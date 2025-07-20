@@ -118,20 +118,25 @@ class AuditLogger {
     try {
       const algorithm = 'aes-256-gcm';
       const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipher(algorithm, this.encryptionKey);
-      
+      const key = crypto.scryptSync(this.encryptionKey, 'salt', 32);
+      const cipher = crypto.createCipheriv(algorithm, key, iv);
+
       // Clone data to avoid mutation
       const clonedData = JSON.parse(JSON.stringify(data));
-      
+
       // Encrypt sensitive fields
       if (clonedData.personalData) {
         const encrypted = cipher.update(JSON.stringify(clonedData.personalData), 'utf8', 'hex');
+        const finalEncrypted = cipher.final('hex');
+        const authTag = cipher.getAuthTag();
+
         clonedData.personalData = {
-          encrypted: encrypted + cipher.final('hex'),
-          iv: iv.toString('hex')
+          encrypted: encrypted + finalEncrypted,
+          iv: iv.toString('hex'),
+          authTag: authTag.toString('hex')
         };
       }
-      
+
       return clonedData;
     } catch (error) {
       console.error('Audit encryption failed:', error);
