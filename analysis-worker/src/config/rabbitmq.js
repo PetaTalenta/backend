@@ -12,6 +12,13 @@ const config = {
   queue: process.env.QUEUE_NAME || 'assessment_analysis',
   routingKey: process.env.ROUTING_KEY || 'analysis.process',
   deadLetterQueue: process.env.DEAD_LETTER_QUEUE || 'assessment_analysis_dlq',
+  // Events configuration for event-driven architecture
+  eventsExchange: process.env.EVENTS_EXCHANGE_NAME || 'atma_events_exchange',
+  eventsRoutingKeys: {
+    analysisCompleted: 'analysis.completed',
+    analysisFailed: 'analysis.failed',
+    analysisStarted: 'analysis.started'
+  },
   options: {
     durable: process.env.QUEUE_DURABLE === 'true',
     persistent: process.env.MESSAGE_PERSISTENT === 'true'
@@ -50,9 +57,14 @@ const initialize = async () => {
     // Set prefetch count for fair dispatch
     await channel.prefetch(parseInt(process.env.WORKER_CONCURRENCY || '10'));
 
-    // Setup exchange
+    // Setup main exchange for job processing
     await channel.assertExchange(config.exchange, 'direct', {
       durable: config.options.durable
+    });
+
+    // Setup events exchange for event-driven architecture
+    await channel.assertExchange(config.eventsExchange, 'topic', {
+      durable: true
     });
 
     // Setup main queue
@@ -74,7 +86,9 @@ const initialize = async () => {
     await channel.bindQueue(config.deadLetterQueue, config.exchange, 'dlq');
 
     logger.info('RabbitMQ connected', {
-      queue: config.queue
+      queue: config.queue,
+      exchange: config.exchange,
+      eventsExchange: config.eventsExchange
     });
 
     return channel;

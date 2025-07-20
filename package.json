@@ -6,19 +6,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:services": "powershell -ExecutionPolicy Bypass -File start-all-services.ps1",
-
     "test:auth": "node test-runner.js",
     "test:websocket": "node test-runner.js --websocket",
     "test:websocket:keep": "node test-runner.js --websocket --keep-user",
     "test:mass-login": "node test-runner.js --mass-login",
     "test:end-to-end": "node test-runner.js --end-to-end",
-
     "test:mass-login:fast": "node test-runner.js --mass-login --high-performance",
     "test:end-to-end:fast": "node test-runner.js --end-to-end --high-performance",
     "test:mass-login:small": "node test-runner.js --mass-login --users=50",
     "test:end-to-end:small": "node test-runner.js --end-to-end --users=10",
     "test:end-to-end:500": "node test-runner.js --end-to-end --users=500 --batch-size=50 --high-performance",
-
     "test:legacy:auth": "node test-user-flow.js",
     "test:legacy:websocket": "node test-user-flow.js --websocket",
     "test:legacy:mass-login": "node test-user-flow.js --mass-login",
@@ -29,6 +26,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.10.0",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.7.5",
+    "uuid": "^11.1.0"
   }
 }

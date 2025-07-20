@@ -1,23 +1,23 @@
+/**
+ * RabbitMQ Configuration for Notification Service
+ */
+
 const amqp = require('amqplib');
 const logger = require('../utils/logger');
 
 // RabbitMQ configuration
 const config = {
   url: process.env.RABBITMQ_URL || 'amqp://localhost:5672',
-  exchange: process.env.EXCHANGE_NAME || 'atma_exchange',
-  queue: process.env.QUEUE_NAME || 'assessment_analysis',
-  routingKey: process.env.ROUTING_KEY || 'analysis.process',
-  // Events configuration for event-driven architecture
   eventsExchange: process.env.EVENTS_EXCHANGE_NAME || 'atma_events_exchange',
-  assessmentsQueue: process.env.EVENTS_QUEUE_NAME_ASSESSMENTS || 'analysis_events_assessments',
-  eventsRoutingKeys: {
+  notificationsQueue: process.env.EVENTS_QUEUE_NAME_NOTIFICATIONS || 'analysis_events_notifications',
+  routingKeys: {
     analysisCompleted: 'analysis.completed',
     analysisFailed: 'analysis.failed',
     analysisStarted: 'analysis.started'
   },
   options: {
-    durable: process.env.QUEUE_DURABLE === 'true',
-    persistent: process.env.MESSAGE_PERSISTENT === 'true'
+    durable: true,
+    persistent: true
   }
 };
 
@@ -26,13 +26,13 @@ let connection = null;
 let channel = null;
 
 /**
- * Initialize RabbitMQ connection and setup exchange/queue
+ * Initialize RabbitMQ connection and setup exchange/queue for event consumption
  * @returns {Promise<Object>} - RabbitMQ channel
  */
-const initialize = async() => {
+const initialize = async () => {
   try {
     // Create connection
-    logger.info('Connecting to RabbitMQ...', { url: config.url });
+    logger.info('Connecting to RabbitMQ for event consumption...');
     connection = await amqp.connect(config.url);
 
     // Handle connection close
@@ -50,53 +50,37 @@ const initialize = async() => {
     // Create channel
     channel = await connection.createChannel();
 
-    // Setup main exchange for job publishing
-    await channel.assertExchange(config.exchange, 'direct', {
+    // Set prefetch count for fair dispatch
+    await channel.prefetch(parseInt(process.env.CONSUMER_PREFETCH || '10'));
+
+    // Setup events exchange (should already exist from analysis-worker)
+    await channel.assertExchange(config.eventsExchange, 'topic', {
       durable: config.options.durable
     });
 
-    // Setup events exchange for event-driven architecture
-    await channel.assertExchange(config.eventsExchange, 'topic', {
-      durable: true
-    });
-
-    // Setup main queue with dead letter exchange
-    await channel.assertQueue(config.queue, {
+    // Setup notifications queue
+    await channel.assertQueue(config.notificationsQueue, {
       durable: config.options.durable,
       arguments: {
-        'x-dead-letter-exchange': config.exchange,
-        'x-dead-letter-routing-key': 'dlq'
-      }
-    });
-
-    // Setup assessments events queue
-    await channel.assertQueue(config.assessmentsQueue, {
-      durable: true,
-      arguments: {
         'x-dead-letter-exchange': `${config.eventsExchange}_dlx`,
-        'x-dead-letter-routing-key': 'assessments.dlq'
+        'x-dead-letter-routing-key': 'notifications.dlq'
       }
     });
 
-    // Bind main queue to exchange
-    await channel.bindQueue(config.queue, config.exchange, config.routingKey);
+    // Bind queue to exchange with routing keys
+    await channel.bindQueue(config.notificationsQueue, config.eventsExchange, config.routingKeys.analysisCompleted);
+    await channel.bindQueue(config.notificationsQueue, config.eventsExchange, config.routingKeys.analysisFailed);
+    await channel.bindQueue(config.notificationsQueue, config.eventsExchange, config.routingKeys.analysisStarted);
 
-    // Bind events queue to events exchange with routing keys
-    await channel.bindQueue(config.assessmentsQueue, config.eventsExchange, config.eventsRoutingKeys.analysisCompleted);
-    await channel.bindQueue(config.assessmentsQueue, config.eventsExchange, config.eventsRoutingKeys.analysisFailed);
-    await channel.bindQueue(config.assessmentsQueue, config.eventsExchange, config.eventsRoutingKeys.analysisStarted);
-
-    logger.info('RabbitMQ connection established successfully', {
-      exchange: config.exchange,
-      queue: config.queue,
-      routingKey: config.routingKey,
-      eventsExchange: config.eventsExchange,
-      assessmentsQueue: config.assessmentsQueue
+    logger.info('RabbitMQ connected for notifications', {
+      queue: config.notificationsQueue,
+      exchange: config.eventsExchange,
+      routingKeys: config.routingKeys
     });
 
     return channel;
   } catch (error) {
-    logger.error('Failed to initialize RabbitMQ', { error: error.message });
+    logger.error('Failed to initialize RabbitMQ for notifications', { error: error.message });
     throw error;
   }
 };
@@ -104,7 +88,7 @@ const initialize = async() => {
 /**
  * Reconnect to RabbitMQ
  */
-const reconnect = async() => {
+const reconnect = async () => {
   try {
     if (connection) {
       try {
@@ -125,7 +109,7 @@ const reconnect = async() => {
  * Get RabbitMQ channel (initialize if needed)
  * @returns {Promise<Object>} - RabbitMQ channel
  */
-const getChannel = async() => {
+const getChannel = async () => {
   if (!channel) {
     await initialize();
   }
@@ -135,7 +119,7 @@ const getChannel = async() => {
 /**
  * Close RabbitMQ connection
  */
-const close = async() => {
+const close = async () => {
   try {
     if (channel) {
       await channel.close();
@@ -154,14 +138,14 @@ const close = async() => {
  * Check if RabbitMQ connection is healthy
  * @returns {Promise<boolean>} - Connection status
  */
-const checkHealth = async() => {
+const checkHealth = async () => {
   try {
     if (!connection || !channel) {
       return false;
     }
 
     // Check if connection is still open
-    return connection.isOpen && channel.isOpen;
+    return connection.connection && !connection.connection.closed;
   } catch (error) {
     logger.error('Error checking RabbitMQ health', { error: error.message });
     return false;
@@ -169,9 +153,9 @@ const checkHealth = async() => {
 };
 
 module.exports = {
+  config,
   initialize,
   getChannel,
   close,
-  checkHealth,
-  config
+  checkHealth
 };

@@ -8,6 +8,7 @@ require('dotenv').config();
 const logger = require('./utils/logger');
 const notificationRoutes = require('./routes/notifications');
 const socketService = require('./services/socketService');
+const eventConsumer = require('./services/eventConsumer');
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +34,21 @@ app.use(express.json());
 // Initialize socket service
 socketService.initialize(io);
 
+// Initialize event consumer for event-driven architecture
+const initializeEventConsumer = async () => {
+  try {
+    await eventConsumer.initialize();
+    await eventConsumer.startConsuming();
+    logger.info('Event consumer initialized and started');
+  } catch (error) {
+    logger.error('Failed to initialize event consumer', { error: error.message });
+    // Don't exit the process, continue with HTTP-based notifications as fallback
+  }
+};
+
+// Start event consumer (async, non-blocking)
+initializeEventConsumer();
+
 // Routes
 app.use('/notifications', notificationRoutes);
 
@@ -43,7 +59,8 @@ app.get('/health', (req, res) => {
     service: 'notification-service',
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    connections: socketService.getConnectionCount()
+    connections: socketService.getConnectionCount(),
+    eventConsumer: eventConsumer.getStatus()
   });
 });
 

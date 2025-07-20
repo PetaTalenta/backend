@@ -16,6 +16,7 @@ const { errorHandler } = require('./middleware/errorHandler');
 
 // Import services
 const queueService = require('./services/queueService');
+const eventConsumer = require('./services/eventConsumer');
 
 // Create Express app
 const app = express();
@@ -72,6 +73,17 @@ app.use(errorHandler);
 const initializeServices = async() => {
   try {
     await queueService.initialize();
+
+    // Initialize event consumer for event-driven architecture
+    try {
+      await eventConsumer.initialize();
+      await eventConsumer.startConsuming();
+      logger.info('Event consumer initialized and started');
+    } catch (eventError) {
+      logger.error('Failed to initialize event consumer', { error: eventError.message });
+      // Don't exit the process, continue with HTTP-based callbacks as fallback
+    }
+
     logger.info('All services initialized successfully');
   } catch (error) {
     logger.error('Failed to initialize services', { error: error.message });
@@ -83,6 +95,14 @@ const initializeServices = async() => {
 const gracefulShutdown = async() => {
   logger.info('Shutting down gracefully...');
   try {
+    // Stop event consumer
+    try {
+      await eventConsumer.stopConsuming();
+      logger.info('Event consumer stopped');
+    } catch (eventError) {
+      logger.error('Error stopping event consumer', { error: eventError.message });
+    }
+
     await queueService.close();
     logger.info('All services closed successfully');
     process.exit(0);

@@ -6,7 +6,8 @@ const aiService = require('../services/aiService');
 const { saveAnalysisResultOptimized, updateJobStatusAsync } = require('../services/optimizedArchiveService');
 const { jobDeduplicationService, tokenRefundService } = require('../services/jobDeduplicationService');
 const { auditLogger, AUDIT_EVENTS, RISK_LEVELS } = require('../services/auditLogger');
-const notificationService = require('../services/notificationService');
+const notificationService = require('../services/notificationService'); // Keep for backward compatibility
+const { getEventPublisher } = require('../services/eventPublisher');
 const logger = require('../utils/logger');
 const { withRetry, withTimeout, ERROR_TYPES, createError } = require('../utils/errorHandler');
 
@@ -276,15 +277,52 @@ const processAssessmentOptimized = async (jobData) => {
       // Mark job as completed in deduplication service
       jobDeduplicationService.markAsCompleted(jobId, deduplicationResult.jobHash, saveResult.id, userId);
 
-      // Send notification (async, non-blocking)
-      notificationService.sendAnalysisCompletedNotification(userId, userEmail, saveResult.id, jobId)
-        .catch(error => {
-          logger.warn('Failed to send notification', {
+      // Publish analysis completed event (async, non-blocking)
+      try {
+        const eventPublisher = getEventPublisher();
+
+        eventPublisher.publishAnalysisCompleted({
+          jobId,
+          userId,
+          userEmail,
+          resultId: saveResult.id,
+          assessmentName: jobData.assessmentName || 'AI-Driven Talent Mapping',
+          processingTime
+        }).catch(eventError => {
+          logger.warn('Failed to publish analysis completed event', {
             jobId,
             userId,
-            error: error.message
+            error: eventError.message
           });
+
+          // Fallback to direct HTTP calls for backward compatibility
+          notificationService.sendAnalysisCompleteNotification(userId, jobId, saveResult.id, 'completed')
+            .catch(fallbackError => {
+              logger.error('Both event publishing and fallback notification failed', {
+                jobId,
+                userId,
+                eventError: eventError.message,
+                fallbackError: fallbackError.message
+              });
+            });
         });
+      } catch (error) {
+        logger.warn('Failed to get event publisher, using fallback notification', {
+          jobId,
+          userId,
+          error: error.message
+        });
+
+        // Fallback to direct HTTP calls
+        notificationService.sendAnalysisCompleteNotification(userId, jobId, saveResult.id, 'completed')
+          .catch(fallbackError => {
+            logger.error('Fallback notification also failed', {
+              jobId,
+              userId,
+              error: fallbackError.message
+            });
+          });
+      }
 
       const processingTime = Date.now() - startTime;
 
@@ -351,6 +389,54 @@ const processAssessmentOptimized = async (jobData) => {
         jobId,
         statusError: statusError.message
       });
+    }
+
+    // Publish analysis failed event (async, non-blocking)
+    try {
+      const eventPublisher = getEventPublisher();
+
+      eventPublisher.publishAnalysisFailed({
+        jobId,
+        userId,
+        userEmail: jobData.userEmail,
+        errorMessage: error.message,
+        assessmentName: jobData.assessmentName || 'AI-Driven Talent Mapping',
+        processingTime,
+        errorType: error.code || 'unknown'
+      }).catch(eventError => {
+        logger.warn('Failed to publish analysis failed event', {
+          jobId,
+          userId,
+          error: eventError.message
+        });
+
+        // Fallback to direct HTTP calls for backward compatibility
+        notificationService.sendAnalysisFailureNotification(userId, jobId, error.message)
+          .catch(fallbackError => {
+            logger.error('Both event publishing and fallback failure notification failed', {
+              jobId,
+              userId,
+              eventError: eventError.message,
+              fallbackError: fallbackError.message
+            });
+          });
+      });
+    } catch (publishError) {
+      logger.warn('Failed to get event publisher for failure event, using fallback notification', {
+        jobId,
+        userId,
+        error: publishError.message
+      });
+
+      // Fallback to direct HTTP calls
+      notificationService.sendAnalysisFailureNotification(userId, jobId, error.message)
+        .catch(fallbackError => {
+          logger.error('Fallback failure notification also failed', {
+            jobId,
+            userId,
+            error: fallbackError.message
+          });
+        });
     }
 
     throw error;

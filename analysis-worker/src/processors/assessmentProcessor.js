@@ -6,7 +6,8 @@
 
 const aiService = require('../services/aiService');
 const archiveService = require('../services/archiveService');
-const notificationService = require('../services/notificationService');
+const notificationService = require('../services/notificationService'); // Keep for backward compatibility
+const { getEventPublisher } = require('../services/eventPublisher');
 const logger = require('../utils/logger');
 const { withRetry, withTimeout, ERROR_TYPES, createError } = require('../utils/errorHandler');
 
@@ -18,7 +19,8 @@ const { withRetry, withTimeout, ERROR_TYPES, createError } = require('../utils/e
 const processAssessment = async (jobData) => {
   const { jobId, userId, userEmail, assessmentData, assessmentName = 'AI-Driven Talent Mapping' } = jobData;
   const processingTimeout = parseInt(process.env.PROCESSING_TIMEOUT || '300000'); // 5 minutes
-  
+  const startTime = Date.now(); // Track processing time for events
+
   try {
     logger.info('Starting assessment processing', {
       jobId,
@@ -71,50 +73,48 @@ const processAssessment = async (jobData) => {
         result_id: saveResult.id
       });
 
-      // Step 5: Update job status in Assessment Service
+      // Step 4: Publish analysis completed event (replaces direct HTTP calls)
       try {
-        await notificationService.updateAssessmentJobStatus(
-          jobId,
-          saveResult.id,
-          'completed'
-        );
+        const eventPublisher = getEventPublisher();
+        const processingTime = Date.now() - startTime;
 
-        logger.debug('Assessment job status updated', {
+        await eventPublisher.publishAnalysisCompleted({
           jobId,
-          resultId: saveResult.id
+          userId,
+          userEmail,
+          resultId: saveResult.id,
+          assessmentName,
+          processingTime
         });
-      } catch (statusError) {
-        // Log but don't fail the process for status update errors
-        logger.warn('Failed to update assessment job status', {
+
+        logger.info('Analysis completed event published', {
           jobId,
           userId,
           resultId: saveResult.id,
-          error: statusError.message
+          processingTime
         });
-      }
-
-      // Step 4: Send notification
-      try {
-        await notificationService.sendAnalysisCompleteNotification(
-          userId,
-          jobId,
-          saveResult.id,
-          'completed'
-        );
-
-        logger.info('Analysis completion notification sent', {
-          jobId,
-          userId,
-          resultId: saveResult.id
-        });
-      } catch (notificationError) {
-        // Log but don't fail the process for notification errors
-        logger.warn('Failed to send completion notification', {
+      } catch (eventError) {
+        // Log but don't fail the process for event publishing errors
+        logger.warn('Failed to publish analysis completed event', {
           jobId,
           userId,
           resultId: saveResult.id,
-          error: notificationError.message
+          error: eventError.message
         });
+
+        // Fallback to direct HTTP calls for backward compatibility
+        try {
+          await notificationService.updateAssessmentJobStatus(jobId, saveResult.id, 'completed');
+          await notificationService.sendAnalysisCompleteNotification(userId, jobId, saveResult.id, 'completed');
+          logger.info('Fallback notifications sent successfully');
+        } catch (fallbackError) {
+          logger.error('Both event publishing and fallback notifications failed', {
+            jobId,
+            userId,
+            eventError: eventError.message,
+            fallbackError: fallbackError.message
+          });
+        }
       }
       
       return {
@@ -165,41 +165,45 @@ const processAssessment = async (jobData) => {
       error_message: error.message
     });
 
-    // Update job status to failed and refund tokens
+    // Publish analysis failed event (replaces direct HTTP calls)
     try {
-      await notificationService.updateAssessmentJobStatusFailed(
-        jobId,
-        failedResultId,
-        error.message
-      );
+      const eventPublisher = getEventPublisher();
 
-      logger.info('Assessment job status updated to failed and tokens refunded', {
+      await eventPublisher.publishAnalysisFailed({
         jobId,
         userId,
-        resultId: failedResultId
+        userEmail,
+        errorMessage: error.message,
+        assessmentName,
+        errorType: error.code || 'unknown'
       });
-    } catch (statusError) {
-      logger.warn('Failed to update assessment job status to failed', {
-        jobId,
-        userId,
-        resultId: failedResultId,
-        error: statusError.message
-      });
-    }
 
-    // Send failure notification
-    try {
-      await notificationService.sendAnalysisFailureNotification(
-        userId,
-        jobId,
-        error.message
-      );
-    } catch (notificationError) {
-      logger.warn('Failed to send failure notification', {
+      logger.info('Analysis failed event published', {
         jobId,
         userId,
-        error: notificationError.message
+        errorMessage: error.message
       });
+    } catch (eventError) {
+      // Log but don't fail the process for event publishing errors
+      logger.warn('Failed to publish analysis failed event', {
+        jobId,
+        userId,
+        error: eventError.message
+      });
+
+      // Fallback to direct HTTP calls for backward compatibility
+      try {
+        await notificationService.updateAssessmentJobStatusFailed(jobId, failedResultId, error.message);
+        await notificationService.sendAnalysisFailureNotification(userId, jobId, error.message);
+        logger.info('Fallback failure notifications sent successfully');
+      } catch (fallbackError) {
+        logger.error('Both event publishing and fallback failure notifications failed', {
+          jobId,
+          userId,
+          eventError: eventError.message,
+          fallbackError: fallbackError.message
+        });
+      }
     }
 
     // Determine if error is retryable for queue retry mechanism

@@ -7,6 +7,7 @@ const logger = require('../utils/logger');
 const assessmentProcessor = require('../processors/assessmentProcessor');
 const { processAssessmentOptimized } = require('../processors/optimizedAssessmentProcessor');
 const { validateJobMessage } = require('../utils/validator');
+const { initializeEventPublisher } = require('./eventPublisher');
 
 // Consumer state
 let isConsuming = false;
@@ -19,8 +20,11 @@ const initialize = async () => {
   try {
     // Initialize RabbitMQ connection
     channel = await rabbitmq.initialize();
-    
-    logger.info('Queue consumer initialized');
+
+    // Initialize event publisher for event-driven architecture
+    await initializeEventPublisher(channel);
+
+    logger.info('Queue consumer and event publisher initialized');
   } catch (error) {
     logger.error('Failed to initialize queue consumer', { error: error.message });
     throw error;
