@@ -17,6 +17,8 @@ const { errorHandler } = require('./middleware/errorHandler');
 // Import services
 const queueService = require('./services/queueService');
 const eventConsumer = require('./services/eventConsumer');
+const database = require('./config/database');
+const idempotencyCleanupJob = require('./jobs/idempotencyCleanup');
 
 // Create Express app
 const app = express();
@@ -72,6 +74,15 @@ app.use(errorHandler);
 // Initialize services
 const initializeServices = async() => {
   try {
+    // Initialize database connection
+    try {
+      await database.initialize();
+      logger.info('Database connection initialized');
+    } catch (dbError) {
+      logger.error('Failed to initialize database connection', { error: dbError.message });
+      // Don't exit the process, idempotency will be disabled if database is not available
+    }
+
     await queueService.initialize();
 
     // Initialize event consumer for event-driven architecture
@@ -82,6 +93,15 @@ const initializeServices = async() => {
     } catch (eventError) {
       logger.error('Failed to initialize event consumer', { error: eventError.message });
       // Don't exit the process, continue with HTTP-based callbacks as fallback
+    }
+
+    // Start idempotency cleanup job
+    try {
+      idempotencyCleanupJob.start();
+      logger.info('Idempotency cleanup job started');
+    } catch (cleanupError) {
+      logger.error('Failed to start idempotency cleanup job', { error: cleanupError.message });
+      // Don't exit the process, cleanup can be done manually
     }
 
     logger.info('All services initialized successfully');
@@ -95,12 +115,28 @@ const initializeServices = async() => {
 const gracefulShutdown = async() => {
   logger.info('Shutting down gracefully...');
   try {
+    // Stop idempotency cleanup job
+    try {
+      idempotencyCleanupJob.stop();
+      logger.info('Idempotency cleanup job stopped');
+    } catch (cleanupError) {
+      logger.error('Error stopping idempotency cleanup job', { error: cleanupError.message });
+    }
+
     // Stop event consumer
     try {
       await eventConsumer.stopConsuming();
       logger.info('Event consumer stopped');
     } catch (eventError) {
       logger.error('Error stopping event consumer', { error: eventError.message });
+    }
+
+    // Close database connection
+    try {
+      await database.close();
+      logger.info('Database connection closed');
+    } catch (dbError) {
+      logger.error('Error closing database connection', { error: dbError.message });
     }
 
     await queueService.close();

@@ -551,7 +551,7 @@ Authorization: Bearer <admin_token>
 
 ## Assessment Endpoints
 
-### POST /assessment/submit
+### POST /assessments/submit
 Submit assessment data untuk analisis AI.
 
 **Headers:**

@@ -122,12 +122,11 @@ describe('AI Service Integration Tests', () => {
       expect(result.roleModel).toBeInstanceOf(Array);
       
       // Verify logging was called with token information
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Mock token counting completed'),
         expect.objectContaining({
           jobId,
-          inputTokens: expect.any(Number),
-          mock: true
+          inputTokens: expect.any(Number)
         })
       );
       
@@ -135,8 +134,7 @@ describe('AI Service Integration Tests', () => {
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('Using mock AI model'),
         expect.objectContaining({
-          jobId,
-          useMockModel: expect.any(Boolean)
+          jobId
         })
       );
     }, 10000);
@@ -169,16 +167,15 @@ describe('AI Service Integration Tests', () => {
       await aiService.generatePersonaProfile(mockAssessmentData, jobId);
       
       // Check that enhanced logging with token breakdown was called
-      const logCalls = logger.info.mock.calls;
-      const tokenLogCall = logCalls.find(call => 
+      const logCalls = logger.debug.mock.calls;
+      const tokenLogCall = logCalls.find(call =>
         call[0].includes('Mock token counting completed')
       );
-      
+
       expect(tokenLogCall).toBeDefined();
       expect(tokenLogCall[1]).toMatchObject({
         jobId,
-        inputTokens: expect.any(Number),
-        mock: true
+        inputTokens: expect.any(Number)
       });
     }, 10000);
   });

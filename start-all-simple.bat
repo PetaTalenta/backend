@@ -7,13 +7,13 @@ echo ========================================
 echo.
 
 REM Configuration
-set WORKER_COUNT=1
+set WORKER_COUNT=15
 set WORKER_CONCURRENCY=5
 
 echo Configuration:
 echo - Number of Analysis Workers: %WORKER_COUNT%
 echo - Worker Concurrency: %WORKER_CONCURRENCY% jobs per worker
-echo - Total Processing Capacity: %WORKER_COUNT% x %WORKER_CONCURRENCY% = 50 concurrent jobs
+echo - Total Processing Capacity: %WORKER_COUNT% x %WORKER_CONCURRENCY% = 75 concurrent jobs
 echo.
 
 REM Kill existing processes (cleanup)
@@ -91,12 +91,12 @@ echo - Worker 8: analysis-worker-8.log
 echo - Worker 9: analysis-worker-9.log
 echo - Worker 10: analysis-worker-10.log
 echo.
-echo Total Processing Capacity: 50 concurrent assessment jobs
+echo Total Processing Capacity: 75 concurrent assessment jobs
 echo.
 echo API Endpoints:
 echo   http://localhost:3000/api/health (Health check)
 echo   http://localhost:3000/api/auth/login (Login)
-echo   http://localhost:3000/api/assessment/submit (Submit assessment)
+echo   http://localhost:3000/api/assessments/submit (Submit assessment)
 echo.
 
 REM Wait a bit for services to start

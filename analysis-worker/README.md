@@ -9,6 +9,16 @@ The Analysis Worker is a microservice that processes assessment data using Googl
 - **Queue-Based Processing**: Consumes assessment jobs from RabbitMQ
 - **Structured Output**: Generates JSON-formatted persona profiles with validation
 - **Error Handling**: Comprehensive error handling with retry mechanisms
+- **Optimized Processing**: Uses optimized processor with rate limiting, deduplication, and audit logging
+
+### Optimized Processing Engine
+- **Rate Limiting**: Multi-level rate limiting (per user, per IP, global)
+- **Job Deduplication**: Prevents duplicate processing and saves resources
+- **Audit Logging**: Comprehensive security and compliance logging
+- **Token Refund**: Automatic token refund for failed operations
+- **Connection Pooling**: Optimized HTTP connections with keep-alive
+- **Batch Operations**: Efficient batch processing for database operations
+- **Async Operations**: Non-blocking operations for better performance
 
 ### Token Counting & Usage Tracking
 - **Accurate Token Counting**: Uses Gemini's native `countTokens` API

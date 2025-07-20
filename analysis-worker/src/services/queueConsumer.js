@@ -4,7 +4,6 @@
 
 const rabbitmq = require('../config/rabbitmq');
 const logger = require('../utils/logger');
-const assessmentProcessor = require('../processors/assessmentProcessor');
 const { processAssessmentOptimized } = require('../processors/optimizedAssessmentProcessor');
 const { validateJobMessage } = require('../utils/validator');
 const { initializeEventPublisher } = require('./eventPublisher');
@@ -97,11 +96,12 @@ const processMessage = async (message) => {
     // Update job data with actual retry count
     jobData.retryCount = actualRetryCount;
 
-    logger.info('Processing assessment job', {
-      jobId: jobData.jobId,
-      userEmail: jobData.userEmail,
+    // Create job-specific logger for better tracking
+    const jobLogger = logger.withJob(jobData.jobId, jobData.userId, jobData.userEmail);
+
+    jobLogger.info('Processing assessment job', {
       retry: actualRetryCount,
-      useOptimizedProcessor: process.env.USE_OPTIMIZED_PROCESSOR === 'true'
+      processor: 'optimized'
     });
 
     // Validate message structure (assessment data validation is already done in assessment-service)
@@ -110,11 +110,8 @@ const processMessage = async (message) => {
       throw new Error(`Invalid message format: ${validationResult.error}`);
     }
 
-    // Process the assessment job (with feature toggle for optimized processor)
-    const useOptimizedProcessor = process.env.USE_OPTIMIZED_PROCESSOR === 'true';
-    const result = useOptimizedProcessor
-      ? await processAssessmentOptimized(jobData)
-      : await assessmentProcessor.processAssessment(jobData);
+    // Process the assessment job using optimized processor
+    const result = await processAssessmentOptimized(jobData);
 
     // Acknowledge message on successful processing
     channel.ack(message);

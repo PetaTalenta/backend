@@ -153,7 +153,7 @@ describe('TokenCounterService Integration Tests', () => {
       expect(result.outputTokens).toBe(280);
       expect(result.totalTokens).toBe(730);
       expect(result.thoughtsTokenCount).toBe(15);
-      expect(result.estimatedCost).toBeCloseTo(0.000235, 6); // (450/1000 * 0.00015) + (280/1000 * 0.0006)
+      expect(result.estimatedCost).toBe(0); // Free tier
     });
   });
 
@@ -228,8 +228,7 @@ describe('TokenCounterService Integration Tests', () => {
       expect(result1.inputTokens).toBeLessThan(1000);
       expect(result1.outputTokens).toBeGreaterThan(0);
       expect(result1.outputTokens).toBeLessThan(1000);
-      expect(result1.estimatedCost).toBeGreaterThan(0);
-      expect(result1.estimatedCost).toBeLessThan(1);
+      expect(result1.estimatedCost).toBe(0); // Free tier
     });
 
     it('should scale mock data with content size', async () => {
@@ -253,40 +252,29 @@ describe('TokenCounterService Integration Tests', () => {
 
   describe('Cost calculation scenarios', () => {
     it('should calculate realistic costs for typical usage', async () => {
-      // Typical persona generation: ~500 input tokens, ~300 output tokens
+      // Free tier - no cost
       const cost = tokenCounterService.calculateEstimatedCost(500, 300);
-      
-      // Expected: (500/1000 * 0.00015) + (300/1000 * 0.0006) = 0.000075 + 0.00018 = 0.000255
-      expect(cost).toBeCloseTo(0.000255, 6);
-      expect(cost).toBeGreaterThan(0);
-      expect(cost).toBeLessThan(0.001); // Should be less than $0.001 per request
+      expect(cost).toBe(0);
     });
 
     it('should handle high-volume scenarios', async () => {
-      // High volume: 2000 input tokens, 1500 output tokens
+      // Free tier - no cost
       const cost = tokenCounterService.calculateEstimatedCost(2000, 1500);
-      
-      // Expected: (2000/1000 * 0.00015) + (1500/1000 * 0.0006) = 0.0003 + 0.0009 = 0.0012
-      expect(cost).toBeCloseTo(0.0012, 6);
-      expect(cost).toBeGreaterThan(0.001);
-      expect(cost).toBeLessThan(0.01);
+      expect(cost).toBe(0);
     });
 
     it('should handle edge cases in cost calculation', async () => {
-      // Very small usage - 1 input token, 1 output token
-      // Expected: (1/1000 * 0.00015) + (1/1000 * 0.0006) = 0.00000015 + 0.0000006 = 0.00000075
+      // Free tier - always zero
       const smallCost = tokenCounterService.calculateEstimatedCost(1, 1);
-      expect(smallCost).toBeGreaterThan(0);
-      expect(smallCost).toBeLessThan(0.000002); // Adjusted to be more realistic
+      expect(smallCost).toBe(0);
 
       // Zero usage
       const zeroCost = tokenCounterService.calculateEstimatedCost(0, 0);
       expect(zeroCost).toBe(0);
 
-      // Large usage
+      // Large usage - still zero in free tier
       const largeCost = tokenCounterService.calculateEstimatedCost(10000, 5000);
-      expect(largeCost).toBeGreaterThan(0.001);
-      expect(largeCost).toBeLessThan(0.1);
+      expect(largeCost).toBe(0);
     });
   });
 

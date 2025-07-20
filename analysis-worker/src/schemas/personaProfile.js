@@ -1,5 +1,5 @@
 /**
- * Persona Profile Schema
+ * Persona Profile Schema - Updated with Full Spec
  */
 
 const Joi = require('joi');
@@ -14,8 +14,14 @@ const personaProfileSchema = Joi.object({
   shortSummary: Joi.string().required()
     .description('Ringkasan singkat tentang persona (1-2 paragraf)'),
 
+  strengthSummary: Joi.string().required()
+    .description('Ringkasan kekuatan utama persona (1 paragraf)'),
+
   strengths: Joi.array().items(Joi.string()).min(3).max(5).required()
     .description('Daftar kekuatan/strength dari persona'),
+
+  weaknessSummary: Joi.string().required()
+    .description('Ringkasan kelemahan utama persona (1 paragraf)'),
 
   weaknesses: Joi.array().items(Joi.string()).min(3).max(5).required()
     .description('Daftar kelemahan/weakness dari persona'),
@@ -26,15 +32,15 @@ const personaProfileSchema = Joi.object({
         .description('Nama karir atau profesi yang direkomendasikan'),
       careerProspect: Joi.object({
         jobAvailability: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
-          .description('Menggambarkan sejauh mana lapangan pekerjaan tersedia di bidang tersebut'),
+          .description('Sejauh mana lapangan pekerjaan tersedia di bidang tersebut'),
         salaryPotential: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
-          .description('Mengukur potensi pendapatan dari profesi tersebut'),
+          .description('Potensi pendapatan dari profesi tersebut'),
         careerProgression: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
-          .description('Menilai seberapa besar peluang seorang profesional naik ke posisi yang lebih tinggi'),
+          .description('Peluang naik jabatan atau spesialisasi di bidang tersebut'),
         industryGrowth: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
-          .description('Melihat apakah industri tempat profesi itu berada sedang berkembang'),
+          .description('Pertumbuhan industri terkait profesi ini di masa depan'),
         skillDevelopment: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
-          .description('Menilai apakah profesi ini memungkinkan individu untuk mengembangkan keahlian')
+          .description('Peluang mengembangkan keahlian di profesi ini')
       }).required()
     })
   ).min(3).max(5).required()
@@ -43,78 +49,101 @@ const personaProfileSchema = Joi.object({
   insights: Joi.array().items(Joi.string()).min(3).max(5).required()
     .description('Daftar insight atau saran pengembangan diri'),
 
+  skillSuggestion: Joi.array().items(Joi.string()).min(3).max(5).required()
+    .description('Rekomendasi pengembangan skill jangka pendek dan menengah'),
+
+  possiblePitfalls: Joi.array().items(Joi.string()).min(2).max(5).required()
+    .description('Kesalahan atau jebakan karir yang perlu diwaspadai'),
+
+  riskTolerance: Joi.string().valid('very high', 'high', 'moderate', 'low', 'very low').required()
+    .description('Seberapa tinggi toleransi risiko persona dalam karir dan pekerjaan'),
+
   workEnvironment: Joi.string().required()
     .description('Deskripsi lingkungan kerja yang ideal untuk persona'),
 
-  roleModel: Joi.array().items(Joi.string()).min(4).max(5).required()
+  roleModel: Joi.array().items(Joi.string()).min(2).max(3).required()
     .description('Daftar role model yang relevan dan inspiratif')
+
 }).required();
 
 /**
  * Example persona profile
  */
 const personaProfileExample = {
-  "archetype": "The Analytical Innovator",
-  "shortSummary": "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis yang dominan dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif. Anda memiliki keingintahuan intelektual yang tinggi dan selalu mencari pengetahuan baru.",
-  "strengths": [
+  archetype: "The Analytical Innovator",
+  shortSummary: "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif.",
+  strengthSummary: "Kekuatan utama Anda terletak pada analisis mendalam, kreativitas, dan dorongan kuat untuk belajar hal baru. Ini membuat Anda mampu menghasilkan solusi unik di berbagai situasi kompleks.",
+  strengths: [
     "Kemampuan analisis yang tajam",
     "Kreativitas dan inovasi",
     "Keingintahuan intelektual yang tinggi",
     "Kemampuan belajar mandiri yang kuat",
     "Pemikiran sistematis dan terstruktur"
   ],
-  "weaknesses": [
+  weaknessSummary: "Anda cenderung overthinking, perfeksionis, dan kadang kurang sabar menghadapi proses lambat atau bekerja sama dengan orang lain.",
+  weaknesses: [
     "Terkadang terlalu perfeksionis",
     "Dapat terjebak dalam overthinking",
     "Kurang sabar dengan proses yang lambat",
     "Kemampuan sosial yang perlu dikembangkan",
     "Kesulitan mendelegasikan tugas"
   ],
-  "careerRecommendation": [
+  careerRecommendation: [
     {
-      "careerName": "Data Scientist",
-      "careerProspect": {
-        "jobAvailability": "high",
-        "salaryPotential": "high",
-        "careerProgression": "high",
-        "industryGrowth": "super high",
-        "skillDevelopment": "super high"
+      careerName: "Data Scientist",
+      careerProspect: {
+        jobAvailability: "high",
+        salaryPotential: "high",
+        careerProgression: "high",
+        industryGrowth: "super high",
+        skillDevelopment: "super high"
       }
     },
     {
-      "careerName": "Peneliti",
-      "careerProspect": {
-        "jobAvailability": "moderate",
-        "salaryPotential": "moderate",
-        "careerProgression": "moderate",
-        "industryGrowth": "moderate",
-        "skillDevelopment": "high"
+      careerName: "Peneliti",
+      careerProspect: {
+        jobAvailability: "moderate",
+        salaryPotential: "moderate",
+        careerProgression: "moderate",
+        industryGrowth: "moderate",
+        skillDevelopment: "high"
       }
     },
     {
-      "careerName": "Pengembang Software",
-      "careerProspect": {
-        "jobAvailability": "super high",
-        "salaryPotential": "high",
-        "careerProgression": "high",
-        "industryGrowth": "super high",
-        "skillDevelopment": "super high"
+      careerName: "Pengembang Software",
+      careerProspect: {
+        jobAvailability: "super high",
+        salaryPotential: "high",
+        careerProgression: "high",
+        industryGrowth: "super high",
+        skillDevelopment: "super high"
       }
     }
   ],
-  "insights": [
+  insights: [
     "Kembangkan keterampilan komunikasi untuk menyampaikan ide kompleks dengan lebih efektif",
     "Latih kemampuan bekerja dalam tim untuk mengimbangi kecenderungan bekerja sendiri",
     "Manfaatkan kekuatan analitis untuk memecahkan masalah sosial",
     "Cari mentor yang dapat membantu mengembangkan keterampilan kepemimpinan",
     "Tetapkan batas waktu untuk menghindari analisis berlebihan"
   ],
-  "workEnvironment": "Lingkungan kerja yang ideal adalah tempat yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda akan berkembang di lingkungan yang terstruktur namun fleksibel, dengan akses ke sumber daya penelitian dan pembelajaran yang memadai.",
-  "roleModel": [
+  skillSuggestion: [
+    "Public Speaking",
+    "Leadership",
+    "Teamwork",
+    "Time Management",
+    "Delegation"
+  ],
+  possiblePitfalls: [
+    "Mengisolasi diri dari tim karena terlalu fokus pada analisis individu",
+    "Menunda keputusan karena perfeksionisme berlebihan",
+    "Kurang membangun jaringan karena terlalu fokus pada teknis"
+  ],
+  riskTolerance: "moderate",
+  workEnvironment: "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
+  roleModel: [
     "Marie Curie",
     "Albert Einstein",
-    "Ada Lovelace",
-    "Elon Musk",
     "B.J. Habibie"
   ]
 };

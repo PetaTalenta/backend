@@ -46,7 +46,7 @@ describe('UsageTracker Integration', () => {
       const stats = usageTracker.getUsageStats('daily');
       expect(stats.totalRequests).toBe(1);
       expect(stats.totalTokens).toBeGreaterThan(0);
-      expect(stats.estimatedTotalCost).toBeGreaterThan(0);
+      expect(stats.estimatedTotalCost).toBe(0); // Free tier
       expect(stats.mockRequests).toBe(1);
     });
 
@@ -115,7 +115,7 @@ describe('UsageTracker Integration', () => {
       expect(stats.failedRequests).toBe(1);
       expect(stats.mockRequests).toBe(3);
       expect(stats.totalTokens).toBeGreaterThan(0);
-      expect(stats.estimatedTotalCost).toBeGreaterThan(0);
+      expect(stats.estimatedTotalCost).toBe(0); // Free tier
     });
 
     test('should track usage over time periods', async () => {
@@ -299,7 +299,7 @@ describe('UsageTracker Integration', () => {
 
       // Verify token data integration
       expect(report.usage.tokens.totalTokens).toBeGreaterThan(0);
-      expect(report.usage.cost.estimatedTotalCost).toBeGreaterThan(0);
+      expect(report.usage.cost.estimatedTotalCost).toBe(0); // Free tier
 
       // Verify performance metrics include token counting data
       expect(report.performance.averageResponseTime).toBeGreaterThan(0);
@@ -322,7 +322,7 @@ describe('UsageTracker Integration', () => {
       // Verify real-time metrics structure
       expect(metrics.current.last24Hours.requests).toBe(5);
       expect(metrics.current.last24Hours.tokens).toBeGreaterThan(0);
-      expect(metrics.current.last24Hours.cost).toBeGreaterThan(0);
+      expect(metrics.current.last24Hours.cost).toBe(0); // Free tier
       expect(metrics.current.last24Hours.successRate).toBe(80);
 
       // Verify system health indicators
@@ -347,7 +347,7 @@ describe('UsageTracker Integration', () => {
       expect(exportResult.metadata.recordCount).toBe(5);
       expect(exportResult.summary.totalRequests).toBe(5);
       expect(exportResult.summary.totalTokens).toBeGreaterThan(0);
-      expect(exportResult.summary.estimatedTotalCost).toBeGreaterThan(0);
+      expect(exportResult.summary.estimatedTotalCost).toBe(0); // Free tier
 
       // Verify data includes token counter information
       expect(exportResult.data).toHaveLength(5);

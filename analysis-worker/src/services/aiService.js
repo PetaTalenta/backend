@@ -101,152 +101,167 @@ const generatePersonaProfile = async (assessmentData, jobId) => {
     }
 
     // Define response schema for structured output
-    const responseSchema = {
-      type: Type.OBJECT,
-      description: "Analisis persona profile",
-      properties: {
-        archetype: {
-          type: Type.STRING,
-          description: "Nama archetype yang paling sesuai",
-        },
-        shortSummary: {
-          type: Type.STRING,
-          description: "Ringkasan singkat (1-2 paragraf) tentang persona",
-        },
-        strengths: {
-          type: Type.ARRAY,
-          minItems: 3,
-          maxItems: 5,
-          items: { type: Type.STRING, description: "Kekuatan spesifik" },
-          description: "Daftar kekuatan persona",
-        },
-        weaknesses: {
-          type: Type.ARRAY,
-          minItems: 3,
-          maxItems: 5,
-          items: {
+const responseSchema = {
+  type: Type.OBJECT,
+  description: "Analisis persona profile",
+  properties: {
+    archetype: {
+      type: Type.STRING,
+      description: "Nama archetype yang paling sesuai",
+    },
+    shortSummary: {
+      type: Type.STRING,
+      description: "Ringkasan singkat (1-2 paragraf) tentang persona",
+    },
+    strengthSummary: {
+      type: Type.STRING,
+      description: "Ringkasan kekuatan utama persona (1 paragraf)",
+    },
+    strengths: {
+      type: Type.ARRAY,
+      minItems: 3,
+      maxItems: 5,
+      items: { type: Type.STRING, description: "Kekuatan spesifik" },
+      description: "Daftar kekuatan persona",
+    },
+    weaknessSummary: {
+      type: Type.STRING,
+      description: "Ringkasan kelemahan utama persona (1 paragraf)",
+    },
+    weaknesses: {
+      type: Type.ARRAY,
+      minItems: 3,
+      maxItems: 5,
+      items: {
+        type: Type.STRING,
+        description: "Kelemahan atau area pengembangan",
+      },
+      description: "Daftar kelemahan persona",
+    },
+    careerRecommendation: {
+      type: Type.ARRAY,
+      minItems: 3,
+      maxItems: 5,
+      description:
+        "Daftar rekomendasi karir sesuai persona, beserta prospeknya",
+      items: {
+        type: Type.OBJECT,
+        required: ["careerName", "careerProspect"],
+        properties: {
+          careerName: {
             type: Type.STRING,
-            description: "Kelemahan atau area pengembangan",
+            description: "Nama karir atau profesi yang direkomendasikan",
           },
-          description: "Daftar kelemahan persona",
-        },
-        careerRecommendation: {
-          type: Type.ARRAY,
-          minItems: 3,
-          maxItems: 5,
-          description:
-            "Daftar rekomendasi karir sesuai persona, beserta prospeknya",
-          items: {
+          careerProspect: {
             type: Type.OBJECT,
-            required: ["careerName", "careerProspect"],
+            required: [
+              "jobAvailability",
+              "salaryPotential",
+              "careerProgression",
+              "industryGrowth",
+              "skillDevelopment",
+            ],
             properties: {
-              careerName: {
+              jobAvailability: {
                 type: Type.STRING,
-                description: "Nama karir atau profesi yang direkomendasikan",
+                description:
+                  "Sejauh mana lapangan pekerjaan tersedia di bidang tersebut",
+                enum: ["super high", "high", "moderate", "low", "super low"],
               },
-              careerProspect: {
-                type: Type.OBJECT,
-                required: [
-                  "jobAvailability",
-                  "salaryPotential",
-                  "careerProgression",
-                  "industryGrowth",
-                  "skillDevelopment",
-                ],
-                properties: {
-                  jobAvailability: {
-                    type: Type.STRING,
-                    description: "Menggambarkan sejauh mana lapangan pekerjaan tersedia di bidang tersebut, baik di tingkat lokal, nasional, maupun global.",
-                    enum: [
-                      "super high",
-                      "high",
-                      "moderate",
-                      "low",
-                      "super low",
-                    ],
-                  },
-                  salaryPotential: {
-                    type: Type.STRING,
-                    description: "Mengukur potensi pendapatan dari profesi tersebut, termasuk gaji pokok, bonus, insentif, dan peluang pendapatan lain.",
-                    enum: [
-                      "super high",
-                      "high",
-                      "moderate",
-                      "low",
-                      "super low",
-                    ],
-                  },
-                  careerProgression: {
-                    type: Type.STRING,
-                    description: "Menilai seberapa besar peluang seorang profesional naik ke posisi yang lebih tinggi, termasuk ke level manajerial atau spesialisasi tertentu.",
-                    enum: [
-                      "super high",
-                      "high",
-                      "moderate",
-                      "low",
-                      "super low",
-                    ],
-                  },
-                  industryGrowth: {
-                    type: Type.STRING,
-                    description: "Melihat apakah industri tempat profesi itu berada sedang berkembang, stagnan, atau menurun. Termasuk potensi pasar di masa depan, dampak teknologi, dan dinamika tren global.",
-                    enum: [
-                      "super high",
-                      "high",
-                      "moderate",
-                      "low",
-                      "super low",
-                    ],
-                  },
-                  skillDevelopment: {
-                    type: Type.STRING,
-                    description: "Menilai apakah profesi ini memungkinkan individu untuk mengembangkan keahlian, baik teknis maupun soft skills, yang relevan dengan perkembangan zaman.",
-                    enum: [
-                      "super high",
-                      "high",
-                      "moderate",
-                      "low",
-                      "super low",
-                    ],
-                  },
-                },
+              salaryPotential: {
+                type: Type.STRING,
+                description:
+                  "Potensi pendapatan dari profesi tersebut, termasuk bonus dan insentif",
+                enum: ["super high", "high", "moderate", "low", "super low"],
+              },
+              careerProgression: {
+                type: Type.STRING,
+                description:
+                  "Peluang naik jabatan atau spesialisasi di bidang tersebut",
+                enum: ["super high", "high", "moderate", "low", "super low"],
+              },
+              industryGrowth: {
+                type: Type.STRING,
+                description:
+                  "Pertumbuhan industri terkait profesi ini di masa depan",
+                enum: ["super high", "high", "moderate", "low", "super low"],
+              },
+              skillDevelopment: {
+                type: Type.STRING,
+                description:
+                  "Peluang mengembangkan keahlian di profesi ini",
+                enum: ["super high", "high", "moderate", "low", "super low"],
               },
             },
           },
         },
-        insights: {
-          type: Type.ARRAY,
-          minItems: 3,
-          maxItems: 5,
-          items: { type: Type.STRING, description: "Saran pengembangan diri" },
-          description: "Insight atau saran actionable",
-        },
-        workEnvironment: {
-          type: Type.STRING,
-          description: "Lingkungan kerja ideal (1 paragraf)",
-        },
-        roleModel: {
-          type: Type.ARRAY,
-          minItems: 4,
-          maxItems: 5,
-          items: {
-            type: Type.STRING,
-            description: "Nama role model yang relevan",
-          },
-          description: "Daftar role model inspiratif",
-        },
       },
-      required: [
-        "archetype",
-        "shortSummary",
-        "strengths",
-        "weaknesses",
-        "careerRecommendation",
-        "insights",
-        "workEnvironment",
-        "roleModel",
-      ],
-    };
+    },
+    insights: {
+      type: Type.ARRAY,
+      minItems: 3,
+      maxItems: 5,
+      items: { type: Type.STRING, description: "Saran pengembangan diri" },
+      description: "Insight atau saran actionable",
+    },
+    skillSuggestion: {
+      type: Type.ARRAY,
+      minItems: 3,
+      maxItems: 5,
+      items: {
+        type: Type.STRING,
+        description: "Keahlian atau kompetensi yang disarankan untuk dikembangkan",
+      },
+      description: "Rekomendasi pengembangan skill jangka pendek dan menengah",
+    },
+    possiblePitfalls: {
+      type: Type.ARRAY,
+      minItems: 2,
+      maxItems: 5,
+      items: {
+        type: Type.STRING,
+        description: "Kesalahan atau jebakan karir yang perlu diwaspadai",
+      },
+      description: "Hal-hal yang sebaiknya dihindari untuk pengembangan optimal",
+    },
+    riskTolerance: {
+      type: Type.STRING,
+      description:
+        "Seberapa tinggi toleransi risiko persona dalam mengambil keputusan karir dan pekerjaan",
+      enum: ["very high", "high", "moderate", "low", "very low"],
+    },
+    workEnvironment: {
+      type: Type.STRING,
+      description: "Lingkungan kerja ideal (1 paragraf)",
+    },
+    roleModel: {
+      type: Type.ARRAY,
+      minItems: 2,
+      maxItems: 3,
+      items: {
+        type: Type.STRING,
+        description: "Nama role model yang relevan",
+      },
+      description: "Daftar role model inspiratif",
+    },
+  },
+  required: [
+    "archetype",
+    "shortSummary",
+    "strengthSummary",
+    "strengths",
+    "weaknessSummary",
+    "weaknesses",
+    "careerRecommendation",
+    "insights",
+    "skillSuggestion",
+    "possiblePitfalls",
+    "riskTolerance",
+    "workEnvironment",
+    "roleModel",
+  ],
+};
+
 
     // Generate content with structured output
     const response = await client.models.generateContent({

@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const Joi = require('joi');
 const { authenticateToken, requireTokenBalance } = require('../middleware/auth');
 const { validateSchema } = require('../middleware/validation');
+const { idempotencyMiddleware, addIdempotencyHeaders, idempotencyHealthCheck, cleanupExpiredCache } = require('../middleware/idempotency');
 const { assessmentSchema } = require('../schemas/assessment');
 const queueService = require('../services/queueService');
 const authService = require('../services/authService');
@@ -172,7 +173,13 @@ router.use(authenticateToken);
  * @description Submit assessment data for AI analysis
  * @access Private
  */
-router.post('/submit', validateSchema(assessmentSchema), requireTokenBalance(1), async(req, res, next) => {
+router.post('/submit',
+  addIdempotencyHeaders,
+  validateSchema(assessmentSchema),
+  authenticateToken,
+  idempotencyMiddleware,
+  requireTokenBalance(1),
+  async(req, res, next) => {
   try {
     const { id: userId, email: userEmail } = req.user;
     const { assessmentName, ...assessmentData } = req.body;
@@ -291,5 +298,19 @@ router.get('/queue/status', async(req, res, next) => {
     next(error);
   }
 });
+
+/**
+ * @route GET /assessments/idempotency/health
+ * @description Check idempotency service health
+ * @access Private
+ */
+router.get('/idempotency/health', idempotencyHealthCheck);
+
+/**
+ * @route POST /assessments/idempotency/cleanup
+ * @description Cleanup expired idempotency cache entries
+ * @access Private (Internal use)
+ */
+router.post('/idempotency/cleanup', cleanupExpiredCache);
 
 module.exports = router;

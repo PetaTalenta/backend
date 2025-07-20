@@ -1,12 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const morgan = require('morgan');
 const compression = require('compression');
 
 const config = require('./config');
 const { generalLimiter } = require('./middleware/rateLimiter');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { asyncRequestLogger } = require('./middleware/asyncLogger');
 
 // Import routes
 const healthRoutes = require('./routes/health');
@@ -60,9 +60,9 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Logging
+// Async Logging (replaces Morgan for better performance)
 if (config.nodeEnv !== 'test') {
-  app.use(morgan(config.logging.format));
+  app.use(asyncRequestLogger);
 }
 
 // Rate limiting

@@ -10,11 +10,31 @@ const logger = require('../utils/logger');
  */
 class TokenCounterService {
   constructor() {
-    // Token pricing configuration (per 1K tokens)
+    // Gemini 2.5 Flash pricing configuration (per 1M tokens in USD)
+    // Updated based on official Google AI pricing as of 2024
     this.pricing = {
-      input: parseFloat(process.env.GEMINI_INPUT_TOKEN_PRICE || '0.00015'), // $0.00015 per 1K input tokens
-      output: parseFloat(process.env.GEMINI_OUTPUT_TOKEN_PRICE || '0.0006') // $0.0006 per 1K output tokens
+      // Free Tier - completely free
+      free: {
+        input: 0,
+        output: 0,
+        contextCaching: 0
+      },
+      // Paid Tier - per 1M tokens
+      paid: {
+        // Text/Image/Video content
+        input: parseFloat(process.env.GEMINI_INPUT_TOKEN_PRICE || '0.30'), // $0.30 per 1M tokens
+        output: parseFloat(process.env.GEMINI_OUTPUT_TOKEN_PRICE || '2.50'), // $2.50 per 1M tokens (including thinking tokens)
+        contextCaching: parseFloat(process.env.GEMINI_CONTEXT_CACHING_PRICE || '0.075'), // $0.075 per 1M tokens
+        contextCachingStorage: parseFloat(process.env.GEMINI_CONTEXT_STORAGE_PRICE || '1.00'), // $1.00 per 1M tokens per hour
+
+        // Audio content (different pricing)
+        inputAudio: parseFloat(process.env.GEMINI_INPUT_AUDIO_PRICE || '1.00'), // $1.00 per 1M tokens
+        contextCachingAudio: parseFloat(process.env.GEMINI_CONTEXT_CACHING_AUDIO_PRICE || '0.25') // $0.25 per 1M tokens
+      }
     };
+
+    // Pricing tier configuration
+    this.pricingTier = process.env.GEMINI_PRICING_TIER || 'free'; // 'free' or 'paid'
 
     // Character to token estimation ratio (approximate)
     this.charToTokenRatio = parseFloat(process.env.CHAR_TO_TOKEN_RATIO || '4'); // ~4 characters per token
@@ -108,11 +128,20 @@ class TokenCounterService {
         timestamp: new Date().toISOString()
       };
 
-      // Calculate estimated cost
+      // Calculate estimated cost and breakdown
       metadata.estimatedCost = this.calculateEstimatedCost(
-        metadata.inputTokens, 
+        metadata.inputTokens,
         metadata.outputTokens
       );
+
+      // Add detailed cost breakdown
+      metadata.costBreakdown = this.calculateCostBreakdown(
+        metadata.inputTokens,
+        metadata.outputTokens
+      );
+
+      // Add pricing tier information
+      metadata.pricingTier = this.pricingTier;
 
       logger.debug('Usage metadata extracted successfully', {
         jobId,
@@ -194,17 +223,58 @@ class TokenCounterService {
    * Calculate estimated cost based on token usage
    * @param {Number} inputTokens - Number of input tokens
    * @param {Number} outputTokens - Number of output tokens
+   * @param {Object} options - Additional options for cost calculation
+   * @param {String} options.contentType - Content type: 'text', 'audio' (default: 'text')
+   * @param {Number} options.contextCachingTokens - Number of context caching tokens
+   * @param {Number} options.contextStorageHours - Hours of context storage
    * @returns {Number} - Estimated cost in USD
    */
-  calculateEstimatedCost(inputTokens, outputTokens) {
+  calculateEstimatedCost(inputTokens, outputTokens, options = {}) {
     try {
       // Ensure inputs are valid numbers
       const validInputTokens = Number(inputTokens) || 0;
       const validOutputTokens = Number(outputTokens) || 0;
+      const validContextCachingTokens = Number(options.contextCachingTokens) || 0;
+      const validContextStorageHours = Number(options.contextStorageHours) || 0;
+      const contentType = options.contentType || 'text';
 
-      const inputCost = (validInputTokens / 1000) * this.pricing.input;
-      const outputCost = (validOutputTokens / 1000) * this.pricing.output;
-      const totalCost = inputCost + outputCost;
+      // Free tier - no cost
+      if (this.pricingTier === 'free') {
+        return 0;
+      }
+
+      // Paid tier calculation (per 1M tokens)
+      const pricing = this.pricing.paid;
+      let inputCost = 0;
+      let outputCost = 0;
+      let contextCachingCost = 0;
+      let contextStorageCost = 0;
+
+      // Calculate input cost based on content type
+      if (contentType === 'audio') {
+        inputCost = (validInputTokens / 1000000) * pricing.inputAudio;
+      } else {
+        inputCost = (validInputTokens / 1000000) * pricing.input;
+      }
+
+      // Calculate output cost (same for all content types)
+      outputCost = (validOutputTokens / 1000000) * pricing.output;
+
+      // Calculate context caching cost
+      if (validContextCachingTokens > 0) {
+        if (contentType === 'audio') {
+          contextCachingCost = (validContextCachingTokens / 1000000) * pricing.contextCachingAudio;
+        } else {
+          contextCachingCost = (validContextCachingTokens / 1000000) * pricing.contextCaching;
+        }
+      }
+
+      // Calculate context storage cost
+      if (validContextStorageHours > 0) {
+        contextStorageCost = (validContextCachingTokens / 1000000) * pricing.contextCachingStorage * validContextStorageHours;
+      }
+
+      const totalCost = inputCost + outputCost + contextCachingCost + contextStorageCost;
 
       // Check for NaN or invalid results
       if (isNaN(totalCost) || !isFinite(totalCost)) {
@@ -283,6 +353,8 @@ class TokenCounterService {
         inputTokens: estimatedTokens,
         outputTokens: 0,
         estimatedCost: this.calculateEstimatedCost(estimatedTokens, 0),
+        costBreakdown: this.calculateCostBreakdown(estimatedTokens, 0),
+        pricingTier: this.pricingTier,
         estimationMethod: 'character_count'
       };
 
@@ -330,6 +402,8 @@ class TokenCounterService {
         outputTokens,
         totalTokens,
         estimatedCost,
+        costBreakdown: this.calculateCostBreakdown(inputTokens, outputTokens),
+        pricingTier: this.pricingTier,
         promptTokenCount: inputTokens,
         candidatesTokenCount: outputTokens,
         totalTokenCount: totalTokens
@@ -343,9 +417,128 @@ class TokenCounterService {
         outputTokens: 50,
         totalTokens: 150,
         estimatedCost: this.calculateEstimatedCost(100, 50),
+        costBreakdown: this.calculateCostBreakdown(100, 50),
+        pricingTier: this.pricingTier,
         promptTokenCount: 100,
         candidatesTokenCount: 50,
         totalTokenCount: 150
+      };
+    }
+  }
+
+  /**
+   * Get current pricing tier information
+   * @returns {Object} - Pricing tier information
+   */
+  getPricingInfo() {
+    return {
+      tier: this.pricingTier,
+      pricing: this.pricing,
+      isFree: this.pricingTier === 'free',
+      isPaid: this.pricingTier === 'paid'
+    };
+  }
+
+  /**
+   * Set pricing tier
+   * @param {String} tier - Pricing tier: 'free' or 'paid'
+   */
+  setPricingTier(tier) {
+    if (tier !== 'free' && tier !== 'paid') {
+      throw new Error('Invalid pricing tier. Must be "free" or "paid"');
+    }
+    this.pricingTier = tier;
+    logger.info('Pricing tier updated', { tier });
+  }
+
+  /**
+   * Calculate cost breakdown for detailed analysis
+   * @param {Number} inputTokens - Number of input tokens
+   * @param {Number} outputTokens - Number of output tokens
+   * @param {Object} options - Additional options for cost calculation
+   * @returns {Object} - Detailed cost breakdown
+   */
+  calculateCostBreakdown(inputTokens, outputTokens, options = {}) {
+    try {
+      const validInputTokens = Number(inputTokens) || 0;
+      const validOutputTokens = Number(outputTokens) || 0;
+      const validContextCachingTokens = Number(options.contextCachingTokens) || 0;
+      const validContextStorageHours = Number(options.contextStorageHours) || 0;
+      const contentType = options.contentType || 'text';
+
+      const breakdown = {
+        tier: this.pricingTier,
+        contentType,
+        tokens: {
+          input: validInputTokens,
+          output: validOutputTokens,
+          contextCaching: validContextCachingTokens,
+          total: validInputTokens + validOutputTokens
+        },
+        costs: {
+          input: 0,
+          output: 0,
+          contextCaching: 0,
+          contextStorage: 0,
+          total: 0
+        },
+        rates: {
+          input: 0,
+          output: 0,
+          contextCaching: 0,
+          contextStorage: 0
+        }
+      };
+
+      // Free tier - no cost
+      if (this.pricingTier === 'free') {
+        return breakdown;
+      }
+
+      // Paid tier calculation
+      const pricing = this.pricing.paid;
+
+      // Set rates based on content type
+      if (contentType === 'audio') {
+        breakdown.rates.input = pricing.inputAudio;
+        breakdown.rates.contextCaching = pricing.contextCachingAudio;
+      } else {
+        breakdown.rates.input = pricing.input;
+        breakdown.rates.contextCaching = pricing.contextCaching;
+      }
+      breakdown.rates.output = pricing.output;
+      breakdown.rates.contextStorage = pricing.contextCachingStorage;
+
+      // Calculate costs
+      breakdown.costs.input = (validInputTokens / 1000000) * breakdown.rates.input;
+      breakdown.costs.output = (validOutputTokens / 1000000) * breakdown.rates.output;
+
+      if (validContextCachingTokens > 0) {
+        breakdown.costs.contextCaching = (validContextCachingTokens / 1000000) * breakdown.rates.contextCaching;
+      }
+
+      if (validContextStorageHours > 0) {
+        breakdown.costs.contextStorage = (validContextCachingTokens / 1000000) * breakdown.rates.contextStorage * validContextStorageHours;
+      }
+
+      breakdown.costs.total = breakdown.costs.input + breakdown.costs.output +
+                             breakdown.costs.contextCaching + breakdown.costs.contextStorage;
+
+      // Round all costs to 6 decimal places
+      Object.keys(breakdown.costs).forEach(key => {
+        breakdown.costs[key] = Math.round(breakdown.costs[key] * 1000000) / 1000000;
+      });
+
+      return breakdown;
+    } catch (error) {
+      logger.error('Failed to calculate cost breakdown', { error: error.message });
+      return {
+        tier: this.pricingTier,
+        contentType: options.contentType || 'text',
+        tokens: { input: 0, output: 0, contextCaching: 0, total: 0 },
+        costs: { input: 0, output: 0, contextCaching: 0, contextStorage: 0, total: 0 },
+        rates: { input: 0, output: 0, contextCaching: 0, contextStorage: 0 },
+        error: error.message
       };
     }
   }

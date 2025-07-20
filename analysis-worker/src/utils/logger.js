@@ -24,25 +24,62 @@ const logColors = {
 // Add colors to winston
 winston.addColors(logColors);
 
-// Create simple, readable format for console
-const simpleFormat = winston.format.printf(({ timestamp, level, message, ...meta }) => {
-  let log = `${timestamp} [${level.toUpperCase()}] ${message}`;
+// Create human-readable format for console and files
+const readableFormat = winston.format.printf(({ timestamp, level, message, correlationId, jobId, userId, userEmail, ...meta }) => {
+  // Start with basic log structure
+  let log = `${timestamp} [${level.toUpperCase().padEnd(5)}]`;
 
-  // Only add important metadata, skip common fields
+  // Add correlation/job ID if available for easy tracking
+  if (correlationId || jobId) {
+    const trackingId = correlationId || jobId;
+    log += ` [${trackingId.substring(0, 8)}]`;
+  }
+
+  log += ` ${message}`;
+
+  // Add user context if available
+  if (userId || userEmail) {
+    const userInfo = userEmail ? `${userEmail}` : `user:${userId?.substring(0, 8)}`;
+    log += ` (${userInfo})`;
+  }
+
+  // Only add important metadata, skip common/verbose fields
   const importantMeta = { ...meta };
   delete importantMeta.service;
   delete importantMeta.version;
+  delete importantMeta.environment;
 
+  // Format remaining metadata in a clean way
   if (Object.keys(importantMeta).length > 0) {
-    // Format metadata in a readable way
     const metaStr = Object.entries(importantMeta)
-      .map(([key, value]) => `${key}=${value}`)
+      .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+      .map(([key, value]) => {
+        // Shorten long values
+        const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+        const displayValue = stringValue.length > 50 ? stringValue.substring(0, 47) + '...' : stringValue;
+        return `${key}=${displayValue}`;
+      })
       .join(' ');
-    log += ` | ${metaStr}`;
+    if (metaStr) {
+      log += ` | ${metaStr}`;
+    }
   }
 
   return log;
 });
+
+// Enhanced console format with colors
+const consoleFormat = winston.format.combine(
+  winston.format.colorize({
+    colors: {
+      error: 'red',
+      warn: 'yellow',
+      info: 'cyan',
+      debug: 'gray'
+    }
+  }),
+  readableFormat
+);
 
 // Create logger instance
 const logger = winston.createLogger({
@@ -58,20 +95,20 @@ const logger = winston.createLogger({
     service: 'analysis-worker'
   },
   transports: [
-    // File transport for all logs (keep JSON for parsing)
+    // File transport for all logs (human-readable format)
     new winston.transports.File({
       filename: process.env.LOG_FILE || 'logs/analysis-worker.log',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
       format: winston.format.combine(
         winston.format.timestamp({
-          format: 'YYYY-MM-DD HH:mm:ss'
+          format: 'MM-dd HH:mm:ss'
         }),
-        winston.format.json()
+        readableFormat
       )
     }),
 
-    // File transport for error logs only
+    // File transport for error logs only (detailed format for debugging)
     new winston.transports.File({
       filename: 'logs/error.log',
       level: 'error',
@@ -81,25 +118,44 @@ const logger = winston.createLogger({
         winston.format.timestamp({
           format: 'YYYY-MM-DD HH:mm:ss'
         }),
+        winston.format.errors({ stack: true }),
+        winston.format.json() // Keep JSON for error analysis
+      )
+    }),
+
+    // Structured logs for monitoring/parsing (JSON format)
+    new winston.transports.File({
+      filename: 'logs/structured.log',
+      maxsize: 5242880, // 5MB
+      maxFiles: 3,
+      format: winston.format.combine(
+        winston.format.timestamp(),
         winston.format.json()
       )
     })
   ]
 });
 
-// Add console transport for development with simple format
+// Add console transport for development with enhanced format
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      simpleFormat
-    )
+    format: consoleFormat
   }));
 }
 
-// Create child logger for specific modules
-logger.child = (meta) => {
-  return logger.child(meta);
+// Helper function to create logger with correlation ID
+logger.withCorrelation = (correlationId) => {
+  return logger.child({ correlationId });
+};
+
+// Helper function to create logger with job context
+logger.withJob = (jobId, userId, userEmail) => {
+  return logger.child({ jobId, userId, userEmail });
+};
+
+// Helper function to create logger with user context
+logger.withUser = (userId, userEmail) => {
+  return logger.child({ userId, userEmail });
 };
 
 module.exports = logger;

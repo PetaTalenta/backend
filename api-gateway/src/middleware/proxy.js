@@ -1,35 +1,55 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const http = require('http');
+const https = require('https');
 const config = require('../config');
+const { withAsyncLogging } = require('./asyncProxyLogger');
+
+// HTTP Agent dengan connection pooling untuk optimisasi performa
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  maxSockets: 50,        // Max concurrent connections per host
+  maxFreeSockets: 10,    // Max idle connections per host
+  timeout: 5000,         // Socket timeout
+  freeSocketTimeout: 30000 // Idle socket timeout
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 50,
+  maxFreeSockets: 10,
+  timeout: 5000,
+  freeSocketTimeout: 30000
+});
 
 /**
- * Membuat proxy middleware untuk service tertentu
+ * Membuat proxy middleware untuk service tertentu dengan async logging
  */
 const createServiceProxy = (serviceUrl, options = {}) => {
+  // Get async logging handlers
+  const asyncLogging = withAsyncLogging(serviceUrl);
+
   return createProxyMiddleware({
     target: serviceUrl,
     changeOrigin: true,
-    timeout: config.healthCheck.timeout,
-    proxyTimeout: config.healthCheck.timeout,
+    timeout: 5000,          // Reduced from 30s to 5s
+    proxyTimeout: 5000,     // Reduced from 30s to 5s
+    agent: serviceUrl.startsWith('https') ? httpsAgent : httpAgent,
 
     // Additional timeout settings
     followRedirects: true,
     secure: false,
 
-    // Parse body as buffer to avoid conflicts
+    // Optimize body handling - avoid double parsing
     parseReqBody: false,
+    buffer: require('stream').PassThrough,
 
     // Logging
     logLevel: config.nodeEnv === 'development' ? 'debug' : 'warn',
-    
-    // Error handling
+
+    // Error handling with async logging
     onError: (err, req, res) => {
-      console.error(`Proxy error for ${req.url}:`, {
-        error: err.message,
-        code: err.code,
-        service: serviceUrl,
-        method: req.method,
-        timestamp: new Date().toISOString()
-      });
+      // Async error logging
+      asyncLogging.onError(err, req, res);
 
       if (!res.headersSent) {
         let statusCode = 503;
@@ -56,53 +76,41 @@ const createServiceProxy = (serviceUrl, options = {}) => {
         });
       }
     },
-    
-    // Request modification
-    onProxyReq: (proxyReq, req, res) => {
-      // Log request
-      console.log(`Proxying ${req.method} ${req.url} to ${serviceUrl}`);
 
-      // Add original IP
+    // Request modification with async logging
+    onProxyReq: (proxyReq, req, res) => {
+      // Async request logging
+      asyncLogging.onProxyReq(proxyReq, req, res);
+
+      // Essential headers only
       proxyReq.setHeader('X-Forwarded-For', req.ip);
       proxyReq.setHeader('X-Original-Host', req.get('host'));
 
-      // Forward user info if available
-      if (req.user) {
+      // User info (if available)
+      if (req.user?.id) {
         proxyReq.setHeader('X-User-ID', req.user.id);
         proxyReq.setHeader('X-User-Type', req.user.user_type || 'user');
       }
 
-      // Forward internal service flag
+      // Internal service flag
       if (req.isInternalService) {
         proxyReq.setHeader('X-Internal-Service', 'true');
       }
 
-      // Handle body forwarding for POST/PUT/PATCH requests
-      if ((req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') && req.body) {
-        const bodyData = JSON.stringify(req.body);
-
-        // Update headers
-        proxyReq.setHeader('Content-Type', 'application/json');
-        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-
-        // Write the body data
-        proxyReq.write(bodyData);
-        proxyReq.end();
-
-        console.log(`Forwarding body data: ${bodyData}`);
-      }
+      // Let proxy handle body forwarding directly (avoid double parsing)
+      // The parseReqBody: false setting handles this automatically
     },
-    
-    // Response modification
+
+    // Response modification with async logging
     onProxyRes: (proxyRes, req, res) => {
-      // Add gateway headers
+      // Async response logging
+      asyncLogging.onProxyRes(proxyRes, req, res);
+
+      // Minimal response headers
       proxyRes.headers['X-Gateway'] = 'ATMA-API-Gateway';
       proxyRes.headers['X-Gateway-Version'] = '1.0.0';
-      
-      // Log response
-      console.log(`Response from ${serviceUrl}: ${proxyRes.statusCode}`);
     },
-    
+
     ...options
   });
 };
