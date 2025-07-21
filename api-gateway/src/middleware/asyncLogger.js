@@ -3,8 +3,8 @@ const DailyRotateFile = require('winston-daily-rotate-file');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure logs directory exists
-const logsDir = path.join(__dirname, '../../logs');
+// Ensure logs directory exists - use relative path to avoid Windows path issues
+const logsDir = 'logs';
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
@@ -20,16 +20,16 @@ const logger = winston.createLogger({
   transports: [
     // Daily rotating file for general logs
     new DailyRotateFile({
-      filename: path.join(logsDir, 'gateway-%DATE%.log'),
+      filename: 'logs/gateway-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
       maxSize: '20m',
       maxFiles: '14d',
       level: 'info'
     }),
-    
+
     // Daily rotating file for errors
     new DailyRotateFile({
-      filename: path.join(logsDir, 'error-%DATE%.log'),
+      filename: 'logs/error-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
       maxSize: '20m',
       maxFiles: '30d',
@@ -38,12 +38,18 @@ const logger = winston.createLogger({
   ]
 });
 
-// Console transport for development
+// Console transport for development with better formatting
 if (process.env.NODE_ENV === 'development') {
   logger.add(new winston.transports.Console({
     format: winston.format.combine(
       winston.format.colorize(),
-      winston.format.simple()
+      winston.format.timestamp({ format: 'HH:mm:ss' }),
+      winston.format.printf(({ timestamp, level, message }) => {
+        if (typeof message === 'object') {
+          return `${timestamp} [${level}] ${message.type || 'LOG'}: ${message.method || ''} ${message.url || ''} ${message.statusCode ? `(${message.statusCode})` : ''} ${message.duration ? `${message.duration}ms` : ''}`;
+        }
+        return `${timestamp} [${level}] ${message}`;
+      })
     )
   }));
 }

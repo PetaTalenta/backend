@@ -4,6 +4,7 @@
  */
 
 const demographicService = require('../services/demographicService');
+const cacheService = require('../services/cacheService');
 const logger = require('../utils/logger');
 const { formatPaginatedResponse } = require('../utils/responseFormatter');
 
@@ -15,13 +16,29 @@ const { formatPaginatedResponse } = require('../utils/responseFormatter');
  */
 const getDemographicOverview = async (req, res, next) => {
   try {
-    const overview = await demographicService.getDemographicOverview();
-    
-    logger.info('Demographic overview requested', {
-      requestId: req.id,
-      isInternalService: req.isInternalService
-    });
-    
+    const cacheKey = 'overview';
+
+    // Try to get from cache first
+    let overview = await cacheService.getDemographics(cacheKey);
+
+    if (!overview) {
+      // Cache miss - get from database
+      overview = await demographicService.getDemographicOverview();
+
+      // Cache the result
+      await cacheService.cacheDemographics(cacheKey, overview);
+
+      logger.info('Demographic overview requested - cache miss', {
+        requestId: req.id,
+        isInternalService: req.isInternalService
+      });
+    } else {
+      logger.info('Demographic overview requested - cache hit', {
+        requestId: req.id,
+        isInternalService: req.isInternalService
+      });
+    }
+
     res.json({
       success: true,
       data: overview
@@ -45,7 +62,7 @@ const getDemographicOverview = async (req, res, next) => {
 const getArchetypeDemographics = async (req, res, next) => {
   try {
     const { archetype } = req.params;
-    
+
     if (!archetype) {
       return res.status(400).json({
         success: false,
@@ -55,15 +72,32 @@ const getArchetypeDemographics = async (req, res, next) => {
         }
       });
     }
-    
-    const demographics = await demographicService.getArchetypeDemographics(archetype);
-    
-    logger.info('Archetype demographics requested', {
-      requestId: req.id,
-      archetype,
-      isInternalService: req.isInternalService
-    });
-    
+
+    const cacheKey = `archetype:${archetype}`;
+
+    // Try to get from cache first
+    let demographics = await cacheService.getArchetypes(cacheKey);
+
+    if (!demographics) {
+      // Cache miss - get from database
+      demographics = await demographicService.getArchetypeDemographics(archetype);
+
+      // Cache the result
+      await cacheService.cacheArchetypes(cacheKey, demographics);
+
+      logger.info('Archetype demographics requested - cache miss', {
+        requestId: req.id,
+        archetype,
+        isInternalService: req.isInternalService
+      });
+    } else {
+      logger.info('Archetype demographics requested - cache hit', {
+        requestId: req.id,
+        archetype,
+        isInternalService: req.isInternalService
+      });
+    }
+
     res.json({
       success: true,
       data: demographics

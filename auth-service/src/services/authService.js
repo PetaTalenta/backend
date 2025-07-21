@@ -2,15 +2,28 @@ const { User } = require('../models');
 const { hashPassword, comparePassword, validatePassword } = require('../utils/password');
 const { generateToken, verifyToken } = require('../utils/jwt');
 const logger = require('../utils/logger');
+const cacheService = require('./cacheService');
+const userCacheService = require('./userCacheService');
+
+// Import metrics recording function
+let recordAuthOperation;
+try {
+  const { recordAuthOperation: recordMetrics } = require('../middleware/metricsMiddleware');
+  recordAuthOperation = recordMetrics;
+} catch (error) {
+  // Graceful fallback if metrics middleware is not available
+  recordAuthOperation = () => {};
+}
 
 /**
- * Register a single user
+ * Register a single user with optimized database queries
  * @param {Object} userData - User registration data
  * @param {Object} options - Registration options
  * @returns {Promise<Object>} User and token
  */
 const registerUser = async (userData, options = {}) => {
   const { email, password } = userData;
+  const startTime = Date.now();
 
   try {
     // Validate password strength
@@ -19,43 +32,59 @@ const registerUser = async (userData, options = {}) => {
       throw new Error(`Password validation failed: ${passwordValidation.errors.join(', ')}`);
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      where: { email }
-    });
-
-    if (existingUser) {
-      throw new Error('Email already exists');
-    }
-
-    // Hash password
+    // Hash password before database operation
     const password_hash = await hashPassword(password);
 
-    // Create user
-    const user = await User.create({
-      email,
-      password_hash,
-      user_type: 'user',
-      token_balance: parseInt(process.env.DEFAULT_TOKEN_BALANCE) || 5
+    // Use findOrCreate to combine check and create in single atomic operation
+    const [user, created] = await User.findOrCreate({
+      where: { email },
+      defaults: {
+        email,
+        password_hash,
+        user_type: 'user',
+        token_balance: parseInt(process.env.DEFAULT_TOKEN_BALANCE) || 5
+      }
     });
+
+    if (!created) {
+      throw new Error('Email already exists');
+    }
 
     // Generate JWT token
     const token = generateToken(user, 'user');
 
+    // Cache the new user
+    const userData = user.toJSON();
+    userCacheService.setUser(userData);
+
+    const duration = Date.now() - startTime;
+
+    // Record metrics
+    recordAuthOperation('register', duration, 'success');
+
     logger.info('User registered successfully', {
       userId: user.id,
       email: user.email,
-      tokenBalance: user.token_balance
+      tokenBalance: user.token_balance,
+      duration,
+      performance: duration < 100 ? 'optimal' : duration < 200 ? 'acceptable' : 'slow',
+      cached: userCacheService.isAvailable()
     });
 
     return {
-      user: user.toJSON(),
+      user: userData,
       token
     };
   } catch (error) {
+    const duration = Date.now() - startTime;
+
+    // Record metrics for failed operation
+    recordAuthOperation('register', duration, 'failure');
+
     logger.error('User registration failed', {
       error: error.message,
-      email
+      email,
+      duration
     });
     throw error;
   }
@@ -168,17 +197,19 @@ const registerUsersBatch = async (usersData) => {
 };
 
 /**
- * Login user
+ * Login user with optimized performance
  * @param {Object} credentials - Login credentials
  * @returns {Promise<Object>} User and token
  */
 const loginUser = async (credentials) => {
   const { email, password } = credentials;
+  const startTime = Date.now();
 
   try {
-    // Find user by email
+    // For login, always fetch from database to ensure we have password_hash
+    // Cache doesn't store password_hash for security reasons
     const user = await User.findOne({
-      where: { 
+      where: {
         email,
         user_type: 'user',
         is_active: true
@@ -195,15 +226,37 @@ const loginUser = async (credentials) => {
       throw new Error('Invalid email or password');
     }
 
-    // Update last login
-    await user.update({ last_login: new Date() });
+    // Cache the user for future requests (without password_hash)
+    userCacheService.setUser(user.toJSON());
 
-    // Generate JWT token
+    // Generate JWT token first (main response)
     const token = generateToken(user, 'user');
+
+    // Update last login asynchronously (fire-and-forget) if enabled
+    if (process.env.ASYNC_LAST_LOGIN === 'true') {
+      // Don't await this - let it run in background
+      user.update({ last_login: new Date() }).catch(error => {
+        logger.warn('Async last_login update failed', {
+          userId: user.id,
+          error: error.message
+        });
+      });
+    } else {
+      // Synchronous update for backward compatibility
+      await user.update({ last_login: new Date() });
+    }
+
+    const duration = Date.now() - startTime;
+
+    // Record metrics
+    recordAuthOperation('login', duration, 'success');
 
     logger.info('User login successful', {
       userId: user.id,
-      email: user.email
+      email: user.email,
+      duration,
+      performance: duration < 80 ? 'optimal' : duration < 150 ? 'acceptable' : 'slow',
+      asyncLastLogin: process.env.ASYNC_LAST_LOGIN === 'true'
     });
 
     return {
@@ -211,9 +264,15 @@ const loginUser = async (credentials) => {
       token
     };
   } catch (error) {
+    const duration = Date.now() - startTime;
+
+    // Record metrics for failed operation
+    recordAuthOperation('login', duration, 'failure');
+
     logger.error('User login failed', {
       error: error.message,
-      email
+      email,
+      duration
     });
     throw error;
   }
@@ -272,28 +331,59 @@ const changePassword = async (userId, passwordData) => {
 };
 
 /**
- * Verify user token
+ * Verify user token with caching and performance monitoring
  * @param {string} token - JWT token
  * @returns {Promise<Object>} User data
  */
 const verifyUserToken = async (token) => {
+  const startTime = Date.now();
+
   try {
-    // Verify token
+    // Verify token first (this is fast)
     const decoded = verifyToken(token);
-    
-    // Find user
-    const user = await User.findByPk(decoded.id, {
-      attributes: { exclude: ['password_hash'] }
-    });
-    
+
+    // Try to get user from cache first
+    let user = userCacheService.getUserById(decoded.id);
+    let cacheHit = !!user;
+
+    if (!user) {
+      // Cache miss - fetch from database
+      user = await User.findByPk(decoded.id, {
+        attributes: { exclude: ['password_hash'] }
+      });
+
+      // Cache the user for future requests
+      if (user && user.is_active) {
+        userCacheService.setUser(user.toJSON());
+      }
+    }
+
     if (!user || !user.is_active) {
       throw new Error('User not found or inactive');
     }
 
-    return user.toJSON();
+    const duration = Date.now() - startTime;
+
+    // Record metrics
+    recordAuthOperation('verify', duration, 'success');
+
+    logger.debug('Token verification successful', {
+      userId: user.id,
+      duration,
+      performance: duration < 20 ? 'optimal' : duration < 50 ? 'acceptable' : 'slow',
+      cacheHit
+    });
+
+    return typeof user.toJSON === 'function' ? user.toJSON() : user;
   } catch (error) {
+    const duration = Date.now() - startTime;
+
+    // Record metrics for failed operation
+    recordAuthOperation('verify', duration, 'failure');
+
     logger.error('Token verification failed', {
-      error: error.message
+      error: error.message,
+      duration
     });
     throw error;
   }

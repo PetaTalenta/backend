@@ -8,7 +8,7 @@ async function testAssessmentSchemaValidation() {
 
   try {
     // Load assessment schema
-    const { assessmentSchema } = require('./assessment-service/src/schemas/assessment');
+    const { assessmentSchema } = require('../assessment-service/src/schemas/assessment');
     
     // Test data with assessment name
     const testDataWithName = {
@@ -175,7 +175,7 @@ async function testArchiveValidationSchemas() {
       createAnalysisJobSchema,
       createAnalysisResultSchema,
       assessmentNameSchema
-    } = require('./archive-service/src/utils/validation');
+    } = require('../archive-service/src/utils/validation');
 
     console.log('\n1. Testing assessmentNameSchema...');
     
@@ -303,7 +303,7 @@ async function testAnalysisWorkerValidation() {
 
   try {
     // Load worker validation
-    const { validateJobMessage } = require('./analysis-worker/src/utils/validator');
+    const { validateJobMessage } = require('../analysis-worker/src/utils/validator');
 
     console.log('\n1. Testing job message with assessment name...');
     const jobMessage = {

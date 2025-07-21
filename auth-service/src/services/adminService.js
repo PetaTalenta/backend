@@ -1,29 +1,11 @@
 const bcrypt = require('bcrypt');
 const { User, UserProfile } = require('../models');
 const { generateToken } = require('../utils/jwt');
-const { validatePassword } = require('../utils/validation');
+const { hashPassword, comparePassword, validatePassword } = require('../utils/password');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 
-/**
- * Hash password using bcrypt
- * @param {string} password - Plain text password
- * @returns {Promise<string>} Hashed password
- */
-const hashPassword = async (password) => {
-  const saltRounds = 12;
-  return await bcrypt.hash(password, saltRounds);
-};
-
-/**
- * Compare password with hash
- * @param {string} password - Plain text password
- * @param {string} hash - Hashed password
- * @returns {Promise<boolean>} Password match result
- */
-const comparePassword = async (password, hash) => {
-  return await bcrypt.compare(password, hash);
-};
+// Remove local implementations - use utility functions from password.js
 
 /**
  * Register a new admin

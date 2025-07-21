@@ -9,7 +9,7 @@ const httpAgent = new http.Agent({
   keepAlive: true,
   maxSockets: 50,        // Max concurrent connections per host
   maxFreeSockets: 10,    // Max idle connections per host
-  timeout: 5000,         // Socket timeout
+  timeout: 15000,         // Socket timeout
   freeSocketTimeout: 30000 // Idle socket timeout
 });
 
@@ -17,7 +17,7 @@ const httpsAgent = new https.Agent({
   keepAlive: true,
   maxSockets: 50,
   maxFreeSockets: 10,
-  timeout: 5000,
+  timeout: 15000,
   freeSocketTimeout: 30000
 });
 
@@ -31,8 +31,8 @@ const createServiceProxy = (serviceUrl, options = {}) => {
   return createProxyMiddleware({
     target: serviceUrl,
     changeOrigin: true,
-    timeout: 5000,          // Reduced from 30s to 5s
-    proxyTimeout: 5000,     // Reduced from 30s to 5s
+    timeout: 15000,          // Reduced from 30s to 5s
+    proxyTimeout: 15000,     // Reduced from 30s to 5s
     agent: serviceUrl.startsWith('https') ? httpsAgent : httpAgent,
 
     // Additional timeout settings
@@ -41,7 +41,6 @@ const createServiceProxy = (serviceUrl, options = {}) => {
 
     // Optimize body handling - avoid double parsing
     parseReqBody: false,
-    buffer: require('stream').PassThrough,
 
     // Logging
     logLevel: config.nodeEnv === 'development' ? 'debug' : 'warn',

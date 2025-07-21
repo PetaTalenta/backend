@@ -18,14 +18,14 @@ const config = {
   logging: process.env.NODE_ENV === 'development' ? 
     (msg) => logger.debug(msg) : false,
   pool: {
-    max: parseInt(process.env.DB_POOL_MAX || '50'),     // Increased from 25 to 50 for higher concurrency
-    min: parseInt(process.env.DB_POOL_MIN || '10'),     // Increased minimum connections
-    acquire: parseInt(process.env.DB_POOL_ACQUIRE || '30000'), // Reduced timeout for faster failure
-    idle: parseInt(process.env.DB_POOL_IDLE || '20000'), // Reduced idle timeout for better turnover
-    evict: parseInt(process.env.DB_POOL_EVICT || '5000'), // More frequent eviction for fresh connections
+    max: parseInt(process.env.DB_POOL_MAX || '75'),     // Phase 2.3: Enhanced pool sizing
+    min: parseInt(process.env.DB_POOL_MIN || '15'),     // Increased minimum connections
+    acquire: parseInt(process.env.DB_POOL_ACQUIRE || '25000'), // Optimized timeout
+    idle: parseInt(process.env.DB_POOL_IDLE || '15000'), // Reduced idle timeout for better turnover
+    evict: parseInt(process.env.DB_POOL_EVICT || '3000'), // More frequent eviction for fresh connections
     handleDisconnects: true,
     retry: {
-      max: 3
+      max: 5  // Increased retry attempts
     }
   },
   define: {

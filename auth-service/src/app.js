@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
+const { collectHttpMetrics } = require('./middleware/metricsMiddleware');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const healthRoutes = require('./routes/health');
@@ -46,6 +47,11 @@ app.use((req, res, next) => {
   res.setHeader('X-Request-ID', req.id);
   next();
 });
+
+// Performance monitoring middleware
+if (process.env.ENABLE_PERFORMANCE_MONITORING === 'true') {
+  app.use(collectHttpMetrics);
+}
 
 // Routes
 app.use('/auth', authRoutes);

@@ -7,6 +7,7 @@ const config = require('./config');
 const { generalLimiter } = require('./middleware/rateLimiter');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { asyncRequestLogger } = require('./middleware/asyncLogger');
+const { jsonParser, urlencodedParser } = require('./middleware/bodyParser');
 
 // Import routes
 const healthRoutes = require('./routes/health');
@@ -56,9 +57,9 @@ app.use(cors({
 // Compression
 app.use(compression());
 
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing - Skip for proxy routes to avoid conflicts
+app.use(jsonParser);
+app.use(urlencodedParser);
 
 // Async Logging (replaces Morgan for better performance)
 if (config.nodeEnv !== 'test') {

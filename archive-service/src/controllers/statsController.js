@@ -5,6 +5,7 @@
 
 const statsService = require('../services/statsService');
 const OptimizedQueryService = require('../services/optimizedQueryService');
+const cacheService = require('../services/cacheService');
 const { sendSuccess, sendError, formatStatsResponse } = require('../utils/responseFormatter');
 const { buildPaginationParams, buildSortParams } = require('../utils/queryBuilder');
 const logger = require('../utils/logger');
@@ -66,42 +67,74 @@ const getStats = async (req, res, next) => {
 };
 
 /**
- * Get user statistics by scope
+ * Get user statistics by scope with caching
  * @param {String} userId - User ID
  * @param {String} scope - Statistics scope
  * @param {String} timeRange - Time range
  * @returns {Promise<Object>} User statistics
  */
 const getUserStatsByScope = async (userId, scope, timeRange) => {
-  switch (scope) {
-    case 'overview':
-      return await statsService.getUserOverview(userId);
-    case 'detailed':
-      return await statsService.getUserStats(userId);
-    case 'analysis':
-      return await OptimizedQueryService.getAnalysisStatistics({ userId, timeRange });
-    default:
-      throw new Error(`Invalid user statistics scope: ${scope}`);
+  const cacheKey = `user:${userId}:${scope}:${timeRange}`;
+
+  // Try cache first
+  let stats = await cacheService.getStats(cacheKey);
+
+  if (!stats) {
+    // Cache miss - get from database
+    switch (scope) {
+      case 'overview':
+        stats = await statsService.getUserOverview(userId);
+        break;
+      case 'detailed':
+        stats = await statsService.getUserStats(userId);
+        break;
+      case 'analysis':
+        stats = await OptimizedQueryService.getAnalysisStatistics({ userId, timeRange });
+        break;
+      default:
+        throw new Error(`Invalid user statistics scope: ${scope}`);
+    }
+
+    // Cache the result
+    await cacheService.cacheStats(cacheKey, stats);
   }
+
+  return stats;
 };
 
 /**
- * Get system statistics by scope
+ * Get system statistics by scope with caching
  * @param {String} scope - Statistics scope
  * @param {String} timeRange - Time range
  * @returns {Promise<Object>} System statistics
  */
 const getSystemStatsByScope = async (scope, timeRange) => {
-  switch (scope) {
-    case 'summary':
-      return await statsService.getSummaryStats();
-    case 'queue':
-      return await OptimizedQueryService.getJobQueueStats();
-    case 'analysis':
-      return await OptimizedQueryService.getAnalysisStatistics({ timeRange });
-    default:
-      throw new Error(`Invalid system statistics scope: ${scope}`);
+  const cacheKey = `system:${scope}:${timeRange}`;
+
+  // Try cache first
+  let stats = await cacheService.getStats(cacheKey);
+
+  if (!stats) {
+    // Cache miss - get from database
+    switch (scope) {
+      case 'summary':
+        stats = await statsService.getSummaryStats();
+        break;
+      case 'queue':
+        stats = await OptimizedQueryService.getJobQueueStats();
+        break;
+      case 'analysis':
+        stats = await OptimizedQueryService.getAnalysisStatistics({ timeRange });
+        break;
+      default:
+        throw new Error(`Invalid system statistics scope: ${scope}`);
+    }
+
+    // Cache the result
+    await cacheService.cacheStats(cacheKey, stats);
   }
+
+  return stats;
 };
 
 /**

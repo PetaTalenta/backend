@@ -6,6 +6,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const compression = require('compression');
 const path = require('path');
 
 // Load environment variables
@@ -14,6 +15,9 @@ require('dotenv').config();
 // Import utilities and middleware
 const logger = require('./utils/logger');
 const { initialize: initializeDatabase, close: closeDatabase } = require('./config/database');
+const cacheService = require('./services/cacheService');
+const backgroundProcessor = require('./services/backgroundProcessor');
+const { metricsMiddleware, cacheMetricsMiddleware } = require('./middleware/metricsMiddleware');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { handleAuthError } = require('./middleware/auth');
 
@@ -24,6 +28,7 @@ const demographicsRoutes = require('./routes/demographics');
 const adminRoutes = require('./routes/admin');
 const healthRoutes = require('./routes/health');
 const unifiedRoutes = require('./routes/unified');
+const metricsRoutes = require('./routes/metrics');
 
 // Create Express app
 const app = express();
@@ -38,6 +43,19 @@ const corsOptions = {
 
 // Middleware
 app.use(cors(corsOptions));
+
+// Response compression middleware - reduces bandwidth usage by 60-80%
+app.use(compression({
+  level: 6,
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -53,6 +71,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Metrics collection middleware
+app.use(metricsMiddleware);
+app.use(cacheMetricsMiddleware);
+
 // Routes
 // New unified API routes (v1)
 app.use('/api/v1', unifiedRoutes);
@@ -67,6 +89,7 @@ app.use('/results', resultsRoutes);
 app.use('/jobs', resultsRoutes);
 
 app.use('/admin', adminRoutes);
+app.use('/metrics', metricsRoutes);
 app.use('/', healthRoutes);
 
 // Root endpoint
@@ -96,6 +119,13 @@ const initializeServices = async () => {
   try {
     // Initialize database
     await initializeDatabase();
+
+    // Initialize cache service
+    await cacheService.initialize();
+
+    // Start background processor
+    backgroundProcessor.start();
+
     logger.info('All services initialized successfully');
   } catch (error) {
     logger.error('Failed to initialize services', { error: error.message });
@@ -108,12 +138,20 @@ const initializeServices = async () => {
  */
 const gracefulShutdown = async (signal) => {
   logger.info(`Received ${signal}, starting graceful shutdown`);
-  
+
   try {
+    // Stop background processor
+    backgroundProcessor.stop();
+    logger.info('Background processor stopped');
+
+    // Close cache service
+    await cacheService.close();
+    logger.info('Cache service closed');
+
     // Close database connection
     await closeDatabase();
     logger.info('Database connection closed');
-    
+
     // Exit process
     process.exit(0);
   } catch (error) {
