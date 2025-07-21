@@ -6,22 +6,44 @@ const axios = require('axios');
 const { Agent } = require('https');
 const { Agent: HttpAgent } = require('http');
 const logger = require('../utils/logger');
+const performanceMonitor = require('../utils/performanceMonitor');
 
-// Connection pooling configuration
-const httpAgent = new HttpAgent({
+// Enhanced HTTP agents dengan monitoring
+const http = require('http');
+const https = require('https');
+
+const httpAgent = new http.Agent({
   keepAlive: true,
-  maxSockets: 50,
-  maxFreeSockets: 10,
+  keepAliveMsecs: parseInt(process.env.HTTP_KEEP_ALIVE_TIMEOUT || '30000'),
+  maxSockets: parseInt(process.env.HTTP_MAX_SOCKETS_PER_HOST || '20'),
+  maxTotalSockets: parseInt(process.env.HTTP_TOTAL_MAX_SOCKETS || '100'),
   timeout: 60000,
-  freeSocketTimeout: 30000
+  // BARU: Connection monitoring
+  scheduling: 'fifo'
 });
 
-const httpsAgent = new Agent({
+const httpsAgent = new https.Agent({
   keepAlive: true,
-  maxSockets: 50,
-  maxFreeSockets: 10,
+  keepAliveMsecs: parseInt(process.env.HTTP_KEEP_ALIVE_TIMEOUT || '30000'),
+  maxSockets: parseInt(process.env.HTTP_MAX_SOCKETS_PER_HOST || '20'),
+  maxTotalSockets: parseInt(process.env.HTTP_TOTAL_MAX_SOCKETS || '100'),
   timeout: 60000,
-  freeSocketTimeout: 30000
+  scheduling: 'fifo'
+});
+
+// TAMBAH: Connection health monitoring
+httpAgent.on('free', (socket, options) => {
+  logger.debug('HTTP connection freed', {
+    host: options.host,
+    port: options.port
+  });
+});
+
+httpsAgent.on('free', (socket, options) => {
+  logger.debug('HTTPS connection freed', {
+    host: options.host,
+    port: options.port
+  });
 });
 
 // Archive service configuration
@@ -52,24 +74,38 @@ class AsyncOperationQueue {
   constructor() {
     this.queue = [];
     this.processing = false;
-    this.batchSize = parseInt(process.env.DB_BATCH_SIZE || '10');
-    this.batchInterval = parseInt(process.env.DB_BATCH_INTERVAL || '5000'); // 5 seconds
-    
+    this.batchSize = parseInt(process.env.DB_BATCH_SIZE || '50');
+    this.batchInterval = parseInt(process.env.DB_BATCH_INTERVAL || '1500'); // 1.5 seconds
+    this.maxQueueSize = parseInt(process.env.DB_BATCH_MAX_QUEUE || '2000');
+
     // Start batch processor
     this.startBatchProcessor();
   }
 
   add(operation) {
+    // Check queue size limit
+    if (this.queue.length >= this.maxQueueSize) {
+      logger.warn('Async queue is full, dropping operation', {
+        operation: operation.type,
+        queueSize: this.queue.length,
+        maxQueueSize: this.maxQueueSize
+      });
+      return false;
+    }
+
     this.queue.push({
       ...operation,
       timestamp: Date.now(),
       retries: 0
     });
-    
+
     logger.debug('Operation added to async queue', {
       operation: operation.type,
-      queueSize: this.queue.length
+      queueSize: this.queue.length,
+      maxQueueSize: this.maxQueueSize
     });
+
+    return true;
   }
 
   async startBatchProcessor() {
@@ -82,25 +118,31 @@ class AsyncOperationQueue {
 
   async processBatch() {
     if (this.processing || this.queue.length === 0) return;
-    
+
     this.processing = true;
     const batch = this.queue.splice(0, this.batchSize);
-    
+    const batchStartTime = Date.now();
+
+    // Update performance monitor
+    performanceMonitor.updateQueueDepth(this.queue.length);
+
     logger.info('Processing async operation batch', {
       batchSize: batch.length,
       remainingQueue: this.queue.length
     });
 
+    let successCount = 0;
     for (const operation of batch) {
       try {
         await this.executeOperation(operation);
+        successCount++;
       } catch (error) {
         logger.error('Failed to execute async operation', {
           operation: operation.type,
           error: error.message,
           retries: operation.retries
         });
-        
+
         // Retry logic
         if (operation.retries < 3) {
           operation.retries++;
@@ -108,7 +150,11 @@ class AsyncOperationQueue {
         }
       }
     }
-    
+
+    // Record batch processing performance
+    const batchSuccess = successCount === batch.length;
+    performanceMonitor.recordBatchProcessing(batchStartTime, batch.length, batchSuccess);
+
     this.processing = false;
   }
 

@@ -92,14 +92,13 @@ async function testEnrichedQueries() {
     
     // Query analysis results with user demographics
     const enrichedResults = await sequelize.query(`
-      SELECT 
+      SELECT
         ar.id,
         ar.user_id,
         ar.persona_profile->>'archetype' as archetype,
         ar.status,
         ar.created_at,
         up.full_name,
-        up.school_origin,
         up.gender,
         EXTRACT(YEAR FROM AGE(up.date_of_birth)) as age
       FROM archive.analysis_results ar
@@ -117,23 +116,10 @@ async function testEnrichedQueries() {
       console.log(`   ${result.archetype || 'Unknown'} - ${result.full_name || 'Anonymous'} (${result.gender || 'N/A'}, age ${result.age || 'N/A'})`);
     });
     
-    // Query schools with analysis count
-    const schoolStats = await sequelize.query(`
-      SELECT 
-        s.name,
-        s.city,
-        s.province,
-        COUNT(ar.id) as analysis_count
-      FROM public.schools s
-      LEFT JOIN auth.user_profiles up ON s.name = up.school_origin
-      LEFT JOIN archive.analysis_results ar ON up.user_id = ar.user_id
-      GROUP BY s.id, s.name, s.city, s.province
-      HAVING COUNT(ar.id) > 0
-      ORDER BY analysis_count DESC
-      LIMIT 5
-    `, {
-      type: sequelize.QueryTypes.SELECT
-    });
+    // Query schools with analysis count (Note: school_origin field has been removed)
+    // This query is now disabled since school_origin is no longer available
+    const schoolStats = [];
+    console.log('⚠️ School statistics query disabled - school_origin field has been removed from user profiles');
     
     console.log(`✅ School statistics query returned ${schoolStats.length} schools with analyses`);
     

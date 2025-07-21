@@ -18,9 +18,9 @@ const config = {
   logging: process.env.NODE_ENV === 'development' ? 
     (msg) => logger.debug(msg) : false,
   pool: {
-    max: parseInt(process.env.DB_POOL_MAX || '75'),     // Phase 2.3: Enhanced pool sizing
-    min: parseInt(process.env.DB_POOL_MIN || '15'),     // Increased minimum connections
-    acquire: parseInt(process.env.DB_POOL_ACQUIRE || '25000'), // Optimized timeout
+    max: parseInt(process.env.DB_POOL_MAX || '100'),     // Phase 1: Enhanced pool sizing (naik dari 75 → 100)
+    min: parseInt(process.env.DB_POOL_MIN || '20'),      // Increased minimum connections (naik dari 15 → 20)
+    acquire: parseInt(process.env.DB_POOL_ACQUIRE || '20000'), // Optimized timeout (turun dari 25000 → 20000)
     idle: parseInt(process.env.DB_POOL_IDLE || '15000'), // Reduced idle timeout for better turnover
     evict: parseInt(process.env.DB_POOL_EVICT || '3000'), // More frequent eviction for fresh connections
     handleDisconnects: true,
@@ -42,6 +42,78 @@ const sequelize = new Sequelize(
   config.password,
   config
 );
+
+// Get connection pool status with error handling
+const getPoolStatus = () => {
+  try {
+    const pool = sequelize.connectionManager.pool;
+    if (!pool) {
+      return {
+        size: 0,
+        available: 0,
+        using: 0,
+        waiting: 0,
+        error: 'Pool not available'
+      };
+    }
+
+    return {
+      size: pool.size || 0,
+      available: pool.available || 0,
+      using: pool.using || 0,
+      waiting: pool.waiting || 0
+    };
+  } catch (error) {
+    logger.warn('Failed to get pool status', {
+      error: error.message
+    });
+    return {
+      size: 0,
+      available: 0,
+      using: 0,
+      waiting: 0,
+      error: error.message
+    };
+  }
+};
+
+// Monitor connection pool health with error handling
+const monitorPoolHealth = () => {
+  setInterval(() => {
+    try {
+      const poolStatus = getPoolStatus();
+
+      // Skip monitoring if pool status has error
+      if (poolStatus.error) {
+        logger.debug('Pool monitoring skipped', {
+          reason: poolStatus.error
+        });
+        return;
+      }
+
+      const utilizationRate = config.pool.max > 0
+        ? (poolStatus.using / config.pool.max) * 100
+        : 0;
+
+      if (utilizationRate > 80) {
+        logger.warn('High database pool utilization', {
+          ...poolStatus,
+          utilizationRate: `${utilizationRate.toFixed(2)}%`,
+          maxConnections: config.pool.max
+        });
+      } else {
+        logger.debug('Database pool status', {
+          ...poolStatus,
+          utilizationRate: `${utilizationRate.toFixed(2)}%`
+        });
+      }
+    } catch (error) {
+      logger.warn('Pool health monitoring failed', {
+        error: error.message
+      });
+    }
+  }, 30000); // Check every 30 seconds
+};
 
 /**
  * Test database connection
@@ -85,6 +157,12 @@ const initialize = async () => {
       }
     }
 
+    // Start pool monitoring if enabled
+    if (process.env.ENABLE_PERFORMANCE_MONITORING === 'true') {
+      monitorPoolHealth();
+      logger.info('Database pool monitoring enabled');
+    }
+
     // Skip sync in development since we use init-databases.sql
     // Uncomment below if you want to use Sequelize migrations instead
     // if (process.env.NODE_ENV === 'development') {
@@ -122,5 +200,6 @@ module.exports = {
   initialize,
   testConnection,
   close,
-  config
+  config,
+  getPoolStatus
 };

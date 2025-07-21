@@ -27,7 +27,6 @@ function regenerateTestUser() {
   const profileData = {
     username: `testuser${timestamp}${randomNum}`,
     full_name: 'Test User',
-    school_id: 1,
     date_of_birth: '1995-01-01',
     gender: 'male'
   };
@@ -93,7 +92,6 @@ async function createTestUser(index) {
     password: 'password123',
     username: `massuser${timestamp}${index}${randomNum}`,
     full_name: `Mass Test User ${index}`,
-    school_id: 1,
     date_of_birth: '1995-01-01',
     gender: 'male'
   };

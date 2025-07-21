@@ -74,12 +74,6 @@ function displayResponse(title, result, showFullResponse = false) {
           console.log(`    Full Name: ${responseData.user.profile.full_name || 'N/A'}`);
           console.log(`    Date of Birth: ${responseData.user.profile.date_of_birth || 'N/A'}`);
           console.log(`    Gender: ${responseData.user.profile.gender || 'N/A'}`);
-
-          if (responseData.user.profile.school) {
-            console.log(`    School: ${responseData.user.profile.school.name || 'N/A'}`);
-            console.log(`    City: ${responseData.user.profile.school.city || 'N/A'}`);
-            console.log(`    Province: ${responseData.user.profile.school.province || 'N/A'}`);
-          }
         }
       }
 

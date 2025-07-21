@@ -38,7 +38,7 @@ app.use(morgan('combined', {
 }));
 
 // Routes
-app.use('/assessments', assessmentRoutes);
+app.use('/assessment', assessmentRoutes);
 app.use('/health', healthRoutes);
 
 // Testing endpoint (only in development)

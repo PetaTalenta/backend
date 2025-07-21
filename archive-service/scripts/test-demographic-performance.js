@@ -148,25 +148,13 @@ async function testDemographicQueryPatterns() {
       {
         name: 'Composite Demographic Filter',
         query: `
-          EXPLAIN (ANALYZE, BUFFERS) 
-          SELECT COUNT(*) 
+          EXPLAIN (ANALYZE, BUFFERS)
+          SELECT COUNT(*)
           FROM archive.analysis_results ar
           INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
-          WHERE ar.status = 'completed' 
+          WHERE ar.status = 'completed'
             AND up.gender = 'female'
             AND up.date_of_birth BETWEEN '1995-01-01' AND '2005-12-31'
-            AND up.school_origin IS NOT NULL
-        `
-      },
-      {
-        name: 'School Origin Search',
-        query: `
-          EXPLAIN (ANALYZE, BUFFERS) 
-          SELECT COUNT(*) 
-          FROM archive.analysis_results ar
-          INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
-          WHERE ar.status = 'completed' 
-            AND up.school_origin ILIKE '%University%'
         `
       },
       {

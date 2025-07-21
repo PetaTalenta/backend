@@ -16,7 +16,7 @@ const { AppError } = require('../middleware/errorHandler');
 const router = express.Router();
 
 /**
- * @route POST /assessments/callback/completed
+ * @route POST /assessment/callback/completed
  * @description Callback endpoint for analysis worker to update job status
  * @access Internal Service Only
  */
@@ -24,10 +24,11 @@ router.post('/callback/completed', async(req, res, next) => {
   try {
     // Validate internal service authentication
     const serviceKey = req.headers['x-service-key'];
+    const internalService = req.headers['x-internal-service'];
     const expectedKey = process.env.INTERNAL_SERVICE_KEY;
 
-    if (!serviceKey || serviceKey !== expectedKey) {
-      return sendError(res, 'UNAUTHORIZED', 'Invalid service key', {}, 401);
+    if (!serviceKey || serviceKey !== expectedKey || internalService !== 'true') {
+      return sendError(res, 'UNAUTHORIZED', 'Invalid service key or missing internal service header', {}, 401);
     }
 
     const { jobId, resultId, status } = req.body;
@@ -78,7 +79,7 @@ router.post('/callback/completed', async(req, res, next) => {
 });
 
 /**
- * @route POST /assessments/callback/failed
+ * @route POST /assessment/callback/failed
  * @description Callback endpoint for analysis worker to update job status to failed and refund tokens
  * @access Internal Service Only
  */
@@ -86,18 +87,20 @@ router.post('/callback/failed', async(req, res, next) => {
   try {
     // Validate internal service authentication
     const serviceKey = req.headers['x-service-key'];
+    const internalService = req.headers['x-internal-service'];
     const expectedKey = process.env.INTERNAL_SERVICE_KEY;
 
-    if (!serviceKey || serviceKey !== expectedKey) {
-      return sendError(res, 'UNAUTHORIZED', 'Invalid service key', {}, 401);
+    if (!serviceKey || serviceKey !== expectedKey || internalService !== 'true') {
+      return sendError(res, 'UNAUTHORIZED', 'Invalid service key or missing internal service header', {}, 401);
     }
 
     const { jobId, resultId, status, errorMessage } = req.body;
 
     // Validate required fields
-    if (!jobId || !status || !errorMessage) {
+    if (!jobId || !resultId || !status || !errorMessage) {
       return sendError(res, 'VALIDATION_ERROR', 'Missing required fields', {
         jobId: 'Job ID is required',
+        resultId: 'Result ID is required',
         status: 'Status is required',
         errorMessage: 'Error message is required'
       }, 400);
@@ -169,7 +172,7 @@ router.post('/callback/failed', async(req, res, next) => {
 router.use(authenticateToken);
 
 /**
- * @route POST /assessments/submit
+ * @route POST /assessment/submit
  * @description Submit assessment data for AI analysis
  * @access Private
  */
@@ -256,13 +259,78 @@ router.post('/submit',
     next(error);
   }
 });
+/**
+ * @route GET /assessment/status/:jobId
+ * @description Get assessment job status
+ * @access Private
+ */
+router.get('/status/:jobId', async(req, res, next) => {
+  try {
+    const { jobId } = req.params;
+    const { id: userId } = req.user;
+
+    // Get job from tracker
+    const job = jobTracker.getJob(jobId);
+
+    if (!job) {
+      return sendNotFound(res, 'Job not found');
+    }
+
+    // Verify job belongs to the authenticated user
+    if (job.userId !== userId) {
+      return sendError(res, 'FORBIDDEN', 'Access denied to this job', {}, 403);
+    }
+
+    // Try to get additional details from archive service
+    let archiveJobData = null;
+    try {
+      archiveJobData = await archiveService.getJobStatus(jobId);
+    } catch (archiveError) {
+      logger.warn('Failed to get job details from archive service', {
+        jobId,
+        error: archiveError.message
+      });
+      // Continue without archive data
+    }
+
+    // Get queue statistics for position estimation
+    const queueStats = await queueService.getQueueStats();
+
+    const response = {
+      jobId,
+      status: job.status,
+      progress: job.progress,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt,
+      estimatedTimeRemaining: job.estimatedTimeRemaining,
+      queuePosition: job.status === 'queued' ? queueStats.messageCount : 0,
+      userId: job.userId,
+      userEmail: job.userEmail
+    };
+
+    // Add archive data if available
+    if (archiveJobData) {
+      response.resultId = archiveJobData.result_id;
+      response.assessmentName = archiveJobData.assessment_name;
+    }
+
+    // Add error message if job failed
+    if (job.error) {
+      response.error = job.error;
+    }
+
+    return sendSuccess(res, 'Job status retrieved successfully', response);
+  } catch (error) {
+    next(error);
+  }
+});
 
 
 
 
 
 /**
- * @route GET /assessments/queue/status
+ * @route GET /assessment/queue/status
  * @description Get queue status (for monitoring)
  * @access Private
  */
@@ -300,14 +368,14 @@ router.get('/queue/status', async(req, res, next) => {
 });
 
 /**
- * @route GET /assessments/idempotency/health
+ * @route GET /assessment/idempotency/health
  * @description Check idempotency service health
  * @access Private
  */
 router.get('/idempotency/health', idempotencyHealthCheck);
 
 /**
- * @route POST /assessments/idempotency/cleanup
+ * @route POST /assessment/idempotency/cleanup
  * @description Cleanup expired idempotency cache entries
  * @access Private (Internal use)
  */

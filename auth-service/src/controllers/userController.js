@@ -12,22 +12,12 @@ const formatProfileResponse = (user) => {
   const userObj = user.toJSON();
 
   if (userObj.profile) {
-    // Add school_info field that combines both school approaches
+    // Add school_info field for structured school data
     userObj.profile.school_info = {
-      type: userObj.profile.school_id ? 'structured' : 'manual',
+      type: userObj.profile.school_id ? 'structured' : null,
       school_id: userObj.profile.school_id,
-      school_origin: userObj.profile.school_origin,
       school: userObj.profile.school || null
     };
-
-    // For backward compatibility, keep original fields but add deprecation notice
-    if (userObj.profile.school_origin && userObj.profile.school_id) {
-      logger.warn('Profile has both school_origin and school_id', {
-        userId: user.id,
-        school_id: userObj.profile.school_id,
-        school_origin: userObj.profile.school_origin
-      });
-    }
   }
 
   return userObj;
@@ -111,7 +101,6 @@ const updateProfile = async (req, res, next) => {
     const {
       username,
       full_name,
-      school_origin,
       school_id,
       date_of_birth,
       gender,
@@ -139,14 +128,26 @@ const updateProfile = async (req, res, next) => {
       }
 
       // Update or create user profile if profile data provided
-      const profileData = { full_name, school_origin, school_id, date_of_birth, gender };
+      const profileData = { full_name, school_id, date_of_birth, gender };
       const hasProfileData = Object.values(profileData).some(val => val !== undefined);
 
       let profile = null;
       if (hasProfileData) {
+        // Validate school_id exists if provided
+        if (school_id !== undefined && school_id !== null) {
+          const schoolExists = await School.findByPk(school_id, { transaction });
+          if (!schoolExists) {
+            await transaction.rollback();
+            return res.status(400).json(formatErrorResponse(
+              'INVALID_SCHOOL_ID',
+              `School with ID ${school_id} does not exist`
+            ));
+          }
+        }
+
         profile = await UserProfile.findByPk(userId, { transaction });
 
-        // Handle school field logic: if school_id is provided, clear school_origin
+        // Prepare profile update data
         const profileUpdateData = {
           user_id: userId,
           ...Object.fromEntries(
@@ -154,12 +155,7 @@ const updateProfile = async (req, res, next) => {
           )
         };
 
-        // Clear conflicting school field
-        if (school_id !== undefined) {
-          profileUpdateData.school_origin = null;
-        } else if (school_origin !== undefined) {
-          profileUpdateData.school_id = null;
-        }
+
 
         if (profile) {
           await profile.update(profileUpdateData, { transaction });

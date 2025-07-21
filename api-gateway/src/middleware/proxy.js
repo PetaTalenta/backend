@@ -141,7 +141,7 @@ const archiveServiceProxy = createServiceProxy(config.services.archive, {
 const assessmentServiceProxy = createServiceProxy(config.services.assessment, {
   pathRewrite: {
     '^/api/assessment/health': '/health', // Health endpoint langsung ke /health
-    '^/api/assessment': '/assessments' // Rewrite to /assessments (plural) sesuai dokumentasi
+    '^/api/assessment': '/assessment' // Rewrite to /assessment (singular)
   }
 });
 

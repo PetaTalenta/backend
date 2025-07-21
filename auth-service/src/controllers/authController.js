@@ -186,7 +186,8 @@ const verifyUserToken = async (req, res, next) => {
         valid: true,
         user: {
           id: user.id,
-          email: user.email
+          email: user.email,
+          user_type: user.user_type
         }
       }
     });

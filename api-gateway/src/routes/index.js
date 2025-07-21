@@ -72,6 +72,16 @@ if (process.env.NODE_ENV === 'development') {
 // Assessment submission (protected + rate limited)
 router.use('/assessment/submit', verifyToken, assessmentLimiter, assessmentServiceProxy);
 
+// Assessment status check (protected)
+router.use('/assessment/status', verifyToken, assessmentServiceProxy);
+
+// Queue monitoring (protected)
+router.use('/assessment/queue/status', verifyToken, assessmentServiceProxy);
+
+// Idempotency endpoints (protected)
+router.use('/assessment/idempotency/health', verifyToken, assessmentServiceProxy);
+router.use('/assessment/idempotency/cleanup', verifyToken, assessmentServiceProxy);
+
 // Internal callback endpoints
 router.use('/assessment/callback/completed', verifyInternalService, assessmentServiceProxy);
 router.use('/assessment/callback/failed', verifyInternalService, assessmentServiceProxy);

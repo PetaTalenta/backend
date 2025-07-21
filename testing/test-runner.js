@@ -6,6 +6,7 @@ const { runAuthFlow, testDeleteProfile } = require('./test-auth-flow');
 const { testConnectWebSocket, testMonitorJobStatus, cleanupWebSocket } = require('./test-websocket-flow');
 const { runAssessmentFlow } = require('./test-assessment-flow');
 const { runMassLoginTest, runMassEndToEndTest } = require('./test-mass-testing');
+const { runAdminAuthFlow } = require('./test-admin-auth');
 const { makeRequest, displayResponse } = require('./test-helpers');
 const { API_GATEWAY_URL } = require('./test-config');
 
@@ -121,6 +122,8 @@ function showHelp() {
   console.log('  node test-runner.js --websocket           - Run WebSocket flow test');
   console.log('  node test-runner.js -w                    - Run WebSocket flow test (short)');
   console.log('  node test-runner.js --websocket --keep-user - Run WebSocket test, keep user profile');
+  console.log('  node test-runner.js --admin               - Run admin authentication test');
+  console.log('  node test-runner.js -a                    - Run admin authentication test (short)');
   console.log('');
   console.log('Mass Testing:');
   console.log('  node test-runner.js --end-to-end          - Run end-to-end test (50 users)');
@@ -292,9 +295,13 @@ function parseArgsAndRun() {
   } else if (args.includes('--websocket') || args.includes('-w')) {
     console.log('Running WebSocket Flow Test...\n');
     runWebSocketFlow();
+  } else if (args.includes('--admin') || args.includes('-a')) {
+    console.log('Running Admin Authentication Test...\n');
+    runAdminAuthFlow();
   } else {
     console.log('Running basic auth flow tests...');
     console.log('Use --websocket or -w flag to run WebSocket flow test');
+    console.log('Use --admin or -a flag to run admin authentication test');
     console.log('Use --mass-login or -m flag to run mass login test');
     console.log('Use --help or -h flag to see all options\n');
     runBasicTests();

@@ -71,7 +71,7 @@ http://localhost:3003
 ```
 
 ### GET /health/ready
-**Error Codes**: 503  
+**Error Codes**: 503
 **Description**: Readiness probe untuk container orchestration
 
 **Response**:
@@ -82,13 +82,42 @@ http://localhost:3003
 }
 ```
 
+### GET /health/live
+**Error Codes**: 500
+**Description**: Simple liveness probe untuk container orchestration
+
+**Response**:
+```json
+{
+  "status": "alive",
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+### GET /health/queue
+**Error Codes**: 500
+**Description**: Queue health check dengan statistik detail
+
+**Response**:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "details": {
+    "messageCount": 5,
+    "consumerCount": 1,
+    "isHealthy": true
+  }
+}
+```
+
 ---
 
 ## Internal Service Endpoints
 
-### POST /assessments/callback/completed
-**Error Codes**: 400, 401, 404  
-**Description**: Callback dari analysis worker ketika job selesai  
+### POST /assessment/callback/completed
+**Error Codes**: 400, 401, 404
+**Description**: Callback dari analysis worker ketika job selesai
 **Authentication**: Internal service key required
 
 **Headers**:
@@ -120,9 +149,9 @@ X-Internal-Service: true
 }
 ```
 
-### POST /assessments/callback/failed
-**Error Codes**: 400, 401, 404  
-**Description**: Callback dari analysis worker ketika job gagal  
+### POST /assessment/callback/failed
+**Error Codes**: 400, 401, 404
+**Description**: Callback dari analysis worker ketika job gagal
 **Authentication**: Internal service key required
 
 **Headers**:
@@ -160,10 +189,10 @@ X-Internal-Service: true
 
 ## User Endpoints
 
-### POST /assessments/submit
-**Error Codes**: 400, 401, 403, 500, 503  
-**Description**: Submit assessment data untuk analisis AI  
-**Authentication**: Bearer token required  
+### POST /assessment/submit
+**Error Codes**: 400, 401, 403, 500, 503
+**Description**: Submit assessment data untuk analisis AI
+**Authentication**: Bearer token required
 **Token Cost**: 1 token
 
 **Headers**:
@@ -235,7 +264,115 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-**Note**: To check job status, use Archive Service endpoint: `GET /api/archive/jobs/:jobId`
+### GET /assessment/status/:jobId
+**Error Codes**: 400, 401, 403, 404
+**Description**: Get assessment job status
+**Authentication**: Bearer token required
+
+**Headers**:
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Job status retrieved successfully",
+  "data": {
+    "jobId": "uuid",
+    "status": "processing",
+    "progress": 50,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "estimatedTimeRemaining": "2-3 minutes",
+    "queuePosition": 0,
+    "userId": "uuid",
+    "userEmail": "user@example.com",
+    "resultId": "uuid",
+    "assessmentName": "AI-Based IQ Test"
+  }
+}
+```
+
+### GET /assessment/queue/status
+**Error Codes**: 401, 500
+**Description**: Get queue status untuk monitoring
+**Authentication**: Bearer token required
+
+**Headers**:
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Queue status retrieved successfully",
+  "data": {
+    "queueLength": 5,
+    "activeWorkers": 2,
+    "averageProcessingTime": "3.2 minutes",
+    "estimatedWaitTime": "1-5 minutes",
+    "jobStats": {
+      "total": 15,
+      "queued": 5,
+      "processing": 2,
+      "completed": 7,
+      "failed": 1
+    }
+  }
+}
+```
+
+### GET /assessment/idempotency/health
+**Error Codes**: 401, 500
+**Description**: Check idempotency service health
+**Authentication**: Bearer token required
+
+**Headers**:
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Idempotency service health check completed",
+  "data": {
+    "status": "healthy",
+    "cacheSize": 150,
+    "expiredEntries": 5,
+    "lastCleanup": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+### POST /assessment/idempotency/cleanup
+**Error Codes**: 401, 500
+**Description**: Cleanup expired idempotency cache entries
+**Authentication**: Bearer token required (Internal use)
+
+**Headers**:
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Idempotency cache cleanup completed",
+  "data": {
+    "removedEntries": 25,
+    "remainingEntries": 125
+  }
+}
+```
+
+**Note**: Alternative job status check available via Archive Service endpoint: `GET /api/archive/jobs/:jobId`
 
 ---
 
@@ -246,16 +383,16 @@ Authorization: Bearer <jwt_token>
 **Description**: Test assessment submission (development only)  
 **Environment**: Development only
 
-**Request Body**: Same as `/assessments/submit`
+**Request Body**: Same as `/assessment/submit`
 
-**Response**: Same as `/assessments/submit`
+**Response**: Same as `/assessment/submit`
 
 ### GET /test/status/:jobId
 **Error Codes**: 400, 404  
 **Description**: Test job status check (development only)  
 **Environment**: Development only
 
-**Response**: Same as `/assessments/status/:jobId`
+**Response**: Same as `/assessment/status/:jobId`
 
 ---
 
@@ -263,7 +400,7 @@ Authorization: Bearer <jwt_token>
 
 1. **Authentication**:
    - User endpoints: `Authorization: Bearer <jwt_token>`
-   - Internal service endpoints: `X-Service-Key` + `X-Internal-Service: true`
+   - Internal service endpoints: `X-Service-Key` + `X-Internal-Service: true` (both headers required)
 
 2. **Content-Type**: Semua request body menggunakan `application/json`
 
@@ -274,3 +411,21 @@ Authorization: Bearer <jwt_token>
 5. **Token Balance**: User harus memiliki minimal 1 token untuk submit assessment
 
 6. **Queue Position**: Estimasi posisi dalam antrian processing
+
+7. **Health Endpoints**:
+   - `/health` - Comprehensive health check dengan dependency status
+   - `/health/ready` - Readiness probe untuk container orchestration
+   - `/health/live` - Simple liveness probe
+   - `/health/queue` - Dedicated queue health check
+
+8. **Monitoring Endpoints**:
+   - `/assessment/queue/status` - Real-time queue monitoring
+   - `/assessment/idempotency/health` - Idempotency service status
+   - `/assessment/idempotency/cleanup` - Manual cache cleanup
+
+9. **Job Status Tracking**:
+   - Local job tracker untuk real-time status
+   - Archive service untuk persistent storage
+   - Automatic fallback jika salah satu service tidak tersedia
+
+10. **Error Handling**: Semua endpoint menggunakan consistent error response format dengan success/error flags

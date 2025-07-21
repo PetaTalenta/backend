@@ -2,6 +2,7 @@ const express = require('express');
 const os = require('os');
 const queueService = require('../services/queueService');
 const authService = require('../services/authService');
+const archiveService = require('../services/archiveService');
 const jobTracker = require('../jobs/jobTracker');
 const logger = require('../utils/logger');
 
@@ -20,25 +21,24 @@ router.get('/', async(req, res) => {
     // Check Auth Service connection
     const authHealth = await authService.checkHealth();
 
+    // Check Archive Service connection
+    let archiveHealth = false;
+    try {
+      archiveHealth = await archiveService.checkHealth();
+    } catch (archiveError) {
+      logger.warn('Archive service health check failed', { error: archiveError.message });
+      archiveHealth = false;
+    }
+
     // Get job statistics
     const jobStats = jobTracker.getJobStats();
 
     // Get queue statistics
     const queueStats = await queueService.getQueueStats();
 
-    // Get system information
-    const systemInfo = {
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      cpuUsage: process.cpuUsage(),
-      hostname: os.hostname(),
-      platform: process.platform,
-      nodeVersion: process.version
-    };
-
     // Determine overall status
     let status = 'healthy';
-    if (!queueHealth || !authHealth) {
+    if (!queueHealth || !authHealth || !archiveHealth) {
       status = 'degraded';
     }
 
@@ -51,14 +51,25 @@ router.get('/', async(req, res) => {
       dependencies: {
         rabbitmq: {
           status: queueHealth ? 'healthy' : 'unhealthy',
-          details: queueStats
+          details: {
+            messageCount: queueStats.messageCount || 0,
+            consumerCount: queueStats.consumerCount || 0
+          }
         },
         authService: {
           status: authHealth ? 'healthy' : 'unhealthy'
+        },
+        archiveService: {
+          status: archiveHealth ? 'healthy' : 'unhealthy'
         }
       },
-      jobs: jobStats,
-      system: systemInfo
+      jobs: {
+        total: jobStats.total || 0,
+        queued: jobStats.queued || 0,
+        processing: jobStats.processing || 0,
+        completed: jobStats.completed || 0,
+        failed: jobStats.failed || 0
+      }
     });
   } catch (error) {
     logger.error('Health check error', { error: error.message });

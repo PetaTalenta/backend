@@ -116,8 +116,7 @@ const changePassword = async (req, res, next) => {
     // Return success response
     res.status(200).json({
       success: true,
-      message: 'Password changed successfully',
-      data: result
+      message: 'Password changed successfully'
     });
   } catch (error) {
     next(error);
@@ -204,13 +203,19 @@ const updateProfile = async (req, res, next) => {
     });
     
     // Return success response
-    res.status(200).json({
-      success: true,
-      message: 'Profile updated successfully',
-      data: {
-        admin
-      }
-    });
+    res.status(200).json(formatResponse({
+      user: {
+        id: admin.id,
+        username: admin.username,
+        email: admin.email,
+        user_type: admin.user_type,
+        is_active: admin.is_active,
+        last_login: admin.last_login,
+        created_at: admin.created_at,
+        profile: admin.profile || null
+      },
+      message: 'Profile updated successfully'
+    }));
   } catch (error) {
     next(error);
   }

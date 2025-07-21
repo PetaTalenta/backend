@@ -5,11 +5,20 @@ Auth Service menyediakan API untuk autentikasi user dan admin, manajemen profil,
 
 **Base URL**: `http://localhost:3001`
 
+## Important Notes
+- **Database Schema**:
+  - Users dan profiles disimpan di schema `auth`
+  - Schools disimpan di schema `public` (shared across services)
+- **Authentication**: Menggunakan JWT tokens
+- **Validation**: Semua input divalidasi menggunakan Joi schemas
+- **Response Format**: Konsisten menggunakan `{ success, message?, data?, error? }`
+
 ## Error Codes
 - **VALIDATION_ERROR** (400): Data input tidak valid atau format salah
 - **EMAIL_EXISTS** (400): Email sudah terdaftar
 - **DUPLICATE_ERROR** (400): Resource sudah ada
 - **REFERENCE_ERROR** (400): Referenced resource tidak ditemukan
+- **INVALID_SCHOOL_ID** (400): School ID yang diberikan tidak exist di database
 - **UNAUTHORIZED** (401): Token tidak valid atau tidak ada
 - **INVALID_CREDENTIALS** (401): Email/password salah
 - **INVALID_TOKEN** (401): Token tidak valid
@@ -35,6 +44,10 @@ Registrasi user baru.
 }
 ```
 
+**Password Requirements:**
+- Minimum 8 characters
+- Must contain at least one letter and one number
+
 **Response:**
 ```json
 {
@@ -57,6 +70,10 @@ Registrasi user baru.
 ### POST /auth/register/batch
 Registrasi batch multiple users.
 
+**Limits:**
+- Maximum 50 users per batch
+- Each user follows same validation rules as single registration
+
 **Request Body:**
 ```json
 {
@@ -66,7 +83,7 @@ Registrasi batch multiple users.
       "password": "password123"
     },
     {
-      "email": "user2@example.com", 
+      "email": "user2@example.com",
       "password": "password456"
     }
   ]
@@ -77,11 +94,37 @@ Registrasi batch multiple users.
 ```json
 {
   "success": true,
-  "message": "Batch registration completed",
+  "message": "Batch user registration processed successfully",
   "data": {
+    "total": 2,
     "successful": 2,
     "failed": 0,
-    "results": [...]
+    "results": [
+      {
+        "index": 0,
+        "success": true,
+        "user": {
+          "id": "uuid",
+          "email": "user1@example.com",
+          "token_balance": 0,
+          "created_at": "2025-01-01T00:00:00.000Z"
+        },
+        "token": "jwt_token_here",
+        "error": null
+      },
+      {
+        "index": 1,
+        "success": true,
+        "user": {
+          "id": "uuid",
+          "email": "user2@example.com",
+          "token_balance": 0,
+          "created_at": "2025-01-01T00:00:00.000Z"
+        },
+        "token": "jwt_token_here",
+        "error": null
+      }
+    ]
   }
 }
 ```
@@ -160,14 +203,12 @@ Ubah password user.
 Mendapatkan profil user lengkap dengan informasi sekolah.
 
 **Response Fields Explanation:**
-- `school_origin`: Legacy field untuk nama sekolah manual
 - `school_id`: ID sekolah dari master data
 - `school`: Object lengkap sekolah (jika menggunakan school_id)
-- `school_info`: **NEW** - Object yang menggabungkan informasi sekolah dengan metadata:
-  - `type`: "structured" (menggunakan school_id) atau "manual" (menggunakan school_origin)
-  - `school_id`: ID sekolah (null jika manual)
-  - `school_origin`: Nama manual (null jika structured)
-  - `school`: Object sekolah lengkap (null jika manual)
+- `school_info`: Object yang menggabungkan informasi sekolah dengan metadata:
+  - `type`: "structured" (menggunakan school_id) atau null
+  - `school_id`: ID sekolah
+  - `school`: Object sekolah lengkap
 
 **Response:**
 ```json
@@ -234,18 +275,17 @@ Update profil user.
 }
 ```
 
-**Alternative dengan school_origin:**
-```json
-{
-  "username": "johndoe",
-  "full_name": "John Doe",
-  "school_origin": "SMA Negeri 1 Jakarta",
-  "date_of_birth": "1995-01-01",
-  "gender": "male"
-}
-```
+**Field Validations:**
+- `username`: 3-100 characters, alphanumeric only
+- `full_name`: Maximum 100 characters
+- `school_id`: Positive integer (references public.schools.id). **Must exist in database**, otherwise returns `INVALID_SCHOOL_ID` error
 
-**Response:**
+- `date_of_birth`: ISO date format (YYYY-MM-DD), cannot be future date
+- `gender`: One of: `male`, `female`, `other`, `prefer_not_to_say`
+
+
+
+**Success Response:**
 ```json
 {
   "success": true,
@@ -309,12 +349,16 @@ Mendapatkan token balance user.
 Mendapatkan daftar sekolah dengan pencarian dan pagination.
 
 **Query Parameters:**
-- `search` (optional): Kata kunci pencarian
+- `search` (optional): Kata kunci pencarian nama sekolah
 - `city` (optional): Filter berdasarkan kota
 - `province` (optional): Filter berdasarkan provinsi
 - `page` (optional): Halaman (default: 1)
-- `limit` (optional): Jumlah per halaman (default: 20)
-- `useFullText` (optional): Gunakan full-text search (default: false)
+- `limit` (optional): Jumlah per halaman (default: 20, max: 100)
+- `useFullText` (optional): Gunakan PostgreSQL full-text search (default: false)
+
+**Search Behavior:**
+- Regular search: ILIKE pattern matching
+- Full-text search: PostgreSQL tsvector dengan ranking
 
 **Response:**
 ```json
@@ -581,12 +625,88 @@ Update profil admin.
 }
 ```
 
+### POST /admin/change-password
+**Headers:** `Authorization: Bearer <admin_token>`
+
+Ubah password admin.
+
+**Request Body:**
+```json
+{
+  "currentPassword": "oldpassword123",
+  "newPassword": "newpassword456"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Password changed successfully"
+}
+```
+
+### POST /admin/logout
+**Headers:** `Authorization: Bearer <admin_token>`
+
+Logout admin (invalidate token di client side).
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Logout successful"
+}
+```
+
+### POST /admin/register
+**Headers:** `Authorization: Bearer <superadmin_token>`
+
+Registrasi admin baru (hanya superadmin yang bisa mengakses).
+
+**Request Body:**
+```json
+{
+  "username": "newadmin",
+  "email": "admin@example.com",
+  "password": "SecurePass123!",
+  "full_name": "Admin Name",
+  "user_type": "admin"
+}
+```
+
+**Admin Password Requirements:**
+- Minimum 8 characters, maximum 128 characters
+- Must contain at least one uppercase letter, one lowercase letter, one number, and one special character
+- Valid user_type: `admin`, `superadmin`, `moderator`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "username": "newadmin",
+      "email": "admin@example.com",
+      "user_type": "admin",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00.000Z"
+    },
+    "token": "jwt_token_here",
+    "message": "Admin registered successfully"
+  }
+}
+```
+
 ---
 
 ## Internal Service Endpoints
 
+**Note**: Endpoints ini digunakan untuk komunikasi antar service internal.
+
 ### POST /auth/verify-token
-Verifikasi token untuk internal service.
+Verifikasi token untuk internal service (tidak memerlukan authentication header).
 
 **Request Body:**
 ```json
@@ -615,6 +735,8 @@ Verifikasi token untuk internal service.
 
 Update token balance user (internal service only).
 
+**Authentication**: Menggunakan internal service key, bukan JWT token.
+
 **Request Body:**
 ```json
 {
@@ -641,14 +763,96 @@ Update token balance user (internal service only).
 ## Health Check
 
 ### GET /health
-Cek status service.
+Cek status service lengkap dengan informasi sistem.
 
 **Response:**
 ```json
 {
-  "success": true,
-  "message": "Auth Service is healthy",
+  "status": "healthy",
   "timestamp": "2025-01-01T00:00:00.000Z",
-  "database": "connected"
+  "uptime": 3600.123,
+  "version": "1.0.0",
+  "environment": "production",
+  "services": {
+    "database": {
+      "status": "healthy",
+      "connected": true,
+      "pool": {
+        "total": 10,
+        "available": 8,
+        "using": 2
+      }
+    },
+    "cache": {
+      "status": "healthy",
+      "enabled": true,
+      "connected": true
+    },
+    "userCache": {
+      "status": "healthy",
+      "enabled": true,
+      "size": 150,
+      "maxSize": 1000
+    }
+  },
+  "system": {
+    "memory": {
+      "rss": 45678912,
+      "heapTotal": 23456789,
+      "heapUsed": 12345678,
+      "external": 1234567
+    },
+    "platform": "linux",
+    "nodeVersion": "v18.17.0"
+  },
+  "responseTime": "15ms"
+}
+```
+
+### GET /health/metrics
+Mendapatkan metrics performa service.
+
+**Response:**
+```text
+# HELP http_requests_total Total number of HTTP requests
+# TYPE http_requests_total counter
+http_requests_total{method="GET",route="/auth/profile",status_code="200"} 1234
+
+# HELP http_request_duration_seconds HTTP request duration in seconds
+# TYPE http_request_duration_seconds histogram
+http_request_duration_seconds_bucket{method="GET",route="/auth/profile",le="0.1"} 1000
+http_request_duration_seconds_bucket{method="GET",route="/auth/profile",le="0.5"} 1200
+http_request_duration_seconds_bucket{method="GET",route="/auth/profile",le="1"} 1234
+```
+
+### GET /health/ready
+Readiness probe untuk container orchestration (Kubernetes).
+
+**Response (Ready):**
+```json
+{
+  "status": "ready",
+  "timestamp": "2025-01-01T00:00:00.000Z"
+}
+```
+
+**Response (Not Ready):**
+```json
+{
+  "status": "not ready",
+  "timestamp": "2025-01-01T00:00:00.000Z",
+  "reason": "Database not available"
+}
+```
+
+### GET /health/live
+Liveness probe untuk container orchestration (Kubernetes).
+
+**Response:**
+```json
+{
+  "status": "alive",
+  "timestamp": "2025-01-01T00:00:00.000Z",
+  "uptime": 3600.123
 }
 ```

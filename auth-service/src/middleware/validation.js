@@ -108,10 +108,7 @@ const schemas = {
       .messages({
         'string.max': 'Full name must be at most 100 characters long'
       }),
-    school_origin: Joi.string().max(150)
-      .messages({
-        'string.max': 'School origin must be at most 150 characters long'
-      }),
+
     school_id: Joi.number().integer().positive()
       .messages({
         'number.base': 'School ID must be a number',
@@ -128,17 +125,6 @@ const schemas = {
       .messages({
         'any.only': 'Gender must be one of: male, female, other, prefer_not_to_say'
       })
-  }).custom((value, helpers) => {
-    // Custom validation: ensure only one school field is provided
-    const { school_origin, school_id } = value;
-
-    if (school_origin && school_id) {
-      return helpers.error('custom.schoolConflict');
-    }
-
-    return value;
-  }).messages({
-    'custom.schoolConflict': 'Cannot provide both school_origin and school_id. Use school_id for structured data or school_origin for manual input.'
   }),
 
   // Token balance update schema

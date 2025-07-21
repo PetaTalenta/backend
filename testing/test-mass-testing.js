@@ -57,7 +57,6 @@ async function loginSingleUser(userIndex, delay = 0, skipProfile = false) {
       profileResult = await makeRequest('PUT', `${API_GATEWAY_URL}/api/auth/profile`, {
         username: user.username,
         full_name: user.full_name,
-        school_id: user.school_id,
         date_of_birth: user.date_of_birth,
         gender: user.gender
       }, {

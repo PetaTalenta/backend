@@ -205,28 +205,9 @@ const getSchoolAnalytics = async (schoolName = null) => {
       replacements.schoolName = `%${schoolName}%`;
     }
 
-    // School performance overview
-    const schoolStats = await sequelize.query(`
-      SELECT 
-        up.school_origin,
-        COUNT(ar.id) as total_analyses,
-        COUNT(DISTINCT ar.user_id) as unique_users,
-        ROUND(AVG(EXTRACT(YEAR FROM AGE(up.date_of_birth))), 1) as avg_age,
-        MODE() WITHIN GROUP (ORDER BY up.gender) as most_common_gender,
-        MODE() WITHIN GROUP (ORDER BY ar.persona_profile->>'archetype') as most_common_archetype
-      FROM archive.analysis_results ar
-      LEFT JOIN auth.user_profiles up ON ar.user_id = up.user_id
-      WHERE ar.status = 'completed'
-        AND up.school_origin IS NOT NULL
-        ${whereClause}
-      GROUP BY up.school_origin
-      HAVING COUNT(ar.id) >= 3
-      ORDER BY total_analyses DESC
-      LIMIT 20
-    `, {
-      replacements,
-      type: sequelize.QueryTypes.SELECT
-    });
+    // School performance overview (disabled - school_origin field removed)
+    const schoolStats = [];
+    // Note: School statistics disabled since school_origin field has been removed from user profiles
 
     // Archetype distribution by schools
     const archetypeBySchool = await sequelize.query(`

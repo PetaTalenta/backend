@@ -22,14 +22,7 @@ const UserProfile = sequelize.define('UserProfile', {
       len: [1, 100]
     }
   },
-  school_origin: {
-    type: DataTypes.STRING(150),
-    allowNull: true,
-    field: 'school_origin',
-    validate: {
-      len: [1, 150]
-    }
-  },
+
   date_of_birth: {
     type: DataTypes.DATEONLY,
     allowNull: true,
@@ -87,15 +80,9 @@ const UserProfile = sequelize.define('UserProfile', {
       fields: ['school_id']
     },
     // Optimized composite index untuk query demografis dan analytics
-    // Urutan: gender (high selectivity) -> date_of_birth -> school_origin
     {
       name: 'idx_user_profiles_demographics_optimized',
-      fields: ['gender', 'date_of_birth', 'school_origin']
-    },
-    // Index untuk school origin queries (independent)
-    {
-      name: 'idx_user_profiles_school_origin',
-      fields: ['school_origin']
+      fields: ['gender', 'date_of_birth']
     },
     // Index untuk school_id queries
     {

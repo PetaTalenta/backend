@@ -6,12 +6,13 @@
 const AnalysisResult = require('../models/AnalysisResult');
 const { NotFoundError, ForbiddenError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
+const batchMetrics = require('../middleware/batchMetrics');
 
-// Batch processing configuration
+// Batch processing configuration (UPDATED)
 const BATCH_CONFIG = {
-  MAX_BATCH_SIZE: parseInt(process.env.BATCH_MAX_SIZE || '50'),
-  BATCH_TIMEOUT: parseInt(process.env.BATCH_TIMEOUT || '2000'), // 2 seconds
-  MAX_QUEUE_SIZE: parseInt(process.env.BATCH_MAX_QUEUE_SIZE || '1000')
+  MAX_BATCH_SIZE: parseInt(process.env.BATCH_MAX_SIZE || '100'),  // Naik dari 50 → 100
+  BATCH_TIMEOUT: parseInt(process.env.BATCH_TIMEOUT || '2000'),   // Tetap 2 detik
+  MAX_QUEUE_SIZE: parseInt(process.env.BATCH_MAX_QUEUE_SIZE || '2000') // Naik dari 1000 → 2000
 };
 
 // Batch processing queue
@@ -71,6 +72,9 @@ class BatchProcessor {
     // Get current batch
     const batch = this.queue.splice(0, BATCH_CONFIG.MAX_BATCH_SIZE);
 
+    // Record batch start for metrics
+    const batchInfo = batchMetrics.recordBatchStart(batch.length);
+
     logger.info('Processing batch', {
       batchSize: batch.length,
       remainingQueue: this.queue.length
@@ -85,12 +89,18 @@ class BatchProcessor {
         item.resolve(results[index]);
       });
 
+      // Record successful batch completion
+      batchMetrics.recordBatchEnd(batchInfo, true);
+
       logger.info('Batch processed successfully', {
         batchSize: batch.length,
         successCount: results.length
       });
 
     } catch (error) {
+      // Record failed batch completion
+      batchMetrics.recordBatchEnd(batchInfo, false, error);
+
       logger.error('Batch processing failed', {
         error: error.message,
         batchSize: batch.length
@@ -110,32 +120,55 @@ class BatchProcessor {
     }
   }
 
+  // TAMBAH: Enhanced Bulk Operations dengan Chunking
   async bulkCreateResults(dataArray) {
-    const transaction = await AnalysisResult.sequelize.transaction();
+    const { Transaction } = require('sequelize');
+    const transaction = await AnalysisResult.sequelize.transaction({
+      isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED
+    });
 
     try {
-      logger.info('Starting bulk insert', {
+      logger.info('Starting enhanced bulk insert with chunking', {
         count: dataArray.length
       });
 
-      // Use bulkCreate for better performance
-      const results = await AnalysisResult.bulkCreate(dataArray, {
-        transaction,
-        returning: true,
-        validate: true
-      });
+      // BARU: Chunk large batches untuk memory efficiency
+      const chunkSize = 50;
+      const chunks = [];
+      for (let i = 0; i < dataArray.length; i += chunkSize) {
+        chunks.push(dataArray.slice(i, i + chunkSize));
+      }
+
+      const allResults = [];
+      for (const chunk of chunks) {
+        const results = await AnalysisResult.bulkCreate(chunk, {
+          transaction,
+          returning: true,
+          validate: true,
+          ignoreDuplicates: false,
+          // BARU: Optimize untuk PostgreSQL
+          logging: false
+        });
+        allResults.push(...results);
+
+        logger.debug('Chunk processed', {
+          chunkSize: chunk.length,
+          totalProcessed: allResults.length
+        });
+      }
 
       await transaction.commit();
 
-      logger.info('Bulk insert completed successfully', {
-        insertedCount: results.length
+      logger.info('Enhanced bulk insert completed successfully', {
+        insertedCount: allResults.length,
+        chunksProcessed: chunks.length
       });
 
-      return results;
+      return allResults;
     } catch (error) {
       await transaction.rollback();
 
-      logger.error('Bulk insert failed', {
+      logger.error('Enhanced bulk insert failed', {
         error: error.message,
         count: dataArray.length
       });

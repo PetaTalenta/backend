@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atma-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - ARCHIVE_SERVICE_URL=http://archive-service:3002
+      - ASSESSMENT_SERVICE_URL=http://assessment-service:3003
+      - JWT_SECRET=atma_secure_jwt_secret_key_f8a5b3c7d9e1f2a3b5c7d9e1f2a3b5c7
+      - INTERNAL_SERVICE_KEY=internal_service_secret_key_change_in_production
+      - RATE_LIMIT_WINDOW_MS=600000
+      - RATE_LIMIT_MAX_REQUESTS=5000
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:5173
+      - LOG_LEVEL=info
+      - LOG_FORMAT=combined
+      - HEALTH_CHECK_INTERVAL=30000
+      - SERVICE_TIMEOUT=30000
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3000, path: '/health/live', timeout: 5000 }; const req = http.request(options, (res) => { if (res.statusCode === 200) { process.exit(0); } else { process.exit(1); } }); req.on('error', () => process.exit(1)); req.on('timeout', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - atma-network
+
+networks:
+  atma-network:
+    driver: bridge
+    external: true

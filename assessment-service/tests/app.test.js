@@ -38,24 +38,24 @@ describe('Assessment Service', () => {
     });
   });
 
-  describe('POST /assessments/submit', () => {
+  describe('POST /assessment/submit', () => {
     it('should require authentication', async () => {
       const response = await request(app)
-        .post('/assessments/submit')
+        .post('/assessment/submit')
         .send({})
         .expect(401);
-      
+
       expect(response.body).toHaveProperty('success', false);
       expect(response.body.error).toHaveProperty('code', 'UNAUTHORIZED');
     });
 
     it('should validate assessment data structure', async () => {
       const response = await request(app)
-        .post('/assessments/submit')
+        .post('/assessment/submit')
         .set('Authorization', 'Bearer invalid-token')
         .send({})
         .expect(401);
-      
+
       expect(response.body).toHaveProperty('success', false);
     });
   });
