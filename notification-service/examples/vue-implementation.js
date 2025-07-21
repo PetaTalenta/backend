@@ -11,8 +11,8 @@
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { io } from 'socket.io-client';
 
-// Configuration
-const SOCKET_URL = process.env.VUE_APP_NOTIFICATION_SERVICE_URL || 'http://localhost:3005';
+// Configuration - Updated to use API Gateway
+const SOCKET_URL = process.env.VUE_APP_API_GATEWAY_URL || 'http://localhost:3000';
 const RECONNECTION_ATTEMPTS = 5;
 const RECONNECTION_DELAY = 1000;
 

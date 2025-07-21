@@ -1,18 +1,20 @@
 const express = require('express');
 const { verifyToken, verifyInternalService, verifyAdmin } = require('../middleware/auth');
 const { authLimiter, assessmentLimiter, adminLimiter, archiveLimiter } = require('../middleware/rateLimiter');
-const { authServiceProxy, archiveServiceProxy, assessmentServiceProxy } = require('../middleware/proxy');
+const { authServiceProxy, archiveServiceProxy, assessmentServiceProxy, notificationServiceProxy, socketIOProxy } = require('../middleware/proxy');
 
 const router = express.Router();
 
 /**
  * API Gateway Routes Configuration
- * 
+ *
  * Route Structure:
  * /api/auth/* -> Auth Service
  * /api/admin/* -> Auth Service (Admin endpoints)
  * /api/archive/* -> Archive Service
  * /api/assessment/* -> Assessment Service
+ * /api/notifications/* -> Notification Service
+ * /socket.io/* -> Notification Service (WebSocket)
  */
 
 // ===== AUTH SERVICE ROUTES =====
@@ -184,6 +186,17 @@ router.use('/assessment/status', verifyToken, assessmentServiceProxy);
 // Queue monitoring (protected)
 router.use('/assessment/queue/status', verifyToken, assessmentServiceProxy);
 
+// ===== NOTIFICATION SERVICE ROUTES =====
+
+// Health endpoints (public)
+router.get('/notifications/health', notificationServiceProxy);
+
+// Debug endpoints (public for development)
+router.use('/notifications/debug', notificationServiceProxy);
+
+// Other notification endpoints (protected)
+router.use('/notifications', verifyToken, notificationServiceProxy);
+
 // Idempotency endpoints (protected)
 router.use('/assessment/idempotency/health', verifyToken, assessmentServiceProxy);
 router.use('/assessment/idempotency/cleanup', verifyToken, assessmentServiceProxy);
@@ -220,5 +233,6 @@ router.use('/auth/*', authServiceProxy);
 router.use('/admin/*', authServiceProxy);
 router.use('/archive/*', archiveServiceProxy);
 router.use('/assessment/*', assessmentServiceProxy);
+router.use('/notifications/*', notificationServiceProxy);
 
 module.exports = router;

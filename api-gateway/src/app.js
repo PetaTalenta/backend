@@ -12,6 +12,7 @@ const { jsonParser, urlencodedParser } = require('./middleware/bodyParser');
 // Import routes
 const healthRoutes = require('./routes/health');
 const apiRoutes = require('./routes/index');
+const { socketIOProxy } = require('./middleware/proxy');
 
 const app = express();
 
@@ -80,6 +81,9 @@ app.use('/health', healthRoutes);
 // API routes
 app.use('/api', apiRoutes);
 
+// Socket.IO proxy route (untuk WebSocket connections)
+app.use('/socket.io', socketIOProxy);
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
@@ -90,7 +94,8 @@ app.get('/', (req, res) => {
     services: {
       auth: `${config.services.auth}`,
       archive: `${config.services.archive}`,
-      assessment: `${config.services.assessment}`
+      assessment: `${config.services.assessment}`,
+      notification: `${config.services.notification}`
     },
     documentation: {
       health: '/health',

@@ -16,10 +16,10 @@ Client Application
        ↓
 API Gateway (Port 3000)
        ↓
-┌─────────────────┬─────────────────┬─────────────────┐
-│  Auth Service   │ Archive Service │Assessment Service│
-│   (Port 3001)   │   (Port 3002)   │   (Port 3003)   │
-└─────────────────┴─────────────────┴─────────────────┘
+┌─────────────────┬─────────────────┬─────────────────┬─────────────────┐
+│  Auth Service   │ Archive Service │Assessment Service│Notification Svc │
+│   (Port 3001)   │   (Port 3002)   │   (Port 3003)   │   (Port 3005)   │
+└─────────────────┴─────────────────┴─────────────────┴─────────────────┘
 ```
 
 ## 🔐 Authentication
@@ -598,7 +598,79 @@ Authorization: Bearer <token>
 
 ---
 
-## 🔍 Health & Monitoring
+## � WebSocket Notifications
+
+### Real-time Notifications via WebSocket
+
+ATMA API Gateway menyediakan proxy untuk WebSocket notifications melalui Socket.IO. Semua koneksi WebSocket sekarang melewati API Gateway sebagai single entry point.
+
+#### WebSocket Connection
+```javascript
+import { io } from 'socket.io-client';
+
+// Connect melalui API Gateway (bukan langsung ke notification service)
+const socket = io('http://localhost:3000', {
+  autoConnect: false,
+  transports: ['websocket', 'polling'],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000
+});
+
+// Authentication setelah connect
+socket.on('connect', () => {
+  socket.emit('authenticate', { token: yourJWTToken });
+});
+
+// Listen untuk events
+socket.on('authenticated', (data) => {
+  console.log('Authenticated:', data.email);
+});
+
+socket.on('analysis-started', (data) => {
+  console.log('Analysis started:', data);
+});
+
+socket.on('analysis-complete', (data) => {
+  console.log('Analysis completed:', data);
+});
+
+socket.on('analysis-failed', (data) => {
+  console.log('Analysis failed:', data);
+});
+
+socket.connect();
+```
+
+#### WebSocket Endpoints
+- **Connection URL**: `http://localhost:3000` (melalui API Gateway)
+- **Socket.IO Path**: `/socket.io/*` (di-proxy ke notification service)
+- **Authentication**: JWT Token required setelah connect
+- **Events**: `analysis-started`, `analysis-complete`, `analysis-failed`
+
+#### Notification Service Health
+```http
+GET /api/notifications/health
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "service": "notification-service",
+  "status": "healthy",
+  "timestamp": "2024-01-21T10:30:00.000Z",
+  "connections": {
+    "total": 5,
+    "authenticated": 3,
+    "users": 3
+  }
+}
+```
+
+---
+
+## �🔍 Health & Monitoring
 
 ### Gateway Health
 ```http

@@ -6,11 +6,14 @@ ATMA Notification Service menyediakan real-time notifications melalui WebSocket 
 
 ## Server Information
 
-- **URL**: `http://localhost:3005` (development)
+- **URL**: `http://localhost:3000` (melalui API Gateway - recommended)
+- **Direct URL**: `http://localhost:3005` (langsung ke notification service - deprecated)
 - **Protocol**: Socket.IO v4.7.2
 - **Authentication**: JWT Token required
 - **CORS**: Enabled untuk semua origins
 - **Timeout**: 10 detik untuk autentikasi setelah connect
+
+**⚠️ Important:** Mulai sekarang, gunakan API Gateway (`http://localhost:3000`) sebagai entry point untuk WebSocket connections. Koneksi langsung ke notification service masih didukung untuk backward compatibility, tetapi tidak direkomendasikan.
 
 ## Konsep Dasar
 
@@ -40,7 +43,7 @@ npm install socket.io-client
 
 ### 2. Basic Setup
 - Import socket.io-client
-- Connect ke `http://localhost:3005`
+- Connect ke `http://localhost:3000` (API Gateway) atau `http://localhost:3005` (direct)
 - Set autoConnect: false untuk kontrol manual
 - Emit `authenticate` event dengan JWT token setelah connect
 
@@ -153,14 +156,14 @@ Data: {
 ```
 
 ### Environment Variables
-- **Development**: `http://localhost:3005`
+- **Development**: `http://localhost:3000` (API Gateway) atau `http://localhost:3005` (direct)
 - **Production**: Sesuaikan dengan domain production
 - **CORS**: Sudah dikonfigurasi untuk allow all origins
 
 ## Testing & Debugging
 
 ### 1. Manual Testing
-- Connect ke `http://localhost:3005` dengan Socket.IO client
+- Connect ke `http://localhost:3000` (API Gateway) dengan Socket.IO client
 - Test authentication dengan valid JWT token
 - Verify events diterima dengan benar
 
@@ -170,7 +173,8 @@ Data: {
 - Check console logs untuk connection events
 
 ### 3. Health Check Endpoint
-- `GET http://localhost:3005/health` untuk status service
+- `GET http://localhost:3000/api/notifications/health` (melalui API Gateway)
+- `GET http://localhost:3005/health` (direct ke notification service)
 - Response berisi connection count dan service status
 
 ## Production Considerations
@@ -199,7 +203,7 @@ Data: {
 4. **Connection Failed**: Periksa service berjalan di port 3005
 
 ### Debug Steps
-1. Check service status: `GET http://localhost:3005/health`
+1. Check service status: `GET http://localhost:3000/api/notifications/health` (via Gateway)
 2. Enable debug mode: `localStorage.debug = 'socket.io-client:socket'`
 3. Monitor network tab untuk WebSocket connections
 4. Verify JWT token payload dan expiry
@@ -252,7 +256,7 @@ Data: {
 
 ### ✅ Basic Setup
 - [ ] Install `socket.io-client`
-- [ ] Setup connection ke `http://localhost:3005`
+- [ ] Setup connection ke `http://localhost:3000` (API Gateway recommended)
 - [ ] Implement authentication dengan JWT token
 - [ ] Handle connection states
 

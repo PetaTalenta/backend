@@ -155,9 +155,31 @@ const assessmentServiceProxy = createServiceProxy(config.services.assessment, {
   }
 });
 
+/**
+ * Proxy untuk Notification Service dengan WebSocket Support
+ */
+const notificationServiceProxy = createServiceProxy(config.services.notification, {
+  ws: true, // Enable WebSocket proxying
+  pathRewrite: {
+    '^/api/notifications/health': '/health',           // Health endpoint
+    '^/api/notifications/debug': '/debug',             // Debug endpoints
+    '^/api/notifications': '/notifications'           // Other notification endpoints
+  }
+});
+
+/**
+ * Proxy khusus untuk Socket.IO (tanpa path rewrite)
+ */
+const socketIOProxy = createServiceProxy(config.services.notification, {
+  ws: true, // Enable WebSocket proxying
+  // No path rewrite for Socket.IO - proxy langsung
+});
+
 module.exports = {
   createServiceProxy,
   authServiceProxy,
   archiveServiceProxy,
-  assessmentServiceProxy
+  assessmentServiceProxy,
+  notificationServiceProxy,
+  socketIOProxy
 };
