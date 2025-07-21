@@ -462,7 +462,7 @@ class LoadTester {
   }
 
   async stage7_DeleteAccounts() {
-    TestUtils.logStage('Stage 7: Clean Up User Account Data');
+    TestUtils.logStage('Stage 7: Delete User Accounts');
 
     const progressBar = new cliProgress.SingleBar({
       format: 'Progress |{bar}| {percentage}% | {value}/{total} users | ETA: {eta}s',
@@ -471,23 +471,23 @@ class LoadTester {
       hideCursor: true
     });
 
-    const usersToCleanup = this.users.filter(user => user.loggedIn);
-    progressBar.start(usersToCleanup.length, 0);
+    const usersToDelete = this.users.filter(user => user.loggedIn);
+    progressBar.start(usersToDelete.length, 0);
 
-    // Clean up account data with some delay to avoid overwhelming the server
-    for (const user of usersToCleanup) {
+    // Delete accounts with some delay to avoid overwhelming the server
+    for (const user of usersToDelete) {
       try {
         await this.deleteUserAccount(user, progressBar);
         await TestUtils.delay(config.test.cleanupDelay);
       } catch (error) {
-        TestUtils.logError(`Failed to cleanup account for ${user.email}: ${error.message}`);
+        TestUtils.logError(`Failed to delete account for ${user.email}: ${error.message}`);
         progressBar.increment();
       }
     }
 
     progressBar.stop();
 
-    TestUtils.logSuccess(`Account cleanup process completed`);
+    TestUtils.logSuccess(`Account deletion process completed`);
     await TestUtils.delay(config.test.delayBetweenStages);
   }
 
@@ -495,41 +495,30 @@ class LoadTester {
     const startTime = Date.now();
 
     try {
-      // Use the cleanup utility to clean up user data
-      const cleanupResults = await TestUtils.cleanupUserAccount(user.token, config.api.baseUrl);
+      // Use the new self-deletion endpoint
+      const deletionResults = await TestUtils.deleteUserAccount(user.token, config.api.baseUrl);
 
       const duration = Date.now() - startTime;
       this.results.deleteAccount.durations.push(duration);
 
-      const totalCleaned = (cleanupResults.profileDeleted ? 1 : 0) +
-                          cleanupResults.resultsDeleted +
-                          cleanupResults.jobsDeleted;
-
-      if (cleanupResults.errors.length === 0) {
+      if (deletionResults.accountDeleted && deletionResults.errors.length === 0) {
         this.results.deleteAccount.successes++;
         user.deleted = true;
-        user.cleanupItems = totalCleaned;
+        user.originalEmail = deletionResults.originalEmail;
+        user.deletedAt = deletionResults.deletedAt;
       } else {
-        // Partial success - still count as success if some items were cleaned
-        if (totalCleaned > 0) {
-          this.results.deleteAccount.successes++;
-          user.deleted = true;
-          user.cleanupItems = totalCleaned;
-          user.cleanupErrors = cleanupResults.errors.length;
-        } else {
-          this.results.deleteAccount.failures++;
-          user.cleanupErrors = cleanupResults.errors.length;
-        }
+        this.results.deleteAccount.failures++;
+        user.deletionErrors = deletionResults.errors;
       }
 
       progressBar.increment();
-      return { success: true, cleanupResults };
+      return { success: deletionResults.accountDeleted, deletionResults };
     } catch (error) {
       const duration = Date.now() - startTime;
       this.results.deleteAccount.durations.push(duration);
       this.results.deleteAccount.failures++;
       progressBar.increment();
-      throw new Error(`Account cleanup failed for ${user.email}: ${error.message}`);
+      throw new Error(`Account deletion failed for ${user.email}: ${error.message}`);
     }
   }
 
@@ -551,7 +540,7 @@ class LoadTester {
       { name: 'Assessment Submission', key: 'submitAssessment' },
       { name: 'Assessment Completion', key: 'waitForCompletion' },
       { name: 'Result Check', key: 'checkAssessment' },
-      { name: 'Account Cleanup', key: 'deleteAccount' }
+      { name: 'Account Deletion', key: 'deleteAccount' }
     ];
 
     stages.forEach(stage => {
@@ -574,7 +563,7 @@ class LoadTester {
         console.log(`     Min: ${chalk.blue(TestUtils.formatDuration(stats.min))}`);
         console.log(`     Max: ${chalk.red(TestUtils.formatDuration(stats.max))}`);
         console.log(`     Avg: ${chalk.yellow(TestUtils.formatDuration(stats.avg))}`);
-        console.log(`     P95: ${chalk.orange(TestUtils.formatDuration(stats.p95))}`);
+        console.log(`     P95: ${chalk.cyan(TestUtils.formatDuration(stats.p95))}`);
         console.log(`     P99: ${chalk.magenta(TestUtils.formatDuration(stats.p99))}`);
       }
     });

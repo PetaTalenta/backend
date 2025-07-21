@@ -7,8 +7,8 @@ echo ========================================
 echo.
 
 REM Configuration
-set WORKER_COUNT=3
-set WORKER_CONCURRENCY=5
+set WORKER_COUNT=5
+set WORKER_CONCURRENCY=10
 
 echo Configuration:
 echo - Number of Analysis Workers: %WORKER_COUNT%

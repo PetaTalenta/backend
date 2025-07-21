@@ -89,85 +89,80 @@ class AccountCleanup {
   }
 
   async performCleanup() {
-    TestUtils.logStage('Step 2: Performing Account Cleanup');
-    
+    TestUtils.logStage('Step 2: Deleting User Account');
+
     try {
-      const cleanupResults = await TestUtils.cleanupUserAccount(this.token, config.api.baseUrl);
-      this.cleanupResults = cleanupResults;
-      
-      // Show cleanup summary
-      console.log(chalk.cyan('\n📊 Cleanup Results:'));
-      
-      if (cleanupResults.profileDeleted) {
-        TestUtils.logSuccess('✓ User profile deleted');
+      const deletionResults = await TestUtils.deleteUserAccount(this.token, config.api.baseUrl);
+      this.deletionResults = deletionResults;
+
+      // Show deletion summary
+      console.log(chalk.cyan('\n📊 Deletion Results:'));
+
+      if (deletionResults.accountDeleted) {
+        TestUtils.logSuccess('✓ User account deleted successfully');
+        if (deletionResults.originalEmail) {
+          TestUtils.logInfo(`Original email: ${deletionResults.originalEmail}`);
+        }
+        if (deletionResults.deletedAt) {
+          TestUtils.logInfo(`Deleted at: ${deletionResults.deletedAt}`);
+        }
       } else {
-        TestUtils.logWarning('⚠ User profile not deleted (may not exist)');
+        TestUtils.logError('✗ Account deletion failed');
       }
-      
-      if (cleanupResults.resultsDeleted > 0) {
-        TestUtils.logSuccess(`✓ ${cleanupResults.resultsDeleted} analysis results deleted`);
-      } else {
-        TestUtils.logInfo('ℹ No analysis results found to delete');
-      }
-      
-      if (cleanupResults.jobsDeleted > 0) {
-        TestUtils.logSuccess(`✓ ${cleanupResults.jobsDeleted} analysis jobs cancelled/deleted`);
-      } else {
-        TestUtils.logInfo('ℹ No analysis jobs found to delete');
-      }
-      
-      if (cleanupResults.errors.length > 0) {
-        TestUtils.logWarning(`⚠ ${cleanupResults.errors.length} errors occurred during cleanup:`);
-        cleanupResults.errors.forEach(error => {
+
+      if (deletionResults.errors.length > 0) {
+        TestUtils.logWarning(`⚠ ${deletionResults.errors.length} errors occurred during deletion:`);
+        deletionResults.errors.forEach(error => {
           console.log(chalk.red(`  • ${error}`));
         });
       }
-      
+
     } catch (error) {
-      throw new Error(`Cleanup operation failed: ${error.message}`);
+      throw new Error(`Account deletion operation failed: ${error.message}`);
     }
   }
 
   async showCleanupSummary() {
-    console.log(chalk.bold.green('\n📋 CLEANUP SUMMARY'));
+    console.log(chalk.bold.green('\n📋 ACCOUNT DELETION SUMMARY'));
     console.log(chalk.gray('='.repeat(60)));
-    
+
     console.log(chalk.bold(`\n👤 Account: ${this.userCredentials.email}`));
-    
-    const results = this.cleanupResults;
-    const totalItems = (results.profileDeleted ? 1 : 0) + results.resultsDeleted + results.jobsDeleted;
-    
-    console.log(chalk.bold.yellow('\n🧹 CLEANUP RESULTS:'));
-    
-    if (totalItems > 0) {
-      console.log(chalk.green(`✅ Successfully cleaned up ${totalItems} items:`));
-      if (results.profileDeleted) {
-        console.log(chalk.green('  ✓ User profile deleted'));
+
+    const results = this.deletionResults;
+
+    console.log(chalk.bold.yellow('\n🗑️  DELETION RESULTS:'));
+
+    if (results.accountDeleted) {
+      console.log(chalk.green('✅ Account successfully deleted'));
+      if (results.originalEmail) {
+        console.log(chalk.green(`  ✓ Original email: ${results.originalEmail}`));
       }
-      if (results.resultsDeleted > 0) {
-        console.log(chalk.green(`  ✓ ${results.resultsDeleted} analysis results deleted`));
-      }
-      if (results.jobsDeleted > 0) {
-        console.log(chalk.green(`  ✓ ${results.jobsDeleted} analysis jobs cancelled`));
+      if (results.deletedAt) {
+        console.log(chalk.green(`  ✓ Deleted at: ${results.deletedAt}`));
       }
     } else {
-      console.log(chalk.yellow('⚠ No items found to clean up'));
+      console.log(chalk.red('❌ Account deletion failed'));
     }
-    
+
     if (results.errors.length > 0) {
       console.log(chalk.red(`\n❌ ${results.errors.length} errors occurred`));
+      results.errors.forEach(error => {
+        console.log(chalk.red(`  • ${error}`));
+      });
     } else {
       console.log(chalk.green('\n✅ No errors occurred'));
     }
-    
+
     console.log(chalk.bold.yellow('\n⚠️  IMPORTANT NOTES:'));
-    console.log(chalk.yellow('• This cleanup only removes user profile and analysis data'));
-    console.log(chalk.yellow('• The user account itself still exists in the system'));
-    console.log(chalk.yellow('• Complete account deletion requires admin privileges'));
-    console.log(chalk.yellow('• Contact an administrator for complete account removal'));
-    
+    console.log(chalk.yellow('• This performs a complete soft delete of the user account'));
+    console.log(chalk.yellow('• The account email is changed to deleted_{timestamp}_{original_email}'));
+    console.log(chalk.yellow('• Token balance is reset to 0 and account is deactivated'));
+    console.log(chalk.yellow('• User profile and all associated data are automatically deleted'));
+    console.log(chalk.yellow('• This operation cannot be undone'));
+    console.log(chalk.yellow('• The user can no longer login with this account'));
+
     console.log(chalk.gray('\n' + '='.repeat(60)));
-    console.log(chalk.bold.green('✅ Account cleanup completed!'));
+    console.log(chalk.bold.green('✅ Account deletion completed!'));
   }
 }
 

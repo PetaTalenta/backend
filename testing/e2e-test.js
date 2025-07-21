@@ -309,34 +309,31 @@ class E2ETester {
   }
 
   async test7_DeleteAccount() {
-    TestUtils.logStage('Test 7: Clean Up User Account Data');
+    TestUtils.logStage('Test 7: Delete User Account');
 
     try {
       const startTime = Date.now();
 
-      // Use the cleanup utility to clean up user data
-      const cleanupResults = await TestUtils.cleanupUserAccount(this.testUser.token, config.api.baseUrl);
+      // Use the new self-deletion endpoint
+      const deletionResults = await TestUtils.deleteUserAccount(this.testUser.token, config.api.baseUrl);
 
       const duration = Date.now() - startTime;
 
-      const totalCleaned = (cleanupResults.profileDeleted ? 1 : 0) +
-                          cleanupResults.resultsDeleted +
-                          cleanupResults.jobsDeleted;
-
-      if (cleanupResults.errors.length === 0) {
-        TestUtils.logSuccess(`Account data cleaned successfully in ${TestUtils.formatDuration(duration)}`);
-        TestUtils.logInfo(`Cleaned ${totalCleaned} items (profile: ${cleanupResults.profileDeleted ? 'yes' : 'no'}, results: ${cleanupResults.resultsDeleted}, jobs: ${cleanupResults.jobsDeleted})`);
+      if (deletionResults.accountDeleted && deletionResults.errors.length === 0) {
+        TestUtils.logSuccess(`Account deleted successfully in ${TestUtils.formatDuration(duration)}`);
+        TestUtils.logInfo(`Original email: ${deletionResults.originalEmail}`);
+        TestUtils.logInfo(`Deleted at: ${deletionResults.deletedAt}`);
       } else {
-        TestUtils.logWarning(`Partial cleanup completed in ${TestUtils.formatDuration(duration)}`);
-        TestUtils.logInfo(`Cleaned ${totalCleaned} items with ${cleanupResults.errors.length} errors`);
-        cleanupResults.errors.forEach(error => {
-          TestUtils.logWarning(`Cleanup error: ${error}`);
+        TestUtils.logWarning(`Account deletion failed in ${TestUtils.formatDuration(duration)}`);
+        deletionResults.errors.forEach(error => {
+          TestUtils.logError(`Deletion error: ${error}`);
         });
+        throw new Error(`Account deletion failed: ${deletionResults.errors.join(', ')}`);
       }
 
       await TestUtils.delay(1000);
     } catch (error) {
-      throw new Error(`Account cleanup failed: ${error.message}`);
+      throw new Error(`Account deletion failed: ${error.message}`);
     }
   }
 

@@ -38,6 +38,11 @@ router.delete('/profile',
   userController.deleteProfile
 );
 
+router.delete('/account',
+  authenticateToken,
+  userController.deleteAccount
+);
+
 router.post('/change-password',
   authenticateToken,
   validateBody(schemas.changePassword),

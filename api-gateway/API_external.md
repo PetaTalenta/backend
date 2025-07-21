@@ -174,7 +174,33 @@ Authorization: Bearer <token>
 }
 ```
 
-**⚠️ Note:** This endpoint only deletes the user profile (user_profiles table), not the user account itself. For complete user account deletion, admin must use admin deletion endpoints.
+**⚠️ Note:** This endpoint only deletes the user profile (user_profiles table), not the user account itself. For complete user account deletion, use the DELETE /api/auth/account endpoint.
+
+#### Delete User Account
+```http
+DELETE /api/auth/account
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Account deleted successfully",
+  "data": {
+    "deletedAt": "2024-01-15T10:30:00.000Z",
+    "originalEmail": "user@example.com"
+  }
+}
+```
+
+**⚠️ Important Notes:**
+- This endpoint performs **soft delete** by changing the user's email to format `deleted_{timestamp}_{original_email}`
+- User's token balance will be reset to 0
+- User's `is_active` status will be set to `false`
+- User profile will also be automatically deleted
+- This operation cannot be undone, ensure confirmation before deleting account
+- After account deletion, user cannot login with this account anymore
 
 #### Change Password
 ```http

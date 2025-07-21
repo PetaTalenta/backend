@@ -148,8 +148,52 @@ class TestUtils {
   }
 
   /**
-   * Clean up user account by deleting profile and analysis results
-   * Note: Complete user account deletion requires admin privileges
+   * Delete user account using the self-deletion endpoint
+   * This performs a complete soft delete of the user account
+   * @param {string} token - User's JWT token
+   * @param {string} baseUrl - API base URL
+   * @returns {Object} Deletion results
+   */
+  static async deleteUserAccount(token, baseUrl) {
+    const results = {
+      accountDeleted: false,
+      originalEmail: null,
+      deletedAt: null,
+      errors: []
+    };
+
+    try {
+      const axios = require('axios');
+      const response = await axios.delete(`${baseUrl}/api/auth/account`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        timeout: 10000
+      });
+
+      if (response.data.success) {
+        results.accountDeleted = true;
+        results.originalEmail = response.data.data?.originalEmail;
+        results.deletedAt = response.data.data?.deletedAt;
+        this.logSuccess('User account deleted successfully');
+        if (results.originalEmail) {
+          this.logInfo(`Original email: ${results.originalEmail}`);
+        }
+      } else {
+        results.errors.push('Account deletion response indicates failure');
+        this.logError('Account deletion response indicates failure');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error?.message || error.message;
+      results.errors.push(`Account deletion failed: ${errorMessage}`);
+      this.logError(`Account deletion failed: ${errorMessage}`);
+    }
+
+    return results;
+  }
+
+  /**
+   * Clean up user account by deleting profile and analysis results (legacy method)
+   * Note: This method is kept for backward compatibility
+   * For complete account deletion, use deleteUserAccount() instead
    * @param {string} token - User's JWT token
    * @param {string} baseUrl - API base URL
    * @returns {Object} Cleanup results

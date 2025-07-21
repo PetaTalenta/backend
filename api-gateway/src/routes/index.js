@@ -37,6 +37,9 @@ router.get('/auth/profile', verifyToken, authServiceProxy);
 router.put('/auth/profile', verifyToken, authServiceProxy);
 router.delete('/auth/profile', verifyToken, authServiceProxy);
 
+// Account deletion endpoint (self-deletion)
+router.delete('/auth/account', verifyToken, authServiceProxy);
+
 // User token balance endpoint (for user queries)
 router.get('/auth/token-balance', verifyToken, authServiceProxy);
 

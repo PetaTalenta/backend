@@ -123,9 +123,9 @@ class BatchAccountCleanup {
       email: account.email,
       success: false,
       authenticated: false,
-      profileDeleted: false,
-      resultsDeleted: 0,
-      jobsDeleted: 0,
+      accountDeleted: false,
+      originalEmail: null,
+      deletedAt: null,
       errors: [],
       duration: 0
     };
@@ -135,7 +135,7 @@ class BatchAccountCleanup {
     try {
       // Step 1: Authenticate
       TestUtils.logInfo(`[${index}] Authenticating ${account.email}...`);
-      
+
       const loginResponse = await axios.post(`${config.api.baseUrl}/api/auth/login`, {
         email: account.email,
         password: account.password
@@ -150,23 +150,19 @@ class BatchAccountCleanup {
       result.authenticated = true;
       const token = loginResponse.data.data.token;
 
-      // Step 2: Perform cleanup
-      const cleanupResults = await TestUtils.cleanupUserAccount(token, config.api.baseUrl);
-      
-      result.profileDeleted = cleanupResults.profileDeleted;
-      result.resultsDeleted = cleanupResults.resultsDeleted;
-      result.jobsDeleted = cleanupResults.jobsDeleted;
-      result.errors = cleanupResults.errors;
-      result.success = cleanupResults.errors.length === 0;
+      // Step 2: Perform account deletion
+      const deletionResults = await TestUtils.deleteUserAccount(token, config.api.baseUrl);
 
-      const totalCleaned = (result.profileDeleted ? 1 : 0) + result.resultsDeleted + result.jobsDeleted;
-      
-      if (result.success && totalCleaned > 0) {
-        TestUtils.logSuccess(`[${index}] ✓ ${account.email} - cleaned ${totalCleaned} items`);
-      } else if (result.success && totalCleaned === 0) {
-        TestUtils.logInfo(`[${index}] ℹ ${account.email} - no items to clean`);
+      result.accountDeleted = deletionResults.accountDeleted;
+      result.originalEmail = deletionResults.originalEmail;
+      result.deletedAt = deletionResults.deletedAt;
+      result.errors = deletionResults.errors;
+      result.success = deletionResults.accountDeleted && deletionResults.errors.length === 0;
+
+      if (result.success) {
+        TestUtils.logSuccess(`[${index}] ✓ ${account.email} - account deleted successfully`);
       } else {
-        TestUtils.logWarning(`[${index}] ⚠ ${account.email} - partial cleanup (${result.errors.length} errors)`);
+        TestUtils.logError(`[${index}] ✗ ${account.email} - deletion failed (${result.errors.length} errors)`);
       }
 
     } catch (error) {
@@ -190,18 +186,14 @@ class BatchAccountCleanup {
     // Calculate statistics
     const successful = this.results.filter(r => r.success).length;
     const authenticated = this.results.filter(r => r.authenticated).length;
-    const totalProfilesDeleted = this.results.reduce((sum, r) => sum + (r.profileDeleted ? 1 : 0), 0);
-    const totalResultsDeleted = this.results.reduce((sum, r) => sum + r.resultsDeleted, 0);
-    const totalJobsDeleted = this.results.reduce((sum, r) => sum + r.jobsDeleted, 0);
+    const totalAccountsDeleted = this.results.reduce((sum, r) => sum + (r.accountDeleted ? 1 : 0), 0);
     const totalErrors = this.results.reduce((sum, r) => sum + r.errors.length, 0);
-    
+
     console.log(chalk.bold.yellow('\n🎯 SUMMARY:'));
     console.log(chalk.green(`✅ Successfully processed: ${successful}/${this.accounts.length} accounts`));
     console.log(chalk.blue(`🔐 Successfully authenticated: ${authenticated}/${this.accounts.length} accounts`));
-    console.log(chalk.cyan(`👤 Profiles deleted: ${totalProfilesDeleted}`));
-    console.log(chalk.cyan(`📊 Analysis results deleted: ${totalResultsDeleted}`));
-    console.log(chalk.cyan(`⚙️  Analysis jobs cancelled: ${totalJobsDeleted}`));
-    
+    console.log(chalk.cyan(`🗑️  Accounts deleted: ${totalAccountsDeleted}`));
+
     if (totalErrors > 0) {
       console.log(chalk.red(`❌ Total errors: ${totalErrors}`));
     } else {
@@ -218,10 +210,12 @@ class BatchAccountCleanup {
     }
     
     console.log(chalk.bold.yellow('\n⚠️  IMPORTANT NOTES:'));
-    console.log(chalk.yellow('• This cleanup only removes user profiles and analysis data'));
-    console.log(chalk.yellow('• User accounts themselves still exist in the system'));
-    console.log(chalk.yellow('• Complete account deletion requires admin privileges'));
-    console.log(chalk.yellow('• Contact an administrator for complete account removal'));
+    console.log(chalk.yellow('• This performs complete soft deletion of user accounts'));
+    console.log(chalk.yellow('• Account emails are changed to deleted_{timestamp}_{original_email}'));
+    console.log(chalk.yellow('• Token balances are reset to 0 and accounts are deactivated'));
+    console.log(chalk.yellow('• User profiles and all associated data are automatically deleted'));
+    console.log(chalk.yellow('• These operations cannot be undone'));
+    console.log(chalk.yellow('• Users can no longer login with these accounts'));
     
     console.log(chalk.gray('\n' + '='.repeat(80)));
     console.log(chalk.bold.green('✅ Batch cleanup completed!'));

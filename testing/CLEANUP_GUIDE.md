@@ -1,21 +1,26 @@
-# 🧹 ATMA Account Cleanup Guide
+# 🗑️ ATMA Account Deletion Guide
 
-This guide explains how to clean up test accounts and their associated data in the ATMA system.
+This guide explains how to delete test accounts completely using the self-deletion functionality in the ATMA system.
 
 ## 📋 Overview
 
-The ATMA system provides several endpoints for users to clean up their own data:
-- **User Profile Deletion**: `DELETE /api/auth/profile` - Removes user profile data
-- **Analysis Results Deletion**: `DELETE /api/archive/results/:id` - Removes analysis results
-- **Analysis Jobs Cancellation**: `DELETE /api/archive/jobs/:jobId` - Cancels/removes analysis jobs
+The ATMA system now provides a complete self-deletion endpoint for users:
+- **Complete Account Deletion**: `DELETE /api/auth/account` - Performs soft delete of the entire user account
 
-**⚠️ Important Note**: These cleanup tools only remove user-generated data (profiles, results, jobs). Complete user account deletion requires admin privileges via `DELETE /api/archive/admin/users/:userId`.
+**✨ New Feature**: Users can now delete their own accounts completely without requiring admin privileges. This performs a soft delete by:
+- Changing the user's email to `deleted_{timestamp}_{original_email}` format
+- Resetting token balance to 0
+- Setting `is_active` status to `false`
+- Automatically deleting user profile and all associated data
+- Making the account unable to login anymore
 
-## 🛠️ Available Cleanup Tools
+**⚠️ Important Note**: This operation cannot be undone!
 
-### 1. Single Account Cleanup (`cleanup-account.js`)
+## 🛠️ Available Deletion Tools
 
-Clean up a single user account and all associated data.
+### 1. Single Account Deletion (`cleanup-account.js`)
+
+Delete a single user account completely (soft delete).
 
 #### Usage:
 
@@ -38,41 +43,42 @@ This tool helps you clean up test accounts and their associated data
 ℹ User Type: user
 ℹ Token Balance: 5
 
-=== Step 2: Performing Account Cleanup ===
-✓ User profile deleted
-✓ 3 analysis results deleted
-✓ 2 analysis jobs cancelled/deleted
+=== Step 2: Deleting User Account ===
+✓ User account deleted successfully
+ℹ Original email: user@example.com
+ℹ Deleted at: 2024-01-15T10:30:00.000Z
 
-📊 Cleanup Results:
-✓ User profile deleted
-✓ 3 analysis results deleted
-✓ 2 analysis jobs cancelled/deleted
+📊 Deletion Results:
+✓ User account deleted successfully
+ℹ Original email: user@example.com
+ℹ Deleted at: 2024-01-15T10:30:00.000Z
 
-📋 CLEANUP SUMMARY
+📋 ACCOUNT DELETION SUMMARY
 ============================================================
 👤 Account: user@example.com
 
-🧹 CLEANUP RESULTS:
-✅ Successfully cleaned up 6 items:
-  ✓ User profile deleted
-  ✓ 3 analysis results deleted
-  ✓ 2 analysis jobs cancelled
+🗑️  DELETION RESULTS:
+✅ Account successfully deleted
+  ✓ Original email: user@example.com
+  ✓ Deleted at: 2024-01-15T10:30:00.000Z
 
 ✅ No errors occurred
 
 ⚠️  IMPORTANT NOTES:
-• This cleanup only removes user profile and analysis data
-• The user account itself still exists in the system
-• Complete account deletion requires admin privileges
-• Contact an administrator for complete account removal
+• This performs a complete soft delete of the user account
+• The account email is changed to deleted_{timestamp}_{original_email}
+• Token balance is reset to 0 and account is deactivated
+• User profile and all associated data are automatically deleted
+• This operation cannot be undone
+• The user can no longer login with this account
 
 ============================================================
-✅ Account cleanup completed!
+✅ Account deletion completed!
 ```
 
-### 2. Batch Account Cleanup (`batch-cleanup.js`)
+### 2. Batch Account Deletion (`batch-cleanup.js`)
 
-Clean up multiple user accounts at once.
+Delete multiple user accounts at once (soft delete).
 
 #### Usage:
 

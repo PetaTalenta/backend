@@ -239,7 +239,44 @@ Hapus profil user yang sedang login (soft delete).
 }
 ```
 
-**⚠️ Note:** Endpoint ini hanya menghapus profil user (user_profiles table), bukan akun user itu sendiri. Untuk menghapus akun user secara keseluruhan, admin harus menggunakan endpoint admin deletion.
+**⚠️ Note:** Endpoint ini hanya menghapus profil user (user_profiles table), bukan akun user itu sendiri. Untuk menghapus akun user secara keseluruhan, gunakan endpoint DELETE /api/auth/account.
+
+### DELETE /api/auth/account
+Hapus akun user yang sedang login secara keseluruhan (soft delete).
+
+**Authentication:** Bearer Token Required
+**Rate Limit:** General Gateway (5000/15min)
+
+**Response Success (200):**
+```json
+{
+  "success": true,
+  "message": "Account deleted successfully",
+  "data": {
+    "deletedAt": "2024-01-15T10:30:00.000Z",
+    "originalEmail": "user@example.com"
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "USER_NOT_FOUND",
+    "message": "User not found or already inactive"
+  }
+}
+```
+
+**⚠️ Important Notes:**
+- Endpoint ini melakukan **soft delete** dengan mengubah email user menjadi format `deleted_{timestamp}_{original_email}`
+- Token balance user akan direset ke 0
+- Status `is_active` akan diubah menjadi `false`
+- Profil user juga akan dihapus secara otomatis
+- Operasi ini tidak dapat di-undo, pastikan konfirmasi sebelum menghapus akun
+- Setelah akun dihapus, user tidak dapat login lagi dengan akun tersebut
 
 ### POST /api/auth/change-password
 Ubah password user.

@@ -74,36 +74,40 @@ node cleanup-account.js <email> <password>
 node batch-cleanup.js [accounts-file.json]
 ```
 
-## 🧹 Account Cleanup Tools
+## 🗑️ Account Deletion Tools
 
-### Single Account Cleanup
+### Single Account Deletion
 ```bash
-# Clean up a single test account
+# Delete a single test account completely
 node cleanup-account.js user@example.com myPassword123
 
 # Using environment variables
 CLEANUP_EMAIL=user@example.com CLEANUP_PASSWORD=myPassword123 node cleanup-account.js
 ```
 
-### Batch Account Cleanup
+### Batch Account Deletion
 ```bash
-# Clean up multiple accounts from JSON file
+# Delete multiple accounts from JSON file
 node batch-cleanup.js test-accounts.json
 
 # Using environment variable
 CLEANUP_ACCOUNTS='[{"email":"user1@example.com","password":"pass1"}]' node batch-cleanup.js
 ```
 
-**What gets cleaned up:**
-- ✅ User profile data (username, full_name, school_id, etc.)
-- ✅ Analysis results and reports
-- ✅ Analysis jobs (pending or completed)
+**What gets deleted:**
+- ✅ Complete user account (soft delete)
+- ✅ User profile data automatically deleted
+- ✅ Analysis results and reports automatically deleted
+- ✅ Analysis jobs automatically cancelled/deleted
+- ✅ Email changed to `deleted_{timestamp}_{original_email}`
+- ✅ Token balance reset to 0
+- ✅ Account deactivated (cannot login anymore)
 
-**What does NOT get cleaned up:**
-- ⚠️ User account itself (email, password, user_type)
-- ⚠️ Complete account deletion requires admin privileges
+**Important:**
+- ⚠️ This operation cannot be undone
+- ⚠️ Users will no longer be able to login with these accounts
 
-📖 **For detailed cleanup instructions, see [CLEANUP_GUIDE.md](CLEANUP_GUIDE.md)**
+📖 **For detailed deletion instructions, see [CLEANUP_GUIDE.md](CLEANUP_GUIDE.md)**
 
 ## 📊 What to Expect
 
@@ -146,9 +150,10 @@ Testing complete user journey from registration to account deletion
 ℹ Found 1 results
 ℹ Latest result status: completed
 
-=== Test 7: Clean Up User Account Data ===
-✓ Account data cleaned successfully in 167ms
-ℹ Cleaned 4 items (profile: yes, results: 2, jobs: 1)
+=== Test 7: Delete User Account ===
+✓ Account deleted successfully in 167ms
+ℹ Original email: john.doe.1@gmail.com
+ℹ Deleted at: 2024-01-15T10:30:00.000Z
 
 📊 E2E TEST REPORT
 =====================================
@@ -194,9 +199,9 @@ Progress |████████████████████| 100% | 5
 Progress |████████████████████| 100% | 50/50 users | ETA: 0s
 ✓ Checked 50/50 assessment results
 
-=== Stage 7: Clean Up User Account Data ===
+=== Stage 7: Delete User Accounts ===
 Progress |████████████████████| 100% | 50/50 users | ETA: 0s
-✓ Account cleanup process completed
+✓ Account deletion process completed
 
 📊 LOAD TEST REPORT
 ================================================================================

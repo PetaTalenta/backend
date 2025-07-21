@@ -261,6 +261,76 @@ const deleteProfile = async (req, res, next) => {
 };
 
 /**
+ * Delete user account (soft delete - user self-deletion)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ */
+const deleteAccount = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const userEmail = req.user.email;
+
+    // Check if user exists and is active
+    const user = await User.findByPk(userId);
+    if (!user || !user.is_active) {
+      return res.status(404).json(formatErrorResponse(
+        'USER_NOT_FOUND',
+        'User not found or already inactive'
+      ));
+    }
+
+    const transaction = await User.sequelize.transaction();
+
+    try {
+      // Soft delete by updating email to include deleted timestamp and reset token balance
+      const timestamp = Math.floor(Date.now() / 1000);
+      const deletedEmail = `deleted_${timestamp}_${userEmail}`;
+
+      await user.update({
+        email: deletedEmail,
+        token_balance: 0,
+        is_active: false
+      }, { transaction });
+
+      // Delete user profile if exists (cascade will handle this, but we'll be explicit)
+      const profile = await UserProfile.findByPk(userId, { transaction });
+      if (profile) {
+        await profile.destroy({ transaction });
+      }
+
+      await transaction.commit();
+
+      logger.warn('User account self-deleted', {
+        userId,
+        originalEmail: userEmail,
+        newEmail: deletedEmail,
+        ip: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json(formatResponse({
+        message: 'Account deleted successfully',
+        data: {
+          deletedAt: new Date().toISOString(),
+          originalEmail: userEmail
+        }
+      }));
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    logger.error('Error deleting user account', {
+      userId: req.user?.id,
+      error: error.message,
+      stack: error.stack
+    });
+    next(error);
+  }
+};
+
+/**
  * Get user token balance (kept for backward compatibility)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -579,6 +649,7 @@ module.exports = {
   getProfile,
   updateProfile,
   deleteProfile,
+  deleteAccount,
   getTokenBalance,
   updateTokenBalance,
   getSchools,
