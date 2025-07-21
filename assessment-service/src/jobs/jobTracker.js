@@ -18,9 +18,10 @@ const JOB_STATUS = {
  * @param {String} userId - User ID who submitted the job
  * @param {String} userEmail - User email
  * @param {Object} assessmentData - Assessment data
+ * @param {String} assessmentName - Assessment name (optional)
  * @returns {Object} - Job object
  */
-const createJob = (jobId, userId, userEmail, assessmentData) => {
+const createJob = (jobId, userId, userEmail, assessmentData, assessmentName = 'AI-Driven Talent Mapping') => {
   const job = {
     jobId,
     userId,
@@ -31,6 +32,8 @@ const createJob = (jobId, userId, userEmail, assessmentData) => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     assessmentData,
+    assessmentName,
+    resultId: null,
     error: null
   };
 
@@ -40,6 +43,7 @@ const createJob = (jobId, userId, userEmail, assessmentData) => {
     jobId,
     userId,
     userEmail,
+    assessmentName,
     status: job.status
   });
 
@@ -61,9 +65,10 @@ const getJob = (jobId) => {
  * @param {String} status - New status
  * @param {Number} progress - Progress percentage (0-100)
  * @param {String} error - Error message (optional)
+ * @param {String} resultId - Result ID (optional, for completed jobs)
  * @returns {Object|null} - Updated job object or null if not found
  */
-const updateJobStatus = (jobId, status, progress = null, error = null) => {
+const updateJobStatus = (jobId, status, progress = null, error = null, resultId = null) => {
   const job = jobs.get(jobId);
 
   if (!job) {
@@ -80,6 +85,10 @@ const updateJobStatus = (jobId, status, progress = null, error = null) => {
 
   if (error) {
     job.error = error;
+  }
+
+  if (resultId) {
+    job.resultId = resultId;
   }
 
   // Update estimated time based on status
@@ -100,6 +109,7 @@ const updateJobStatus = (jobId, status, progress = null, error = null) => {
     userId: job.userId,
     status,
     progress: job.progress,
+    resultId,
     error
   });
 

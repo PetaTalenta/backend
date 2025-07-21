@@ -3,7 +3,7 @@
  */
 
 const aiService = require('../services/aiService');
-const { saveAnalysisResultOptimized, updateJobStatusAsync } = require('../services/optimizedArchiveService');
+const { saveAnalysisResult, updateAnalysisJobStatus, checkHealth } = require('../services/archiveService');
 const { jobDeduplicationService, tokenRefundService } = require('../services/jobDeduplicationService');
 const { auditLogger, AUDIT_EVENTS, RISK_LEVELS } = require('../services/auditLogger');
 const notificationService = require('../services/notificationService'); // Keep for backward compatibility
@@ -217,7 +217,7 @@ const processAssessmentOptimized = async (jobData) => {
     });
 
     // Step 4: Update job status to processing (async)
-    updateJobStatusAsync(jobId, 'processing');
+    updateAnalysisJobStatus(jobId, 'processing');
 
     // Step 5: Process with timeout
     const result = await withTimeout(async () => {
@@ -248,9 +248,9 @@ const processAssessmentOptimized = async (jobData) => {
         processingTime: Date.now() - startTime
       });
 
-      // Save result to Archive Service (optimized)
+      // Save result to Archive Service (optimized with batching)
       const saveResult = await withRetry(
-        () => saveAnalysisResultOptimized(userId, assessmentData, personaProfile, jobId, assessmentName),
+        () => saveAnalysisResult(userId, assessmentData, personaProfile, jobId, assessmentName),
         {
           operationName: 'Archive service save',
           shouldRetry: (error) => error.isRetryable
@@ -270,7 +270,7 @@ const processAssessmentOptimized = async (jobData) => {
       });
 
       // Update job status to completed (async)
-      updateJobStatusAsync(jobId, 'completed', {
+      updateAnalysisJobStatus(jobId, 'completed', {
         result_id: saveResult.id
       });
 
@@ -380,7 +380,7 @@ const processAssessmentOptimized = async (jobData) => {
 
     // Save failed result (async)
     try {
-      updateJobStatusAsync(jobId, 'failed', {
+      updateAnalysisJobStatus(jobId, 'failed', {
         error_message: error.message,
         error_code: error.code
       });

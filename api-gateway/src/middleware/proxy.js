@@ -131,7 +131,11 @@ const authServiceProxy = createServiceProxy(config.services.auth, {
 const archiveServiceProxy = createServiceProxy(config.services.archive, {
   pathRewrite: {
     '^/api/archive/health': '/health', // Health endpoint langsung ke /health
-    '^/api/archive': '/archive' // Keep /archive prefix
+    '^/api/archive/metrics': '/metrics', // Metrics endpoints langsung ke /metrics
+    '^/api/archive/admin': '/admin', // Admin endpoints langsung ke /admin
+    '^/api/results': '/results', // Direct access results endpoints
+    '^/api/jobs': '/jobs', // Direct access jobs endpoints
+    '^/api/archive': '/archive' // Keep /archive prefix for other endpoints
   }
 });
 
@@ -140,8 +144,14 @@ const archiveServiceProxy = createServiceProxy(config.services.archive, {
  */
 const assessmentServiceProxy = createServiceProxy(config.services.assessment, {
   pathRewrite: {
-    '^/api/assessment/health': '/health', // Health endpoint langsung ke /health
-    '^/api/assessment': '/assessment' // Rewrite to /assessment (singular)
+    '^/api/assessment/health/ready': '/health/ready', // Readiness probe
+    '^/api/assessment/health/live': '/health/live',   // Liveness probe
+    '^/api/assessment/health/queue': '/health/queue', // Queue health check
+    '^/api/assessment/health': '/health',             // Main health endpoint
+    '^/api/assessment/test/submit': '/test/submit',   // Development test submit
+    '^/api/assessment/test/status': '/test/status',   // Development test status
+    '^/api/assessment$': '/',                         // Root endpoint (exact match)
+    '^/api/assessment': '/assessment'                 // Other assessment endpoints
   }
 });
 

@@ -154,7 +154,7 @@ const getSchoolAnalytics = async (req, res, next) => {
  */
 const getOptimizedDemographics = async (req, res, next) => {
   try {
-    const { gender, ageMin, ageMax, schoolOrigin, archetype, limit } = req.query;
+    const { gender, ageMin, ageMax, schoolId, schoolName, archetype, limit } = req.query;
 
     const filters = {};
 
@@ -162,7 +162,8 @@ const getOptimizedDemographics = async (req, res, next) => {
     if (ageMin && ageMax) {
       filters.ageRange = { min: parseInt(ageMin), max: parseInt(ageMax) };
     }
-    if (schoolOrigin) filters.schoolOrigin = schoolOrigin;
+    if (schoolId) filters.schoolId = parseInt(schoolId);
+    if (schoolName) filters.schoolName = schoolName;
     if (archetype) filters.archetype = archetype;
     if (limit) filters.limit = parseInt(limit);
 

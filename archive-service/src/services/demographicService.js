@@ -52,14 +52,17 @@ const getDemographicOverview = async () => {
 
     // Top schools by analysis count
     const schoolStats = await sequelize.query(`
-      SELECT 
-        COALESCE(up.school_origin, 'Unknown') as school_name,
+      SELECT
+        COALESCE(s.name, 'Unknown') as school_name,
+        s.city,
+        s.province,
         COUNT(ar.id) as analysis_count,
         COUNT(DISTINCT ar.user_id) as unique_users
       FROM archive.analysis_results ar
       LEFT JOIN auth.user_profiles up ON ar.user_id = up.user_id
+      LEFT JOIN public.schools s ON up.school_id = s.id
       WHERE ar.status = 'completed'
-      GROUP BY up.school_origin
+      GROUP BY s.id, s.name, s.city, s.province
       HAVING COUNT(ar.id) > 0
       ORDER BY analysis_count DESC
       LIMIT 10
@@ -148,18 +151,21 @@ const getArchetypeDemographics = async (archetype) => {
       type: sequelize.QueryTypes.SELECT
     });
 
-    // Top schools for this archetype - optimized dengan index pada school_origin
+    // Top schools for this archetype - optimized dengan index pada school_id
     const topSchools = await sequelize.query(`
       SELECT
-        up.school_origin,
+        s.name as school_name,
+        s.city,
+        s.province,
         COUNT(*) as count,
         ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as percentage
       FROM archive.analysis_results ar
       INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
+      INNER JOIN public.schools s ON up.school_id = s.id
       WHERE ar.status = 'completed'
         AND ar.persona_profile->>'archetype' = :archetype
-        AND up.school_origin IS NOT NULL
-      GROUP BY up.school_origin
+        AND up.school_id IS NOT NULL
+      GROUP BY s.id, s.name, s.city, s.province
       ORDER BY count DESC
       LIMIT 10
     `, {
@@ -201,28 +207,49 @@ const getSchoolAnalytics = async (schoolName = null) => {
     let replacements = {};
 
     if (schoolName) {
-      whereClause = 'AND up.school_origin ILIKE :schoolName';
+      whereClause = 'AND s.name ILIKE :schoolName';
       replacements.schoolName = `%${schoolName}%`;
     }
 
-    // School performance overview (disabled - school_origin field removed)
-    const schoolStats = [];
-    // Note: School statistics disabled since school_origin field has been removed from user profiles
+    // School performance overview
+    const schoolStats = await sequelize.query(`
+      SELECT
+        s.name as school_name,
+        s.city,
+        s.province,
+        COUNT(ar.id) as total_analyses,
+        COUNT(DISTINCT ar.user_id) as unique_users,
+        COUNT(DISTINCT ar.persona_profile->>'archetype') as unique_archetypes
+      FROM archive.analysis_results ar
+      INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
+      INNER JOIN public.schools s ON up.school_id = s.id
+      WHERE ar.status = 'completed'
+        ${whereClause}
+      GROUP BY s.id, s.name, s.city, s.province
+      ORDER BY total_analyses DESC
+      LIMIT 20
+    `, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT
+    });
 
     // Archetype distribution by schools
     const archetypeBySchool = await sequelize.query(`
-      SELECT 
-        up.school_origin,
+      SELECT
+        s.name as school_name,
+        s.city,
+        s.province,
         ar.persona_profile->>'archetype' as archetype,
         COUNT(*) as count
       FROM archive.analysis_results ar
-      LEFT JOIN auth.user_profiles up ON ar.user_id = up.user_id
+      INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
+      INNER JOIN public.schools s ON up.school_id = s.id
       WHERE ar.status = 'completed'
-        AND up.school_origin IS NOT NULL
+        AND up.school_id IS NOT NULL
         AND ar.persona_profile->>'archetype' IS NOT NULL
         ${whereClause}
-      GROUP BY up.school_origin, ar.persona_profile->>'archetype'
-      ORDER BY up.school_origin, count DESC
+      GROUP BY s.id, s.name, s.city, s.province, ar.persona_profile->>'archetype'
+      ORDER BY s.name, count DESC
     `, {
       replacements,
       type: sequelize.QueryTypes.SELECT
@@ -256,7 +283,7 @@ const getSchoolAnalytics = async (schoolName = null) => {
  */
 const getOptimizedDemographics = async (filters = {}) => {
   try {
-    const { gender, ageRange, schoolOrigin, archetype } = filters;
+    const { gender, ageRange, schoolId, schoolName, archetype } = filters;
 
     // Base query yang memanfaatkan composite index idx_user_profiles_demographics
     let whereClause = 'ar.status = \'completed\'';
@@ -277,9 +304,14 @@ const getOptimizedDemographics = async (filters = {}) => {
       replacements.maxDate = `${maxBirthYear}-12-31`;
     }
 
-    if (schoolOrigin) {
-      whereClause += ' AND up.school_origin ILIKE :schoolOrigin';
-      replacements.schoolOrigin = `%${schoolOrigin}%`;
+    if (schoolId) {
+      whereClause += ' AND up.school_id = :schoolId';
+      replacements.schoolId = schoolId;
+    }
+
+    if (schoolName) {
+      whereClause += ' AND s.name ILIKE :schoolName';
+      replacements.schoolName = `%${schoolName}%`;
     }
 
     if (archetype) {
@@ -291,17 +323,19 @@ const getOptimizedDemographics = async (filters = {}) => {
     const results = await sequelize.query(`
       SELECT
         up.gender,
-        up.school_origin,
+        s.name as school_name,
+        s.city as school_city,
+        s.province as school_province,
         EXTRACT(YEAR FROM AGE(up.date_of_birth)) as age,
         ar.persona_profile->>'archetype' as archetype,
         COUNT(*) as count
       FROM archive.analysis_results ar
       INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
+      LEFT JOIN public.schools s ON up.school_id = s.id
       WHERE ${whereClause}
         AND up.gender IS NOT NULL
         AND up.date_of_birth IS NOT NULL
-        AND up.school_origin IS NOT NULL
-      GROUP BY up.gender, up.school_origin, up.date_of_birth, ar.persona_profile->>'archetype'
+      GROUP BY up.gender, s.id, s.name, s.city, s.province, up.date_of_birth, ar.persona_profile->>'archetype'
       ORDER BY count DESC
       LIMIT 100
     `, {
@@ -319,7 +353,7 @@ const getOptimizedDemographics = async (filters = {}) => {
       summary: {
         totalRecords: results.reduce((sum, r) => sum + parseInt(r.count), 0),
         uniqueGenders: [...new Set(results.map(r => r.gender))].length,
-        uniqueSchools: [...new Set(results.map(r => r.school_origin))].length,
+        uniqueSchools: [...new Set(results.map(r => r.school_name).filter(Boolean))].length,
         uniqueArchetypes: [...new Set(results.map(r => r.archetype))].length
       }
     };
@@ -349,7 +383,7 @@ const getDemographicTrends = async (options = {}) => {
         COUNT(DISTINCT ar.user_id) as unique_users,
         COUNT(*) as total_analyses,
         COUNT(DISTINCT up.gender) as gender_diversity,
-        COUNT(DISTINCT up.school_origin) as school_diversity,
+        COUNT(DISTINCT up.school_id) as school_diversity,
         AVG(EXTRACT(YEAR FROM AGE(up.date_of_birth))) as avg_age
       FROM archive.analysis_results ar
       INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id

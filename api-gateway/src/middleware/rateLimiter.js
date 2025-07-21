@@ -101,9 +101,38 @@ const adminLimiter = rateLimit({
   }
 });
 
+/**
+ * Rate limiter khusus untuk archive endpoints
+ * User endpoints have rate limiting, service endpoints do not
+ */
+const archiveLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 2000, // Allow 2000 requests per 15 minutes for archive operations
+  message: {
+    success: false,
+    error: 'ARCHIVE_RATE_LIMIT_EXCEEDED',
+    message: 'Too many archive requests, please try again later.',
+    retryAfter: 900
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+
+  skip: (req) => {
+    return req.isInternalService === true;
+  },
+
+  keyGenerator: (req) => {
+    if (req.user && req.user.id) {
+      return `archive-${req.user.id}`;
+    }
+    return `archive-${req.ip}`;
+  }
+});
+
 module.exports = {
   generalLimiter,
   authLimiter,
   assessmentLimiter,
-  adminLimiter
+  adminLimiter,
+  archiveLimiter
 };

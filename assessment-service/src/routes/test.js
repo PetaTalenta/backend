@@ -49,7 +49,7 @@ router.post('/submit', validateSchema(assessmentSchema), async (req, res, next) 
     }
 
     // Create job in local tracker
-    jobTracker.createJob(jobId, userId, userEmail, assessmentData);
+    jobTracker.createJob(jobId, userId, userEmail, assessmentData, 'AI-Driven Talent Mapping');
 
     // Publish job to queue with the same jobId
     await queueService.publishAssessmentJob(assessmentData, userId, userEmail, jobId, 'AI-Driven Talent Mapping');

@@ -1,32 +1,24 @@
 {
-  "name": "atma-backend",
+  "name": "atma-e2e-load-testing",
   "version": "1.0.0",
-  "description": "AI-Driven Talent Mapping Assessment Backend",
+  "description": "E2E and Load Testing for ATMA Backend",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start:services": "powershell -ExecutionPolicy Bypass -File start-all-services.ps1",
-    "test:auth": "node test-runner.js",
-    "test:websocket": "node test-runner.js --websocket",
-    "test:websocket:keep": "node test-runner.js --websocket --keep-user",
-    "test:mass-login": "node test-runner.js --mass-login",
-    "test:end-to-end": "node test-runner.js --end-to-end",
-    "test:mass-login:fast": "node test-runner.js --mass-login --high-performance",
-    "test:end-to-end:fast": "node test-runner.js --end-to-end --high-performance",
-    "test:mass-login:small": "node test-runner.js --mass-login --users=50",
-    "test:end-to-end:small": "node test-runner.js --end-to-end --users=10",
-    "test:end-to-end:500": "node test-runner.js --end-to-end --users=500 --batch-size=50 --high-performance",
-    "test:legacy:auth": "node test-user-flow.js",
-    "test:legacy:websocket": "node test-user-flow.js --websocket",
-    "test:legacy:mass-login": "node test-user-flow.js --mass-login",
-    "test:legacy:end-to-end": "node test-user-flow.js --end-to-end"
+    "test:e2e": "node e2e-test.js",
+    "test:load": "node load-test.js",
+    "test:all": "npm run test:e2e && npm run test:load",
+    "cleanup:single": "node cleanup-account.js",
+    "cleanup:batch": "node batch-cleanup.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "axios": "^1.10.0",
-    "socket.io-client": "^4.7.5",
-    "uuid": "^11.1.0"
-  }
+    "axios": "^1.6.0",
+    "socket.io-client": "^4.7.2",
+    "chalk": "^4.1.2",
+    "cli-progress": "^3.12.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {},
+  "keywords": ["testing", "e2e", "load-testing", "atma"],
+  "author": "ATMA Team",
+  "license": "MIT"
 }

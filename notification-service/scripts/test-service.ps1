@@ -44,14 +44,44 @@ try {
     Write-Host "❌ Service status error: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-# Test 3: Analysis Complete Notification
-Write-Host "`n3. Testing Analysis Complete Notification..." -ForegroundColor Yellow
+# Test 3: Analysis Started Notification
+Write-Host "`n3. Testing Analysis Started Notification..." -ForegroundColor Yellow
+$startedPayload = @{
+    userId = "123e4567-e89b-12d3-a456-426614174000"
+    jobId = "123e4567-e89b-12d3-a456-426614174001"
+    status = "started"
+    message = "Test analysis started processing..."
+    metadata = @{
+        assessmentName = "Test Assessment"
+        estimatedProcessingTime = "5-10 minutes"
+    }
+} | ConvertTo-Json
+
+try {
+    $response = Invoke-WebRequest -Uri "$baseUrl/notifications/analysis-started" -Method POST -Headers $headers -Body $startedPayload
+    $content = $response.Content | ConvertFrom-Json
+    if ($content.success -eq $true) {
+        Write-Host "✅ Analysis started notification passed" -ForegroundColor Green
+        Write-Host "   Sent: $($content.data.sent)" -ForegroundColor Gray
+    } else {
+        Write-Host "❌ Analysis started notification failed" -ForegroundColor Red
+    }
+} catch {
+    Write-Host "❌ Analysis started error: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Test 4: Analysis Complete Notification
+Write-Host "`n4. Testing Analysis Complete Notification..." -ForegroundColor Yellow
 $payload = @{
     userId = "123e4567-e89b-12d3-a456-426614174000"
     jobId = "123e4567-e89b-12d3-a456-426614174001"
     resultId = "123e4567-e89b-12d3-a456-426614174002"
     status = "completed"
     message = "Test analysis completed successfully"
+    metadata = @{
+        assessmentName = "Test Assessment"
+        processingTime = "7 minutes"
+    }
 } | ConvertTo-Json
 
 try {
@@ -67,13 +97,17 @@ try {
     Write-Host "❌ Analysis complete error: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-# Test 4: Analysis Failed Notification
-Write-Host "`n4. Testing Analysis Failed Notification..." -ForegroundColor Yellow
+# Test 5: Analysis Failed Notification
+Write-Host "`n5. Testing Analysis Failed Notification..." -ForegroundColor Yellow
 $failedPayload = @{
     userId = "123e4567-e89b-12d3-a456-426614174000"
     jobId = "123e4567-e89b-12d3-a456-426614174003"
     error = "PROCESSING_ERROR"
     message = "Test analysis failed"
+    metadata = @{
+        assessmentName = "Test Assessment"
+        errorType = "PROCESSING_ERROR"
+    }
 } | ConvertTo-Json
 
 try {

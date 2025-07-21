@@ -37,6 +37,64 @@ describe('Notification Service', () => {
       'X-Service-Key': 'test_service_key'
     };
 
+    describe('POST /notifications/analysis-started', () => {
+      test('should accept valid analysis started notification', async () => {
+        const payload = {
+          userId: '123e4567-e89b-12d3-a456-426614174000',
+          jobId: '123e4567-e89b-12d3-a456-426614174001',
+          status: 'started',
+          message: 'Your analysis has started processing...',
+          metadata: {
+            assessmentName: 'Test Assessment',
+            estimatedProcessingTime: '5-10 minutes'
+          }
+        };
+
+        const response = await request(app)
+          .post('/notifications/analysis-started')
+          .set(validHeaders)
+          .send(payload)
+          .expect(200);
+
+        expect(response.body).toMatchObject({
+          success: true,
+          message: 'Notification sent'
+        });
+
+        expect(response.body.data).toMatchObject({
+          userId: payload.userId,
+          jobId: payload.jobId
+        });
+      });
+
+      test('should reject request without service authentication', async () => {
+        const payload = {
+          userId: '123e4567-e89b-12d3-a456-426614174000',
+          jobId: '123e4567-e89b-12d3-a456-426614174001',
+          status: 'started'
+        };
+
+        await request(app)
+          .post('/notifications/analysis-started')
+          .send(payload)
+          .expect(401);
+      });
+
+      test('should reject invalid payload', async () => {
+        const invalidPayload = {
+          userId: 'invalid-uuid',
+          jobId: '123e4567-e89b-12d3-a456-426614174001',
+          status: 'invalid-status'
+        };
+
+        await request(app)
+          .post('/notifications/analysis-started')
+          .set(validHeaders)
+          .send(invalidPayload)
+          .expect(400);
+      });
+    });
+
     describe('POST /notifications/analysis-complete', () => {
       test('should accept valid analysis complete notification', async () => {
         const payload = {
@@ -44,7 +102,11 @@ describe('Notification Service', () => {
           jobId: '123e4567-e89b-12d3-a456-426614174001',
           resultId: '123e4567-e89b-12d3-a456-426614174002',
           status: 'completed',
-          message: 'Analysis completed successfully'
+          message: 'Analysis completed successfully',
+          metadata: {
+            assessmentName: 'Test Assessment',
+            processingTime: '7 minutes'
+          }
         };
 
         const response = await request(app)
@@ -101,7 +163,11 @@ describe('Notification Service', () => {
           userId: '123e4567-e89b-12d3-a456-426614174000',
           jobId: '123e4567-e89b-12d3-a456-426614174001',
           error: 'PROCESSING_ERROR',
-          message: 'Failed to process the file'
+          message: 'Failed to process the file',
+          metadata: {
+            assessmentName: 'Test Assessment',
+            errorType: 'PROCESSING_ERROR'
+          }
         };
 
         const response = await request(app)

@@ -30,7 +30,7 @@ const sendAnalysisCompleteNotification = async (userId, jobId, resultId) => {
 
 const updateAssessmentJobStatus = async (jobId, resultId, status) => {
   try {
-    await axios.post(`${ASSESSMENT_SERVICE_URL}/assessments/callback/completed`, {
+    await axios.post(`${ASSESSMENT_SERVICE_URL}/assessment/callback/completed`, {
       jobId,
       resultId,
       status
@@ -78,7 +78,7 @@ const sendAnalysisFailureNotification = async (userId, jobId, errorMessage) => {
 
 const updateAssessmentJobStatusFailed = async (jobId, resultId, errorMessage) => {
   try {
-    await axios.post(`${ASSESSMENT_SERVICE_URL}/assessments/callback/failed`, {
+    await axios.post(`${ASSESSMENT_SERVICE_URL}/assessment/callback/failed`, {
       jobId,
       resultId,
       status: 'failed',

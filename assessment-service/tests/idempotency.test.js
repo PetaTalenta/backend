@@ -7,6 +7,31 @@ const request = require('supertest');
 const app = require('../src/app');
 const { generateIdempotencyKey, generateRequestHash, validateIdempotencyKey } = require('../src/utils/hashGenerator');
 const idempotencyService = require('../src/services/idempotencyService');
+const jwt = require('jsonwebtoken');
+
+// Mock auth service
+jest.mock('../src/services/authService', () => ({
+  verifyToken: jest.fn().mockResolvedValue({
+    id: 'test-user-123',
+    email: 'test@example.com',
+    tokenBalance: 10
+  }),
+  checkHealth: jest.fn().mockResolvedValue(true),
+  refundTokens: jest.fn().mockResolvedValue(true)
+}));
+
+// Helper function to create valid JWT token for testing
+const createTestToken = () => {
+  return jwt.sign(
+    {
+      id: 'test-user-123',
+      email: 'test@example.com',
+      tokenBalance: 10
+    },
+    process.env.JWT_SECRET || 'test-secret',
+    { expiresIn: '1h' }
+  );
+};
 
 describe('Idempotency Feature', () => {
   
@@ -110,50 +135,54 @@ describe('Idempotency Feature', () => {
         agreeableness: 80, neuroticism: 35
       },
       viaIs: {
-        creativity: 70, curiosity: 80, judgment: 75, love_of_learning: 85,
+        creativity: 70, curiosity: 80, judgment: 75, loveOfLearning: 85,
         perspective: 65, bravery: 60, perseverance: 90, honesty: 95,
-        zest: 55, love: 85, kindness: 90, social_intelligence: 75,
+        zest: 55, love: 85, kindness: 90, socialIntelligence: 75,
         teamwork: 80, fairness: 85, leadership: 60, forgiveness: 70,
-        humility: 75, prudence: 65, self_regulation: 70, appreciation_of_beauty: 60,
+        humility: 75, prudence: 65, selfRegulation: 70, appreciationOfBeauty: 60,
         gratitude: 85, hope: 75, humor: 65, spirituality: 50
       }
     };
 
     test('should add idempotency headers to responses', async () => {
       const response = await request(app)
-        .get('/health')
-        .expect(200);
-      
+        .post('/assessment/submit')
+        .send(validAssessmentData)
+        .expect(401); // Will fail auth but should still have headers
+
       expect(response.headers['x-idempotency-supported']).toBe('true');
       expect(response.headers['x-idempotency-ttl-hours']).toBeDefined();
     });
 
     test('should handle requests without authentication gracefully', async () => {
       const response = await request(app)
-        .post('/assessments/submit')
+        .post('/assessment/submit')
         .send(validAssessmentData)
         .expect(401);
-      
+
       expect(response.body.success).toBe(false);
     });
 
     test('should check idempotency health endpoint', async () => {
+      const token = createTestToken();
       const response = await request(app)
-        .get('/assessments/idempotency/health')
+        .get('/assessment/idempotency/health')
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
-      
+
       expect(response.body.success).toBe(true);
-      expect(response.body.data.enabled).toBeDefined();
       expect(response.body.data.status).toBeDefined();
     });
 
     test('should handle cleanup endpoint', async () => {
+      const token = createTestToken();
       const response = await request(app)
-        .post('/assessments/idempotency/cleanup')
+        .post('/assessment/idempotency/cleanup')
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
-      
+
       expect(response.body.success).toBe(true);
-      expect(response.body.data.deletedEntries).toBeDefined();
+      expect(response.body.data.removedEntries).toBeDefined();
     });
   });
 
@@ -192,13 +221,18 @@ describe('Idempotency Middleware', () => {
     // Mock idempotency service to be disabled
     const originalIsEnabled = idempotencyService.isEnabled;
     idempotencyService.isEnabled = jest.fn().mockReturnValue(false);
-    
+
     const response = await request(app)
-      .get('/health')
-      .expect(200);
-    
+      .post('/assessment/submit')
+      .send({
+        riasec: { realistic: 75, investigative: 85, artistic: 60, social: 50, enterprising: 70, conventional: 55 },
+        ocean: { openness: 80, conscientiousness: 65, extraversion: 55, agreeableness: 45, neuroticism: 30 },
+        viaIs: { creativity: 85, curiosity: 78, judgment: 70, loveOfLearning: 65, perspective: 75, bravery: 60, perseverance: 80, honesty: 90, zest: 70, love: 85, kindness: 88, socialIntelligence: 75, teamwork: 82, fairness: 85, leadership: 70, forgiveness: 75, humility: 65, prudence: 70, selfRegulation: 75, appreciationOfBeauty: 80, gratitude: 85, hope: 80, humor: 75, spirituality: 60 }
+      })
+      .expect(401); // Will fail auth but should still have headers
+
     expect(response.headers['x-idempotency-supported']).toBe('true');
-    
+
     // Restore original method
     idempotencyService.isEnabled = originalIsEnabled;
   });

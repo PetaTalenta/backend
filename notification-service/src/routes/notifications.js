@@ -7,19 +7,69 @@ const socketService = require('../services/socketService');
 const logger = require('../utils/logger');
 
 /**
+ * POST /notifications/analysis-started
+ * Endpoint untuk menerima notifikasi ketika analisis dimulai
+ */
+router.post('/analysis-started', serviceAuth, validateNotification, (req, res) => {
+  try {
+    const { userId, jobId, status, message, metadata } = req.body;
+
+    // Send notification to user via WebSocket
+    const sent = socketService.sendToUser(userId, 'analysis-started', {
+      jobId,
+      status,
+      message: message || 'Your analysis has started processing...',
+      metadata: metadata || {}
+    });
+
+    logger.info('Analysis started notification processed', {
+      userId,
+      jobId,
+      sent
+    });
+
+    res.json({
+      success: true,
+      message: 'Notification sent',
+      data: {
+        userId,
+        jobId,
+        sent
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error processing analysis started notification', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body
+    });
+
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to process notification'
+      }
+    });
+  }
+});
+
+/**
  * POST /notifications/analysis-complete
  * Endpoint untuk menerima notifikasi dari analysis-worker ketika analisis selesai
  */
 router.post('/analysis-complete', serviceAuth, validateNotification, (req, res) => {
   try {
-    const { userId, jobId, resultId, status, message } = req.body;
+    const { userId, jobId, resultId, status, message, metadata } = req.body;
 
     // Send notification to user via WebSocket
     const sent = socketService.sendToUser(userId, 'analysis-complete', {
       jobId,
       resultId,
       status,
-      message: message || 'Your analysis is ready!'
+      message: message || 'Your analysis is ready!',
+      metadata: metadata || {}
     });
 
     logger.info('Analysis complete notification processed', {
@@ -63,13 +113,14 @@ router.post('/analysis-complete', serviceAuth, validateNotification, (req, res) 
  */
 router.post('/analysis-failed', serviceAuth, validateNotification, (req, res) => {
   try {
-    const { userId, jobId, error, message } = req.body;
+    const { userId, jobId, error, message, metadata } = req.body;
 
     // Send notification to user via WebSocket
     const sent = socketService.sendToUser(userId, 'analysis-failed', {
       jobId,
       error,
-      message: message || 'Analysis failed. Please try again.'
+      message: message || 'Analysis failed. Please try again.',
+      metadata: metadata || {}
     });
 
     logger.info('Analysis failed notification processed', {

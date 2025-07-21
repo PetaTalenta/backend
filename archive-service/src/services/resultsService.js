@@ -8,6 +8,156 @@ const { NotFoundError, ForbiddenError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
 const batchMetrics = require('../middleware/batchMetrics');
 
+/**
+ * Validate business logic for analysis result data
+ * @param {Object} data - Analysis result data
+ * @throws {Error} - If validation fails
+ */
+const validateBusinessLogic = async (data) => {
+  // 1. Validate user existence (only in production)
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      const userExists = await AnalysisResult.sequelize.query(
+        'SELECT 1 FROM auth.users WHERE id = :userId LIMIT 1',
+        {
+          replacements: { userId: data.user_id },
+          type: AnalysisResult.sequelize.QueryTypes.SELECT
+        }
+      );
+
+      if (!userExists.length) {
+        throw new Error(`User with ID ${data.user_id} does not exist`);
+      }
+    } catch (error) {
+      logger.error('User validation failed', {
+        userId: data.user_id,
+        error: error.message
+      });
+      throw new Error('Invalid user ID provided');
+    }
+  }
+
+  // 2. Validate data consistency
+  if (data.status === 'completed' && !data.persona_profile) {
+    throw new Error('Completed analysis must have persona_profile');
+  }
+
+  if (data.status === 'failed' && data.persona_profile) {
+    logger.warn('Failed analysis should not have persona_profile', {
+      userId: data.user_id,
+      status: data.status
+    });
+    // Don't throw error, just log warning and clean up
+    data.persona_profile = null;
+  }
+
+  if (data.status === 'failed' && !data.error_message) {
+    throw new Error('Failed analysis must have error_message');
+  }
+
+  // 3. Sanitize assessment data
+  if (data.assessment_data && typeof data.assessment_data === 'object') {
+    // Remove any potentially sensitive fields
+    const sanitizedData = { ...data.assessment_data };
+    delete sanitizedData.password;
+    delete sanitizedData.token;
+    delete sanitizedData.secret;
+    data.assessment_data = sanitizedData;
+  }
+
+  // 4. Validate persona profile structure if present
+  if (data.persona_profile && typeof data.persona_profile === 'object') {
+    const requiredFields = ['archetype', 'shortSummary', 'strengths', 'weaknesses', 'careerRecommendation'];
+    const missingFields = requiredFields.filter(field => !data.persona_profile[field]);
+
+    if (missingFields.length > 0) {
+      throw new Error(`Persona profile missing required fields: ${missingFields.join(', ')}`);
+    }
+
+    // Validate array fields
+    if (!Array.isArray(data.persona_profile.strengths) || data.persona_profile.strengths.length < 3) {
+      throw new Error('Persona profile must have at least 3 strengths');
+    }
+
+    if (!Array.isArray(data.persona_profile.weaknesses) || data.persona_profile.weaknesses.length < 3) {
+      throw new Error('Persona profile must have at least 3 weaknesses');
+    }
+
+    if (!Array.isArray(data.persona_profile.careerRecommendation) || data.persona_profile.careerRecommendation.length < 3) {
+      throw new Error('Persona profile must have at least 3 career recommendations');
+    }
+  }
+
+  logger.debug('Business logic validation passed', {
+    userId: data.user_id,
+    status: data.status,
+    hasPersonaProfile: !!data.persona_profile,
+    hasAssessmentData: !!data.assessment_data
+  });
+};
+
+/**
+ * Validate business logic for update operations
+ * @param {Object} updateData - Update data
+ * @param {Object} existingResult - Existing result from database
+ * @throws {Error} - If validation fails
+ */
+const validateUpdateBusinessLogic = async (updateData, existingResult) => {
+  // 1. Prevent status regression (completed -> processing)
+  if (updateData.status && existingResult.status === 'completed' && updateData.status === 'processing') {
+    throw new Error('Cannot change status from completed back to processing');
+  }
+
+  // 2. Validate status transitions
+  const validTransitions = {
+    'processing': ['completed', 'failed'],
+    'failed': ['processing'], // Allow retry
+    'completed': ['failed'] // Allow marking as failed if issues found
+  };
+
+  if (updateData.status && existingResult.status !== updateData.status) {
+    const allowedTransitions = validTransitions[existingResult.status] || [];
+    if (!allowedTransitions.includes(updateData.status)) {
+      throw new Error(`Invalid status transition from ${existingResult.status} to ${updateData.status}`);
+    }
+  }
+
+  // 3. Validate data consistency for updates
+  if (updateData.status === 'completed' && updateData.persona_profile === null) {
+    throw new Error('Cannot mark as completed without persona_profile');
+  }
+
+  if (updateData.status === 'failed' && updateData.persona_profile && !updateData.error_message) {
+    throw new Error('Failed status requires error_message');
+  }
+
+  // 4. Validate persona profile updates
+  if (updateData.persona_profile && typeof updateData.persona_profile === 'object') {
+    const requiredFields = ['archetype', 'shortSummary', 'strengths', 'weaknesses', 'careerRecommendation'];
+    const missingFields = requiredFields.filter(field => !updateData.persona_profile[field]);
+
+    if (missingFields.length > 0) {
+      throw new Error(`Updated persona profile missing required fields: ${missingFields.join(', ')}`);
+    }
+  }
+
+  // 5. Prevent unauthorized modifications
+  if (updateData.user_id && updateData.user_id !== existingResult.user_id) {
+    throw new Error('Cannot change user_id of existing result');
+  }
+
+  if (updateData.created_at) {
+    throw new Error('Cannot modify created_at timestamp');
+  }
+
+  logger.debug('Update business logic validation passed', {
+    resultId: existingResult.id,
+    updateFields: Object.keys(updateData),
+    currentStatus: existingResult.status,
+    newStatus: updateData.status
+  });
+};
+
 // Batch processing configuration (UPDATED)
 const BATCH_CONFIG = {
   MAX_BATCH_SIZE: parseInt(process.env.BATCH_MAX_SIZE || '100'),  // Naik dari 50 → 100
@@ -273,6 +423,9 @@ const createResult = async (data, options = {}) => {
   const { useBatching = true } = options;
 
   try {
+    // Business logic validation
+    await validateBusinessLogic(data);
+
     logger.info('Creating new analysis result', {
       userId: data.user_id,
       status: data.status,
@@ -447,18 +600,21 @@ const updateResult = async (resultId, updateData, userId = null, isInternalServi
       isInternalService,
       updateFields: Object.keys(updateData)
     });
-    
+
     const result = await AnalysisResult.findByPk(resultId);
-    
+
     if (!result) {
       throw new NotFoundError('Analysis result not found');
     }
-    
+
     // Check access permissions (skip for internal services)
     if (!isInternalService && userId && result.user_id !== userId) {
       throw new ForbiddenError('You do not have access to this analysis result');
     }
-    
+
+    // Business logic validation for updates
+    await validateUpdateBusinessLogic(updateData, result);
+
     // Update the result
     await result.update(updateData);
     

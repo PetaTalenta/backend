@@ -10,6 +10,7 @@
     "test:db": "node scripts/test-database.js",
     "test:api": "node scripts/test-api.js",
     "test:integration": "node scripts/test-integration.js",
+    "test:validation": "node scripts/test-validation.js",
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
     "seed": "npx sequelize-cli db:seed:all",

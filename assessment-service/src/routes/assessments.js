@@ -43,7 +43,7 @@ router.post('/callback/completed', async(req, res, next) => {
     }
 
     // Update job status in local tracker
-    const updatedJob = jobTracker.updateJobStatus(jobId, status, 100);
+    const updatedJob = jobTracker.updateJobStatus(jobId, status, 100, null, resultId);
 
     if (!updatedJob) {
       return sendNotFound(res, 'Job not found in local tracker');
@@ -113,7 +113,7 @@ router.post('/callback/failed', async(req, res, next) => {
     }
 
     // Update job status to failed
-    const updatedJob = jobTracker.updateJobStatus(jobId, status, 0, errorMessage);
+    const updatedJob = jobTracker.updateJobStatus(jobId, status, 0, errorMessage, resultId);
 
     // Refund tokens to user
     try {
@@ -238,7 +238,7 @@ router.post('/submit',
     }
 
     // Create job in local tracker
-    jobTracker.createJob(jobId, userId, userEmail, assessmentData);
+    jobTracker.createJob(jobId, userId, userEmail, assessmentData, finalAssessmentName);
 
     // Publish job to queue with the same jobId
     await queueService.publishAssessmentJob(assessmentData, userId, userEmail, jobId, finalAssessmentName);
@@ -305,13 +305,15 @@ router.get('/status/:jobId', async(req, res, next) => {
       estimatedTimeRemaining: job.estimatedTimeRemaining,
       queuePosition: job.status === 'queued' ? queueStats.messageCount : 0,
       userId: job.userId,
-      userEmail: job.userEmail
+      userEmail: job.userEmail,
+      resultId: job.resultId || null,
+      assessmentName: job.assessmentName || 'AI-Driven Talent Mapping'
     };
 
-    // Add archive data if available
+    // Override with archive data if available (more authoritative)
     if (archiveJobData) {
-      response.resultId = archiveJobData.result_id;
-      response.assessmentName = archiveJobData.assessment_name;
+      response.resultId = archiveJobData.result_id || response.resultId;
+      response.assessmentName = archiveJobData.assessment_name || response.assessmentName;
     }
 
     // Add error message if job failed
@@ -372,13 +374,13 @@ router.get('/queue/status', async(req, res, next) => {
  * @description Check idempotency service health
  * @access Private
  */
-router.get('/idempotency/health', idempotencyHealthCheck);
+router.get('/idempotency/health', authenticateToken, idempotencyHealthCheck);
 
 /**
  * @route POST /assessment/idempotency/cleanup
  * @description Cleanup expired idempotency cache entries
  * @access Private (Internal use)
  */
-router.post('/idempotency/cleanup', cleanupExpiredCache);
+router.post('/idempotency/cleanup', authenticateToken, cleanupExpiredCache);
 
 module.exports = router;

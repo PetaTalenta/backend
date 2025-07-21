@@ -49,8 +49,13 @@ School.prototype.toJSON = function() {
 
 // Class methods
 School.associate = function(models) {
-  // Schools can be related to UserProfiles through school_origin field
-  // This would be a manual relationship since school_origin is a string field
+  // School has many UserProfiles
+  School.hasMany(models.UserProfile, {
+    foreignKey: 'school_id',
+    as: 'userProfiles',
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL'
+  });
 };
 
 module.exports = School;

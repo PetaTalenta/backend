@@ -36,7 +36,7 @@ const UserProfile = sequelize.define('UserProfile', {
     type: DataTypes.STRING(10),
     allowNull: true,
     validate: {
-      isIn: [['male', 'female', 'other', 'prefer_not_to_say']]
+      isIn: [['male', 'female']]
     }
   },
   school_id: {

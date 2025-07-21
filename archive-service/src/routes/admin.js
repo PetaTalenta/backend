@@ -2,6 +2,7 @@ const express = require('express');
 const adminUserController = require('../controllers/adminUserController');
 const { authenticateAdmin, requireAdminRole } = require('../middleware/adminAuth');
 const { authenticateService } = require('../middleware/serviceAuth');
+const { validateBody, validateQuery, validateParams } = require('../middleware/validation');
 const Joi = require('joi');
 
 const router = express.Router();
@@ -40,78 +41,7 @@ const uuidParamSchema = Joi.object({
     })
 });
 
-// Validation middleware
-const validateQuery = (schema) => {
-  return (req, res, next) => {
-    const { error, value } = schema.validate(req.query, {
-      abortEarly: false,
-      stripUnknown: true
-    });
-
-    if (error) {
-      const errorDetails = error.details.map(detail => detail.message);
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Query validation failed',
-          details: errorDetails
-        }
-      });
-    }
-
-    req.query = value;
-    next();
-  };
-};
-
-const validateParams = (schema) => {
-  return (req, res, next) => {
-    const { error, value } = schema.validate(req.params, {
-      abortEarly: false,
-      stripUnknown: true
-    });
-
-    if (error) {
-      const errorDetails = error.details.map(detail => detail.message);
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Parameter validation failed',
-          details: errorDetails
-        }
-      });
-    }
-
-    req.params = value;
-    next();
-  };
-};
-
-const validateBody = (schema) => {
-  return (req, res, next) => {
-    const { error, value } = schema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true
-    });
-
-    if (error) {
-      const errorDetails = error.details.map(detail => detail.message);
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Body validation failed',
-          details: errorDetails
-        }
-      });
-    }
-
-    req.body = value;
-    next();
-  };
-};
+// Validation middleware is now imported from '../middleware/validation'
 
 /**
  * GET /admin/users

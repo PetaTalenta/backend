@@ -20,6 +20,7 @@ const backgroundProcessor = require('./services/backgroundProcessor');
 const { metricsMiddleware, cacheMetricsMiddleware } = require('./middleware/metricsMiddleware');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { handleAuthError } = require('./middleware/auth');
+const { sanitizeRequest, validateRequestSize, addSecurityHeaders } = require('./middleware/security');
 
 // Import routes
 const resultsRoutes = require('./routes/results');
@@ -44,6 +45,14 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 
+// Security middleware
+app.use(addSecurityHeaders);
+app.use(validateRequestSize({
+  maxBodySize: 10 * 1024 * 1024, // 10MB
+  maxQueryParams: 50,
+  maxQueryStringLength: 2048
+}));
+
 // Response compression middleware - reduces bandwidth usage by 60-80%
 app.use(compression({
   level: 6,
@@ -58,6 +67,9 @@ app.use(compression({
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Request sanitization middleware
+app.use(sanitizeRequest);
 
 // HTTP request logging
 app.use(morgan('combined', {

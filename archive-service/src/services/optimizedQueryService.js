@@ -211,7 +211,7 @@ class OptimizedQueryService {
       }
 
       if (schoolOrigin) {
-        whereConditions.push('up.school_origin ILIKE :schoolOrigin');
+        whereConditions.push('s.name ILIKE :schoolOrigin');
         replacements.schoolOrigin = `%${schoolOrigin}%`;
       }
 
@@ -219,25 +219,26 @@ class OptimizedQueryService {
 
       const results = await sequelize.query(`
         WITH demographic_data AS (
-          SELECT 
+          SELECT
             ar.persona_profile->>'archetype' as archetype,
             up.gender,
             EXTRACT(YEAR FROM AGE(up.date_of_birth)) as age,
-            up.school_origin,
+            s.name as school_name,
             ar.created_at
           FROM archive.analysis_results ar
           INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
+          LEFT JOIN public.schools s ON up.school_id = s.id
           WHERE ${whereClause}
           LIMIT :limit
         )
-        SELECT 
+        SELECT
           archetype,
           gender,
           COUNT(*) as count,
           ROUND(AVG(age), 1) as avg_age,
           MIN(age) as min_age,
           MAX(age) as max_age,
-          COUNT(DISTINCT school_origin) as unique_schools,
+          COUNT(DISTINCT school_name) as unique_schools,
           ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as percentage
         FROM demographic_data
         WHERE archetype IS NOT NULL

@@ -1,27 +1,68 @@
 /**
- * Archive Service Integration
+ * Optimized Archive Service Integration with Circuit Breaker and Connection Pooling
  */
 
 const axios = require('axios');
+const http = require('http');
+const https = require('https');
 const logger = require('../utils/logger');
 
-// Archive service configuration
-const config = {
-  baseURL: process.env.ARCHIVE_SERVICE_URL || 'http://localhost:3002/archive',
-  serviceKey: process.env.INTERNAL_SERVICE_KEY || 'internal_service_secret_key_change_in_production',
-  timeout: 30000 // 30 seconds
+// Circuit breaker state
+let circuitBreakerState = {
+  isOpen: false,
+  failureCount: 0,
+  lastFailureTime: null,
+  successCount: 0
 };
 
-// Create axios instance
+// Configuration
+const config = {
+  // Use direct routes for better performance (no /archive prefix)
+  baseURL: process.env.ARCHIVE_SERVICE_URL || 'http://localhost:3002',
+  serviceKey: process.env.INTERNAL_SERVICE_KEY || 'internal_service_secret_key_change_in_production',
+  timeout: parseInt(process.env.ARCHIVE_TIMEOUT || '30000'),
+  retryAttempts: parseInt(process.env.ARCHIVE_RETRY_ATTEMPTS || '3'),
+  retryDelay: parseInt(process.env.ARCHIVE_RETRY_DELAY || '1000'),
+  circuitBreakerThreshold: parseInt(process.env.CIRCUIT_BREAKER_THRESHOLD || '5'),
+  circuitBreakerTimeout: parseInt(process.env.CIRCUIT_BREAKER_TIMEOUT || '60000'),
+  batchSize: parseInt(process.env.ARCHIVE_BATCH_SIZE || '10'),
+  batchInterval: parseInt(process.env.ARCHIVE_BATCH_INTERVAL || '5000')
+};
+
+// Create HTTP agents with connection pooling
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  maxSockets: 50,
+  maxFreeSockets: 10,
+  timeout: config.timeout,
+  freeSocketTimeout: 30000
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 50,
+  maxFreeSockets: 10,
+  timeout: config.timeout,
+  freeSocketTimeout: 30000
+});
+
+// Create optimized axios instance
 const archiveClient = axios.create({
   baseURL: config.baseURL,
   timeout: config.timeout,
+  httpAgent: httpAgent,
+  httpsAgent: httpsAgent,
   headers: {
     'Content-Type': 'application/json',
     'X-Internal-Service': 'true',
-    'X-Service-Key': config.serviceKey
+    'X-Service-Key': config.serviceKey,
+    'Connection': 'keep-alive'
   }
 });
+
+// Batch processing queue
+let batchQueue = [];
+let batchTimer = null;
 
 // Add request interceptor for logging
 archiveClient.interceptors.request.use(
@@ -61,20 +102,216 @@ archiveClient.interceptors.response.use(
 );
 
 /**
- * Save analysis result to Archive Service
+ * Circuit breaker functions
+ */
+const isCircuitBreakerOpen = () => {
+  if (!circuitBreakerState.isOpen) return false;
+
+  const timeSinceLastFailure = Date.now() - circuitBreakerState.lastFailureTime;
+  if (timeSinceLastFailure > config.circuitBreakerTimeout) {
+    // Reset circuit breaker after timeout
+    circuitBreakerState.isOpen = false;
+    circuitBreakerState.failureCount = 0;
+    circuitBreakerState.successCount = 0;
+    logger.info('Circuit breaker reset after timeout');
+    return false;
+  }
+
+  return true;
+};
+
+const recordSuccess = () => {
+  circuitBreakerState.successCount++;
+  if (circuitBreakerState.isOpen && circuitBreakerState.successCount >= 3) {
+    circuitBreakerState.isOpen = false;
+    circuitBreakerState.failureCount = 0;
+    logger.info('Circuit breaker closed after successful requests');
+  }
+};
+
+const recordFailure = () => {
+  circuitBreakerState.failureCount++;
+  circuitBreakerState.lastFailureTime = Date.now();
+  circuitBreakerState.successCount = 0;
+
+  if (circuitBreakerState.failureCount >= config.circuitBreakerThreshold) {
+    circuitBreakerState.isOpen = true;
+    logger.warn('Circuit breaker opened due to failures', {
+      failureCount: circuitBreakerState.failureCount,
+      threshold: config.circuitBreakerThreshold
+    });
+  }
+};
+
+/**
+ * Check if error is retryable
+ */
+const isRetryableError = (error) => {
+  if (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+    return true;
+  }
+  if (error.response && error.response.status >= 500) {
+    return true;
+  }
+  if (error.code === 'ECONNABORTED') {
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Retry with exponential backoff
+ */
+const withRetry = async (operation, maxRetries = config.retryAttempts) => {
+  if (isCircuitBreakerOpen()) {
+    throw new Error('Circuit breaker is open - Archive service unavailable');
+  }
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await operation();
+      recordSuccess();
+      return result;
+    } catch (error) {
+      recordFailure();
+
+      if (attempt === maxRetries || !isRetryableError(error)) {
+        throw error;
+      }
+
+      const delay = config.retryDelay * Math.pow(2, attempt - 1);
+      logger.warn(`Archive service request failed, retrying in ${delay}ms`, {
+        attempt,
+        maxRetries,
+        error: error.message
+      });
+
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
+
+/**
+ * Batch processing functions
+ */
+const processBatch = async () => {
+  if (batchQueue.length === 0) return;
+
+  const batch = batchQueue.splice(0, config.batchSize);
+
+  try {
+    logger.info('Processing batch of results', { batchSize: batch.length });
+
+    const response = await withRetry(() =>
+      archiveClient.post('/results/batch', { results: batch })
+    );
+
+    logger.info('Batch processed successfully', {
+      batchSize: batch.length,
+      successful: response.data.data.successful,
+      failed: response.data.data.failed
+    });
+
+    return response.data.data;
+  } catch (error) {
+    logger.error('Batch processing failed', {
+      batchSize: batch.length,
+      error: error.message
+    });
+
+    // Re-queue failed items for individual processing
+    for (const item of batch) {
+      try {
+        await saveAnalysisResultDirect(
+          item.user_id,
+          item.assessment_data,
+          item.persona_profile,
+          item.jobId,
+          item.assessment_name
+        );
+      } catch (individualError) {
+        logger.error('Individual fallback processing failed', {
+          userId: item.user_id,
+          jobId: item.jobId,
+          error: individualError.message
+        });
+      }
+    }
+  }
+};
+
+const addToBatch = (userId, assessmentData, personaProfile, jobId, assessmentName) => {
+  // Generate UUID immediately for proper tracking
+  const { v4: uuidv4 } = require('uuid');
+  const resultId = uuidv4();
+
+  batchQueue.push({
+    id: resultId, // Pre-generated UUID
+    user_id: userId,
+    assessment_data: assessmentData,
+    persona_profile: personaProfile,
+    assessment_name: assessmentName,
+    status: personaProfile ? 'completed' : 'failed',
+    jobId // For logging purposes
+  });
+
+  // Start batch timer if not already running
+  if (!batchTimer) {
+    batchTimer = setTimeout(() => {
+      processBatch();
+      batchTimer = null;
+    }, config.batchInterval);
+  }
+
+  // Process immediately if batch is full
+  if (batchQueue.length >= config.batchSize) {
+    clearTimeout(batchTimer);
+    batchTimer = null;
+    processBatch();
+  }
+
+  // Return the generated UUID
+  return resultId;
+};
+
+/**
+ * Save analysis result to Archive Service (with batching)
  * @param {String} userId - User ID
  * @param {Object} assessmentData - Assessment data
  * @param {Object} personaProfile - Persona profile
  * @param {String} jobId - Job ID for logging
  * @param {String} assessmentName - Assessment name
+ * @param {Boolean} forceDirect - Force direct save (skip batching)
  * @returns {Promise<Object>} - Save result
  */
-const saveAnalysisResult = async (userId, assessmentData, personaProfile, jobId, assessmentName = 'AI-Driven Talent Mapping') => {
-  try {
+const saveAnalysisResult = async (userId, assessmentData, personaProfile, jobId, assessmentName = 'AI-Driven Talent Mapping', forceDirect = false) => {
+  // Use batching for better performance unless forced direct
+  if (!forceDirect && process.env.ENABLE_BATCH_PROCESSING !== 'false') {
+    const resultId = addToBatch(userId, assessmentData, personaProfile, jobId, assessmentName);
+
+    // Return response with proper UUID for batched items
+    return {
+      success: true,
+      id: resultId, // Use the pre-generated UUID
+      status: personaProfile ? 'completed' : 'failed',
+      created_at: new Date().toISOString(),
+      batched: true
+    };
+  }
+
+  // Direct processing
+  return saveAnalysisResultDirect(userId, assessmentData, personaProfile, jobId, assessmentName);
+};
+
+/**
+ * Save analysis result directly (no batching)
+ */
+const saveAnalysisResultDirect = async (userId, assessmentData, personaProfile, jobId, assessmentName = 'AI-Driven Talent Mapping') => {
+  return withRetry(async () => {
     logger.info('Saving analysis result to Archive Service', {
       jobId,
       userId,
-      profileArchetype: personaProfile.archetype
+      profileArchetype: personaProfile?.archetype
     });
 
     // Prepare request body
@@ -86,7 +323,7 @@ const saveAnalysisResult = async (userId, assessmentData, personaProfile, jobId,
       status: 'completed'
     };
 
-    // Send request to Archive Service
+    // Send request to Archive Service using direct route
     const response = await archiveClient.post('/results', requestBody);
 
     logger.info('Analysis result saved successfully', {
@@ -102,26 +339,7 @@ const saveAnalysisResult = async (userId, assessmentData, personaProfile, jobId,
       status: response.data.data.status,
       created_at: response.data.data.created_at
     };
-
-  } catch (error) {
-    logger.error('Failed to save analysis result', {
-      jobId,
-      userId,
-      error: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText
-    });
-
-    // Check if it's a retryable error
-    const isRetryable = isRetryableError(error);
-
-    throw {
-      message: error.message,
-      isRetryable,
-      status: error.response?.status,
-      originalError: error
-    };
-  }
+  });
 };
 
 /**
@@ -132,7 +350,7 @@ const saveAnalysisResult = async (userId, assessmentData, personaProfile, jobId,
  * @returns {Promise<Object>} - Update result
  */
 const updateAnalysisResult = async (resultId, status, jobId) => {
-  try {
+  return withRetry(async () => {
     logger.info('Updating analysis result status', {
       jobId,
       resultId,
@@ -140,11 +358,9 @@ const updateAnalysisResult = async (resultId, status, jobId) => {
     });
 
     // Prepare request body
-    const requestBody = {
-      status
-    };
+    const requestBody = { status };
 
-    // Send request to Archive Service
+    // Send request to Archive Service using direct route
     const response = await archiveClient.put(`/results/${resultId}`, requestBody);
 
     logger.info('Analysis result status updated successfully', {
@@ -158,48 +374,7 @@ const updateAnalysisResult = async (resultId, status, jobId) => {
       id: response.data.data.id,
       updated_at: response.data.data.updated_at
     };
-
-  } catch (error) {
-    logger.error('Failed to update analysis result status', {
-      jobId,
-      resultId,
-      status,
-      error: error.message,
-      responseStatus: error.response?.status
-    });
-
-    throw {
-      message: error.message,
-      isRetryable: isRetryableError(error),
-      status: error.response?.status,
-      originalError: error
-    };
-  }
-};
-
-/**
- * Check if error is retryable
- * @param {Error} error - Error object
- * @returns {boolean} - Whether error is retryable
- */
-const isRetryableError = (error) => {
-  // Network errors are retryable
-  if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT') {
-    return true;
-  }
-
-  // HTTP 5xx errors are retryable
-  if (error.response && error.response.status >= 500) {
-    return true;
-  }
-
-  // HTTP 429 (Too Many Requests) is retryable
-  if (error.response && error.response.status === 429) {
-    return true;
-  }
-
-  // Other errors are not retryable
-  return false;
+  });
 };
 
 /**
@@ -212,7 +387,7 @@ const isRetryableError = (error) => {
  * @returns {Promise<Object>} - Save result
  */
 const saveFailedAnalysisResult = async (userId, assessmentData, errorMessage, jobId, assessmentName = 'AI-Driven Talent Mapping') => {
-  try {
+  return withRetry(async () => {
     logger.info('Saving failed analysis result to Archive Service', {
       jobId,
       userId,
@@ -229,7 +404,7 @@ const saveFailedAnalysisResult = async (userId, assessmentData, errorMessage, jo
       error_message: errorMessage
     };
 
-    // Send request to Archive Service
+    // Send request to Archive Service using direct route
     const response = await archiveClient.post('/results', requestBody);
 
     logger.info('Failed analysis result saved successfully', {
@@ -245,26 +420,7 @@ const saveFailedAnalysisResult = async (userId, assessmentData, errorMessage, jo
       status: response.data.data.status,
       created_at: response.data.data.created_at
     };
-
-  } catch (error) {
-    logger.error('Failed to save failed analysis result', {
-      jobId,
-      userId,
-      error: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText
-    });
-
-    // Check if it's a retryable error
-    const isRetryable = isRetryableError(error);
-
-    throw {
-      message: error.message,
-      isRetryable,
-      status: error.response?.status,
-      originalError: error
-    };
-  }
+  });
 };
 
 /**
@@ -277,14 +433,14 @@ const checkHealth = async () => {
       timeout: 5000 // 5 seconds for health check
     });
 
+    recordSuccess();
     return response.status === 200;
   } catch (error) {
+    recordFailure();
     logger.error('Archive Service health check failed', { error: error.message });
     return false;
   }
 };
-
-// createAnalysisJob method removed - jobs are now created by Assessment Service
 
 /**
  * Update analysis job status in Archive Service
@@ -295,19 +451,22 @@ const checkHealth = async () => {
  */
 const updateAnalysisJobStatus = async (jobId, status, additionalData = {}) => {
   try {
-    logger.info('Updating analysis job status', { jobId, status });
+    return await withRetry(async () => {
+      logger.info('Updating analysis job status', { jobId, status });
 
-    const requestBody = { status, ...additionalData };
-    const response = await archiveClient.put(`/jobs/${jobId}/status`, requestBody);
+      const requestBody = { status, ...additionalData };
+      // Use direct route for better performance
+      const response = await archiveClient.put(`/jobs/${jobId}/status`, requestBody);
 
-    logger.info('Analysis job status updated successfully', { jobId, status });
-    return response.data.data;
+      logger.info('Analysis job status updated successfully', { jobId, status });
+      return response.data.data;
+    });
   } catch (error) {
     logger.error('Failed to update analysis job status', {
       jobId,
       status,
       error: error.message,
-      status: error.response?.status,
+      responseStatus: error.response?.status,
       statusText: error.response?.statusText
     });
     // Don't throw error - allow processing to continue
@@ -315,10 +474,42 @@ const updateAnalysisJobStatus = async (jobId, status, additionalData = {}) => {
   }
 };
 
+/**
+ * Force process current batch (for graceful shutdown)
+ */
+const flushBatch = async () => {
+  if (batchTimer) {
+    clearTimeout(batchTimer);
+    batchTimer = null;
+  }
+
+  if (batchQueue.length > 0) {
+    logger.info('Flushing remaining batch items', { count: batchQueue.length });
+    await processBatch();
+  }
+};
+
+/**
+ * Get circuit breaker status
+ */
+const getCircuitBreakerStatus = () => {
+  return {
+    isOpen: circuitBreakerState.isOpen,
+    failureCount: circuitBreakerState.failureCount,
+    successCount: circuitBreakerState.successCount,
+    lastFailureTime: circuitBreakerState.lastFailureTime
+  };
+};
+
 module.exports = {
   saveAnalysisResult,
+  saveAnalysisResultDirect,
   saveFailedAnalysisResult,
   updateAnalysisResult,
   checkHealth,
-  updateAnalysisJobStatus
+  updateAnalysisJobStatus,
+  flushBatch,
+  getCircuitBreakerStatus,
+  // Expose config for testing
+  config
 };

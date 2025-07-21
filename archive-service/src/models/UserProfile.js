@@ -18,10 +18,14 @@ const UserProfile = sequelize.define('UserProfile', {
     allowNull: true,
     field: 'full_name'
   },
-  school_origin: {
-    type: DataTypes.STRING(150),
+  school_id: {
+    type: DataTypes.INTEGER,
     allowNull: true,
-    field: 'school_origin'
+    field: 'school_id',
+    references: {
+      model: 'schools',
+      key: 'id'
+    }
   },
   date_of_birth: {
     type: DataTypes.DATEONLY,
@@ -57,12 +61,13 @@ UserProfile.prototype.toJSON = function() {
 
 // Class methods
 UserProfile.associate = function(models) {
-  // TODO: Fix association issues
-  // UserProfile.hasMany(models.AnalysisResult, {
-  //   foreignKey: 'user_id',
-  //   sourceKey: 'user_id',
-  //   as: 'analysisResults'
-  // });
+  // UserProfile belongs to School
+  UserProfile.belongsTo(models.School, {
+    foreignKey: 'school_id',
+    as: 'school',
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL'
+  });
 };
 
 module.exports = UserProfile;

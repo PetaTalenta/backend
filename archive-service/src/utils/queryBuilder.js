@@ -11,8 +11,8 @@ const { sequelize } = require('../config/database');
  * @returns {Object} - { whereClause, replacements }
  */
 const buildDemographicFilters = (filters = {}) => {
-  const { gender, ageRange, schoolOrigin, archetype, status = 'completed' } = filters;
-  
+  const { gender, ageRange, schoolId, schoolName, archetype, status = 'completed' } = filters;
+
   let whereClause = 'ar.status = :status';
   const replacements = { status };
 
@@ -31,9 +31,14 @@ const buildDemographicFilters = (filters = {}) => {
     replacements.maxDate = `${maxBirthYear}-12-31`;
   }
 
-  if (schoolOrigin) {
-    whereClause += ' AND up.school_origin ILIKE :schoolOrigin';
-    replacements.schoolOrigin = `%${schoolOrigin}%`;
+  if (schoolId) {
+    whereClause += ' AND up.school_id = :schoolId';
+    replacements.schoolId = schoolId;
+  }
+
+  if (schoolName) {
+    whereClause += ' AND s.name ILIKE :schoolName';
+    replacements.schoolName = `%${schoolName}%`;
   }
 
   if (archetype) {
@@ -67,7 +72,7 @@ const executeDemographicAnalysis = async (filters = {}, options = {}) => {
   `;
 
   if (includeSchool) {
-    selectClause += ', up.school_origin';
+    selectClause += ', s.name as school_name, s.city as school_city, s.province as school_province';
   }
 
   if (includeAge) {
@@ -79,6 +84,7 @@ const executeDemographicAnalysis = async (filters = {}, options = {}) => {
     SELECT ${selectClause}
     FROM archive.analysis_results ar
     INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
+    ${includeSchool ? 'LEFT JOIN public.schools s ON up.school_id = s.id' : ''}
     WHERE ${whereClause}
     ORDER BY ar.created_at DESC
     LIMIT :limit
@@ -136,7 +142,7 @@ const executeArchetypeDistribution = async (options = {}) => {
       COUNT(CASE WHEN up.gender = 'male' THEN 1 END) as male_count,
       COUNT(CASE WHEN up.gender = 'female' THEN 1 END) as female_count,
       ROUND(AVG(EXTRACT(YEAR FROM AGE(up.date_of_birth))), 1) as avg_age,
-      COUNT(DISTINCT up.school_origin) as unique_schools
+      COUNT(DISTINCT up.school_id) as unique_schools
     `;
   }
 

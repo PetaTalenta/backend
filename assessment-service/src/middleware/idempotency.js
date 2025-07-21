@@ -148,15 +148,12 @@ const idempotencyHealthCheck = async (req, res) => {
 
     return res.json({
       success: true,
-      message: 'Idempotency service is healthy',
+      message: 'Idempotency service health check completed',
       data: {
-        enabled: true,
         status: 'healthy',
-        cacheStats: stats,
-        config: {
-          ttlHours: process.env.IDEMPOTENCY_TTL_HOURS || '24',
-          maxCacheSize: process.env.IDEMPOTENCY_MAX_CACHE_SIZE || '10000'
-        }
+        cacheSize: stats.totalEntries,
+        expiredEntries: stats.expiredEntries,
+        lastCleanup: new Date().toISOString() // This would be better if tracked in the service
       }
     });
 
@@ -185,11 +182,16 @@ const cleanupExpiredCache = async (req, res) => {
   try {
     const deletedCount = await idempotencyService.cleanupExpired();
 
+    // Get remaining entries count after cleanup
+    const stats = await idempotencyService.getCacheStats();
+    const remainingEntries = stats.totalEntries;
+
     return res.json({
       success: true,
-      message: 'Cache cleanup completed',
+      message: 'Idempotency cache cleanup completed',
       data: {
-        deletedEntries: deletedCount
+        removedEntries: deletedCount,
+        remainingEntries: remainingEntries
       }
     });
 
