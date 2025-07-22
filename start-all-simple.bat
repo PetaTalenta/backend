@@ -7,7 +7,7 @@ echo ========================================
 echo.
 
 REM Configuration
-set WORKER_COUNT=5
+set WORKER_COUNT=1
 set WORKER_CONCURRENCY=10
 
 echo Configuration:
