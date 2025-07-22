@@ -31,23 +31,9 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// CORS configuration
+// CORS configuration - Allow all origins
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (config.cors.allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    // In development, allow localhost with any port
-    if (config.nodeEnv === 'development' && origin.includes('localhost')) {
-      return callback(null, true);
-    }
-    
-    return callback(new Error('Not allowed by CORS'));
-  },
+  origin: true, // Allow all origins
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Service-Key', 'X-Internal-Service']

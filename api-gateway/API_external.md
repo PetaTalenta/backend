@@ -44,18 +44,14 @@ X-Internal-Service: true
 | Endpoint Type | Limit | Window |
 |---------------|-------|--------|
 | General Gateway | 5000 requests | 15 minutes |
-| Auth Endpoints | 100 requests | 15 minutes |
-| Admin Endpoints | 50 requests | 15 minutes |
-| Assessment Endpoints | 100 requests | 15 minutes |
+| Auth Endpoints | 2500 requests | 15 minutes |
+| Admin Endpoints | 1000 requests | 15 minutes |
+| Assessment Endpoints | 1000 requests | 15 minutes |
 | Archive Endpoints | 5000 requests | 15 minutes |
 
 ## 🌐 CORS Configuration
 
-**Allowed Origins:**
-- `http://localhost:3000`
-- `http://localhost:8080`
-- `http://localhost:5173`
-
+**Allowed Origins:** All origins (`*`) - Unlimited access
 **Allowed Methods:** GET, POST, PUT, DELETE, OPTIONS
 **Allowed Headers:** Content-Type, Authorization, X-Service-Key, X-Internal-Service
 

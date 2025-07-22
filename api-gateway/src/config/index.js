@@ -26,11 +26,13 @@ const config = {
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 5000 // Increased from 1000 to 5000
   },
   
-  // CORS
+  // CORS - Allow all origins
   cors: {
-    allowedOrigins: process.env.ALLOWED_ORIGINS ? 
-      process.env.ALLOWED_ORIGINS.split(',') : 
-      ['http://localhost:3000', 'http://localhost:8080', 'http://localhost:5173']
+    allowedOrigins: process.env.ALLOWED_ORIGINS === '*' ?
+      '*' :
+      (process.env.ALLOWED_ORIGINS ?
+        process.env.ALLOWED_ORIGINS.split(',') :
+        ['*']) // Default to allow all origins
   },
   
   // Logging

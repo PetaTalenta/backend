@@ -1,0 +1,389 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: atma-postgres
+    environment:
+      POSTGRES_DB: atma_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: atma_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./current_database_dump.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./production_database_init.sql:/docker-entrypoint-initdb.d/02-production-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d atma_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - atma-network
+
+  # Message Queue
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    container_name: atma-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: atma_user
+      RABBITMQ_DEFAULT_PASS: atma_password
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - atma-network
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: atma-auth-service
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: atma_db
+      DB_USER: postgres
+      DB_PASSWORD: atma_password
+      DB_DIALECT: postgres
+      DB_SCHEMA: auth
+      JWT_SECRET: atma_super_secret_jwt_key_production_2024
+      JWT_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: 10
+      DEFAULT_TOKEN_BALANCE: 5
+      INTERNAL_SERVICE_KEY: internal_service_secret_production_2024
+      LOG_LEVEL: info
+      LOG_FILE: logs/auth-service.log
+      ASYNC_LAST_LOGIN: true
+      ENABLE_QUERY_CACHE: true
+      ENABLE_PERFORMANCE_MONITORING: true
+      DB_POOL_MAX: 25
+      DB_POOL_MIN: 5
+      DB_POOL_ACQUIRE: 60000
+      DB_POOL_IDLE: 30000
+      # Redis Configuration (disabled since no Redis in compose)
+      REDIS_HOST: ""
+      REDIS_PORT: ""
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
+      REDIS_KEY_PREFIX: "atma:auth:"
+      # Cache Configuration (disabled since no Redis)
+      CACHE_TTL_USER: 3600
+      CACHE_TTL_JWT: 1800
+      CACHE_TTL_SESSION: 7200
+      ENABLE_CACHE: false
+      ENABLE_USER_CACHE: false
+      USER_CACHE_MAX_SIZE: 1000
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./auth-service/logs:/app/logs
+    networks:
+      - atma-network
+    restart: unless-stopped
+
+  # Archive Service
+  archive-service:
+    build:
+      context: ./archive-service
+      dockerfile: Dockerfile
+    container_name: atma-archive-service
+    environment:
+      PORT: 3002
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: atma_db
+      DB_USER: postgres
+      DB_PASSWORD: atma_password
+      DB_DIALECT: postgres
+      DB_SCHEMA: archive
+      JWT_SECRET: atma_super_secret_jwt_key_production_2024
+      AUTH_SERVICE_URL: http://auth-service:3001
+      INTERNAL_SERVICE_KEY: internal_service_secret_production_2024
+      DEFAULT_PAGE_SIZE: 10
+      MAX_PAGE_SIZE: 100
+      LOG_LEVEL: info
+      LOG_FILE: logs/archive-service.log
+      CORS_ORIGIN: "*"
+      # Batch Processing Configuration
+      BATCH_MAX_SIZE: 100
+      BATCH_TIMEOUT: 2000
+      BATCH_MAX_QUEUE_SIZE: 2000
+      # Database Pool Optimization
+      DB_POOL_MAX: 100
+      DB_POOL_MIN: 20
+      DB_POOL_ACQUIRE: 20000
+      DB_POOL_IDLE: 15000
+      DB_POOL_EVICT: 3000
+      # RabbitMQ Configuration
+      RABBITMQ_URL: amqp://atma_user:atma_password@rabbitmq:5672
+      EVENTS_EXCHANGE_NAME: atma_events_exchange
+      EVENTS_QUEUE_NAME_ARCHIVE: analysis_events_archive
+      CONSUMER_PREFETCH: 10
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./archive-service/logs:/app/logs
+    networks:
+      - atma-network
+    restart: unless-stopped
+
+  # Assessment Service
+  assessment-service:
+    build:
+      context: ./assessment-service
+      dockerfile: Dockerfile
+    container_name: atma-assessment-service
+    environment:
+      PORT: 3003
+      NODE_ENV: production
+      JWT_SECRET: atma_super_secret_jwt_key_production_2024
+      # RabbitMQ Configuration
+      RABBITMQ_URL: amqp://atma_user:atma_password@rabbitmq:5672
+      RABBITMQ_USER: atma_user
+      RABBITMQ_PASSWORD: atma_password
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      # Service URLs
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      # Token Cost Configuration
+      ANALYSIS_TOKEN_COST: 1
+      # Queue Configuration
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      # Event-Driven Architecture Configuration
+      EVENTS_EXCHANGE_NAME: atma_events_exchange
+      EVENTS_QUEUE_NAME_ASSESSMENTS: analysis_events_assessments
+      CONSUMER_PREFETCH: 10
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: atma_db
+      DB_USER: postgres
+      DB_PASSWORD: atma_password
+      DB_DIALECT: postgres
+      DB_SCHEMA: assessment
+      DB_POOL_MAX: 25
+      DB_POOL_MIN: 5
+      DB_POOL_ACQUIRE: 30000
+      DB_POOL_IDLE: 20000
+      DB_POOL_EVICT: 5000
+      # Idempotency Configuration
+      IDEMPOTENCY_ENABLED: true
+      IDEMPOTENCY_TTL_HOURS: 24
+      IDEMPOTENCY_MAX_CACHE_SIZE: 10000
+      IDEMPOTENCY_CLEANUP_INTERVAL_MINUTES: 60
+      # Logging Configuration
+      LOG_LEVEL: info
+      LOG_FILE: logs/assessment-service.log
+      # Internal Service Configuration
+      INTERNAL_SERVICE_KEY: internal_service_secret_production_2024
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    volumes:
+      - ./assessment-service/logs:/app/logs
+    networks:
+      - atma-network
+    restart: unless-stopped
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: atma-notification-service
+    environment:
+      PORT: 3005
+      NODE_ENV: production
+      # JWT Configuration
+      JWT_SECRET: atma_super_secret_jwt_key_production_2024
+      # Internal Service Authentication
+      INTERNAL_SERVICE_KEY: internal_service_secret_production_2024
+      # CORS Configuration
+      CORS_ORIGIN: "*"
+      # Logging Configuration
+      LOG_LEVEL: info
+      LOG_FILE: logs/notification-service.log
+      # Socket.IO Configuration
+      SOCKET_PING_TIMEOUT: 60000
+      SOCKET_PING_INTERVAL: 25000
+      # RabbitMQ Configuration for Event-Driven Architecture
+      RABBITMQ_URL: amqp://atma_user:atma_password@rabbitmq:5672
+      EVENTS_EXCHANGE_NAME: atma_events_exchange
+      EVENTS_QUEUE_NAME_NOTIFICATIONS: analysis_events_notifications
+      CONSUMER_PREFETCH: 10
+    ports:
+      - "3005:3005"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./notification-service/logs:/app/logs
+    networks:
+      - atma-network
+    restart: unless-stopped
+
+  # Analysis Worker
+  analysis-worker:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+    container_name: atma-analysis-worker
+    environment:
+      NODE_ENV: production
+      # RabbitMQ Configuration
+      RABBITMQ_URL: amqp://atma_user:atma_password@rabbitmq:5672
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      DEAD_LETTER_QUEUE: assessment_analysis_dlq
+      # Events Configuration for Event-Driven Architecture
+      EVENTS_EXCHANGE_NAME: atma_events_exchange
+      # Worker Configuration
+      WORKER_CONCURRENCY: 5
+      HEARTBEAT_INTERVAL: 300000
+      # Queue Options
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      # Google AI Configuration (you need to set this)
+      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_MODEL: gemini-1.5-flash
+      # Service URLs
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      AUTH_SERVICE_URL: http://auth-service:3001
+      # Internal Service Authentication
+      INTERNAL_SERVICE_KEY: internal_service_secret_production_2024
+      # Logging Configuration
+      LOG_LEVEL: info
+      LOG_FILE: logs/analysis-worker.log
+      # Performance Configuration
+      MAX_RETRIES: 1
+      RETRY_DELAY: 5000
+      PROCESSING_TIMEOUT: 300000
+      # Memory and Performance
+      NODE_OPTIONS: "--max-old-space-size=2048"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      archive-service:
+        condition: service_healthy
+    volumes:
+      - ./analysis-worker/logs:/app/logs
+    networks:
+      - atma-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: atma-api-gateway
+    environment:
+      # API Gateway Configuration
+      PORT: 3000
+      NODE_ENV: production
+      # Service URLs
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      DOCUMENTATION_SERVICE_URL: http://documentation-service
+      # Security
+      JWT_SECRET: atma_super_secret_jwt_key_production_2024
+      INTERNAL_SERVICE_KEY: internal_service_secret_production_2024
+      # Rate Limiting
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 5000
+      # CORS
+      ALLOWED_ORIGINS: "*"
+      # Logging
+      LOG_LEVEL: info
+      LOG_FORMAT: combined
+      # Health Check
+      HEALTH_CHECK_INTERVAL: 30000
+      SERVICE_TIMEOUT: 5000
+    ports:
+      - "3000:3000"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      archive-service:
+        condition: service_healthy
+      assessment-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      documentation-service:
+        condition: service_healthy
+    volumes:
+      - ./api-gateway/logs:/app/logs
+    networks:
+      - atma-network
+    restart: unless-stopped
+
+  # Documentation Service
+  documentation-service:
+    build:
+      context: ./documentation-service
+      dockerfile: Dockerfile
+    container_name: atma-documentation-service
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3006:80"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - atma-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+
+networks:
+  atma-network:
+    driver: bridge

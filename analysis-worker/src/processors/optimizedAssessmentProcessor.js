@@ -277,6 +277,9 @@ const processAssessmentOptimized = async (jobData) => {
       // Mark job as completed in deduplication service
       jobDeduplicationService.markAsCompleted(jobId, deduplicationResult.jobHash, saveResult.id, userId);
 
+      // Calculate processing time
+      const processingTime = Date.now() - startTime;
+
       // Publish analysis completed event (async, non-blocking)
       try {
         const eventPublisher = getEventPublisher();
@@ -324,8 +327,6 @@ const processAssessmentOptimized = async (jobData) => {
           });
       }
 
-      const processingTime = Date.now() - startTime;
-
       // Audit: Job completed
       auditLogger.logJobEvent(AUDIT_EVENTS.JOB_COMPLETED, jobData, {
         resultId: saveResult.id,
@@ -346,13 +347,13 @@ const processAssessmentOptimized = async (jobData) => {
     return result;
 
   } catch (error) {
-    const processingTime = Date.now() - startTime;
+    const errorProcessingTime = Date.now() - startTime;
 
     logger.error('Failed to process assessment job (optimized)', {
       jobId,
       userId,
       error: error.message,
-      processingTime: `${processingTime}ms`
+      processingTime: `${errorProcessingTime}ms`
     });
 
     // Mark job as failed in deduplication service
@@ -374,7 +375,7 @@ const processAssessmentOptimized = async (jobData) => {
     auditLogger.logJobEvent(AUDIT_EVENTS.JOB_FAILED, jobData, {
       error: error.message,
       errorCode: error.code,
-      processingTime,
+      processingTime: errorProcessingTime,
       jobHash: deduplicationResult?.jobHash
     });
 
@@ -401,7 +402,7 @@ const processAssessmentOptimized = async (jobData) => {
         userEmail: jobData.userEmail,
         errorMessage: error.message,
         assessmentName: jobData.assessmentName || 'AI-Driven Talent Mapping',
-        processingTime,
+        processingTime: errorProcessingTime,
         errorType: error.code || 'unknown'
       }).catch(eventError => {
         logger.warn('Failed to publish analysis failed event', {
