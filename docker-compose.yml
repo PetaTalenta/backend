@@ -315,7 +315,7 @@ services:
       GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: false
+      USE_MOCK_MODEL: true
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
@@ -326,7 +326,7 @@ services:
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
-      WORKER_CONCURRENCY: 5
+      WORKER_CONCURRENCY: 10
       MAX_RETRIES: 3
       RETRY_DELAY: 5000
       PROCESSING_TIMEOUT: 1800000
@@ -378,7 +378,7 @@ services:
       GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: false
+      USE_MOCK_MODEL: true
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
@@ -389,7 +389,7 @@ services:
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
-      WORKER_CONCURRENCY: 5
+      WORKER_CONCURRENCY: 10
       MAX_RETRIES: 3
       RETRY_DELAY: 5000
       PROCESSING_TIMEOUT: 1800000
@@ -441,7 +441,7 @@ services:
       GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: false
+      USE_MOCK_MODEL: true
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
@@ -452,7 +452,7 @@ services:
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
-      WORKER_CONCURRENCY: 5
+      WORKER_CONCURRENCY: 10
       MAX_RETRIES: 3
       RETRY_DELAY: 5000
       PROCESSING_TIMEOUT: 1800000
@@ -483,6 +483,447 @@ services:
     volumes:
       - ./analysis-worker/logs:/app/logs/worker-3
 
+  # Analysis Worker - Instance 4
+  analysis-worker-4:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+    container_name: atma-analysis-worker-4
+    environment:
+      NODE_ENV: production
+      WORKER_ID: worker-4
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin123
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      DEAD_LETTER_QUEUE: assessment_analysis_dlq
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_MODEL: gemini-2.5-flash
+      AI_TEMPERATURE: 0.4
+      USE_MOCK_MODEL: true
+      ENABLE_TOKEN_COUNTING: true
+      TOKEN_USAGE_RETENTION_DAYS: 30
+      INPUT_TOKEN_PRICE_PER_1K: 0.30
+      OUTPUT_TOKEN_PRICE_PER_1K: 2.50
+      TOKEN_COUNT_TIMEOUT: 5000
+      ENABLE_TOKEN_COUNT_FALLBACK: true
+      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      WORKER_CONCURRENCY: 10
+      MAX_RETRIES: 3
+      RETRY_DELAY: 5000
+      PROCESSING_TIMEOUT: 1800000
+      HEARTBEAT_INTERVAL: 300000
+      LOG_LEVEL: info
+      LOG_FILE: logs/analysis-worker-4.log
+      DB_BATCH_SIZE: 10
+      DB_BATCH_INTERVAL: 5000
+      HTTP_KEEP_ALIVE: true
+      HTTP_MAX_SOCKETS: 50
+      HTTP_MAX_FREE_SOCKETS: 10
+      RATE_LIMIT_USER_HOUR: 5
+      RATE_LIMIT_IP_HOUR: 20
+      RATE_LIMIT_GLOBAL_MINUTE: 100
+      JOB_CACHE_RETENTION_MS: 3600000
+      MAX_JOB_CACHE_SIZE: 10000
+      AUDIT_LOG_DIR: logs/audit
+      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_RETENTION_DAYS: 2555
+      ENABLE_TOKEN_REFUND: true
+      REFUND_PROCESSING_INTERVAL: 5000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./analysis-worker/logs:/app/logs/worker-4
+
+  # Analysis Worker - Instance 5
+  analysis-worker-5:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+    container_name: atma-analysis-worker-5
+    environment:
+      NODE_ENV: production
+      WORKER_ID: worker-5
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin123
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      DEAD_LETTER_QUEUE: assessment_analysis_dlq
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_MODEL: gemini-2.5-flash
+      AI_TEMPERATURE: 0.4
+      USE_MOCK_MODEL: true
+      ENABLE_TOKEN_COUNTING: true
+      TOKEN_USAGE_RETENTION_DAYS: 30
+      INPUT_TOKEN_PRICE_PER_1K: 0.30
+      OUTPUT_TOKEN_PRICE_PER_1K: 2.50
+      TOKEN_COUNT_TIMEOUT: 5000
+      ENABLE_TOKEN_COUNT_FALLBACK: true
+      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      WORKER_CONCURRENCY: 10
+      MAX_RETRIES: 3
+      RETRY_DELAY: 5000
+      PROCESSING_TIMEOUT: 1800000
+      HEARTBEAT_INTERVAL: 300000
+      LOG_LEVEL: info
+      LOG_FILE: logs/analysis-worker-5.log
+      DB_BATCH_SIZE: 10
+      DB_BATCH_INTERVAL: 5000
+      HTTP_KEEP_ALIVE: true
+      HTTP_MAX_SOCKETS: 50
+      HTTP_MAX_FREE_SOCKETS: 10
+      RATE_LIMIT_USER_HOUR: 5
+      RATE_LIMIT_IP_HOUR: 20
+      RATE_LIMIT_GLOBAL_MINUTE: 100
+      JOB_CACHE_RETENTION_MS: 3600000
+      MAX_JOB_CACHE_SIZE: 10000
+      AUDIT_LOG_DIR: logs/audit
+      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_RETENTION_DAYS: 2555
+      ENABLE_TOKEN_REFUND: true
+      REFUND_PROCESSING_INTERVAL: 5000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./analysis-worker/logs:/app/logs/worker-5
+
+  # Analysis Worker - Instance 6
+  analysis-worker-6:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+    container_name: atma-analysis-worker-6
+    environment:
+      NODE_ENV: production
+      WORKER_ID: worker-6
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin123
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      DEAD_LETTER_QUEUE: assessment_analysis_dlq
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_MODEL: gemini-2.5-flash
+      AI_TEMPERATURE: 0.4
+      USE_MOCK_MODEL: true
+      ENABLE_TOKEN_COUNTING: true
+      TOKEN_USAGE_RETENTION_DAYS: 30
+      INPUT_TOKEN_PRICE_PER_1K: 0.30
+      OUTPUT_TOKEN_PRICE_PER_1K: 2.50
+      TOKEN_COUNT_TIMEOUT: 5000
+      ENABLE_TOKEN_COUNT_FALLBACK: true
+      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      WORKER_CONCURRENCY: 10
+      MAX_RETRIES: 3
+      RETRY_DELAY: 5000
+      PROCESSING_TIMEOUT: 1800000
+      HEARTBEAT_INTERVAL: 300000
+      LOG_LEVEL: info
+      LOG_FILE: logs/analysis-worker-6.log
+      DB_BATCH_SIZE: 10
+      DB_BATCH_INTERVAL: 5000
+      HTTP_KEEP_ALIVE: true
+      HTTP_MAX_SOCKETS: 50
+      HTTP_MAX_FREE_SOCKETS: 10
+      RATE_LIMIT_USER_HOUR: 5
+      RATE_LIMIT_IP_HOUR: 20
+      RATE_LIMIT_GLOBAL_MINUTE: 100
+      JOB_CACHE_RETENTION_MS: 3600000
+      MAX_JOB_CACHE_SIZE: 10000
+      AUDIT_LOG_DIR: logs/audit
+      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_RETENTION_DAYS: 2555
+      ENABLE_TOKEN_REFUND: true
+      REFUND_PROCESSING_INTERVAL: 5000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./analysis-worker/logs:/app/logs/worker-6
+
+  # Analysis Worker - Instance 7
+  analysis-worker-7:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+    container_name: atma-analysis-worker-7
+    environment:
+      NODE_ENV: production
+      WORKER_ID: worker-7
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin123
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      DEAD_LETTER_QUEUE: assessment_analysis_dlq
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_MODEL: gemini-2.5-flash
+      AI_TEMPERATURE: 0.4
+      USE_MOCK_MODEL: true
+      ENABLE_TOKEN_COUNTING: true
+      TOKEN_USAGE_RETENTION_DAYS: 30
+      INPUT_TOKEN_PRICE_PER_1K: 0.30
+      OUTPUT_TOKEN_PRICE_PER_1K: 2.50
+      TOKEN_COUNT_TIMEOUT: 5000
+      ENABLE_TOKEN_COUNT_FALLBACK: true
+      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      WORKER_CONCURRENCY: 10
+      MAX_RETRIES: 3
+      RETRY_DELAY: 5000
+      PROCESSING_TIMEOUT: 1800000
+      HEARTBEAT_INTERVAL: 300000
+      LOG_LEVEL: info
+      LOG_FILE: logs/analysis-worker-7.log
+      DB_BATCH_SIZE: 10
+      DB_BATCH_INTERVAL: 5000
+      HTTP_KEEP_ALIVE: true
+      HTTP_MAX_SOCKETS: 50
+      HTTP_MAX_FREE_SOCKETS: 10
+      RATE_LIMIT_USER_HOUR: 5
+      RATE_LIMIT_IP_HOUR: 20
+      RATE_LIMIT_GLOBAL_MINUTE: 100
+      JOB_CACHE_RETENTION_MS: 3600000
+      MAX_JOB_CACHE_SIZE: 10000
+      AUDIT_LOG_DIR: logs/audit
+      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_RETENTION_DAYS: 2555
+      ENABLE_TOKEN_REFUND: true
+      REFUND_PROCESSING_INTERVAL: 5000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./analysis-worker/logs:/app/logs/worker-7
+
+  # Analysis Worker - Instance 8
+  analysis-worker-8:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+    container_name: atma-analysis-worker-8
+    environment:
+      NODE_ENV: production
+      WORKER_ID: worker-8
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin123
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      DEAD_LETTER_QUEUE: assessment_analysis_dlq
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_MODEL: gemini-2.5-flash
+      AI_TEMPERATURE: 0.4
+      USE_MOCK_MODEL: true
+      ENABLE_TOKEN_COUNTING: true
+      TOKEN_USAGE_RETENTION_DAYS: 30
+      INPUT_TOKEN_PRICE_PER_1K: 0.30
+      OUTPUT_TOKEN_PRICE_PER_1K: 2.50
+      TOKEN_COUNT_TIMEOUT: 5000
+      ENABLE_TOKEN_COUNT_FALLBACK: true
+      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      WORKER_CONCURRENCY: 10
+      MAX_RETRIES: 3
+      RETRY_DELAY: 5000
+      PROCESSING_TIMEOUT: 1800000
+      HEARTBEAT_INTERVAL: 300000
+      LOG_LEVEL: info
+      LOG_FILE: logs/analysis-worker-8.log
+      DB_BATCH_SIZE: 10
+      DB_BATCH_INTERVAL: 5000
+      HTTP_KEEP_ALIVE: true
+      HTTP_MAX_SOCKETS: 50
+      HTTP_MAX_FREE_SOCKETS: 10
+      RATE_LIMIT_USER_HOUR: 5
+      RATE_LIMIT_IP_HOUR: 20
+      RATE_LIMIT_GLOBAL_MINUTE: 100
+      JOB_CACHE_RETENTION_MS: 3600000
+      MAX_JOB_CACHE_SIZE: 10000
+      AUDIT_LOG_DIR: logs/audit
+      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_RETENTION_DAYS: 2555
+      ENABLE_TOKEN_REFUND: true
+      REFUND_PROCESSING_INTERVAL: 5000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./analysis-worker/logs:/app/logs/worker-8
+
+  # Analysis Worker - Instance 9
+  analysis-worker-9:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+    container_name: atma-analysis-worker-9
+    environment:
+      NODE_ENV: production
+      WORKER_ID: worker-9
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin123
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      DEAD_LETTER_QUEUE: assessment_analysis_dlq
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_MODEL: gemini-2.5-flash
+      AI_TEMPERATURE: 0.4
+      USE_MOCK_MODEL: true
+      ENABLE_TOKEN_COUNTING: true
+      TOKEN_USAGE_RETENTION_DAYS: 30
+      INPUT_TOKEN_PRICE_PER_1K: 0.30
+      OUTPUT_TOKEN_PRICE_PER_1K: 2.50
+      TOKEN_COUNT_TIMEOUT: 5000
+      ENABLE_TOKEN_COUNT_FALLBACK: true
+      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      WORKER_CONCURRENCY: 10
+      MAX_RETRIES: 3
+      RETRY_DELAY: 5000
+      PROCESSING_TIMEOUT: 1800000
+      HEARTBEAT_INTERVAL: 300000
+      LOG_LEVEL: info
+      LOG_FILE: logs/analysis-worker-9.log
+      DB_BATCH_SIZE: 10
+      DB_BATCH_INTERVAL: 5000
+      HTTP_KEEP_ALIVE: true
+      HTTP_MAX_SOCKETS: 50
+      HTTP_MAX_FREE_SOCKETS: 10
+      RATE_LIMIT_USER_HOUR: 5
+      RATE_LIMIT_IP_HOUR: 20
+      RATE_LIMIT_GLOBAL_MINUTE: 100
+      JOB_CACHE_RETENTION_MS: 3600000
+      MAX_JOB_CACHE_SIZE: 10000
+      AUDIT_LOG_DIR: logs/audit
+      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_RETENTION_DAYS: 2555
+      ENABLE_TOKEN_REFUND: true
+      REFUND_PROCESSING_INTERVAL: 5000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./analysis-worker/logs:/app/logs/worker-9
+
+  # Analysis Worker - Instance 10
+  analysis-worker-10:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+    container_name: atma-analysis-worker-10
+    environment:
+      NODE_ENV: production
+      WORKER_ID: worker-10
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin123
+      QUEUE_NAME: assessment_analysis
+      EXCHANGE_NAME: atma_exchange
+      ROUTING_KEY: analysis.process
+      DEAD_LETTER_QUEUE: assessment_analysis_dlq
+      QUEUE_DURABLE: true
+      MESSAGE_PERSISTENT: true
+      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_MODEL: gemini-2.5-flash
+      AI_TEMPERATURE: 0.4
+      USE_MOCK_MODEL: true
+      ENABLE_TOKEN_COUNTING: true
+      TOKEN_USAGE_RETENTION_DAYS: 30
+      INPUT_TOKEN_PRICE_PER_1K: 0.30
+      OUTPUT_TOKEN_PRICE_PER_1K: 2.50
+      TOKEN_COUNT_TIMEOUT: 5000
+      ENABLE_TOKEN_COUNT_FALLBACK: true
+      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      WORKER_CONCURRENCY: 10
+      MAX_RETRIES: 3
+      RETRY_DELAY: 5000
+      PROCESSING_TIMEOUT: 1800000
+      HEARTBEAT_INTERVAL: 300000
+      LOG_LEVEL: info
+      LOG_FILE: logs/analysis-worker-10.log
+      DB_BATCH_SIZE: 10
+      DB_BATCH_INTERVAL: 5000
+      HTTP_KEEP_ALIVE: true
+      HTTP_MAX_SOCKETS: 50
+      HTTP_MAX_FREE_SOCKETS: 10
+      RATE_LIMIT_USER_HOUR: 5
+      RATE_LIMIT_IP_HOUR: 20
+      RATE_LIMIT_GLOBAL_MINUTE: 100
+      JOB_CACHE_RETENTION_MS: 3600000
+      MAX_JOB_CACHE_SIZE: 10000
+      AUDIT_LOG_DIR: logs/audit
+      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_RETENTION_DAYS: 2555
+      ENABLE_TOKEN_REFUND: true
+      REFUND_PROCESSING_INTERVAL: 5000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./analysis-worker/logs:/app/logs/worker-10
+
   # Documentation Service
   documentation-service:
     build:
@@ -494,6 +935,32 @@ services:
     networks:
       - atma-network
     restart: unless-stopped
+
+  # Testing Service
+  testing-service:
+    build:
+      context: ./testing
+      dockerfile: Dockerfile
+    container_name: atma-testing-service
+    environment:
+      NODE_ENV: testing
+      API_BASE_URL: http://api-gateway:3000
+      WEBSOCKET_URL: http://notification-service:3005
+      TEST_USER_COUNT: 100
+      TEST_CONCURRENCY: 100
+    volumes:
+      - ./testing:/app
+      - /app/node_modules
+    networks:
+      - atma-network
+    depends_on:
+      - api-gateway
+      - notification-service
+      - auth-service
+      - assessment-service
+      - archive-service
+    restart: "no"
+    command: ["tail", "-f", "/dev/null"]
 
   # Cloudflare Tunnel
   cloudflared:

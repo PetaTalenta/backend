@@ -2,14 +2,14 @@
 module.exports = {
   // API Configuration
   api: {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: process.env.API_BASE_URL || 'http://localhost:3000',
     timeout: 30000,
     retries: 3
   },
-  
+
   // WebSocket Configuration - Updated to use API Gateway
   websocket: {
-    url: 'http://localhost:3000', // Changed from 3005 to 3000 (API Gateway)
+    url: process.env.WEBSOCKET_URL || 'http://localhost:3000', // Changed from 3005 to 3000 (API Gateway)
     timeout: 10000,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000
@@ -17,8 +17,8 @@ module.exports = {
   
   // Test Configuration
   test: {
-    userCount: 100,
-    concurrency: 20, // Number of concurrent operations
+    userCount: parseInt(process.env.TEST_USER_COUNT) || 100,
+    concurrency: parseInt(process.env.TEST_CONCURRENCY) || 10, // Number of concurrent operations
     delayBetweenStages: 2000, // 2 seconds between stages
     assessmentTimeout: 300000, // 5 minutes timeout for assessment completion
     cleanupDelay: 20, // 1 second delay between cleanup operations
