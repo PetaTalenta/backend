@@ -26,31 +26,36 @@ echo Starting Core Services...
 echo ========================================
 
 REM Start Auth Service
-echo [1/6] Starting Auth Service...
+echo [1/7] Starting Auth Service...
 start "Auth Service" cmd /k "cd /d %~dp0auth-service && npm start"
 timeout /t 2 /nobreak >nul
 
 REM Start Archive Service
-echo [2/6] Starting Archive Service...
+echo [2/7] Starting Archive Service...
 start "Archive Service" cmd /k "cd /d %~dp0archive-service && npm start"
 timeout /t 2 /nobreak >nul
 
 REM Start Assessment Service
-echo [3/6] Starting Assessment Service...
+echo [3/7] Starting Assessment Service...
 start "Assessment Service" cmd /k "cd /d %~dp0assessment-service && npm start"
 timeout /t 2 /nobreak >nul
 
 REM Start Notification Service
-echo [4/6] Starting Notification Service...
+echo [4/7] Starting Notification Service...
 start "Notification Service" cmd /k "cd /d %~dp0notification-service && npm start"
 timeout /t 2 /nobreak >nul
 
 REM Start API Gateway
-echo [5/6] Starting API Gateway...
+echo [5/7] Starting API Gateway...
 start "API Gateway" cmd /k "cd /d %~dp0api-gateway && npm start"
 timeout /t 2 /nobreak >nul
 
-echo [6/6] Core services started!
+REM Start Documentation Service
+echo [6/7] Starting API Gateway...
+start "API Gateway" cmd /k "cd /d %~dp0documentation-service && npm run dev"
+timeout /t 2 /nobreak >nul
+
+echo [7/7] Core services started!
 echo.
 
 echo ========================================
@@ -85,7 +90,7 @@ echo - Worker 2: analysis-worker-2.log
 echo - Worker 3: analysis-worker-3.log
 echo - Worker 4: analysis-worker-4.log
 echo - Worker 5: analysis-worker-5.log
-echo - Worker 6: analysis-worker-6.log
+echo - Worker 7: analysis-worker-7.log
 echo - Worker 7: analysis-worker-7.log
 echo - Worker 8: analysis-worker-8.log
 echo - Worker 9: analysis-worker-9.log

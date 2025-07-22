@@ -3,7 +3,7 @@ export const apiData = {
     title: "ATMA API Gateway",
     description:
       "ATMA API Gateway adalah entry point tunggal untuk semua komunikasi dengan backend services. Gateway ini mengelola routing, authentication, rate limiting, dan security untuk seluruh sistem ATMA (AI-Driven Talent Mapping Assessment).",
-    baseUrl: "https://api.chhrone.web.id",
+    baseUrl: "api.chhrone.web.id",
     version: "1.0.0",
     architecture: {
       title: "Architecture Overview",
@@ -378,12 +378,12 @@ export const apiData = {
     title: "WebSocket Notifications",
     description: "Real-time notifications melalui Socket.IO via API Gateway",
     connection: {
-      url: "http://localhost:3000",
+      url: "api.chhrone.web.id",
       events: ["analysis-started", "analysis-complete", "analysis-failed"],
       example: `
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3000', {
+const socket = io('api.chhrone.web.id', {
   autoConnect: false,
   transports: ['websocket', 'polling']
 });

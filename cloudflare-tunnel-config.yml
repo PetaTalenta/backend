@@ -1,0 +1,18 @@
+tunnel: atma-tunnel
+credentials-file: /etc/cloudflared/cert.pem
+
+ingress:
+  # API Gateway - localhost:3000 -> api.chhrone.web.id
+  - hostname: api.chhrone.web.id
+    service: http://api-gateway:3000
+    originRequest:
+      httpHostHeader: api.chhrone.web.id
+      
+  # Documentation Service - localhost:8080 -> docs.chhrone.web.id  
+  - hostname: docs.chhrone.web.id
+    service: http://documentation-service:80
+    originRequest:
+      httpHostHeader: docs.chhrone.web.id
+      
+  # Catch-all rule (required)
+  - service: http_status:404
