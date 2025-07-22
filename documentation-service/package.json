@@ -1,7 +1,7 @@
 {
-  "name": "atma-documentation-service",
+  "name": "atma-api-documentation",
+  "private": true,
   "version": "1.0.0",
-  "description": "Simple documentation service for ATMA API Gateway",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,6 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
-    "marked": "^11.0.0",
-    "highlight.js": "^11.9.0"
+    "prismjs": "^1.29.0"
   }
 }
