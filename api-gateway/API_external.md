@@ -158,7 +158,7 @@ Content-Type: application/json
 - **full_name**: Maximum 100 characters, optional
 - **school_id**: Positive integer, optional
 - **date_of_birth**: ISO date format (YYYY-MM-DD), cannot be future date, optional
-- **gender**: Must be one of: "male", "female", "other", "prefer_not_to_say", optional
+- **gender**: Must be one of: "male", "female", optional
 
 #### Delete User Profile
 ```http

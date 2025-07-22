@@ -1,5 +1,12 @@
 # 🚀 Quick Start Guide - ATMA Testing Suite
 
+## 🌐 WebSocket Routing Update
+
+**Important Change**: WebSocket connections sekarang melewati API Gateway sebagai single entry point:
+- **Connection URL**: `http://localhost:3000` (API Gateway)
+- **Previous**: Direct ke `http://localhost:3005` (notification service)
+- **Benefit**: Konsistensi dengan arsitektur microservices dan centralized routing
+
 ## Prerequisites Checklist
 
 ✅ **ATMA Backend Services Running:**
@@ -259,7 +266,8 @@ Progress |████████████████████| 100% | 5
    ```
    WebSocket connection failed
    ```
-   **Solution:** Ensure notification service is running on port 3005
+   **Solution:** Ensure API Gateway (port 3000) and notification service (port 3005) are running
+   **Note:** WebSocket connections now route through API Gateway
 
 4. **Assessment Timeout**
    ```

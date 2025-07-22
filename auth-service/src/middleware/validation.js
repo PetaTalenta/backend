@@ -104,8 +104,9 @@ const schemas = {
         'string.email': 'Email must be a valid email address',
         'string.max': 'Email must be at most 255 characters long'
       }),
-    full_name: Joi.string().max(100)
+    full_name: Joi.string().min(1).max(100).allow(null)
       .messages({
+        'string.min': 'Full name must be at least 1 character long',
         'string.max': 'Full name must be at most 100 characters long'
       }),
 
@@ -121,9 +122,9 @@ const schemas = {
         'date.format': 'Date of birth must be in ISO format (YYYY-MM-DD)',
         'date.max': 'Date of birth cannot be in the future'
       }),
-    gender: Joi.string().valid('male', 'female', 'other', 'prefer_not_to_say')
+    gender: Joi.string().valid('male', 'female')
       .messages({
-        'any.only': 'Gender must be one of: male, female, other, prefer_not_to_say'
+        'any.only': 'Gender must be one of: male, female'
       })
   }),
 
@@ -240,8 +241,9 @@ const schemas = {
         'string.email': 'Email must be a valid email address',
         'string.max': 'Email must be at most 255 characters long'
       }),
-    full_name: Joi.string().max(100)
+    full_name: Joi.string().min(1).max(100).allow(null)
       .messages({
+        'string.min': 'Full name must be at least 1 character long',
         'string.max': 'Full name must be at most 100 characters long'
       })
   }),

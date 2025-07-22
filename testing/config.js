@@ -7,9 +7,9 @@ module.exports = {
     retries: 3
   },
   
-  // WebSocket Configuration
+  // WebSocket Configuration - Updated to use API Gateway
   websocket: {
-    url: 'http://localhost:3005',
+    url: 'http://localhost:3000', // Changed from 3005 to 3000 (API Gateway)
     timeout: 10000,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000
@@ -17,11 +17,11 @@ module.exports = {
   
   // Test Configuration
   test: {
-    userCount: 50,
-    concurrency: 10, // Number of concurrent operations
+    userCount: 100,
+    concurrency: 20, // Number of concurrent operations
     delayBetweenStages: 2000, // 2 seconds between stages
     assessmentTimeout: 300000, // 5 minutes timeout for assessment completion
-    cleanupDelay: 1000, // 1 second delay between cleanup operations
+    cleanupDelay: 20, // 1 second delay between cleanup operations
     forceDirect: true // Force direct processing to avoid batch "resultId" issues
   },
   

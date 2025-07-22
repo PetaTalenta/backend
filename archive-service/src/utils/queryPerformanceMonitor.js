@@ -126,23 +126,24 @@ class QueryPerformanceMonitor {
         {
           name: 'school_filter_performance',
           query: () => this.sequelize.query(`
-            SELECT COUNT(*) 
+            SELECT COUNT(*)
             FROM archive.analysis_results ar
             INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
-            WHERE ar.status = 'completed' 
-              AND up.school_origin ILIKE '%University%'
+            INNER JOIN public.schools s ON up.school_id = s.id
+            WHERE ar.status = 'completed'
+              AND s.name ILIKE '%University%'
           `, { type: this.sequelize.QueryTypes.SELECT })
         },
         {
           name: 'composite_demographic_performance',
           query: () => this.sequelize.query(`
-            SELECT COUNT(*) 
+            SELECT COUNT(*)
             FROM archive.analysis_results ar
             INNER JOIN auth.user_profiles up ON ar.user_id = up.user_id
-            WHERE ar.status = 'completed' 
+            WHERE ar.status = 'completed'
               AND up.gender = 'female'
               AND up.date_of_birth BETWEEN '1995-01-01' AND '2005-12-31'
-              AND up.school_origin IS NOT NULL
+              AND up.school_id IS NOT NULL
           `, { type: this.sequelize.QueryTypes.SELECT })
         }
       ];

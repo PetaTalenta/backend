@@ -121,10 +121,38 @@ const updateProfile = async (req, res, next) => {
     try {
       // Update user basic data if provided
       const userUpdateData = {};
-      if (username !== undefined) userUpdateData.username = username;
+      if (username !== undefined && username !== null && username !== '') {
+        userUpdateData.username = username;
+      }
 
       if (Object.keys(userUpdateData).length > 0) {
-        await user.update(userUpdateData, { transaction });
+        try {
+          await user.update(userUpdateData, { transaction });
+        } catch (userUpdateError) {
+          await transaction.rollback();
+          logger.error('Error updating user data', {
+            userId,
+            userUpdateData,
+            error: userUpdateError.message,
+            stack: userUpdateError.stack
+          });
+
+          // Handle specific validation errors
+          if (userUpdateError.name === 'SequelizeValidationError') {
+            const validationErrors = userUpdateError.errors.map(err => ({
+              field: err.path,
+              message: err.message,
+              value: err.value
+            }));
+            return res.status(400).json(formatErrorResponse(
+              'VALIDATION_ERROR',
+              'User data validation failed',
+              { validationErrors }
+            ));
+          }
+
+          throw userUpdateError;
+        }
       }
 
       // Update or create user profile if profile data provided
@@ -157,10 +185,36 @@ const updateProfile = async (req, res, next) => {
 
 
 
-        if (profile) {
-          await profile.update(profileUpdateData, { transaction });
-        } else {
-          profile = await UserProfile.create(profileUpdateData, { transaction });
+        try {
+          if (profile) {
+            await profile.update(profileUpdateData, { transaction });
+          } else {
+            profile = await UserProfile.create(profileUpdateData, { transaction });
+          }
+        } catch (profileUpdateError) {
+          await transaction.rollback();
+          logger.error('Error updating user profile', {
+            userId,
+            profileUpdateData,
+            error: profileUpdateError.message,
+            stack: profileUpdateError.stack
+          });
+
+          // Handle specific validation errors
+          if (profileUpdateError.name === 'SequelizeValidationError') {
+            const validationErrors = profileUpdateError.errors.map(err => ({
+              field: err.path,
+              message: err.message,
+              value: err.value
+            }));
+            return res.status(400).json(formatErrorResponse(
+              'VALIDATION_ERROR',
+              'Profile data validation failed',
+              { validationErrors }
+            ));
+          }
+
+          throw profileUpdateError;
         }
       }
 

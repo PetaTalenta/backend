@@ -114,7 +114,7 @@ async function healthCheck() {
   const axios = require('axios');
   const services = [
     { name: 'API Gateway', url: `${config.api.baseUrl}/health` },
-    { name: 'Notification Service', url: `${config.websocket.url}/health` }
+    { name: 'Notification Service', url: `${config.api.baseUrl}/api/notifications/health` }
   ];
 
   for (const service of services) {

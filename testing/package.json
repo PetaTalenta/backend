@@ -7,6 +7,7 @@
     "test:e2e": "node e2e-test.js",
     "test:load": "node load-test.js",
     "test:all": "npm run test:e2e && npm run test:load",
+    "test:websocket": "node test-websocket-routing.js",
     "cleanup:single": "node cleanup-account.js",
     "cleanup:batch": "node batch-cleanup.js"
   },

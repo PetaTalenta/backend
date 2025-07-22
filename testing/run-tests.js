@@ -84,7 +84,7 @@ class TestRunner {
     const axios = require('axios');
     const services = [
       { name: 'API Gateway', url: 'http://localhost:3000/health' },
-      { name: 'Notification Service', url: 'http://localhost:3005/health' }
+      { name: 'Notification Service', url: 'http://localhost:3000/api/notifications/health' }
     ];
 
     for (const service of services) {

@@ -11,7 +11,7 @@ const { formatPaginatedResponse } = require('./pagination');
 const DEFAULT_FIELD_SELECTIONS = {
   analysisResult: ['id', 'user_id', 'status', 'created_at', 'assessment_name'],
   analysisResultDetailed: ['id', 'user_id', 'persona_profile', 'status', 'created_at', 'updated_at', 'assessment_name'],
-  userProfile: ['user_id', 'full_name', 'school_origin', 'gender'],
+  userProfile: ['user_id', 'full_name', 'gender'],
   demographics: ['archetype', 'count', 'percentage'],
   stats: ['total', 'completed', 'failed', 'processing']
 };

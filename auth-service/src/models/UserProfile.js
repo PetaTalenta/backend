@@ -19,7 +19,15 @@ const UserProfile = sequelize.define('UserProfile', {
     allowNull: true,
     field: 'full_name',
     validate: {
-      len: [1, 100]
+      len: {
+        args: [1, 100],
+        msg: 'Full name must be between 1 and 100 characters'
+      },
+      isNotEmptyString(value) {
+        if (value !== null && value !== undefined && typeof value === 'string' && value.trim() === '') {
+          throw new Error('Full name cannot be empty');
+        }
+      }
     }
   },
 
@@ -100,7 +108,7 @@ UserProfile.prototype.toJSON = function() {
 
 // Static methods untuk query yang dioptimalkan
 UserProfile.findByDemographics = async function(options = {}) {
-  const { gender, ageRange, schoolOrigin, limit = 100, offset = 0 } = options;
+  const { gender, ageRange, limit = 100, offset = 0 } = options;
   const where = {};
 
   if (gender) {
@@ -120,11 +128,7 @@ UserProfile.findByDemographics = async function(options = {}) {
     };
   }
 
-  if (schoolOrigin) {
-    where.school_origin = {
-      [require('sequelize').Op.iLike]: `%${schoolOrigin}%`
-    };
-  }
+  // school_origin column removed - no longer exists in database
 
   return this.findAndCountAll({
     where,
@@ -183,12 +187,14 @@ UserProfile.getTopSchools = async function(limit = 10) {
 
   return sequelize.query(`
     SELECT
-      school_origin,
-      COUNT(*) as count,
-      ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as percentage
-    FROM auth.user_profiles
-    WHERE school_origin IS NOT NULL
-    GROUP BY school_origin
+      s.name as school_name,
+      s.city,
+      s.province,
+      COUNT(up.user_id) as count,
+      ROUND(COUNT(up.user_id) * 100.0 / SUM(COUNT(up.user_id)) OVER (), 2) as percentage
+    FROM public.schools s
+    INNER JOIN auth.user_profiles up ON s.id = up.school_id
+    GROUP BY s.id, s.name, s.city, s.province
     ORDER BY count DESC
     LIMIT :limit
   `, {

@@ -85,6 +85,18 @@ Setiap stage akan menampilkan:
 - Throughput rate
 - Error details (jika ada)
 
+## 🌐 WebSocket Configuration
+
+**Important**: WebSocket connections sekarang melewati API Gateway sebagai single entry point:
+
+- **Before**: Direct connection ke `http://localhost:3005` (notification service)
+- **After**: Connection melalui `http://localhost:3000` (API Gateway)
+
+API Gateway akan secara otomatis mem-proxy WebSocket connections ke notification service. Ini memberikan:
+- Konsistensi dengan arsitektur microservices
+- Centralized routing dan monitoring
+- Better security dan rate limiting
+
 ## ⚙️ Configuration
 
 Edit `config.js` untuk mengubah:
@@ -117,7 +129,8 @@ Edit `config.js` untuk mengubah:
    WebSocket authentication failed: Invalid token
    ```
    - Pastikan JWT token valid dan belum expired
-   - Check notification service berjalan di port 3005
+   - Check API Gateway dan notification service berjalan
+   - WebSocket connections sekarang melalui API Gateway (port 3000)
 
 3. **Assessment Timeout**
    ```

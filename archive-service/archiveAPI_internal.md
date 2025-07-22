@@ -44,7 +44,7 @@ Membuat hasil analisis baru (hanya untuk internal service).
   "demographic_data": {
     "age": 25,
     "gender": "male",
-    "school_origin": "University ABC"
+    "school_id": 123
   }
 }
 ```

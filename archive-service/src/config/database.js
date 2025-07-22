@@ -165,10 +165,10 @@ const initialize = async () => {
 
     // Skip sync in development since we use init-databases.sql
     // Uncomment below if you want to use Sequelize migrations instead
-    // if (process.env.NODE_ENV === 'development') {
-    //   await sequelize.sync({ alter: false });
-    //   logger.info('Database models synchronized');
-    // }
+    if (process.env.NODE_ENV === 'development' && process.env.FORCE_SYNC === 'true') {
+      await sequelize.sync({ alter: true });
+      logger.info('Database models synchronized with alter=true');
+    }
 
     logger.info('Database initialized successfully');
   } catch (error) {
