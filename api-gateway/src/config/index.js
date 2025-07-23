@@ -10,7 +10,8 @@ const config = {
     auth: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
     archive: process.env.ARCHIVE_SERVICE_URL || 'http://localhost:3002',
     assessment: process.env.ASSESSMENT_SERVICE_URL || 'http://localhost:3003',
-    notification: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005'
+    notification: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005',
+    chatbot: process.env.CHATBOT_SERVICE_URL || 'http://localhost:3006'
   },
   
   // Security

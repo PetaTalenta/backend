@@ -129,10 +129,39 @@ const archiveLimiter = rateLimit({
   }
 });
 
+/**
+ * Rate limiter khusus untuk chatbot endpoints
+ * Allows reasonable conversation limits for users
+ */
+const chatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // Allow 500 requests per 15 minutes for chat operations
+  message: {
+    success: false,
+    error: 'CHAT_RATE_LIMIT_EXCEEDED',
+    message: 'Too many chat requests, please try again later.',
+    retryAfter: 900
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+
+  skip: (req) => {
+    return req.isInternalService === true;
+  },
+
+  keyGenerator: (req) => {
+    if (req.user && req.user.id) {
+      return `chat-${req.user.id}`;
+    }
+    return `chat-${req.ip}`;
+  }
+});
+
 module.exports = {
   generalLimiter,
   authLimiter,
   assessmentLimiter,
   adminLimiter,
-  archiveLimiter
+  archiveLimiter,
+  chatLimiter
 };

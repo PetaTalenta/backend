@@ -23,6 +23,8 @@ const server = app.listen(config.port, () => {
    - Auth Service: ${config.services.auth}
    - Archive Service: ${config.services.archive}
    - Assessment Service: ${config.services.assessment}
+   - Notification Service: ${config.services.notification}
+   - Chatbot Service: ${config.services.chatbot}
 🔗 Gateway URL: http://localhost:${config.port}
 📋 Health Check: http://localhost:${config.port}/health
 📖 API Documentation: http://localhost:${config.port}/

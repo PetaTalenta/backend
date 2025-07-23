@@ -1,0 +1,258 @@
+const axios = require('axios');
+const logger = require('../utils/logger');
+
+/**
+ * OpenRouter Service for AI conversation integration
+ * Implements free model strategy with fallback mechanism
+ * Based on OpenRouter API v1 documentation
+ */
+class OpenRouterService {
+  constructor() {
+    this.baseURL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
+    this.apiKey = process.env.OPENROUTER_API_KEY;
+    this.defaultModel = process.env.DEFAULT_MODEL || 'qwen/qwen-2.5-coder-32b-instruct:free';
+    this.fallbackModel = process.env.FALLBACK_MODEL || 'meta-llama/llama-3.2-3b-instruct:free';
+    this.emergencyFallbackModel = process.env.EMERGENCY_FALLBACK_MODEL || 'openai/gpt-4o-mini';
+    this.useFreeModelsOnly = process.env.USE_FREE_MODELS_ONLY === 'true';
+    this.maxTokens = parseInt(process.env.MAX_TOKENS) || 1000;
+    this.temperature = parseFloat(process.env.TEMPERATURE) || 0.7;
+    this.timeout = parseInt(process.env.OPENROUTER_TIMEOUT) || 45000;
+
+    // Validate required configuration
+    if (!this.apiKey) {
+      throw new Error('OPENROUTER_API_KEY is required');
+    }
+
+    // Create axios client with OpenRouter configuration
+    this.client = axios.create({
+      baseURL: this.baseURL,
+      headers: {
+        'Authorization': `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://atma.chhrone.web.id',
+        'X-Title': 'ATMA - AI Talent Mapping Assessment'
+      },
+      timeout: this.timeout
+    });
+
+    // Add request/response interceptors for logging
+    this.client.interceptors.request.use(
+      (config) => {
+        logger.debug('OpenRouter API Request', {
+          url: config.url,
+          method: config.method,
+          model: config.data?.model,
+          messageCount: config.data?.messages?.length
+        });
+        return config;
+      },
+      (error) => {
+        logger.error('OpenRouter API Request Error', error);
+        return Promise.reject(error);
+      }
+    );
+
+    this.client.interceptors.response.use(
+      (response) => {
+        logger.debug('OpenRouter API Response', {
+          status: response.status,
+          model: response.data?.model,
+          usage: response.data?.usage
+        });
+        return response;
+      },
+      (error) => {
+        logger.error('OpenRouter API Response Error', {
+          status: error.response?.status,
+          message: error.response?.data?.error?.message || error.message,
+          model: error.config?.data ? JSON.parse(error.config.data)?.model : 'unknown'
+        });
+        return Promise.reject(error);
+      }
+    );
+
+    logger.info('OpenRouter Service initialized', {
+      baseURL: this.baseURL,
+      defaultModel: this.defaultModel,
+      useFreeModelsOnly: this.useFreeModelsOnly,
+      timeout: this.timeout
+    });
+  }
+
+  /**
+   * Generate AI response using OpenRouter API
+   * @param {Array} messages - Array of message objects with role and content
+   * @param {Object} options - Generation options
+   * @returns {Object} Response with content, model, usage, and metadata
+   */
+  async generateResponse(messages, options = {}) {
+    const startTime = Date.now();
+    
+    try {
+      const model = options.model || this.defaultModel;
+      const isFreeModel = this.isFreeModel(model);
+
+      // Build request payload according to OpenRouter API spec
+      const payload = {
+        model: model,
+        messages: messages,
+        max_tokens: options.maxTokens || this.maxTokens,
+        temperature: options.temperature || this.temperature,
+        user: options.userId, // For user tracking and optimization
+        usage: { include: true } // Include usage statistics in response
+      };
+
+      // Add optional parameters if provided
+      if (options.stop) payload.stop = options.stop;
+      if (options.topP) payload.top_p = options.topP;
+      if (options.topK) payload.top_k = options.topK;
+      if (options.frequencyPenalty) payload.frequency_penalty = options.frequencyPenalty;
+      if (options.presencePenalty) payload.presence_penalty = options.presencePenalty;
+
+      logger.info('Generating OpenRouter response', {
+        model,
+        messageCount: messages.length,
+        isFreeModel,
+        userId: options.userId
+      });
+
+      const response = await this.client.post('/chat/completions', payload);
+      const processingTime = Date.now() - startTime;
+
+      // Extract response data
+      const choice = response.data.choices[0];
+      const usage = response.data.usage || {};
+
+      const result = {
+        content: choice.message.content,
+        model: response.data.model,
+        usage: {
+          prompt_tokens: usage.prompt_tokens || 0,
+          completion_tokens: usage.completion_tokens || 0,
+          total_tokens: usage.total_tokens || 0,
+          cost: isFreeModel ? 0 : (usage.cost || 0),
+          isFreeModel: isFreeModel
+        },
+        processingTime,
+        finishReason: choice.finish_reason,
+        nativeFinishReason: choice.native_finish_reason
+      };
+
+      logger.info('OpenRouter response generated successfully', {
+        model: result.model,
+        processingTime: result.processingTime,
+        usage: result.usage,
+        finishReason: result.finishReason
+      });
+
+      return result;
+
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      logger.warn('OpenRouter primary model failed, attempting fallback', {
+        model: options.model || this.defaultModel,
+        error: error.message,
+        processingTime
+      });
+
+      return this.handleFallback(messages, options, error);
+    }
+  }
+
+  /**
+   * Handle fallback strategy when primary model fails
+   * @param {Array} messages - Original messages
+   * @param {Object} options - Original options
+   * @param {Error} originalError - Error from primary attempt
+   * @returns {Object} Response from fallback model
+   */
+  async handleFallback(messages, options, originalError) {
+    const currentModel = options.model || this.defaultModel;
+
+    // First fallback: try free fallback model
+    if (currentModel !== this.fallbackModel && !options.isFirstRetry) {
+      logger.info('Attempting first fallback model', {
+        from: currentModel,
+        to: this.fallbackModel
+      });
+
+      return this.generateResponse(messages, {
+        ...options,
+        model: this.fallbackModel,
+        isFirstRetry: true
+      });
+    }
+
+    // Second fallback: try emergency paid model (if allowed)
+    if (!this.useFreeModelsOnly && 
+        currentModel !== this.emergencyFallbackModel && 
+        !options.isSecondRetry) {
+      
+      logger.info('Attempting emergency fallback model', {
+        from: currentModel,
+        to: this.emergencyFallbackModel
+      });
+
+      return this.generateResponse(messages, {
+        ...options,
+        model: this.emergencyFallbackModel,
+        isSecondRetry: true
+      });
+    }
+
+    // All fallbacks exhausted
+    logger.error('All OpenRouter models failed', {
+      originalModel: this.defaultModel,
+      fallbackModel: this.fallbackModel,
+      emergencyModel: this.emergencyFallbackModel,
+      originalError: originalError.message,
+      useFreeModelsOnly: this.useFreeModelsOnly
+    });
+
+    throw new Error(`All OpenRouter models failed. Original error: ${originalError.message}`);
+  }
+
+  /**
+   * Check if a model is a free model
+   * @param {string} model - Model identifier
+   * @returns {boolean} True if model is free
+   */
+  isFreeModel(model) {
+    return model.includes(':free') ||
+           model === 'qwen/qwen-2.5-coder-32b-instruct:free' ||
+           model === 'meta-llama/llama-3.2-3b-instruct:free' ||
+           model === 'qwen/qwen3-235b-a22b-07-25:free';
+  }
+
+  /**
+   * Get available models from OpenRouter
+   * @returns {Array} List of available models
+   */
+  async getAvailableModels() {
+    try {
+      const response = await this.client.get('/models');
+      return response.data.data || response.data;
+    } catch (error) {
+      logger.error('Failed to fetch available models', error);
+      throw new Error('Failed to fetch available models');
+    }
+  }
+
+  /**
+   * Get service health status
+   * @returns {Object} Health status information
+   */
+  getHealthStatus() {
+    return {
+      service: 'OpenRouter',
+      status: 'healthy',
+      baseURL: this.baseURL,
+      defaultModel: this.defaultModel,
+      useFreeModelsOnly: this.useFreeModelsOnly,
+      timeout: this.timeout,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
+module.exports = OpenRouterService;

@@ -175,11 +175,24 @@ const socketIOProxy = createServiceProxy(config.services.notification, {
   // No path rewrite for Socket.IO - proxy langsung
 });
 
+/**
+ * Proxy untuk Chatbot Service
+ */
+const chatbotServiceProxy = createServiceProxy(config.services.chatbot, {
+  pathRewrite: {
+    '^/api/chatbot/health': '/health',                 // Health endpoint
+    '^/api/chatbot/conversations': '/conversations',   // Conversations endpoint
+    '^/api/chatbot$': '/',                             // Root endpoint (exact match)
+    '^/api/chatbot': ''                                // Remove /api/chatbot prefix for other endpoints
+  }
+});
+
 module.exports = {
   createServiceProxy,
   authServiceProxy,
   archiveServiceProxy,
   assessmentServiceProxy,
   notificationServiceProxy,
-  socketIOProxy
+  socketIOProxy,
+  chatbotServiceProxy
 };

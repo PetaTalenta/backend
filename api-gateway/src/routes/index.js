@@ -1,7 +1,7 @@
 const express = require('express');
 const { verifyToken, verifyInternalService, verifyAdmin } = require('../middleware/auth');
-const { authLimiter, assessmentLimiter, adminLimiter, archiveLimiter } = require('../middleware/rateLimiter');
-const { authServiceProxy, archiveServiceProxy, assessmentServiceProxy, notificationServiceProxy, socketIOProxy } = require('../middleware/proxy');
+const { authLimiter, assessmentLimiter, adminLimiter, archiveLimiter, chatLimiter } = require('../middleware/rateLimiter');
+const { authServiceProxy, archiveServiceProxy, assessmentServiceProxy, notificationServiceProxy, socketIOProxy, chatbotServiceProxy } = require('../middleware/proxy');
 
 const router = express.Router();
 
@@ -14,6 +14,7 @@ const router = express.Router();
  * /api/archive/* -> Archive Service
  * /api/assessment/* -> Assessment Service
  * /api/notifications/* -> Notification Service
+ * /api/chatbot/* -> Chatbot Service
  * /socket.io/* -> Notification Service (WebSocket)
  */
 
@@ -186,6 +187,20 @@ router.use('/assessment/status', verifyToken, assessmentServiceProxy);
 // Queue monitoring (protected)
 router.use('/assessment/queue/status', verifyToken, assessmentServiceProxy);
 
+// ===== CHATBOT SERVICE ROUTES =====
+
+// Health endpoints (public)
+router.get('/chatbot/health', chatbotServiceProxy);
+router.get('/chatbot/health/ready', chatbotServiceProxy);
+router.get('/chatbot/health/live', chatbotServiceProxy);
+router.get('/chatbot/health/metrics', chatbotServiceProxy);
+
+// Conversation endpoints (protected)
+router.use('/chatbot/conversations', verifyToken, chatLimiter, chatbotServiceProxy);
+
+// Root endpoint (service information)
+router.get('/chatbot', chatbotServiceProxy);
+
 // ===== NOTIFICATION SERVICE ROUTES =====
 
 // Health endpoints (public)
@@ -226,6 +241,7 @@ router.get('/health/live', authServiceProxy); // Liveness probe
 // Health endpoints for individual services (these are already handled above, but kept for compatibility)
 router.use('/auth/health', authServiceProxy);
 router.use('/archive/health', archiveServiceProxy);
+router.use('/chatbot/health', chatbotServiceProxy);
 // Assessment health endpoints are handled specifically above
 
 // Fallback for any other routes to respective services
@@ -234,5 +250,6 @@ router.use('/admin/*', authServiceProxy);
 router.use('/archive/*', archiveServiceProxy);
 router.use('/assessment/*', assessmentServiceProxy);
 router.use('/notifications/*', notificationServiceProxy);
+router.use('/chatbot/*', chatbotServiceProxy);
 
 module.exports = router;

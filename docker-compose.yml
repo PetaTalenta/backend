@@ -81,6 +81,7 @@ services:
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      CHATBOT_SERVICE_URL: http://chatbot-service:3006
       JWT_SECRET: ${JWT_SECRET}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
@@ -293,6 +294,61 @@ services:
     restart: unless-stopped
     volumes:
       - ./notification-service/logs:/app/logs
+
+  # Chatbot Service
+  chatbot-service:
+    build:
+      context: ./chatbot-service
+      dockerfile: Dockerfile
+    container_name: atma-chatbot-service
+    environment:
+      NODE_ENV: production
+      PORT: 3006
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_DIALECT: postgres
+      DB_SCHEMA: chat
+      DB_POOL_MAX: 20
+      DB_POOL_MIN: 5
+      DB_POOL_ACQUIRE: 30000
+      DB_POOL_IDLE: 10000
+      DB_POOL_EVICT: 5000
+      AUTH_SERVICE_URL: http://auth-service:3001
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
+      RATE_LIMIT_CONVERSATIONS_PER_DAY: ${RATE_LIMIT_CONVERSATIONS_PER_DAY}
+      MAX_MESSAGE_LENGTH: ${MAX_MESSAGE_LENGTH}
+      ALLOWED_ORIGINS: "*"
+      LOG_LEVEL: info
+      LOG_FILE: logs/chatbot-service.log
+      # OpenRouter Configuration
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL}
+      DEFAULT_MODEL: ${DEFAULT_MODEL}
+      FALLBACK_MODEL: ${FALLBACK_MODEL}
+      EMERGENCY_FALLBACK_MODEL: ${EMERGENCY_FALLBACK_MODEL}
+      USE_FREE_MODELS_ONLY: ${USE_FREE_MODELS_ONLY}
+      MAX_TOKENS: ${MAX_TOKENS}
+      TEMPERATURE: ${TEMPERATURE}
+      OPENROUTER_TIMEOUT: ${OPENROUTER_TIMEOUT}
+      # Rate Limiting for Free Models
+      FREE_MODEL_RATE_LIMIT_PER_MINUTE: ${FREE_MODEL_RATE_LIMIT_PER_MINUTE}
+      MAX_CONVERSATION_HISTORY_TOKENS: ${MAX_CONVERSATION_HISTORY_TOKENS}
+    ports:
+      - "3006:3006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./chatbot-service/logs:/app/logs
 
   # Analysis Worker - Instance 1
   analysis-worker-1:
