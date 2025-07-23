@@ -9,9 +9,9 @@ services:
     image: postgres:17-alpine
     container_name: atma-postgres
     environment:
-      POSTGRES_DB: atma_db
-      POSTGRES_USER: atma_user
-      POSTGRES_PASSWORD: secret-passworrd
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -22,7 +22,7 @@ services:
     networks:
       - atma-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U atma_user -d atma_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -33,8 +33,8 @@ services:
     image: rabbitmq:4.1-management-alpine
     container_name: atma-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_DEFAULT_VHOST: /
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
@@ -54,7 +54,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: atma-redis
-    command: redis-server --appendonly yes --requirepass redis123
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     ports:
@@ -62,7 +62,7 @@ services:
     networks:
       - atma-network
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "redis123", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "--raw", "incr", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -81,9 +81,9 @@ services:
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
-      JWT_SECRET: atma_secure_jwt_secret_key_f8a5b3c7d9e1f2a3b5c7d9e1f2a3b5c7
-      REDIS_URL: redis://:redis123@redis:6379
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       RATE_LIMIT_WINDOW_MS: 900000
       RATE_LIMIT_MAX_REQUESTS: 1000
       ALLOWED_ORIGINS: "*"
@@ -113,9 +113,9 @@ services:
       PORT: 3001
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: atma_db
-      DB_USER: atma_user
-      DB_PASSWORD: secret-passworrd
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_DIALECT: postgres
       DB_SCHEMA: auth
       DB_POOL_MAX: 75
@@ -123,14 +123,14 @@ services:
       DB_POOL_ACQUIRE: 60000
       DB_POOL_IDLE: 30000
       DB_POOL_EVICT: 10000
-      JWT_SECRET: atma_secure_jwt_secret_key_f8a5b3c7d9e1f2a3b5c7d9e1f2a3b5c7
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 7d
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: redis123
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_DB: 0
       REDIS_KEY_PREFIX: "atma:auth:"
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       BCRYPT_ROUNDS: 10
       DEFAULT_TOKEN_BALANCE: 3
       LOG_LEVEL: info
@@ -171,9 +171,9 @@ services:
       PORT: 3003
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: atma_db
-      DB_USER: atma_user
-      DB_PASSWORD: secret-passworrd
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_DIALECT: postgres
       DB_SCHEMA: assessment
       DB_POOL_MAX: 20
@@ -181,9 +181,9 @@ services:
       DB_POOL_ACQUIRE: 30000
       DB_POOL_IDLE: 10000
       DB_POOL_EVICT: 5000
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
@@ -191,8 +191,8 @@ services:
       MESSAGE_PERSISTENT: true
       AUTH_SERVICE_URL: http://auth-service:3001
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
-      JWT_SECRET: atma_secure_jwt_secret_key_f8a5b3c7d9e1f2a3b5c7d9e1f2a3b5c7
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ANALYSIS_TOKEN_COST: 1
       OUTBOX_PROCESSING_INTERVAL: 5000
       OUTBOX_BATCH_SIZE: 50
@@ -223,21 +223,21 @@ services:
       PORT: 3002
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: atma_db
-      DB_USER: atma_user
-      DB_PASSWORD: secret-passworrd
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_DIALECT: postgres
       DB_SCHEMA: archive
-      DB_MIGRATION_USER: atma_user
-      DB_MIGRATION_PASSWORD: secret-passworrd
+      DB_MIGRATION_USER: ${POSTGRES_USER}
+      DB_MIGRATION_PASSWORD: ${POSTGRES_PASSWORD}
       DB_POOL_MAX: 75
       DB_POOL_MIN: 15
       DB_POOL_ACQUIRE: 25000
       DB_POOL_IDLE: 15000
       DB_POOL_EVICT: 3000
       AUTH_SERVICE_URL: http://auth-service:3001
-      JWT_SECRET: atma_secure_jwt_secret_key_f8a5b3c7d9e1f2a3b5c7d9e1f2a3b5c7
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       DEFAULT_PAGE_SIZE: 10
       MAX_PAGE_SIZE: 100
       BATCH_MAX_SIZE: 50
@@ -245,7 +245,7 @@ services:
       BATCH_MAX_QUEUE_SIZE: 1000
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: redis123
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_DB: 0
       DISABLE_REDIS: false
       LOG_LEVEL: info
@@ -272,14 +272,14 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3005
-      JWT_SECRET: atma_secure_jwt_secret_key_f8a5b3c7d9e1f2a3b5c7d9e1f2a3b5c7
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       CORS_ORIGIN: "*"
       LOG_LEVEL: info
       LOG_FILE: logs/notification-service.log
       SOCKET_PING_TIMEOUT: 60000
       SOCKET_PING_INTERVAL: 25000
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
       EVENTS_EXCHANGE_NAME: atma_events_exchange
       EVENTS_QUEUE_NAME_NOTIFICATIONS: analysis_events_notifications
       CONSUMER_PREFETCH: 10
@@ -303,26 +303,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-1
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -344,7 +344,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -366,26 +366,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-2
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -407,7 +407,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -429,26 +429,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-3
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -470,7 +470,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -492,26 +492,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-4
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -533,7 +533,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -555,26 +555,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-5
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -596,7 +596,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -618,26 +618,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-6
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -659,7 +659,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -681,26 +681,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-7
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -722,7 +722,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -744,26 +744,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-8
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -785,7 +785,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -807,26 +807,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-9
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -848,7 +848,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
@@ -870,26 +870,26 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: worker-10
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
       EXCHANGE_NAME: atma_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyAH2hc8NyXkiuiPfib63bAZgzV1t7m3rbc
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.4
-      USE_MOCK_MODEL: true
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
       OUTPUT_TOKEN_PRICE_PER_1K: 2.50
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
-      INTERNAL_SERVICE_KEY: internal_service_secret_key_change_in_production
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
@@ -911,7 +911,7 @@ services:
       JOB_CACHE_RETENTION_MS: 3600000
       MAX_JOB_CACHE_SIZE: 10000
       AUDIT_LOG_DIR: logs/audit
-      AUDIT_ENCRYPTION_KEY: your_audit_encryption_key_here
+      AUDIT_ENCRYPTION_KEY: ${AUDIT_ENCRYPTION_KEY}
       AUDIT_RETENTION_DAYS: 2555
       ENABLE_TOKEN_REFUND: true
       REFUND_PROCESSING_INTERVAL: 5000
