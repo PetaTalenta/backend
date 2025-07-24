@@ -1475,6 +1475,65 @@ socket.connect();
     ]
   },
 
+  chatbotSession: {
+    title: "Chatbot Session Details",
+    description: "Penjelasan mendalam mengenai alur sesi percakapan dengan chatbot, mulai dari inisiasi hingga terminasi, termasuk manajemen konteks dan interaksi dengan AI.",
+    lifecycle: {
+      title: "Siklus Hidup Sesi Chat",
+      steps: [
+        {
+          step: "1. Inisiasi Sesi",
+          description: "Sebuah sesi percakapan dimulai dengan membuat sebuah 'conversation' baru melalui endpoint <code>POST /api/chatbot/conversations</code>. Ini akan menghasilkan sebuah <code>conversationId</code> yang unik.",
+          details: "Untuk percakapan yang terkait dengan hasil assessment, gunakan endpoint <code>POST /api/chatbot/assessment/from-assessment</code> untuk membuat percakapan dengan konteks yang sudah dipersonalisasi."
+        },
+        {
+          step: "2. Pengiriman Pesan",
+          description: "User mengirimkan pesan dalam sebuah percakapan menggunakan endpoint <code>POST /api/chatbot/conversations/{conversationId}/messages</code>.",
+          details: "Setiap pesan dari user akan dibalas oleh AI. Sistem akan menjaga riwayat percakapan untuk menjaga konteks. Konteks ini secara otomatis dioptimalkan untuk efisiensi."
+        },
+        {
+          step: "3. Regenerasi Respons",
+          description: "Jika user tidak puas dengan respons AI, mereka dapat meminta respons baru menggunakan endpoint <code>POST /api/chatbot/conversations/{conversationId}/messages/{messageId}/regenerate</code>.",
+          details: "Fitur ini akan menghasilkan respons alternatif berdasarkan riwayat percakapan yang sama."
+        },
+        {
+          step: "4. Manajemen Sesi",
+          description: "User dapat melihat riwayat percakapan mereka, memperbarui judul, atau mengarsipkannya menggunakan endpoint-endpoint di bawah 'Conversation Management'.",
+          details: "Mengambil detail percakapan dapat dilakukan dengan atau tanpa menyertakan pesan-pesan di dalamnya untuk efisiensi."
+        },
+        {
+          step: "5. Terminasi Sesi",
+          description: "Sesi dapat dianggap berakhir ketika user berhenti berinteraksi. Percakapan dapat dihapus menggunakan <code>DELETE /api/chatbot/conversations/{conversationId}</code>.",
+          details: "Menghapus percakapan akan menghapus semua pesan yang terkait."
+        }
+      ]
+    },
+    contextManagement: {
+      title: "Manajemen Konteks",
+      description: "Konteks adalah kunci untuk percakapan yang relevan dan personal. Chatbot service mengelola konteks secara otomatis.",
+      points: [
+        "<strong>Konteks Awal:</strong> Saat membuat percakapan, Anda dapat menyediakan konteks awal, misalnya 'assessment' atau 'general'.",
+        "<strong>Konteks dari Assessment:</strong> Jika percakapan dibuat dari hasil assessment, profil persona user akan secara otomatis menjadi bagian dari konteks awal, memungkinkan AI memberikan saran yang sangat personal.",
+        "<strong>Riwayat Pesan:</strong> Riwayat pesan dalam satu percakapan secara otomatis digunakan sebagai konteks untuk pesan-pesan berikutnya.",
+        "<strong>Optimasi Konteks:</strong> Untuk efisiensi dan performa, service secara otomatis meringkas dan mengoptimalkan konteks yang dikirim ke model AI, terutama dalam percakapan yang panjang."
+      ]
+    },
+    interactiveFeatures: {
+      title: "Fitur Interaktif",
+      description: "Selain tanya jawab standar, sesi chatbot mendukung beberapa fitur interaktif.",
+      features: [
+        {
+          name: "Saran Pertanyaan",
+          description: "Berdasarkan konteks percakapan, terutama yang terkait assessment, sistem dapat memberikan saran pertanyaan relevan melalui endpoint <code>GET /api/chatbot/assessment/conversations/{conversationId}/suggestions</code>."
+        },
+        {
+          name: "Personalisasi Berbasis Persona",
+          description: "Respons AI disesuaikan dengan profil persona user yang didapat dari hasil assessment, membuat interaksi lebih relevan dan bermanfaat."
+        }
+      ]
+    }
+  },
+
   health: {
     title: "Health & Monitoring",
     description: "Endpoint untuk monitoring kesehatan sistem",

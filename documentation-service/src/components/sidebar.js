@@ -8,6 +8,7 @@ export function renderSidebar(apiData, currentSection) {
     { key: 'assessment', title: 'Assessment Service', icon: '🎯' },
     { key: 'archive', title: 'Archive Service', icon: '📊' },
     { key: 'chatbot', title: 'Chatbot Service', icon: '💬' },
+    { key: 'chatbotSession', title: 'Chatbot Session', icon: '🗣️' },
     { key: 'websocket', title: 'WebSocket', icon: '🔔' },
     { key: 'health', title: 'Health & Monitoring', icon: '🔍' },
     { key: 'errors', title: 'Error Handling', icon: '❌' }

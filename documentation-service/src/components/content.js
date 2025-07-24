@@ -16,6 +16,8 @@ export function renderContent(apiData, section) {
     case 'archive':
     case 'chatbot':
       return renderEndpointSection(data)
+    case 'chatbotSession':
+      return renderChatbotSessionSection(data)
     case 'websocket':
       return renderWebSocketSection(data)
     case 'errors':
@@ -401,6 +403,47 @@ function renderGenericSection(data) {
     <div class="content-header">
       <h1 class="content-title">${data.title}</h1>
       <p class="content-description">${data.description}</p>
+    </div>
+  `
+}
+
+function renderChatbotSessionSection(data) {
+  return `
+    <div class="content-header">
+      <h1 class="content-title">${data.title}</h1>
+      <p class="content-description">${data.description}</p>
+    </div>
+
+    <div class="endpoint-section">
+      <h2>${data.lifecycle.title}</h2>
+      ${data.lifecycle.steps.map(step => `
+        <div class="endpoint-section" style="box-shadow: none; padding: 15px; border: 1px solid #eee;">
+          <h4>${step.step}</h4>
+          <p>${step.description}</p>
+          <div class="info-box" style="margin-top: 10px;">
+            <p>${step.details}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="endpoint-section">
+      <h2>${data.contextManagement.title}</h2>
+      <p>${data.contextManagement.description}</p>
+      <ul>
+        ${data.contextManagement.points.map(point => `<li>${point}</li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="endpoint-section">
+      <h2>${data.interactiveFeatures.title}</h2>
+      <p>${data.interactiveFeatures.description}</p>
+      ${data.interactiveFeatures.features.map(feature => `
+        <div style="margin-top: 15px;">
+          <strong>${feature.name}:</strong>
+          <p>${feature.description}</p>
+        </div>
+      `).join('')}
     </div>
   `
 }
