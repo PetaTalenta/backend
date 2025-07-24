@@ -29,8 +29,8 @@ class OpenRouterService {
       headers: {
         'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://atma.chhrone.web.id',
-        'X-Title': 'ATMA - AI Talent Mapping Assessment'
+        'HTTP-Referer': process.env.HTTP_REFERER || 'https://atma.chhrone.web.id',
+        'X-Title': process.env.X_TITLE || 'ATMA - AI Talent Mapping Assessment'
       },
       timeout: this.timeout
     });

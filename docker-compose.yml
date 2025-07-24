@@ -15,8 +15,9 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./current_database_dump_fixed.sql:/docker-entrypoint-initdb.d/01-current_database_dump.sql
-      - ./production_database_init_fixed.sql:/docker-entrypoint-initdb.d/02-production_database_init.sql
+      - ./migrations/production_database_init_fixed.sql:/docker-entrypoint-initdb.d/01-current_database_dump.sql
+      - ./migrations/current_database_dump_fixed.sql:/docker-entrypoint-initdb.d/02-production_database_init.sql
+      - ./migrations/001_create_chat_schema.sql:/docker-entrypoint-initdb.d/03-create_chat_schema.sql
     ports:
       - "5432:5432"
     networks:
@@ -337,6 +338,9 @@ services:
       # Rate Limiting for Free Models
       FREE_MODEL_RATE_LIMIT_PER_MINUTE: ${FREE_MODEL_RATE_LIMIT_PER_MINUTE}
       MAX_CONVERSATION_HISTORY_TOKENS: ${MAX_CONVERSATION_HISTORY_TOKENS}
+      # OpenRouter Headers
+      HTTP_REFERER: ${HTTP_REFERER:-https://atma.chhrone.web.id}
+      X_TITLE: ${X_TITLE:-ATMA - AI Talent Mapping Assessment}
       # Phase 3: Assessment Integration
       ARCHIVE_SERVICE_URL: http://archive-service:3002
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672

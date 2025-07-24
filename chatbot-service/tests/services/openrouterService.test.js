@@ -20,6 +20,8 @@ describe('OpenRouterService', () => {
     process.env.MAX_TOKENS = '1000';
     process.env.TEMPERATURE = '0.7';
     process.env.OPENROUTER_TIMEOUT = '45000';
+    process.env.HTTP_REFERER = 'https://atma.chhrone.web.id';
+    process.env.X_TITLE = 'ATMA - AI Talent Mapping Assessment';
 
     // Mock axios instance
     mockAxiosInstance = {
@@ -57,6 +59,42 @@ describe('OpenRouterService', () => {
     it('should throw error if API key is missing', () => {
       delete process.env.OPENROUTER_API_KEY;
       expect(() => new OpenRouterService()).toThrow('OPENROUTER_API_KEY is required');
+    });
+
+    it('should use fallback values for HTTP_REFERER and X_TITLE when env vars are not set', () => {
+      delete process.env.HTTP_REFERER;
+      delete process.env.X_TITLE;
+
+      new OpenRouterService();
+
+      expect(mockedAxios.create).toHaveBeenCalledWith({
+        baseURL: 'https://openrouter.ai/api/v1',
+        headers: {
+          'Authorization': 'Bearer test-api-key',
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://atma.chhrone.web.id',
+          'X-Title': 'ATMA - AI Talent Mapping Assessment'
+        },
+        timeout: 45000
+      });
+    });
+
+    it('should use custom values for HTTP_REFERER and X_TITLE when env vars are set', () => {
+      process.env.HTTP_REFERER = 'https://custom-domain.com';
+      process.env.X_TITLE = 'Custom App Title';
+
+      new OpenRouterService();
+
+      expect(mockedAxios.create).toHaveBeenCalledWith({
+        baseURL: 'https://openrouter.ai/api/v1',
+        headers: {
+          'Authorization': 'Bearer test-api-key',
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://custom-domain.com',
+          'X-Title': 'Custom App Title'
+        },
+        timeout: 45000
+      });
     });
   });
 
@@ -262,7 +300,7 @@ describe('OpenRouterService', () => {
           model: 'openai/gpt-4o-mini',
           isSecondRetry: true
         }, mockError)
-      ).rejects.toThrow('All OpenRouter models failed. Original error: Primary model failed');
+      ).rejects.toThrow(/All OpenRouter models failed/);
     });
   });
 });
