@@ -15,7 +15,24 @@ const logger = require('../utils/logger');
  */
 const getResults = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    // For internal service requests, get userId from header or query
+    let userId;
+    if (req.isInternalService) {
+      userId = req.headers['x-user-id'] || req.query.user_id;
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'MISSING_USER_ID',
+            message: 'User ID is required for internal service requests',
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+    } else {
+      userId = req.user.id;
+    }
+
     const options = {
       page: req.query.page,
       limit: req.query.limit,
@@ -24,7 +41,7 @@ const getResults = async (req, res, next) => {
       sort: req.query.sort,
       order: req.query.order
     };
-    
+
     const results = await resultsService.getResultsByUser(userId, options);
     
     // Format response

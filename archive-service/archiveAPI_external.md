@@ -67,18 +67,25 @@ Mendapatkan detail hasil analisis berdasarkan ID.
 ```json
 {
   "success": true,
-  "message": "Result retrieved successfully",
   "data": {
     "id": "uuid",
     "user_id": "uuid",
-    "assessment_name": "string",
-    "archetype": "string",
-    "analysis_data": {...},
+    "assessment_data": {...},
+    "persona_profile": {...},
+    "status": "completed",
+    "error_message": null,
+    "assessment_name": "AI-Driven Talent Mapping",
     "created_at": "timestamp",
     "updated_at": "timestamp"
   }
 }
 ```
+
+**Field Descriptions:**
+- `assessment_data`: Data assessment yang dikirim user (RIASEC, OCEAN, VIA-IS)
+- `persona_profile`: Hasil analisis dan profil persona yang dihasilkan
+- `status`: Status hasil analisis ('completed', 'processing', 'failed')
+- `error_message`: Pesan error jika status 'failed', null jika berhasil
 
 ### 3. Update Result
 **PUT** `/api/archive/results/:id`
@@ -91,7 +98,8 @@ Memperbarui hasil analisis (hanya pemilik atau admin).
 **Request Body:**
 ```json
 {
-  "analysis_data": {...},
+  "assessment_data": {...},
+  "persona_profile": {...},
   "status": "completed"
 }
 ```
@@ -238,7 +246,7 @@ Mendapatkan overview statistik untuk dashboard user.
 ## 🔄 Unified API v1 Endpoints
 
 ### 1. Unified Statistics
-**GET** `/api/archive/api/v1/stats`
+**GET** `/api/archive/v1/stats`
 
 Endpoint statistik terpadu dengan parameter fleksibel.
 
@@ -250,7 +258,7 @@ Endpoint statistik terpadu dengan parameter fleksibel.
 **Note:** Parameter `type` dengan nilai `system`, `demographic`, atau `performance` memerlukan autentikasi internal service.
 
 ### 2. Unified Data Retrieval
-**GET** `/api/archive/api/v1/data/:type`
+**GET** `/api/archive/v1/data/:type`
 
 Endpoint pengambilan data terpadu.
 

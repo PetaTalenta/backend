@@ -9,7 +9,7 @@ const httpAgent = new http.Agent({
   keepAlive: true,
   maxSockets: 50,        // Max concurrent connections per host
   maxFreeSockets: 10,    // Max idle connections per host
-  timeout: 15000,         // Socket timeout
+  timeout: 60000,         // Socket timeout increased for AI processing
   freeSocketTimeout: 30000 // Idle socket timeout
 });
 
@@ -17,7 +17,7 @@ const httpsAgent = new https.Agent({
   keepAlive: true,
   maxSockets: 50,
   maxFreeSockets: 10,
-  timeout: 15000,
+  timeout: 60000,
   freeSocketTimeout: 30000
 });
 
@@ -31,8 +31,8 @@ const createServiceProxy = (serviceUrl, options = {}) => {
   return createProxyMiddleware({
     target: serviceUrl,
     changeOrigin: true,
-    timeout: 15000,          // Reduced from 30s to 5s
-    proxyTimeout: 15000,     // Reduced from 30s to 5s
+    timeout: 60000,          // Increased to 60s for AI processing
+    proxyTimeout: 60000,     // Increased to 60s for AI processing
     agent: serviceUrl.startsWith('https') ? httpsAgent : httpAgent,
 
     // Additional timeout settings
@@ -88,6 +88,7 @@ const createServiceProxy = (serviceUrl, options = {}) => {
       // User info (if available)
       if (req.user?.id) {
         proxyReq.setHeader('X-User-ID', req.user.id);
+        proxyReq.setHeader('X-User-Email', req.user.email || 'unknown');
         proxyReq.setHeader('X-User-Type', req.user.user_type || 'user');
       }
 
@@ -130,12 +131,10 @@ const authServiceProxy = createServiceProxy(config.services.auth, {
  */
 const archiveServiceProxy = createServiceProxy(config.services.archive, {
   pathRewrite: {
-    '^/api/archive/health': '/health', // Health endpoint langsung ke /health
-    '^/api/archive/metrics': '/metrics', // Metrics endpoints langsung ke /metrics
-    '^/api/archive/admin': '/admin', // Admin endpoints langsung ke /admin
-    '^/api/results': '/results', // Direct access results endpoints
-    '^/api/jobs': '/jobs', // Direct access jobs endpoints
-    '^/api/archive': '/archive' // Keep /archive prefix for other endpoints
+    '^/api/archive/health': '/archive/health', // Health endpoint with archive prefix
+    '^/api/archive/metrics': '/archive/metrics', // Metrics endpoints with archive prefix
+    '^/api/archive/admin': '/archive/admin', // Admin endpoints with archive prefix
+    '^/api/archive': '/archive' // Keep /archive prefix for all endpoints
   }
 });
 
@@ -180,10 +179,14 @@ const socketIOProxy = createServiceProxy(config.services.notification, {
  */
 const chatbotServiceProxy = createServiceProxy(config.services.chatbot, {
   pathRewrite: {
-    '^/api/chatbot/health': '/health',                 // Health endpoint
-    '^/api/chatbot/conversations': '/conversations',   // Conversations endpoint
-    '^/api/chatbot$': '/',                             // Root endpoint (exact match)
-    '^/api/chatbot': ''                                // Remove /api/chatbot prefix for other endpoints
+    '^/api/chatbot/health': '/health',                                    // Health endpoint
+    '^/api/chatbot/assessment/from-assessment': '/assessment/from-assessment',  // Assessment integration endpoint
+    '^/api/chatbot/conversations/([^/]+)/suggestions': '/assessment/$1/suggestions', // Conversation suggestions
+    '^/api/chatbot/auto-initialize': '/assessment/auto-initialize',       // Auto-initialize endpoint
+    '^/api/chatbot/assessment-ready': '/assessment/assessment-ready',     // Assessment ready check
+    '^/api/chatbot/conversations': '/conversations',                      // General conversations endpoint
+    '^/api/chatbot$': '/',                                               // Root endpoint (exact match)
+    '^/api/chatbot': ''                                                  // Remove /api/chatbot prefix for other endpoints
   }
 });
 

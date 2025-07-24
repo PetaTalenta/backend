@@ -8,6 +8,8 @@
     "dev": "nodemon src/app.js",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:archive": "node scripts/test-archive-integration.js",
+    "test:archive:examples": "node examples/archive-integration-examples.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix"
   },

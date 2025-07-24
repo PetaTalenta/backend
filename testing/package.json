@@ -1,33 +1,43 @@
 {
-  "name": "atma-e2e-load-testing",
+  "name": "atma-e2e-testing",
   "version": "1.0.0",
-  "description": "E2E and Load Testing for ATMA Backend",
+  "description": "End-to-End Testing Suite for ATMA Backend Services",
   "main": "index.js",
   "scripts": {
-    "test:e2e": "node e2e-test.js",
-    "test:load": "node load-test.js",
-    "test:all": "npm run test:e2e && npm run test:load",
-    "test:websocket": "node test-websocket-routing.js",
-    "test:chatbot:proxy": "node chatbot/test-chatbot-proxy.js",
-    "test:chatbot:simple": "node chatbot/test-chatbot-simple.js",
-    "test:chatbot:openrouter": "node chatbot/test-openrouter-integration.js",
-    "test:chatbot:ai": "node chatbot/test-openrouter-ai-integration.js",
-    "test:chatbot:direct": "node chatbot/test-openrouter-direct.js",
-    "test:chatbot:report": "node chatbot/test-openrouter-final-report.js",
-    "test:chatbot:all": "npm run test:chatbot:proxy && npm run test:chatbot:simple && npm run test:chatbot:openrouter",
-    "cleanup:single": "node cleanup-account.js",
-    "cleanup:batch": "node batch-cleanup.js"
+    "test": "node test-runner.js",
+    "test:single": "node single-user-test.js",
+    "test:dual": "node dual-user-test.js",
+    "test:stress": "node stress-test.js",
+    "test:websocket": "node websocket-test.js",
+    "test:chatbot": "node chatbot-test.js",
+    "clean": "node cleanup.js",
+    "check-services": "node scripts/check-services.js",
+    "install-deps": "npm install",
+    "setup": "chmod +x scripts/install.sh && ./scripts/install.sh",
+    "db:setup": "node scripts/setup-test-db.js setup",
+    "db:cleanup": "node scripts/setup-test-db.js cleanup",
+    "test:with-db": "npm run db:setup && npm run test && npm run db:cleanup"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "axios": "^1.6.0",
-    "socket.io-client": "^4.7.2",
     "chalk": "^4.1.2",
-    "cli-progress": "^3.12.0",
-    "uuid": "^9.0.0",
-    "colors": "^1.4.0"
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.0",
+    "socket.io-client": "^4.7.2",
+    "uuid": "^9.0.1"
   },
-  "devDependencies": {},
-  "keywords": ["testing", "e2e", "load-testing", "atma"],
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "e2e",
+    "testing",
+    "atma",
+    "websocket",
+    "api"
+  ],
   "author": "ATMA Team",
   "license": "MIT"
 }

@@ -17,7 +17,7 @@ let circuitBreakerState = {
 
 // Configuration
 const config = {
-  // Use direct routes for better performance (no /archive prefix)
+  // Archive service base URL - all routes use /archive prefix for consistency
   baseURL: process.env.ARCHIVE_SERVICE_URL || 'http://localhost:3002',
   serviceKey: process.env.INTERNAL_SERVICE_KEY || 'internal_service_secret_key_change_in_production',
   timeout: parseInt(process.env.ARCHIVE_TIMEOUT || '30000'),
@@ -203,7 +203,7 @@ const processBatch = async () => {
     logger.info('Processing batch of results', { batchSize: batch.length });
 
     const response = await withRetry(() =>
-      archiveClient.post('/results/batch', { results: batch })
+      archiveClient.post('/archive/results/batch', { results: batch })
     );
 
     logger.info('Batch processed successfully', {
@@ -323,8 +323,8 @@ const saveAnalysisResultDirect = async (userId, assessmentData, personaProfile, 
       status: 'completed'
     };
 
-    // Send request to Archive Service using direct route
-    const response = await archiveClient.post('/results', requestBody);
+    // Send request to Archive Service
+    const response = await archiveClient.post('/archive/results', requestBody);
 
     logger.info('Analysis result saved successfully', {
       jobId,
@@ -360,8 +360,8 @@ const updateAnalysisResult = async (resultId, status, jobId) => {
     // Prepare request body
     const requestBody = { status };
 
-    // Send request to Archive Service using direct route
-    const response = await archiveClient.put(`/results/${resultId}`, requestBody);
+    // Send request to Archive Service
+    const response = await archiveClient.put(`/archive/results/${resultId}`, requestBody);
 
     logger.info('Analysis result status updated successfully', {
       jobId,
@@ -404,8 +404,8 @@ const saveFailedAnalysisResult = async (userId, assessmentData, errorMessage, jo
       error_message: errorMessage
     };
 
-    // Send request to Archive Service using direct route
-    const response = await archiveClient.post('/results', requestBody);
+    // Send request to Archive Service
+    const response = await archiveClient.post('/archive/results', requestBody);
 
     logger.info('Failed analysis result saved successfully', {
       jobId,
@@ -455,8 +455,8 @@ const updateAnalysisJobStatus = async (jobId, status, additionalData = {}) => {
       logger.info('Updating analysis job status', { jobId, status });
 
       const requestBody = { status, ...additionalData };
-      // Use direct route for better performance
-      const response = await archiveClient.put(`/jobs/${jobId}/status`, requestBody);
+      // Send request to Archive Service
+      const response = await archiveClient.put(`/archive/jobs/${jobId}/status`, requestBody);
 
       logger.info('Analysis job status updated successfully', { jobId, status });
       return response.data.data;

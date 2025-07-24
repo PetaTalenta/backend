@@ -109,16 +109,33 @@ const getQueueStats = async() => {
 };
 
 /**
- * Initialize queue service
+ * Initialize queue service with retry mechanism
  * @returns {Promise<void>}
  */
 const initialize = async() => {
-  try {
-    await rabbitmq.initialize();
-    logger.info('Queue service initialized successfully');
-  } catch (error) {
-    logger.error('Failed to initialize queue service', { error: error.message });
-    throw error;
+  const maxRetries = 5;
+  const retryDelay = 5000; // 5 seconds
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await rabbitmq.initialize();
+      logger.info('Queue service initialized successfully', { attempt });
+      return;
+    } catch (error) {
+      logger.error(`Failed to initialize queue service (attempt ${attempt}/${maxRetries})`, {
+        error: error.message,
+        attempt,
+        maxRetries
+      });
+
+      if (attempt === maxRetries) {
+        logger.error('Queue service initialization failed after all retries');
+        throw error;
+      }
+
+      logger.info(`Retrying queue service initialization in ${retryDelay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
   }
 };
 

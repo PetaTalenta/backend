@@ -1,9 +1,11 @@
 const { Conversation, Message, UsageTracking } = require('../models');
 const OpenRouterService = require('../services/openrouterService');
+const ContextService = require('../services/contextService');
 const logger = require('../utils/logger');
 
-// Initialize OpenRouter service
+// Initialize services
 const openrouterService = new OpenRouterService();
+const contextService = new ContextService();
 
 /**
  * Message Controller for handling AI conversation messages
@@ -66,7 +68,7 @@ class MessageController {
       });
 
       // Build conversation context for AI
-      const conversationHistory = await this.buildConversationHistory(conversationId);
+      const conversationHistory = await contextService.buildConversationContext(conversationId);
       
       // Generate AI response
       const startTime = Date.now();
@@ -127,10 +129,13 @@ class MessageController {
       });
 
       res.json({
-        user_message: userMessage,
-        assistant_message: assistantMessage,
-        usage: aiResponse.usage,
-        processing_time: totalTime
+        success: true,
+        data: {
+          user_message: userMessage,
+          assistant_message: assistantMessage,
+          usage: aiResponse.usage,
+          processing_time: totalTime
+        }
       });
 
     } catch (error) {
@@ -268,9 +273,9 @@ class MessageController {
       }
 
       // Build conversation history up to the parent message
-      const conversationHistory = await this.buildConversationHistory(
-        conversationId, 
-        message.parent_message_id
+      const conversationHistory = await contextService.buildConversationContext(
+        conversationId,
+        { upToMessageId: message.parent_message_id }
       );
 
       // Generate new AI response
@@ -316,8 +321,11 @@ class MessageController {
       });
 
       res.json({
-        message: message,
-        usage: aiResponse.usage
+        success: true,
+        data: {
+          message: message,
+          usage: aiResponse.usage
+        }
       });
 
     } catch (error) {

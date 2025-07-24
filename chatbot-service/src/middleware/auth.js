@@ -28,15 +28,40 @@ const verifyToken = (token) => {
  */
 const authenticateToken = async (req, res, next) => {
   try {
+    // Check if user info is provided by API Gateway via headers
+    if (req.headers['x-user-id']) {
+      req.user = {
+        id: req.headers['x-user-id'],
+        email: req.headers['x-user-email'] || 'unknown',
+        user_type: req.headers['x-user-type'] || 'user'
+      };
+
+      logger.info('User authenticated via API Gateway headers', {
+        userId: req.user.id,
+        userEmail: req.user.email,
+        url: req.originalUrl
+      });
+
+      return next();
+    }
+
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    logger.info('Authentication attempt', {
+      hasAuthHeader: !!authHeader,
+      hasToken: !!token,
+      url: req.originalUrl,
+      headers: Object.keys(req.headers)
+    });
 
     if (!token) {
       logger.warn('Authentication failed: No token provided', {
         ip: req.ip,
         userAgent: req.get('User-Agent'),
         url: req.originalUrl,
-        requestId: req.id
+        requestId: req.id,
+        authHeader: authHeader
       });
       return res.status(401).json({
         success: false,
@@ -50,12 +75,20 @@ const authenticateToken = async (req, res, next) => {
     // Verify token
     const decoded = verifyToken(token);
 
+    logger.info('Token verification result', {
+      hasDecoded: !!decoded,
+      decodedId: decoded?.id,
+      decodedEmail: decoded?.email,
+      url: req.originalUrl
+    });
+
     // For chatbot service, we'll make a request to auth service to validate user
     // For now, we'll use a simplified approach and trust the JWT payload
     if (!decoded.id) {
       logger.warn('Authentication failed: Invalid token payload', {
         ip: req.ip,
-        requestId: req.id
+        requestId: req.id,
+        decoded: decoded
       });
       return res.status(401).json({
         success: false,
@@ -73,6 +106,12 @@ const authenticateToken = async (req, res, next) => {
       user_type: decoded.user_type || 'user'
     };
     req.token = token;
+
+    logger.info('User attached to request', {
+      userId: req.user.id,
+      userEmail: req.user.email,
+      url: req.originalUrl
+    });
 
     logger.debug('User authenticated successfully', {
       userId: req.user.id,

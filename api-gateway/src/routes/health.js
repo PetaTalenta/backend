@@ -6,6 +6,26 @@ const { asyncHandler } = require('../middleware/errorHandler');
 const router = express.Router();
 
 /**
+ * Middleware to add gateway headers to health endpoints
+ */
+const addGatewayHeaders = (req, res, next) => {
+  // Add request ID if not present
+  if (!req.id) {
+    req.id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  }
+
+  // Add gateway headers
+  res.setHeader('X-Request-ID', req.id);
+  res.setHeader('X-Gateway', 'ATMA-API-Gateway');
+  res.setHeader('X-Gateway-Version', '1.0.0');
+
+  next();
+};
+
+// Apply gateway headers middleware to all health routes
+router.use(addGatewayHeaders);
+
+/**
  * Health check untuk API Gateway
  */
 router.get('/', asyncHandler(async (req, res) => {

@@ -1,0 +1,212 @@
+{
+  "testName": "single-user-test-2025-07-24T03-29-50",
+  "startTime": "2025-07-24T03:29:50.971Z",
+  "endTime": "2025-07-24T03:30:27.086Z",
+  "duration": 36115,
+  "results": {
+    "passed": 8,
+    "failed": 2,
+    "skipped": 0,
+    "total": 10
+  },
+  "successRate": 80,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Chatbot test failed",
+      "error": {
+        "message": "Request failed with status code 500",
+        "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.createConversationFromAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:152:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:218:28)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)",
+        "response": {
+          "error": "Failed to create assessment conversation",
+          "code": "CONVERSATION_CREATION_ERROR"
+        }
+      },
+      "timestamp": "2025-07-24T03:30:27.084Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 500",
+        "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.createConversationFromAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:152:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:218:28)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)",
+        "response": {
+          "error": "Failed to create assessment conversation",
+          "code": "CONVERSATION_CREATION_ERROR"
+        }
+      },
+      "timestamp": "2025-07-24T03:30:27.084Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:50.972Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:50.973Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser17533277909734nq87r@example.com",
+        "username": "testuser4nq87r"
+      },
+      "timestamp": "2025-07-24T03:29:50.975Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:50.976Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "edc37be7-8961-45e4-baed-cb13eceefa98",
+        "email": "testuser17533277909734nq87r@example.com"
+      },
+      "timestamp": "2025-07-24T03:29:51.070Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:51.071Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:51.129Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:51.129Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:51.149Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Update Profile",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:51.150Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile updated successfully",
+      "data": {
+        "username": "updatedmvrpfo"
+      },
+      "timestamp": "2025-07-24T03:29:51.175Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Submit Assessment",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:51.176Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment submitted successfully",
+      "data": {
+        "jobId": "e6fb3cb4-dcc9-4237-9eea-32bd4aabefc3",
+        "status": "queued"
+      },
+      "timestamp": "2025-07-24T03:29:51.295Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Wait for WebSocket Notification",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:51.295Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for assessment completion notification...",
+      "data": null,
+      "timestamp": "2025-07-24T03:29:51.295Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment completion notification received",
+      "data": {
+        "jobId": "e6fb3cb4-dcc9-4237-9eea-32bd4aabefc3",
+        "resultId": "d53ee4c1-23ec-4c65-b669-c3b926c09976"
+      },
+      "timestamp": "2025-07-24T03:30:21.040Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 8: Get Profile Persona",
+      "data": null,
+      "timestamp": "2025-07-24T03:30:21.041Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch processing to complete...",
+      "data": null,
+      "timestamp": "2025-07-24T03:30:21.041Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile persona retrieved successfully",
+      "data": {
+        "archetype": "The Empathetic Architect",
+        "careerCount": 5
+      },
+      "timestamp": "2025-07-24T03:30:27.066Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 9: Test Chatbot",
+      "data": null,
+      "timestamp": "2025-07-24T03:30:27.066Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Chatbot test failed",
+      "error": {
+        "message": "Request failed with status code 500",
+        "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.createConversationFromAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:152:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:218:28)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)",
+        "response": {
+          "error": "Failed to create assessment conversation",
+          "code": "CONVERSATION_CREATION_ERROR"
+        }
+      },
+      "timestamp": "2025-07-24T03:30:27.084Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 500",
+        "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.createConversationFromAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:152:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:218:28)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)",
+        "response": {
+          "error": "Failed to create assessment conversation",
+          "code": "CONVERSATION_CREATION_ERROR"
+        }
+      },
+      "timestamp": "2025-07-24T03:30:27.084Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-07-24T03:30:27.086Z"
+    }
+  ]
+}

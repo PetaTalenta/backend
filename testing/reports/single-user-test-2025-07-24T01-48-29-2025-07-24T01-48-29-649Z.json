@@ -1,0 +1,110 @@
+{
+  "testName": "single-user-test-2025-07-24T01-48-29",
+  "startTime": "2025-07-24T01:48:29.601Z",
+  "endTime": "2025-07-24T01:48:29.648Z",
+  "duration": 47,
+  "results": {
+    "passed": 1,
+    "failed": 2,
+    "skipped": 0,
+    "total": 3
+  },
+  "successRate": 33.33,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "User registration failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.register (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:51:22)\n    at async SingleUserTest.registerUser (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:69:24)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:27:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)",
+        "response": {
+          "success": false,
+          "error": "NOT_FOUND",
+          "message": "Route POST /auth/register not found",
+          "timestamp": "2025-07-24T01:48:29.644Z"
+        }
+      },
+      "timestamp": "2025-07-24T01:48:29.647Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.register (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:51:22)\n    at async SingleUserTest.registerUser (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:69:24)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:27:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)",
+        "response": {
+          "success": false,
+          "error": "NOT_FOUND",
+          "message": "Route POST /auth/register not found",
+          "timestamp": "2025-07-24T01:48:29.644Z"
+        }
+      },
+      "timestamp": "2025-07-24T01:48:29.647Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.601Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.602Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser_1753321709602_hujgmu@example.com",
+        "username": "testuser_hujgmu"
+      },
+      "timestamp": "2025-07-24T01:48:29.604Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.605Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "User registration failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.register (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:51:22)\n    at async SingleUserTest.registerUser (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:69:24)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:27:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)",
+        "response": {
+          "success": false,
+          "error": "NOT_FOUND",
+          "message": "Route POST /auth/register not found",
+          "timestamp": "2025-07-24T01:48:29.644Z"
+        }
+      },
+      "timestamp": "2025-07-24T01:48:29.647Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.register (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:51:22)\n    at async SingleUserTest.registerUser (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:69:24)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:27:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)",
+        "response": {
+          "success": false,
+          "error": "NOT_FOUND",
+          "message": "Route POST /auth/register not found",
+          "timestamp": "2025-07-24T01:48:29.644Z"
+        }
+      },
+      "timestamp": "2025-07-24T01:48:29.647Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.647Z"
+    }
+  ]
+}

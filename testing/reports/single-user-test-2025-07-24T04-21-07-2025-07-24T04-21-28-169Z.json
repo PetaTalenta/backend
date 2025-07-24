@@ -1,0 +1,113 @@
+{
+  "testName": "single-user-test-2025-07-24T04-21-07",
+  "startTime": "2025-07-24T04:21:07.979Z",
+  "endTime": "2025-07-24T04:21:28.168Z",
+  "duration": 20189,
+  "results": {
+    "passed": 3,
+    "failed": 2,
+    "skipped": 0,
+    "total": 5
+  },
+  "successRate": 60,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "WebSocket connection failed",
+      "error": {
+        "message": "timeout",
+        "stack": "Error: timeout\n    at Timeout.<anonymous> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\socket.io-client\\build\\cjs\\manager.js:176:25)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-07-24T04:21:28.166Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "timeout",
+        "stack": "Error: timeout\n    at Timeout.<anonymous> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\socket.io-client\\build\\cjs\\manager.js:176:25)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-07-24T04:21:28.167Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T04:21:07.980Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-07-24T04:21:07.981Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser1753330867982yab520@example.com",
+        "username": "testuseryab520"
+      },
+      "timestamp": "2025-07-24T04:21:07.984Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-07-24T04:21:07.985Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "4e7c80f9-7e57-4188-8c3e-e36110241b3b",
+        "email": "testuser1753330867982yab520@example.com"
+      },
+      "timestamp": "2025-07-24T04:21:08.100Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-07-24T04:21:08.100Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T04:21:08.158Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T04:21:08.159Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "WebSocket connection failed",
+      "error": {
+        "message": "timeout",
+        "stack": "Error: timeout\n    at Timeout.<anonymous> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\socket.io-client\\build\\cjs\\manager.js:176:25)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-07-24T04:21:28.166Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "timeout",
+        "stack": "Error: timeout\n    at Timeout.<anonymous> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\socket.io-client\\build\\cjs\\manager.js:176:25)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-07-24T04:21:28.167Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-07-24T04:21:28.167Z"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "content": "Hello! I just completed my assessment and would like some career guidance.",
+    "content_type": "text",
+    "category": "greeting"
+  },
+  {
+    "content": "What career paths would be most suitable for my personality type?",
+    "content_type": "text",
+    "category": "career_inquiry"
+  },
+  {
+    "content": "Can you explain my strengths and how I can leverage them in my career?",
+    "content_type": "text",
+    "category": "strengths_analysis"
+  },
+  {
+    "content": "What are my main weaknesses and how can I work on improving them?",
+    "content_type": "text",
+    "category": "weaknesses_analysis"
+  },
+  {
+    "content": "Which industries would be the best fit for someone with my profile?",
+    "content_type": "text",
+    "category": "industry_inquiry"
+  },
+  {
+    "content": "What skills should I focus on developing to advance in my chosen career path?",
+    "content_type": "text",
+    "category": "skill_development"
+  },
+  {
+    "content": "How does my personality type typically perform in leadership roles?",
+    "content_type": "text",
+    "category": "leadership_inquiry"
+  },
+  {
+    "content": "What type of work environment would I thrive in the most?",
+    "content_type": "text",
+    "category": "environment_inquiry"
+  },
+  {
+    "content": "Can you suggest some specific job titles that match my assessment results?",
+    "content_type": "text",
+    "category": "job_suggestions"
+  },
+  {
+    "content": "Thank you for all the helpful guidance! This has been very insightful.",
+    "content_type": "text",
+    "category": "closing"
+  }
+]

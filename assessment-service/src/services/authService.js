@@ -96,7 +96,7 @@ const deductTokens = async(userId, token, tokenAmount = 1) => {
     }, {
       headers: {
         'X-Internal-Service': 'true',
-        'X-Service-Key': process.env.AUTH_SERVICE_KEY || 'internal_service_secret_key_change_in_production'
+        'X-Service-Key': process.env.INTERNAL_SERVICE_KEY || 'internal_service_secret_key_change_in_production'
       }
     });
 

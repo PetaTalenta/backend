@@ -21,7 +21,7 @@ const router = express.Router();
 router.use(authenticateService);
 
 /**
- * GET /api/v1/stats
+ * GET /archive/v1/stats
  * Unified statistics endpoint
  * Query parameters:
  * - type: user|system|demographic|performance
@@ -42,7 +42,7 @@ router.get('/stats',
 );
 
 /**
- * GET /api/v1/analytics
+ * GET /archive/v1/analytics
  * Advanced analytics endpoint with filtering and aggregation
  * Query parameters:
  * - metric: results|jobs|demographics|performance
@@ -97,7 +97,7 @@ router.get('/analytics',
 );
 
 /**
- * GET /api/v1/data/:type
+ * GET /archive/v1/data/:type
  * Unified data retrieval endpoint
  * Supports: results, jobs, demographics
  */
@@ -198,7 +198,7 @@ router.post('/batch/:operation',
 );
 
 /**
- * GET /api/v1/health/:component
+ * GET /archive/v1/health/:component
  * Unified health check endpoint
  */
 router.get('/health/:component?',

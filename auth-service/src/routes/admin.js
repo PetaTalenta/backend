@@ -2,6 +2,7 @@ const express = require('express');
 const adminController = require('../controllers/adminController');
 const { authenticateAdminToken, requireAdminRole } = require('../middleware/auth');
 const { validateBody, schemas } = require('../middleware/validation');
+const cleanupRoutes = require('./admin/cleanup');
 
 const router = express.Router();
 
@@ -41,5 +42,8 @@ router.post('/register',
   validateBody(schemas.adminRegister),
   adminController.register
 );
+
+// Cleanup routes (admin only)
+router.use('/cleanup', cleanupRoutes);
 
 module.exports = router;

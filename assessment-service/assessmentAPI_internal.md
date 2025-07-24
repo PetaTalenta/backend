@@ -22,6 +22,38 @@ X-Service-Key: <internal_service_secret_key>
 
 ---
 
+## 🔄 Archive Service Integration
+
+Assessment Service terintegrasi dengan Archive Service untuk:
+1. **Job Management** - Membuat dan tracking analysis jobs
+2. **Result Storage** - Menyimpan hasil analisis langsung (jika diperlukan)
+3. **Status Synchronization** - Sinkronisasi status job antar services
+
+### Archive Service Configuration
+
+**Environment Variables:**
+```env
+ARCHIVE_SERVICE_URL=http://localhost:3002
+INTERNAL_SERVICE_KEY=internal_service_secret_key_change_in_production
+```
+
+### Available Archive Integration Methods
+
+#### 1. Job Management
+- `createJob(jobId, userId, assessmentData, assessmentName)` - Membuat job baru
+- `getJobStatus(jobId)` - Mendapatkan status job
+- `syncJobStatus(jobId, status, additionalData)` - Sinkronisasi status job
+
+#### 2. Result Management
+- `createAnalysisResult(userId, assessmentData, personaProfile, assessmentName, status, errorMessage)` - Membuat hasil analisis
+- `getAnalysisResult(resultId)` - Mendapatkan hasil analisis
+- `updateAnalysisResult(resultId, updateData)` - Update hasil analisis
+
+#### 3. Health Check
+- `checkHealth()` - Cek kesehatan Archive Service
+
+---
+
 ## 🔄 Job Callback Endpoints - Internal Only
 
 ### 1. Job Completion Callback

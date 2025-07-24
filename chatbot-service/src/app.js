@@ -14,6 +14,7 @@ const conversationRoutes = require('./routes/conversations');
 const messageRoutes = require('./routes/messages');
 const usageRoutes = require('./routes/usage');
 const healthRoutes = require('./routes/health');
+const assessmentIntegrationRoutes = require('./routes/assessmentIntegration');
 
 const app = express();
 
@@ -63,6 +64,15 @@ app.use('/conversations', conversationRoutes);
 app.use('/conversations/:conversationId/messages', messageRoutes);
 app.use('/usage', usageRoutes);
 app.use('/health', healthRoutes);
+
+// Phase 3: Assessment Integration Routes
+app.use('/assessment', (req, res, next) => {
+  console.log('=== ASSESSMENT ROUTE MIDDLEWARE ===');
+  console.log('Method:', req.method);
+  console.log('Path:', req.path);
+  console.log('URL:', req.url);
+  next();
+}, assessmentIntegrationRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

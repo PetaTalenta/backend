@@ -1,0 +1,303 @@
+{
+  "testName": "dual-user-test-2025-07-24T01-52-27",
+  "startTime": "2025-07-24T01:52:27.682Z",
+  "endTime": "2025-07-24T01:52:27.946Z",
+  "duration": 264,
+  "results": {
+    "passed": 2,
+    "failed": 4,
+    "skipped": 0,
+    "total": 6
+  },
+  "successRate": 33.33,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "User 1 flow failed",
+      "error": {
+        "message": "Request failed with status code 400",
+        "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.updateProfile (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:76:22)\n    at async DualUserTest.updateProfile (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:198:24)\n    at async DualUserTest.runSingleUserFlow (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:111:7)\n    at async Promise.allSettled (index 0)\n    at async DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:68:23)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Validation failed",
+            "details": [
+              "Username must contain only alphanumeric characters"
+            ]
+          }
+        }
+      },
+      "timestamp": "2025-07-24T01:52:27.944Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "User 2 flow failed",
+      "error": {
+        "message": "Request failed with status code 400",
+        "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.updateProfile (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:76:22)\n    at async DualUserTest.updateProfile (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:198:24)\n    at async DualUserTest.runSingleUserFlow (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:111:7)\n    at async Promise.allSettled (index 1)\n    at async DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:68:23)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Validation failed",
+            "details": [
+              "Username must contain only alphanumeric characters"
+            ]
+          }
+        }
+      },
+      "timestamp": "2025-07-24T01:52:27.944Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Parallel user flows failed",
+      "error": {
+        "message": "2 user flows failed",
+        "stack": "Error: 2 user flows failed\n    at DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:88:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)"
+      },
+      "timestamp": "2025-07-24T01:52:27.945Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Dual User E2E Test failed",
+      "error": {
+        "message": "2 user flows failed",
+        "stack": "Error: 2 user flows failed\n    at DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:88:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)"
+      },
+      "timestamp": "2025-07-24T01:52:27.945Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Dual User E2E Test with 2 users",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.682Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Initialize Users",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.683Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User 1 initialized",
+      "data": {
+        "email": "testuser_1753321947683_h4c03h@example.com",
+        "username": "testuser_h4c03h"
+      },
+      "timestamp": "2025-07-24T01:52:27.684Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User 2 initialized",
+      "data": {
+        "email": "testuser_1753321947684_9cbisn@example.com",
+        "username": "testuser_9cbisn"
+      },
+      "timestamp": "2025-07-24T01:52:27.684Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Run Parallel User Flows",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.685Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Starting user flow",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.685Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Registering user",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.685Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Starting user flow",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.685Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Registering user",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.685Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: User registered successfully",
+      "data": {
+        "userId": "f36044ff-0d8a-4a1a-bf1b-443ad9ba6405",
+        "email": "testuser_1753321947684_9cbisn@example.com"
+      },
+      "timestamp": "2025-07-24T01:52:27.769Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Logging in user",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.770Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: User registered successfully",
+      "data": {
+        "userId": "7940fe7a-88b6-4e4b-8cc3-cbc5f91838d4",
+        "email": "testuser_1753321947683_h4c03h@example.com"
+      },
+      "timestamp": "2025-07-24T01:52:27.777Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Logging in user",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.779Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.840Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Connecting WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.840Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.845Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Connecting WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.845Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.894Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Updating profile",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.894Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.916Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Updating profile",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.916Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Profile update failed",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.936Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: User flow failed: Request failed with status code 400",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.936Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Profile update failed",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.944Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: User flow failed: Request failed with status code 400",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.944Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "User 1 flow failed",
+      "error": {
+        "message": "Request failed with status code 400",
+        "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.updateProfile (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:76:22)\n    at async DualUserTest.updateProfile (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:198:24)\n    at async DualUserTest.runSingleUserFlow (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:111:7)\n    at async Promise.allSettled (index 0)\n    at async DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:68:23)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Validation failed",
+            "details": [
+              "Username must contain only alphanumeric characters"
+            ]
+          }
+        }
+      },
+      "timestamp": "2025-07-24T01:52:27.944Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "User 2 flow failed",
+      "error": {
+        "message": "Request failed with status code 400",
+        "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.updateProfile (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:76:22)\n    at async DualUserTest.updateProfile (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:198:24)\n    at async DualUserTest.runSingleUserFlow (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:111:7)\n    at async Promise.allSettled (index 1)\n    at async DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:68:23)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Validation failed",
+            "details": [
+              "Username must contain only alphanumeric characters"
+            ]
+          }
+        }
+      },
+      "timestamp": "2025-07-24T01:52:27.944Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Parallel execution completed: 0 success, 2 failures",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.945Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Parallel user flows failed",
+      "error": {
+        "message": "2 user flows failed",
+        "stack": "Error: 2 user flows failed\n    at DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:88:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)"
+      },
+      "timestamp": "2025-07-24T01:52:27.945Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Dual User E2E Test failed",
+      "error": {
+        "message": "2 user flows failed",
+        "stack": "Error: 2 user flows failed\n    at DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:88:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)"
+      },
+      "timestamp": "2025-07-24T01:52:27.945Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected all users from services",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:27.946Z"
+    }
+  ]
+}

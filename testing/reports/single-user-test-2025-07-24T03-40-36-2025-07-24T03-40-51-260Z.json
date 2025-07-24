@@ -1,0 +1,113 @@
+{
+  "testName": "single-user-test-2025-07-24T03-40-36",
+  "startTime": "2025-07-24T03:40:36.079Z",
+  "endTime": "2025-07-24T03:40:51.259Z",
+  "duration": 15180,
+  "results": {
+    "passed": 3,
+    "failed": 2,
+    "skipped": 0,
+    "total": 5
+  },
+  "successRate": 60,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "WebSocket connection failed",
+      "error": {
+        "message": "websocket error",
+        "stack": "Error: websocket error\n    at WS.onError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\engine.io-client\\build\\cjs\\transport.js:48:37)\n    at ws.onerror (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\engine.io-client\\build\\cjs\\transports\\websocket.js:57:39)\n    at callListener (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\event-target.js:290:14)\n    at WebSocket.onError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\event-target.js:230:9)\n    at WebSocket.emit (node:events:518:28)\n    at emitErrorAndClose (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\websocket.js:1035:13)\n    at ClientRequest.<anonymous> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\websocket.js:880:5)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketOnEnd (node:_http_client:542:5)"
+      },
+      "timestamp": "2025-07-24T03:40:51.258Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "websocket error",
+        "stack": "Error: websocket error\n    at WS.onError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\engine.io-client\\build\\cjs\\transport.js:48:37)\n    at ws.onerror (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\engine.io-client\\build\\cjs\\transports\\websocket.js:57:39)\n    at callListener (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\event-target.js:290:14)\n    at WebSocket.onError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\event-target.js:230:9)\n    at WebSocket.emit (node:events:518:28)\n    at emitErrorAndClose (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\websocket.js:1035:13)\n    at ClientRequest.<anonymous> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\websocket.js:880:5)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketOnEnd (node:_http_client:542:5)"
+      },
+      "timestamp": "2025-07-24T03:40:51.258Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T03:40:36.080Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-07-24T03:40:36.082Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser1753328436082x3da4g@example.com",
+        "username": "testuserx3da4g"
+      },
+      "timestamp": "2025-07-24T03:40:36.084Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-07-24T03:40:36.085Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "6119663d-4f20-4d7c-8d2e-a5688b8fe4b9",
+        "email": "testuser1753328436082x3da4g@example.com"
+      },
+      "timestamp": "2025-07-24T03:40:36.189Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-07-24T03:40:36.190Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T03:40:36.247Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T03:40:36.247Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "WebSocket connection failed",
+      "error": {
+        "message": "websocket error",
+        "stack": "Error: websocket error\n    at WS.onError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\engine.io-client\\build\\cjs\\transport.js:48:37)\n    at ws.onerror (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\engine.io-client\\build\\cjs\\transports\\websocket.js:57:39)\n    at callListener (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\event-target.js:290:14)\n    at WebSocket.onError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\event-target.js:230:9)\n    at WebSocket.emit (node:events:518:28)\n    at emitErrorAndClose (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\websocket.js:1035:13)\n    at ClientRequest.<anonymous> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\websocket.js:880:5)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketOnEnd (node:_http_client:542:5)"
+      },
+      "timestamp": "2025-07-24T03:40:51.258Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "websocket error",
+        "stack": "Error: websocket error\n    at WS.onError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\engine.io-client\\build\\cjs\\transport.js:48:37)\n    at ws.onerror (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\engine.io-client\\build\\cjs\\transports\\websocket.js:57:39)\n    at callListener (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\event-target.js:290:14)\n    at WebSocket.onError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\event-target.js:230:9)\n    at WebSocket.emit (node:events:518:28)\n    at emitErrorAndClose (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\websocket.js:1035:13)\n    at ClientRequest.<anonymous> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\ws\\lib\\websocket.js:880:5)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketOnEnd (node:_http_client:542:5)"
+      },
+      "timestamp": "2025-07-24T03:40:51.258Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-07-24T03:40:51.259Z"
+    }
+  ]
+}

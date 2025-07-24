@@ -1,245 +1,276 @@
-# ATMA API Gateway - External API Documentation
+# API Gateway - External API Documentation
 
 ## Overview
-ATMA API Gateway adalah entry point tunggal untuk semua komunikasi dengan backend services. Gateway ini mengelola routing, authentication, rate limiting, dan security untuk seluruh sistem ATMA (AI-Driven Talent Mapping Assessment).
+
+API Gateway menyediakan akses terpusat ke semua microservices dalam sistem ATMA (AI-Driven Talent Mapping Assessment). Gateway ini menangani routing, autentikasi, rate limiting, dan proxy ke berbagai services.
 
 **Gateway Information:**
+
 - **Service Name:** api-gateway
 - **Port:** 3000
-- **Base URL:** `http://localhost:3000`
+- **Base URL:** `http://localhost:3000/api/`
 - **Version:** 1.0.0
 
-## 🏗️ Architecture Overview
+## Authentication
 
-```
-Client Application
-       ↓
-API Gateway (Port 3000)
-       ↓
-┌─────────────────┬─────────────────┬─────────────────┬─────────────────┐
-│  Auth Service   │ Archive Service │Assessment Service│Notification Svc │
-│   (Port 3001)   │   (Port 3002)   │   (Port 3003)   │   (Port 3005)   │
-└─────────────────┴─────────────────┴─────────────────┴─────────────────┘
-```
-
-## 🔐 Authentication
-
-### JWT Token Authentication
-Sebagian besar endpoint memerlukan JWT token yang diperoleh dari login.
+Sebagian besar endpoint memerlukan autentikasi JWT token yang diperoleh dari Auth Service.
 
 **Header Required:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
 
-### Internal Service Authentication
-Untuk komunikasi antar service (tidak untuk client):
-```
-X-Service-Key: <internal_service_key>
-X-Internal-Service: true
-```
+## Rate Limiting
 
-## 📊 Rate Limiting
-
-| Endpoint Type | Limit | Window |
-|---------------|-------|--------|
-| General Gateway | 5000 requests | 15 minutes |
-| Auth Endpoints | 2500 requests | 15 minutes |
-| Admin Endpoints | 1000 requests | 15 minutes |
-| Assessment Endpoints | 1000 requests | 15 minutes |
-| Archive Endpoints | 5000 requests | 15 minutes |
-
-## 🌐 CORS Configuration
-
-**Allowed Origins:** All origins (`*`) - Unlimited access
-**Allowed Methods:** GET, POST, PUT, DELETE, OPTIONS
-**Allowed Headers:** Content-Type, Authorization, X-Service-Key, X-Internal-Service
+- **General Gateway:** 5000 requests per 15 minutes
+- **Auth Endpoints:** 100 requests per 15 minutes
+- **Assessment Endpoints:** 100 requests per 15 minutes
+- **Admin Endpoints:** 50 requests per 15 minutes
+- **Archive Endpoints:** 1000 requests per 15 minutes
+- **Chat Endpoints:** 500 requests per 15 minutes
 
 ---
 
-## 🔐 Authentication & User Management
+## 🔐 Authentication Service Routes (`/api/auth/`)
 
-### Public Authentication Endpoints
+### Public Endpoints (No Authentication)
 
-#### Register User
-```http
-POST /api/auth/register
-Content-Type: application/json
+#### POST /api/auth/register
 
+Mendaftarkan user baru ke sistem.
+
+**Request Body:**
+
+```json
 {
   "email": "user@example.com",
-  "password": "myPassword1"
+  "password": "myPassword1",
+  "username": "johndoe"
 }
 ```
 
-**Validation Rules:**
-- **email**: Valid email format, maximum 255 characters, required
-- **password**: Minimum 8 characters, must contain at least one letter and one number, required
+**Response Success (201):**
 
-#### Batch Register Users
-```http
-POST /api/auth/register/batch
-Content-Type: application/json
-
-{
-  "users": [
-    {"email": "user1@example.com", "password": "myPassword1"},
-    {"email": "user2@example.com", "password": "anotherPass2"}
-  ]
-}
-```
-
-**Validation Rules:**
-- **users**: Array of user objects, maximum 50 users per batch, required
-- Each user object follows same validation as single registration
-- Duplicate emails within batch are not allowed
-
-#### User Login
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "myPassword1"
-}
-```
-
-**Validation Rules:**
-- **email**: Valid email format, required
-- **password**: Required (no specific format validation for login)
-
-**Response:**
 ```json
 {
   "success": true,
   "data": {
     "user": {
-      "id": "uuid",
+      "id": "550e8400-e29b-41d4-a716-446655440000",
       "email": "user@example.com",
+      "username": "johndoe",
       "user_type": "user",
-      "token_balance": 100
+      "is_active": true,
+      "token_balance": 5
     },
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
+  },
+  "message": "User registered successfully"
 }
 ```
 
-### Protected User Endpoints
+#### POST /api/auth/login
 
-#### Get User Profile
-```http
-GET /api/auth/profile
-Authorization: Bearer <token>
-```
+Login user ke sistem.
 
-#### Update User Profile
-```http
-PUT /api/auth/profile
-Authorization: Bearer <token>
-Content-Type: application/json
+**Request Body:**
 
+```json
 {
-  "username": "johndoe",
-  "full_name": "John Doe",
-  "school_id": 1,
-  "date_of_birth": "1990-01-15",
-  "gender": "male"
+  "email": "user@example.com",
+  "password": "myPassword1"
 }
 ```
 
-**Validation Rules:**
-- **username**: Alphanumeric only, 3-100 characters, optional
-- **email**: Valid email format, maximum 255 characters, optional
-- **full_name**: Maximum 100 characters, optional
-- **school_id**: Positive integer, optional
-- **date_of_birth**: ISO date format (YYYY-MM-DD), cannot be future date, optional
-- **gender**: Must be one of: "male", "female", optional
+**Response Success (200):**
 
-#### Delete User Profile
-```http
-DELETE /api/auth/profile
-Authorization: Bearer <token>
-```
-
-**Response:**
 ```json
 {
   "success": true,
-  "message": "Profile deleted successfully"
-}
-```
-
-**⚠️ Note:** This endpoint only deletes the user profile (user_profiles table), not the user account itself. For complete user account deletion, use the DELETE /api/auth/account endpoint.
-
-#### Delete User Account
-```http
-DELETE /api/auth/account
-Authorization: Bearer <token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Account deleted successfully",
   "data": {
-    "deletedAt": "2024-01-15T10:30:00.000Z",
-    "originalEmail": "user@example.com"
+    "user": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "email": "user@example.com",
+      "username": "johndoe",
+      "user_type": "user",
+      "is_active": true,
+      "token_balance": 5
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  },
+  "message": "Login successful"
+}
+```
+
+### Protected Endpoints (Authentication Required)
+
+#### GET /api/auth/profile
+
+Mendapatkan profil user yang sedang login.
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "user@example.com",
+    "username": "johndoe",
+    "user_type": "user",
+    "is_active": true,
+    "token_balance": 5,
+    "created_at": "2024-01-15T10:30:00.000Z"
   }
 }
 ```
 
-**⚠️ Important Notes:**
-- This endpoint performs **soft delete** by changing the user's email to format `deleted_{timestamp}_{original_email}`
-- User's token balance will be reset to 0
-- User's `is_active` status will be set to `false`
-- User profile will also be automatically deleted
-- This operation cannot be undone, ensure confirmation before deleting account
-- After account deletion, user cannot login with this account anymore
+#### PUT /api/auth/profile
 
-#### Change Password
-```http
-POST /api/auth/change-password
-Authorization: Bearer <token>
-Content-Type: application/json
+Update profil user.
 
+**Request Body:**
+
+```json
+{
+  "username": "newusername",
+  "email": "newemail@example.com",
+  "full_name": "John Doe Updated"
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "username": "newusername",
+      "email": "newemail@example.com",
+      "user_type": "user",
+      "is_active": true,
+      "token_balance": 5,
+      "last_login": "2024-01-15T10:30:00.000Z",
+      "created_at": "2024-01-15T10:30:00.000Z",
+      "profile": {
+        "full_name": "John Doe Updated",
+        "school_info": {
+          "type": "structured",
+          "school_id": "school-uuid",
+          "school": {
+            "id": "school-uuid",
+            "name": "SMA Negeri 1 Jakarta"
+          }
+        }
+      }
+    },
+    "message": "Profile updated successfully"
+  }
+}
+```
+
+#### POST /api/auth/change-password
+
+Mengubah password user.
+
+**Request Body:**
+
+```json
 {
   "currentPassword": "oldPassword1",
-  "newPassword": "newPassword2"
+  "newPassword": "newPassword1"
 }
 ```
 
-**Validation Rules:**
-- **currentPassword**: Required
-- **newPassword**: Minimum 8 characters, must contain at least one letter and one number, required
+**Response Success (200):**
 
-#### Logout
-```http
-POST /api/auth/logout
-Authorization: Bearer <token>
+```json
+{
+  "success": true,
+  "message": "Password changed successfully"
+}
 ```
 
-#### Get Token Balance
-```http
-GET /api/auth/token-balance
-Authorization: Bearer <token>
+#### POST /api/auth/logout
+
+Logout user dari sistem.
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Logout successful"
+}
 ```
 
-### School Management
+#### GET /api/auth/token-balance
 
-#### Get Schools
-```http
-GET /api/auth/schools
-Authorization: Bearer <token>
+Mendapatkan saldo token user.
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "token_balance": 5
+  }
+}
 ```
 
-#### Create School
-```http
-POST /api/auth/schools
-Authorization: Bearer <token>
-Content-Type: application/json
+#### GET /api/auth/schools
 
+Mendapatkan daftar sekolah.
+
+**Query Parameters:**
+
+- `search` (string): Pencarian nama sekolah
+- `city` (string): Filter berdasarkan kota
+- `province` (string): Filter berdasarkan provinsi
+- `page` (number): Halaman (default: 1)
+- `limit` (number): Jumlah per halaman (default: 20)
+- `useFullText` (boolean): Gunakan full-text search (default: false)
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "schools": [
+      {
+        "id": "school-uuid",
+        "name": "SMA Negeri 1 Jakarta",
+        "address": "Jl. Sudirman No. 1",
+        "city": "Jakarta",
+        "province": "DKI Jakarta",
+        "created_at": "2024-01-15T10:30:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 1,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrev": false
+    }
+  }
+}
+```
+
+#### POST /api/auth/schools
+
+Membuat sekolah baru.
+
+**Request Body:**
+
+```json
 {
   "name": "SMA Negeri 1 Jakarta",
   "address": "Jl. Sudirman No. 1",
@@ -248,151 +279,48 @@ Content-Type: application/json
 }
 ```
 
-**Validation Rules:**
-- **name**: Maximum 200 characters, required
-- **address**: Optional
-- **city**: Maximum 100 characters, optional
-- **province**: Maximum 100 characters, optional
+**Response Success (201):**
 
-#### Get Schools by Location
-```http
-GET /api/auth/schools/by-location?city=Jakarta
-Authorization: Bearer <token>
-```
-
-#### Get School Users
-```http
-GET /api/auth/schools/:schoolId/users
-Authorization: Bearer <token>
-```
-
----
-
-## 👨‍💼 Admin Management
-
-### Admin Authentication
-
-#### Admin Login
-```http
-POST /api/admin/login
-Content-Type: application/json
-
-{
-  "username": "admin",
-  "password": "Admin123!"
-}
-```
-
-**Validation Rules:**
-- **username**: Required (can be username or email)
-- **password**: Required (no specific format validation for login)
-
-### Protected Admin Endpoints
-
-#### Get Admin Profile
-```http
-GET /api/admin/profile
-Authorization: Bearer <admin_token>
-```
-
-#### Register New Admin (Superadmin only)
-```http
-POST /api/admin/register
-Authorization: Bearer <superadmin_token>
-Content-Type: application/json
-
-{
-  "username": "newadmin",
-  "email": "newadmin@atma.com",
-  "password": "NewAdmin123!",
-  "full_name": "New Admin",
-  "user_type": "admin"
-}
-```
-
-**Validation Rules:**
-- **username**: Alphanumeric only, 3-100 characters, required
-- **email**: Valid email format, maximum 255 characters, required
-- **password**: Minimum 8 characters, maximum 128 characters, must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&), required
-- **full_name**: Maximum 255 characters, optional
-- **user_type**: Must be one of: "admin", "superadmin", "moderator", defaults to "admin"
-
-### Admin User Management
-
-#### Get All Users (Admin Only)
-```http
-GET /api/archive/admin/users?page=1&limit=10&search=user@example.com
-Authorization: Bearer <admin_token>
-```
-
-**Query Parameters:**
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 10, max: 100)
-- `search`: Search by email or username
-- `user_type`: Filter by user type (user, admin, superadmin, moderator)
-- `is_active`: Filter by active status (true/false)
-
-#### Get User by ID (Admin Only)
-```http
-GET /api/archive/admin/users/:userId
-Authorization: Bearer <admin_token>
-```
-
-#### Update User Token Balance (Admin Only)
-```http
-PUT /api/archive/admin/users/:userId/token-balance
-Authorization: Bearer <admin_token>
-Content-Type: application/json
-
-{
-  "token_balance": 100
-}
-```
-
-**Validation Rules:**
-- **token_balance**: Integer, minimum 0, required
-
-#### Delete User (Admin Only)
-```http
-DELETE /api/archive/admin/users/:userId
-Authorization: Bearer <admin_token>
-```
-
-**Response:**
 ```json
 {
   "success": true,
-  "message": "User deleted successfully",
   "data": {
-    "deletedUser": {
-      "id": "550e8400-e29b-41d4-a716-446655440000",
-      "originalEmail": "user@example.com",
-      "deletedAt": "2024-01-15T10:30:00.000Z"
+    "school": {
+      "id": "school-uuid",
+      "name": "SMA Negeri 1 Jakarta",
+      "address": "Jl. Sudirman No. 1",
+      "city": "Jakarta",
+      "province": "DKI Jakarta",
+      "created_at": "2024-01-15T10:30:00.000Z"
     }
-  }
+  },
+  "message": "School created successfully"
 }
 ```
 
-**⚠️ Important Notes:**
-- **Soft Delete:** User email is changed to `deleted_{timestamp}_{original_email}` format
-- **Token Reset:** User token balance is reset to 0
-- **Role Requirement:** Only admin or superadmin roles can delete users
-- **Irreversible:** This operation cannot be undone
-- **Service:** Handled by Archive Service via API Gateway
-
 ---
 
-## 🎯 Assessment Service
+## 🎯 Assessment Service Routes (`/api/assessment/`)
 
-### Submit Assessment
-```http
-POST /api/assessment/submit
-Authorization: Bearer <token>
+### Assessment Submission
+
+#### POST /api/assessment/submit
+
+Submit assessment data untuk analisis AI.
+
+**Headers:**
+
+```
+Authorization: Bearer <jwt_token>
 Content-Type: application/json
 X-Idempotency-Key: <unique_key> (optional)
+```
 
+**Request Body:**
+
+```json
 {
-  "assessmentName": "AI-Driven Talent Mapping",
+  "assessmentName": "Test Assessment",
   "riasec": {
     "realistic": 75,
     "investigative": 80,
@@ -437,461 +365,1708 @@ X-Idempotency-Key: <unique_key> (optional)
 }
 ```
 
-**Field Validation:**
-- `assessmentName` (optional): Must be one of "AI-Driven Talent Mapping", "AI-Based IQ Test", or "Custom Assessment"
-- `riasec` (required): RIASEC assessment with 6 dimensions (realistic, investigative, artistic, social, enterprising, conventional)
-- `ocean` (required): Big Five personality traits (openness, conscientiousness, extraversion, agreeableness, neuroticism)
-- `viaIs` (required): VIA-IS character strengths - all 24 strengths must be provided
-- All scores must be integers between 0-100
+**Response Success (202):**
 
-**Features:**
-- **Token Deduction:** Automatically deducts token from user balance
-- **Idempotency:** Prevent duplicate submission with idempotency key
-- **Queue Position:** Information about position in processing queue
-- **Real-time Tracking:** Job ID for tracking status
-
-**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "jobId": "uuid",
+    "jobId": "job_550e8400-e29b-41d4-a716-446655440000",
     "status": "queued",
     "estimatedProcessingTime": "2-5 minutes",
-    "queuePosition": 3,
-    "tokenCost": 1,
-    "remainingTokens": 9
+    "queuePosition": 1
+  },
+  "message": "Assessment submitted successfully"
+}
+```
+
+#### GET /api/assessment/status/:jobId
+
+Mengecek status assessment yang sedang diproses.
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "jobId": "job_550e8400-e29b-41d4-a716-446655440000",
+    "status": "completed",
+    "progress": 100,
+    "resultId": "result_550e8400-e29b-41d4-a716-446655440000"
   }
 }
 ```
 
-### Get Assessment Status
-```http
-GET /api/assessment/status/:jobId
-Authorization: Bearer <token>
-```
+### Health Endpoints
 
-### Get Queue Status
-```http
-GET /api/assessment/queue/status
-Authorization: Bearer <token>
-```
+#### GET /api/assessment/health
 
-### Health Checks
-```http
-GET /api/assessment/health
-GET /api/assessment/health/ready
-GET /api/assessment/health/live
-GET /api/assessment/health/queue
-```
+Health check assessment service.
+
+#### GET /api/assessment/health/ready
+
+Readiness probe.
+
+#### GET /api/assessment/health/live
+
+Liveness probe.
+
+#### GET /api/assessment/health/queue
+
+Queue status check.
 
 ---
 
-## 📊 Archive Service
+## 📁 Archive Service Routes (`/api/archive/`)
 
-### Analysis Results
+Archive Service mengelola hasil assessment dan job tracking dengan optimasi performa tinggi menggunakan caching dan batch processing.
 
-#### Get User Results
-```http
-GET /api/archive/results?page=1&limit=10&status=completed
-Authorization: Bearer <token>
-```
+**Supported Assessment Types:**
 
-#### Get Specific Result
-```http
-GET /api/archive/results/:id
-Authorization: Bearer <token>
-```
+- `AI-Driven Talent Mapping` (default)
+- `AI-Based IQ Test`
+- `Custom Assessment`
 
-#### Update Result
-```http
-PUT /api/archive/results/:id
-Authorization: Bearer <token>
-Content-Type: application/json
+**Status Values:**
 
-{
-  "analysis_data": {...},
-  "status": "completed"
-}
-```
+- Results: `completed`, `processing`, `failed`
+- Jobs: `queued`, `processing`, `completed`, `failed`
 
-#### Delete Result
-```http
-DELETE /api/archive/results/:id
-Authorization: Bearer <token>
-```
+### Results Management
 
-**Response:**
+#### GET /api/archive/results
+
+Mendapatkan daftar hasil assessment user.
+
+**Query Parameters:**
+
+- `page` (number): Halaman (default: 1)
+- `limit` (number): Jumlah per halaman (default: 10, max: 100)
+- `status` (string): Filter status (completed, processing, failed)
+- `assessment_name` (string): Filter berdasarkan nama assessment (AI-Driven Talent Mapping, AI-Based IQ Test, Custom Assessment)
+- `sort` (string): Field untuk sorting (created_at, updated_at, default: created_at)
+- `order` (string): Urutan sorting (asc, desc, ASC, DESC, default: desc)
+
+**Response Success (200):**
+
 ```json
 {
   "success": true,
-  "message": "Analysis result deleted successfully"
+  "message": "Results retrieved successfully",
+  "data": {
+    "results": [
+      {
+        "id": "result_550e8400-e29b-41d4-a716-446655440000",
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "assessment_name": "AI-Driven Talent Mapping",
+        "status": "completed",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "persona_profile": {
+          "archetype": "The Innovator",
+          "shortSummary": "You are a natural innovator with strong analytical thinking and problem-solving abilities. You thrive in environments that challenge your intellect and allow you to explore new ideas.",
+          "strengths": ["Problem Solving", "Analytical Thinking", "Innovation"],
+          "weaknesses": ["Communication", "Leadership", "Time Management"],
+          "careerRecommendation": [
+            {
+              "careerName": "Software Engineer",
+              "careerProspect": {
+                "jobAvailability": "high",
+                "salaryPotential": "high",
+                "careerProgression": "high",
+                "industryGrowth": "high",
+                "skillDevelopment": "high"
+              }
+            },
+            {
+              "careerName": "Data Scientist",
+              "careerProspect": {
+                "jobAvailability": "high",
+                "salaryPotential": "high",
+                "careerProgression": "high",
+                "industryGrowth": "super high",
+                "skillDevelopment": "high"
+              }
+            }
+          ],
+          "insights": [
+            "Your investigative nature makes you excellent at research and analysis",
+            "You prefer working independently on complex problems",
+            "Technology and innovation sectors align well with your personality"
+          ],
+          "workEnvironment": "You thrive in quiet, organized environments where you can focus deeply on complex problems. You prefer minimal interruptions and value intellectual autonomy.",
+          "roleModel": [
+            "Elon Musk",
+            "Steve Jobs",
+            "Bill Gates",
+            "Mark Zuckerberg"
+          ]
+        }
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 1,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrev": false
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
 }
 ```
 
-**⚠️ Note:** Users can only delete their own analysis results.
+#### GET /api/archive/results/:resultId
 
-### Analysis Jobs
+Mendapatkan detail hasil assessment.
 
-#### Get User Jobs
-```http
-GET /api/archive/jobs?page=1&limit=10&status=completed
-Authorization: Bearer <token>
-```
+**Path Parameters:**
 
-#### Get Job Status
-```http
-GET /api/archive/jobs/:jobId
-Authorization: Bearer <token>
-```
+- `resultId` (string): UUID dari hasil assessment
 
-#### Get Job Statistics
-```http
-GET /api/archive/jobs/stats
-Authorization: Bearer <token>
-```
+**Response Success (200):**
 
-#### Delete/Cancel Job
-```http
-DELETE /api/archive/jobs/:jobId
-Authorization: Bearer <token>
-```
-
-**Response:**
 ```json
 {
   "success": true,
-  "message": "Job deleted successfully"
+  "message": "Result retrieved successfully",
+  "data": {
+    "id": "result_550e8400-e29b-41d4-a716-446655440000",
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "assessment_name": "AI-Driven Talent Mapping",
+    "status": "completed",
+    "assessment_data": {
+      "riasec": {
+        "realistic": 75,
+        "investigative": 80,
+        "artistic": 65,
+        "social": 70,
+        "enterprising": 85,
+        "conventional": 60
+      },
+      "ocean": {
+        "openness": 80,
+        "conscientiousness": 75,
+        "extraversion": 70,
+        "agreeableness": 85,
+        "neuroticism": 40
+      },
+      "viaIs": {
+        "creativity": 80,
+        "curiosity": 85,
+        "judgment": 75,
+        "loveOfLearning": 90,
+        "perspective": 70,
+        "bravery": 65,
+        "perseverance": 80,
+        "honesty": 85,
+        "zest": 75,
+        "love": 80,
+        "kindness": 85,
+        "socialIntelligence": 75,
+        "teamwork": 80,
+        "fairness": 85,
+        "leadership": 70,
+        "forgiveness": 75,
+        "humility": 80,
+        "prudence": 75,
+        "selfRegulation": 80,
+        "appreciationOfBeauty": 70,
+        "gratitude": 85,
+        "hope": 80,
+        "humor": 75,
+        "spirituality": 60
+      }
+    },
+    "persona_profile": {
+      "archetype": "The Innovator",
+      "shortSummary": "You are a natural innovator with strong analytical thinking and problem-solving abilities. You thrive in environments that challenge your intellect and allow you to explore new ideas.",
+      "strengths": ["Problem Solving", "Analytical Thinking", "Innovation"],
+      "weaknesses": ["Communication", "Leadership", "Time Management"],
+      "careerRecommendation": [
+        {
+          "careerName": "Software Engineer",
+          "careerProspect": {
+            "jobAvailability": "high",
+            "salaryPotential": "high",
+            "careerProgression": "high",
+            "industryGrowth": "high",
+            "skillDevelopment": "high"
+          }
+        },
+        {
+          "careerName": "Data Scientist",
+          "careerProspect": {
+            "jobAvailability": "high",
+            "salaryPotential": "high",
+            "careerProgression": "high",
+            "industryGrowth": "super high",
+            "skillDevelopment": "high"
+          }
+        }
+      ],
+      "insights": [
+        "Your investigative nature makes you excellent at research and analysis",
+        "You prefer working independently on complex problems",
+        "Technology and innovation sectors align well with your personality"
+      ],
+      "workEnvironment": "You thrive in quiet, organized environments where you can focus deeply on complex problems. You prefer minimal interruptions and value intellectual autonomy.",
+      "roleModel": ["Elon Musk", "Steve Jobs", "Bill Gates", "Mark Zuckerberg"]
+    },
+    "error_message": null,
+    "created_at": "2024-01-15T10:30:00.000Z",
+    "updated_at": "2024-01-15T10:30:00.000Z"
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
 }
 ```
 
-**⚠️ Note:** Users can only delete/cancel their own analysis jobs.
+### Job Tracking
+
+#### GET /api/archive/jobs
+
+Mendapatkan daftar job assessment user.
+
+**Query Parameters:**
+
+- `page` (number): Halaman (default: 1)
+- `limit` (number): Jumlah per halaman (default: 10, max: 100)
+- `status` (string): Filter status (queued, processing, completed, failed)
+- `assessment_name` (string): Filter berdasarkan nama assessment (AI-Driven Talent Mapping, AI-Based IQ Test, Custom Assessment)
+- `sort` (string): Field untuk sorting (created_at, updated_at, status, default: created_at)
+- `order` (string): Urutan sorting (asc, desc, ASC, DESC, default: desc)
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Jobs retrieved successfully",
+  "data": {
+    "jobs": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "job_id": "job_550e8400-e29b-41d4-a716-446655440000",
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "completed",
+        "assessment_name": "AI-Driven Talent Mapping",
+        "result_id": "result_550e8400-e29b-41d4-a716-446655440000",
+        "error_message": null,
+        "completed_at": "2024-01-15T10:35:00.000Z",
+        "processing_started_at": "2024-01-15T10:30:30.000Z",
+        "priority": 0,
+        "retry_count": 0,
+        "max_retries": 3,
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "updated_at": "2024-01-15T10:35:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 1,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrev": false
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+#### GET /api/archive/jobs/:jobId
+
+Mendapatkan detail job assessment.
+
+**Path Parameters:**
+
+- `jobId` (string): Job ID dari assessment
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Job retrieved successfully",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "job_id": "job_550e8400-e29b-41d4-a716-446655440000",
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "completed",
+    "assessment_name": "AI-Driven Talent Mapping",
+    "result_id": "result_550e8400-e29b-41d4-a716-446655440000",
+    "error_message": null,
+    "completed_at": "2024-01-15T10:35:00.000Z",
+    "processing_started_at": "2024-01-15T10:30:30.000Z",
+    "priority": 0,
+    "retry_count": 0,
+    "max_retries": 3,
+    "created_at": "2024-01-15T10:30:00.000Z",
+    "updated_at": "2024-01-15T10:35:00.000Z"
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+#### DELETE /api/archive/jobs/:jobId
+
+Hapus/cancel job assessment (user only). Job dengan status 'processing' tidak dapat dihapus.
+
+**Path Parameters:**
+
+- `jobId` (string): Job ID dari assessment
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Job deleted successfully",
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+**Response Error (400) - Job sedang diproses:**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Cannot delete job that is currently processing",
+    "timestamp": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+#### GET /api/archive/jobs/stats
+
+Mendapatkan statistik job untuk user yang sedang login.
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Job statistics retrieved successfully",
+  "data": {
+    "total_jobs": 10,
+    "completed_jobs": 8,
+    "failed_jobs": 1,
+    "processing_jobs": 1,
+    "queued_jobs": 0,
+    "success_rate": 0.8,
+    "average_processing_time": "3.2 minutes",
+    "last_job_date": "2024-01-15T10:30:00.000Z"
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
 
 ### Statistics
 
-#### Get User Statistics
-```http
-GET /api/archive/stats
-Authorization: Bearer <token>
-```
+#### GET /api/archive/v1/stats
 
-#### Get User Overview
-```http
-GET /api/archive/stats/overview
-Authorization: Bearer <token>
-```
-
-#### Unified Statistics API
-```http
-GET /api/archive/api/v1/stats?type=user&scope=overview&timeRange=30%20days
-Authorization: Bearer <token>
-```
+Endpoint statistik terpadu dengan caching dan optimasi performa.
 
 **Query Parameters:**
-- `type`: user, system, demographic, performance
-- `scope`: overview, detailed, analysis, summary
-- `timeRange`: "1 day", "7 days", "30 days", "90 days"
 
----
+- `type` (string): user, system, demographic, performance (required)
+- `scope` (string): overview, detailed, analysis, summary, queue, insights (default: overview)
+- `timeRange` (string): "1 day", "7 days", "30 days", "90 days" (default: "7 days")
 
-## � WebSocket Notifications
+**Response Success (200) - User Stats (type=user, scope=overview):**
 
-### Real-time Notifications via WebSocket
-
-ATMA API Gateway menyediakan proxy untuk WebSocket notifications melalui Socket.IO. Semua koneksi WebSocket sekarang melewati API Gateway sebagai single entry point.
-
-#### WebSocket Connection
-```javascript
-import { io } from 'socket.io-client';
-
-// Connect melalui API Gateway (bukan langsung ke notification service)
-const socket = io('http://localhost:3000', {
-  autoConnect: false,
-  transports: ['websocket', 'polling'],
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000
-});
-
-// Authentication setelah connect
-socket.on('connect', () => {
-  socket.emit('authenticate', { token: yourJWTToken });
-});
-
-// Listen untuk events
-socket.on('authenticated', (data) => {
-  console.log('Authenticated:', data.email);
-});
-
-socket.on('analysis-started', (data) => {
-  console.log('Analysis started:', data);
-});
-
-socket.on('analysis-complete', (data) => {
-  console.log('Analysis completed:', data);
-});
-
-socket.on('analysis-failed', (data) => {
-  console.log('Analysis failed:', data);
-});
-
-socket.connect();
-```
-
-#### WebSocket Endpoints
-- **Connection URL**: `http://localhost:3000` (melalui API Gateway)
-- **Socket.IO Path**: `/socket.io/*` (di-proxy ke notification service)
-- **Authentication**: JWT Token required setelah connect
-- **Events**: `analysis-started`, `analysis-complete`, `analysis-failed`
-
-#### Notification Service Health
-```http
-GET /api/notifications/health
-```
-
-**Response:**
 ```json
 {
   "success": true,
-  "service": "notification-service",
-  "status": "healthy",
-  "timestamp": "2024-01-21T10:30:00.000Z",
-  "connections": {
-    "total": 5,
-    "authenticated": 3,
-    "users": 3
+  "message": "user statistics retrieved successfully",
+  "data": {
+    "total_assessments": 5,
+    "completed_assessments": 4,
+    "failed_assessments": 1,
+    "processing_assessments": 0,
+    "success_rate": 0.8,
+    "last_assessment_date": "2024-01-15T10:30:00.000Z",
+    "favorite_assessment_type": "AI-Driven Talent Mapping",
+    "total_jobs": 5,
+    "average_processing_time": "3.5 minutes"
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+**Response Success (200) - User Stats (type=user, scope=detailed):**
+
+```json
+{
+  "success": true,
+  "message": "user statistics retrieved successfully",
+  "data": {
+    "assessment_breakdown": {
+      "AI-Driven Talent Mapping": 3,
+      "AI-Based IQ Test": 1,
+      "Custom Assessment": 1
+    },
+    "monthly_activity": [
+      {
+        "month": "2024-01",
+        "assessments": 5,
+        "success_rate": 0.8
+      }
+    ],
+    "archetype_history": [
+      {
+        "archetype": "The Innovator",
+        "assessment_date": "2024-01-15T10:30:00.000Z",
+        "assessment_name": "AI-Driven Talent Mapping"
+      }
+    ],
+    "performance_metrics": {
+      "average_completion_time": "3.5 minutes",
+      "fastest_completion": "2.1 minutes",
+      "slowest_completion": "5.2 minutes"
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+**Response Success (200) - System Stats (type=system, scope=summary) - Internal Service Only:**
+
+```json
+{
+  "success": true,
+  "message": "system statistics retrieved successfully",
+  "data": {
+    "total_users": 1250,
+    "active_users_today": 89,
+    "total_assessments": 3500,
+    "assessments_today": 45,
+    "overall_success_rate": 0.92,
+    "average_processing_time": "3.2 minutes",
+    "system_health": {
+      "database_status": "healthy",
+      "cache_hit_rate": 0.85,
+      "queue_length": 12
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+**Response Success (200) - Performance Stats (type=performance) - Internal Service Only:**
+
+```json
+{
+  "success": true,
+  "message": "performance statistics retrieved successfully",
+  "data": {
+    "database_performance": {
+      "avg_query_time": "45ms",
+      "slow_queries": 2,
+      "connection_pool_usage": 0.65
+    },
+    "cache_performance": {
+      "hit_rate": 0.85,
+      "miss_rate": 0.15,
+      "eviction_rate": 0.02
+    },
+    "index_statistics": [
+      {
+        "table": "analysis_results",
+        "index": "idx_user_created",
+        "scans": 1250,
+        "efficiency": 0.95
+      }
+    ]
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+---
+
+## 💬 Chatbot Service Routes (`/api/chatbot/`)
+
+### Conversation Management
+
+#### POST /api/chatbot/conversations
+
+Membuat percakapan baru.
+
+**Request Body:**
+
+```json
+{
+  "title": "Career Guidance Chat",
+  "context_type": "career_guidance",
+  "context_data": {},
+  "metadata": {}
+}
+```
+
+**Response Success (201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "conv_550e8400-e29b-41d4-a716-446655440000",
+    "title": "Career Guidance Chat",
+    "context_type": "career_guidance",
+    "status": "active",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+#### GET /api/chatbot/conversations
+
+Mendapatkan daftar percakapan user.
+
+**Query Parameters:**
+
+- `page` (number): Halaman (default: 1)
+- `limit` (number): Jumlah per halaman (default: 20)
+- `include_archived` (boolean): Sertakan yang diarsipkan (default: false)
+- `context_type` (string): Filter berdasarkan tipe konteks (general, assessment, career_guidance)
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "conversations": [
+      {
+        "id": "conv_550e8400-e29b-41d4-a716-446655440000",
+        "title": "Career Guidance Chat",
+        "context_type": "career_guidance",
+        "status": "active",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "updated_at": "2024-01-15T10:30:00.000Z",
+        "message_count": 5
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 1,
+      "total_items": 1,
+      "items_per_page": 20,
+      "has_next": false,
+      "has_prev": false
+    }
+  }
+}
+```
+
+#### GET /api/chatbot/conversations/:id
+
+Mendapatkan detail percakapan.
+
+**Query Parameters:**
+
+- `include_messages` (boolean): Sertakan pesan (default: false)
+- `message_limit` (number): Batas jumlah pesan (default: 50)
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "conv_550e8400-e29b-41d4-a716-446655440000",
+    "title": "Career Guidance Chat",
+    "context_type": "career_guidance",
+    "context_data": {
+      "assessment_id": "result_550e8400-e29b-41d4-a716-446655440000"
+    },
+    "status": "active",
+    "metadata": {
+      "model_preference": "gpt-3.5-turbo"
+    },
+    "created_at": "2024-01-15T10:30:00.000Z",
+    "updated_at": "2024-01-15T10:30:00.000Z",
+    "messages": [
+      {
+        "id": "msg_123",
+        "content": "Hello, I need career guidance",
+        "sender_type": "user",
+        "created_at": "2024-01-15T10:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+#### PUT /api/chatbot/conversations/:id
+
+Update percakapan.
+
+**Request Body:**
+
+```json
+{
+  "title": "Updated Career Chat",
+  "status": "archived",
+  "metadata": {
+    "updated_reason": "Session completed"
+  }
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "conv_550e8400-e29b-41d4-a716-446655440000",
+    "title": "Updated Career Chat",
+    "context_type": "career_guidance",
+    "status": "archived",
+    "updated_at": "2024-01-15T11:00:00.000Z"
+  }
+}
+```
+
+#### DELETE /api/chatbot/conversations/:id
+
+Hapus percakapan (soft delete).
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Conversation deleted successfully"
+}
+```
+
+### Message Handling
+
+#### POST /api/chatbot/conversations/:conversationId/messages
+
+Mengirim pesan dan mendapatkan balasan AI.
+
+**Request Body:**
+
+```json
+{
+  "content": "Hello, I need career guidance",
+  "content_type": "text",
+  "parent_message_id": null
+}
+```
+
+**Response Success (201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "user_message": {
+      "id": "msg_user_123",
+      "content": "Hello, I need career guidance",
+      "sender_type": "user",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    },
+    "assistant_message": {
+      "id": "msg_assistant_124",
+      "content": "Hello! I'd be happy to help you with career guidance...",
+      "sender_type": "assistant",
+      "created_at": "2024-01-15T10:30:01.000Z"
+    },
+    "usage": {
+      "tokens_used": 150,
+      "model": "openai/gpt-3.5-turbo"
+    }
+  }
+}
+```
+
+#### GET /api/chatbot/conversations/:conversationId/messages
+
+Mendapatkan pesan dalam percakapan.
+
+**Query Parameters:**
+
+- `page` (number): Halaman (default: 1)
+- `limit` (number): Jumlah per halaman (default: 50)
+- `include_usage` (boolean): Sertakan informasi usage (default: false)
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "messages": [
+      {
+        "id": "msg_user_123",
+        "content": "Hello, I need career guidance",
+        "sender_type": "user",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "parent_message_id": null
+      },
+      {
+        "id": "msg_assistant_124",
+        "content": "Hello! I'd be happy to help you with career guidance...",
+        "sender_type": "assistant",
+        "created_at": "2024-01-15T10:30:01.000Z",
+        "parent_message_id": "msg_user_123",
+        "metadata": {
+          "model": "gpt-3.5-turbo",
+          "tokens_used": 150
+        }
+      }
+    ],
+    "conversation_id": "conv_550e8400-e29b-41d4-a716-446655440000",
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 1,
+      "total_items": 2,
+      "items_per_page": 50,
+      "has_next": false,
+      "has_prev": false
+    }
+  }
+}
+```
+
+#### POST /api/chatbot/conversations/:conversationId/messages/:messageId/regenerate
+
+Regenerate balasan AI untuk pesan tertentu.
+
+**Response Success (200):**
+
+```json
+{
+  "message": {
+    "id": "msg_assistant_124",
+    "content": "I'd be delighted to assist you with career guidance...",
+    "sender_type": "assistant",
+    "created_at": "2024-01-15T10:30:01.000Z",
+    "updated_at": "2024-01-15T10:35:00.000Z",
+    "parent_message_id": "msg_user_123",
+    "metadata": {
+      "model": "gpt-3.5-turbo",
+      "tokens_used": 160,
+      "regenerated_at": "2024-01-15T10:35:00.000Z"
+    }
+  },
+  "usage": {
+    "prompt_tokens": 50,
+    "completion_tokens": 160,
+    "total_tokens": 210,
+    "model": "gpt-3.5-turbo"
+  }
+}
+```
+
+### Assessment Integration
+
+#### GET /api/chatbot/assessment-ready/:userId
+
+Mengecek apakah assessment user siap untuk integrasi chat.
+
+**Response Success (200):**
+
+```json
+{
+  "has_assessment": true,
+  "assessment_date": "2024-01-15T10:30:00.000Z",
+  "assessment_id": "result_550e8400-e29b-41d4-a716-446655440000",
+  "conversation_exists": false,
+  "conversation_id": null,
+  "ready_for_chatbot": true
+}
+```
+
+#### POST /api/chatbot/assessment/from-assessment
+
+Membuat percakapan berdasarkan hasil assessment.
+
+**Request Body:**
+
+```json
+{
+  "assessment_id": "result_550e8400-e29b-41d4-a716-446655440000",
+  "title": "Career Guidance Based on Assessment",
+  "auto_start_message": true
+}
+```
+
+**Response Success (201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "conversation": {
+      "id": "conv_550e8400-e29b-41d4-a716-446655440000",
+      "title": "Career Guidance Based on Assessment",
+      "context_type": "assessment",
+      "context_data": {
+        "assessment_id": "result_550e8400-e29b-41d4-a716-446655440000"
+      },
+      "status": "active",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    },
+    "welcome_message": {
+      "id": "msg_welcome_123",
+      "content": "Hello! I've reviewed your assessment results and I'm here to help guide your career journey...",
+      "sender_type": "assistant",
+      "created_at": "2024-01-15T10:30:01.000Z"
+    },
+    "suggestions": [
+      "What career paths align with my personality type?",
+      "How can I develop my identified strengths?",
+      "What skills should I focus on improving?"
+    ]
+  }
+}
+```
+
+#### GET /api/chatbot/conversations/:conversationId/suggestions
+
+Mendapatkan saran percakapan berdasarkan assessment.
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "suggestions": [
+      "What career paths align with my personality type?",
+      "How can I develop my identified strengths?",
+      "What skills should I focus on improving?",
+      "Tell me about careers in technology",
+      "How can I improve my leadership skills?"
+    ],
+    "context": {
+      "assessment_based": true,
+      "conversation_stage": "initial",
+      "user_archetype": "The Innovator"
+    }
+  }
+}
+```
+
+#### POST /api/chatbot/auto-initialize
+
+Auto-initialize percakapan berdasarkan assessment terbaru.
+
+**Response Success (201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "conversation": {
+      "id": "conv_550e8400-e29b-41d4-a716-446655440000",
+      "title": "AI Career Guidance",
+      "context_type": "assessment",
+      "status": "active",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    },
+    "welcome_message": {
+      "id": "msg_welcome_123",
+      "content": "Hello! Based on your recent assessment, I'm here to provide personalized career guidance...",
+      "sender_type": "assistant",
+      "created_at": "2024-01-15T10:30:01.000Z"
+    },
+    "suggestions": [
+      "What career paths suit my personality?",
+      "How can I leverage my strengths?",
+      "What development areas should I focus on?"
+    ]
   }
 }
 ```
 
 ---
 
-## �🔍 Health & Monitoring
+## 🔔 Notification Service Routes (`/api/notifications/`)
 
-### Gateway Health
-```http
-GET /
-GET /health
-GET /health/detailed
-GET /health/ready
-GET /health/live
-```
+### WebSocket Connection
 
-### Service-Specific Health
-```http
-GET /api/auth/health
-GET /api/archive/health
-GET /api/assessment/health
+Notification service menyediakan real-time notifications melalui WebSocket di `/socket.io/`.
+
+### Health Check
+
+#### GET /api/notifications/health
+
+Health check notification service.
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "service": "notification-service",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "websocket": {
+    "status": "active",
+    "connections": 25
+  }
+}
 ```
 
 ---
 
-## ❌ Error Handling
+## 👨‍💼 Admin Routes (`/api/admin/`)
 
-### Standard Error Response
+### Admin Authentication
+
+#### POST /api/admin/login
+
+Login admin ke sistem.
+
+**Request Body:**
+
+```json
+{
+  "username": "admin",
+  "password": "adminPassword1"
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "admin": {
+      "id": "admin-uuid",
+      "username": "admin",
+      "email": "admin@example.com",
+      "user_type": "admin",
+      "is_active": true,
+      "created_at": "2024-01-15T10:30:00.000Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  },
+  "message": "Admin login successful"
+}
+```
+
+#### POST /api/admin/register
+
+Mendaftarkan admin baru (hanya untuk superadmin).
+
+**Request Body:**
+
+```json
+{
+  "username": "newadmin",
+  "email": "admin@example.com",
+  "password": "adminPassword1",
+  "full_name": "Admin Name",
+  "user_type": "admin"
+}
+```
+
+**Response Success (201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "admin": {
+      "id": "admin-uuid",
+      "username": "newadmin",
+      "email": "admin@example.com",
+      "user_type": "admin",
+      "is_active": true,
+      "full_name": "Admin Name",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    }
+  },
+  "message": "Admin registered successfully"
+}
+```
+
+### Admin User Management
+
+#### DELETE /api/archive/admin/users/:userId
+
+Hapus user secara permanen (soft delete) - hanya untuk admin.
+
+**Path Parameters:**
+
+- `userId` (string): UUID dari user
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "User deleted successfully",
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+#### PUT /api/archive/admin/users/:userId/token-balance
+
+Update token balance user (untuk admin).
+
+**Path Parameters:**
+
+- `userId` (string): UUID dari user
+
+**Request Body:**
+
+```json
+{
+  "amount": 100,
+  "operation": "add"
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Token balance updated successfully",
+  "data": {
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "old_balance": 5,
+    "new_balance": 105,
+    "amount": 100,
+    "operation": "add"
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+### Additional Archive Endpoints
+
+#### DELETE /api/archive/results/:id
+
+Hapus hasil assessment (user only).
+
+**Path Parameters:**
+
+- `id` (string): UUID dari hasil assessment
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Analysis result deleted successfully",
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+#### POST /api/archive/results
+
+Membuat hasil assessment baru (internal service only).
+
+**Headers:**
+
+```
+X-Internal-Service: true
+X-Service-Key: <internal_service_secret_key>
+```
+
+**Request Body:**
+
+```json
+{
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+  "assessment_data": {
+    "riasec": {
+      "realistic": 85,
+      "investigative": 92,
+      "artistic": 78,
+      "social": 65,
+      "enterprising": 70,
+      "conventional": 55
+    },
+    "ocean": {
+      "openness": 88,
+      "conscientiousness": 75,
+      "extraversion": 82,
+      "agreeableness": 90,
+      "neuroticism": 45
+    },
+    "viaIs": {
+      "creativity": 85,
+      "curiosity": 90,
+      "judgment": 78
+    }
+  },
+  "persona_profile": {
+    "archetype": "The Innovator",
+    "shortSummary": "You are a natural innovator with strong analytical thinking and problem-solving abilities. You thrive in environments that challenge your intellect and allow you to explore new ideas.",
+    "strengths": ["Problem Solving", "Analytical Thinking", "Innovation"],
+    "weaknesses": ["Communication", "Leadership", "Time Management"],
+    "careerRecommendation": [
+      {
+        "careerName": "Software Engineer",
+        "careerProspect": {
+          "jobAvailability": "high",
+          "salaryPotential": "high",
+          "careerProgression": "high",
+          "industryGrowth": "high",
+          "skillDevelopment": "high"
+        }
+      },
+      {
+        "careerName": "Data Scientist",
+        "careerProspect": {
+          "jobAvailability": "high",
+          "salaryPotential": "high",
+          "careerProgression": "high",
+          "industryGrowth": "super high",
+          "skillDevelopment": "high"
+        }
+      }
+    ],
+    "insights": [
+      "Your investigative nature makes you excellent at research and analysis",
+      "You prefer working independently on complex problems",
+      "Technology and innovation sectors align well with your personality"
+    ],
+    "workEnvironment": "You thrive in quiet, organized environments where you can focus deeply on complex problems. You prefer minimal interruptions and value intellectual autonomy.",
+    "roleModel": ["Elon Musk", "Steve Jobs", "Bill Gates", "Mark Zuckerberg"]
+  },
+  "assessment_name": "AI-Driven Talent Mapping",
+  "status": "completed",
+  "error_message": null
+}
+```
+
+**Response Success (201):**
+
+```json
+{
+  "success": true,
+  "message": "Analysis result saved successfully",
+  "data": {
+    "id": "result_550e8400-e29b-41d4-a716-446655440000",
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "completed",
+    "assessment_name": "AI-Driven Talent Mapping",
+    "created_at": "2024-01-15T10:30:00.000Z",
+    "batched": false
+  }
+}
+```
+
+#### POST /api/archive/jobs
+
+Membuat job assessment baru (internal service only).
+
+**Headers:**
+
+```
+X-Internal-Service: true
+X-Service-Key: <internal_service_secret_key>
+```
+
+**Request Body:**
+
+```json
+{
+  "job_id": "job_550e8400-e29b-41d4-a716-446655440000",
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+  "assessment_data": {
+    "riasec": {...},
+    "ocean": {...},
+    "viaIs": {...}
+  },
+  "assessment_name": "AI-Driven Talent Mapping",
+  "status": "queued"
+}
+```
+
+**Response Success (201):**
+
+```json
+{
+  "success": true,
+  "message": "Analysis job created successfully",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "job_id": "job_550e8400-e29b-41d4-a716-446655440000",
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "queued",
+    "assessment_name": "AI-Driven Talent Mapping",
+    "priority": 0,
+    "retry_count": 0,
+    "max_retries": 3,
+    "created_at": "2024-01-15T10:30:00.000Z",
+    "updated_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+#### PUT /api/archive/jobs/:jobId/status
+
+Update status job assessment (internal service only).
+
+**Headers:**
+
+```
+X-Internal-Service: true
+X-Service-Key: <internal_service_secret_key>
+```
+
+**Path Parameters:**
+
+- `jobId` (string): Job ID dari assessment
+
+**Request Body:**
+
+```json
+{
+  "status": "completed",
+  "result_id": "result_550e8400-e29b-41d4-a716-446655440000",
+  "error_message": null
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Job status updated successfully",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "job_id": "job_550e8400-e29b-41d4-a716-446655440000",
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "completed",
+    "result_id": "result_550e8400-e29b-41d4-a716-446655440000",
+    "completed_at": "2024-01-15T10:35:00.000Z",
+    "updated_at": "2024-01-15T10:35:00.000Z"
+  }
+}
+```
+
+#### GET /api/archive/v1/data/:type
+
+Unified data retrieval endpoint untuk results, jobs, demographics.
+
+**Path Parameters:**
+
+- `type` (string): results, jobs, demographics
+
+**Query Parameters:**
+
+- `page` (number): Halaman (default: 1)
+- `limit` (number): Jumlah per halaman (default: 10, max: 100)
+- `sort` (string): Field untuk sorting (created_at, updated_at, status)
+- `order` (string): Urutan sorting (asc, desc, ASC, DESC, default: desc)
+- `status` (string): Filter status (untuk results: completed, processing, failed; untuk jobs: queued, processing, completed, failed)
+- `assessment_name` (string): Filter berdasarkan nama assessment
+
+**Response Success (200) - Type: results:**
+
+```json
+{
+  "success": true,
+  "message": "results data retrieved successfully",
+  "data": [
+    {
+      "id": "result_550e8400-e29b-41d4-a716-446655440000",
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "status": "completed",
+      "assessment_name": "AI-Driven Talent Mapping",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "totalPages": 5,
+    "hasNext": true,
+    "hasPrev": false
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+**Response Success (200) - Type: jobs:**
+
+```json
+{
+  "success": true,
+  "message": "jobs data retrieved successfully",
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "job_id": "job_550e8400-e29b-41d4-a716-446655440000",
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "status": "completed",
+      "assessment_name": "AI-Driven Talent Mapping",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 25,
+    "totalPages": 3,
+    "hasNext": true,
+    "hasPrev": false
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+#### GET /api/archive/v1/health/:component
+
+Unified health check endpoint.
+
+**Path Parameters:**
+
+- `component` (string): all, database, queue, performance (optional, default: all)
+
+**Response Success (200) - Component: all:**
+
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "data": {
+    "timestamp": "2024-01-15T10:30:00.000Z",
+    "service": "archive-service",
+    "version": "1.0.0",
+    "database": {
+      "status": "healthy",
+      "message": "Database connection successful"
+    },
+    "queue": {
+      "status": "healthy",
+      "pending_jobs": 5,
+      "processing_jobs": 2
+    },
+    "performance": {
+      "status": "healthy",
+      "avg_index_scans": 1250,
+      "total_indexes": 15
+    }
+  }
+}
+```
+
+**Response Success (200) - Component: database:**
+
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "data": {
+    "timestamp": "2024-01-15T10:30:00.000Z",
+    "service": "archive-service",
+    "version": "1.0.0",
+    "database": {
+      "status": "healthy",
+      "message": "Database connection successful",
+      "connection_pool": {
+        "active": 5,
+        "idle": 10,
+        "total": 15
+      }
+    }
+  }
+}
+```
+
+#### POST /api/archive/results/batch
+
+Membuat multiple hasil assessment dalam satu request (internal service only).
+
+**Headers:**
+
+```
+X-Internal-Service: true
+X-Service-Key: <internal_service_secret_key>
+```
+
+**Request Body:**
+
+```json
+{
+  "items": [
+    {
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "assessment_data": {...},
+      "persona_profile": {...},
+      "assessment_name": "AI-Driven Talent Mapping",
+      "status": "completed"
+    }
+  ],
+  "options": {
+    "batch_size": 100,
+    "validate_users": true
+  }
+}
+```
+
+**Response Success (201):**
+
+```json
+{
+  "success": true,
+  "message": "Batch results created successfully",
+  "data": {
+    "created_count": 1,
+    "failed_count": 0,
+    "batch_id": "batch_550e8400-e29b-41d4-a716-446655440000",
+    "processing_time": "1.2s"
+  }
+}
+```
+
+#### POST /api/archive/v1/batch/:operation
+
+Operasi batch terpadu (internal service only).
+
+**Headers:**
+
+```
+X-Internal-Service: true
+X-Service-Key: <internal_service_secret_key>
+```
+
+**Path Parameters:**
+
+- `operation` (string): create-results, update-jobs, cleanup
+
+**Request Body untuk create-results:**
+
+```json
+{
+  "items": [
+    {
+      "user_id": "uuid",
+      "assessment_data": {...},
+      "persona_profile": {...},
+      "status": "completed"
+    }
+  ],
+  "options": {
+    "batch_size": 100
+  }
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Batch operation completed successfully",
+  "data": {
+    "operation": "create-results",
+    "processed_count": 50,
+    "success_count": 48,
+    "failed_count": 2,
+    "processing_time": "2.5s"
+  }
+}
+```
+
+---
+
+## 🏥 Health Check Routes
+
+### Global Health
+
+#### GET /health
+
+Main health check untuk semua services.
+
+**Response Success (200):**
+
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "services": {
+    "auth": "healthy",
+    "assessment": "healthy",
+    "archive": "healthy",
+    "notification": "healthy",
+    "chatbot": "healthy"
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+#### GET /health/metrics
+
+Metrics endpoint.
+
+#### GET /health/ready
+
+Readiness probe.
+
+#### GET /health/live
+
+Liveness probe.
+
+---
+
+## 📋 Error Response Format
+
+Semua error response menggunakan format standar dengan timestamp:
+
 ```json
 {
   "success": false,
   "error": {
     "code": "ERROR_CODE",
     "message": "Human readable error message",
-    "details": {...}
-  },
-  "timestamp": "2024-01-01T00:00:00.000Z"
+    "timestamp": "2024-01-15T10:30:00.000Z",
+    "details": {} // Optional additional details
+  }
 }
 ```
 
-### Common HTTP Status Codes
-- `200` - Success
-- `201` - Created
-- `400` - Bad Request / Validation Error
-- `401` - Unauthorized
-- `403` - Forbidden
-- `404` - Not Found
-- `409` - Conflict (e.g., email exists)
-- `429` - Rate Limit Exceeded
-- `500` - Internal Server Error
-- `503` - Service Unavailable
-- `504` - Gateway Timeout
-
 ### Common Error Codes
-- `VALIDATION_ERROR` (400) - Request validation failed
-- `UNAUTHORIZED` (401) - Missing or invalid authentication
-- `FORBIDDEN` (403) - Insufficient permissions
-- `USER_NOT_FOUND` (404) - User not found
-- `EMAIL_EXISTS` (409) - Email already registered
-- `USERNAME_EXISTS` (409) - Username already taken
-- `INVALID_CREDENTIALS` (401) - Invalid login credentials
-- `INSUFFICIENT_TOKENS` (402) - Not enough token balance
-- `RATE_LIMIT_EXCEEDED` (429) - Too many requests
-- `SERVICE_UNAVAILABLE` (503) - Backend service unavailable
-- `GATEWAY_TIMEOUT` (504) - Service request timeout
-- `ARCHIVE_SERVICE_ERROR` (503) - Error communicating with Archive Service
-- `PROFILE_NOT_FOUND` (404) - User profile not found for deletion
-- `ACCESS_DENIED` (403) - User does not have access to the resource
-- `INTERNAL_ERROR` (500) - Internal server error
+
+- `UNAUTHORIZED` - Token tidak valid atau tidak ada
+- `FORBIDDEN` - Akses ditolak (contoh: internal service access required)
+- `RATE_LIMIT_EXCEEDED` - Rate limit terlampaui
+- `VALIDATION_ERROR` - Data input tidak valid (dengan detail validasi)
+- `NOT_FOUND` - Resource tidak ditemukan
+- `INTERNAL_ERROR` - Server error
+
+### Archive Service Specific Errors
+
+- `RESULT_NOT_FOUND` - Analysis result tidak ditemukan
+- `JOB_NOT_FOUND` - Analysis job tidak ditemukan
+- `ACCESS_DENIED` - User tidak memiliki akses ke resource
+- `INVALID_STATUS_TRANSITION` - Perubahan status tidak valid
+- `BATCH_SIZE_EXCEEDED` - Ukuran batch melebihi limit (max 100)
+- `JOB_PROCESSING` - Job sedang diproses dan tidak dapat dihapus
+- `INVALID_UUID` - Format UUID tidak valid
 
 ---
 
-## ⚠️ Validation Notes & Important Considerations
+## 🔒 Security Headers
 
-### Password Validation Standards
-1. **Regular User Passwords:**
-   - Registration: Minimum 8 characters, must contain at least one letter and one number
-   - Password Change: Same validation as registration
+API Gateway menambahkan security headers pada setiap response:
 
-2. **Admin Passwords:**
-   - Registration: Minimum 8 characters, maximum 128 characters, must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)
-   - Password Change: Currently uses weaker validation (letter + number only) - consider standardizing
+- `X-Gateway: ATMA-API-Gateway`
+- `X-Gateway-Version: 1.0.0`
+- `X-Request-ID: <unique-request-id>`
 
-### Assessment Data Validation
-1. **Score Ranges:** All RIASEC, OCEAN, and VIA-IS scores must be integers between 0-100
-2. **Required Fields:** All 6 RIASEC dimensions, all 5 OCEAN traits, and all 24 VIA-IS character strengths must be provided
-3. **Assessment Names:** Must be one of the predefined values: "AI-Driven Talent Mapping", "AI-Based IQ Test", or "Custom Assessment"
+## 📊 Rate Limiting Headers
 
-### Token Balance
-- Default token balance is configurable via `DEFAULT_TOKEN_BALANCE` environment variable
-- Falls back to 5 if not set
-- Each assessment submission costs 1 token
+Ketika rate limit diterapkan, response akan menyertakan headers:
 
-### Rate Limiting Considerations
-- Different endpoints have different rate limits
-- Auth endpoints are more restrictive to prevent brute force attacks
-- Monitor rate limit headers in responses for client-side handling
+- `X-RateLimit-Limit: <limit>`
+- `X-RateLimit-Remaining: <remaining>`
+- `X-RateLimit-Reset: <reset-time>`
 
----
+## 🌐 CORS Configuration
 
-## 🚀 Getting Started
+API Gateway dikonfigurasi untuk menerima request dari:
 
-### 1. Register & Login
-```javascript
-// Register
-const registerResponse = await fetch('/api/auth/register', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    email: 'user@example.com',
-    password: 'myPassword1'  // Must contain letter + number, min 8 chars
-  })
-});
+- `http://localhost:3000` (Frontend development)
+- `http://localhost:5173` (Vite development server)
+- Production domains (sesuai konfigurasi)
 
-// Login
-const loginResponse = await fetch('/api/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    email: 'user@example.com',
-    password: 'myPassword1'
-  })
-});
+## 📝 Request/Response Examples
 
-const { data } = await loginResponse.json();
-const token = data.token;
-```
+### Successful Response Format
 
-### 2. Submit Assessment
-```javascript
-const assessmentResponse = await fetch('/api/assessment/submit', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-    'X-Idempotency-Key': 'unique-key-123'
+```json
+{
+  "success": true,
+  "message": "Operation completed successfully",
+  "data": {
+    /* response data */
   },
-  body: JSON.stringify({
-    assessmentName: 'AI-Driven Talent Mapping',
-    riasec: {
-      realistic: 75, investigative: 80, artistic: 65,
-      social: 70, enterprising: 85, conventional: 60
-    },
-    ocean: {
-      openness: 80, conscientiousness: 75, extraversion: 70,
-      agreeableness: 85, neuroticism: 40
-    },
-    viaIs: {
-      creativity: 80, curiosity: 85, judgment: 75,
-      loveOfLearning: 90, perspective: 70, bravery: 65,
-      perseverance: 80, honesty: 85, zest: 75,
-      love: 80, kindness: 85, socialIntelligence: 75,
-      teamwork: 80, fairness: 85, leadership: 70,
-      forgiveness: 75, humility: 80, prudence: 75,
-      selfRegulation: 80, appreciationOfBeauty: 70,
-      gratitude: 85, hope: 80, humor: 75, spirituality: 60
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Error description",
+    "timestamp": "2024-01-15T10:30:00.000Z",
+    "details": {
+      /* additional error details */
     }
-  })
-});
-
-const { data } = await assessmentResponse.json();
-const jobId = data.jobId;
-```
-
-### 3. Monitor Progress
-```javascript
-const checkStatus = async (jobId) => {
-  const response = await fetch(`/api/assessment/status/${jobId}`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  
-  const { data } = await response.json();
-  return data.status; // 'queued', 'processing', 'completed', 'failed'
-};
-
-// Poll every 10 seconds
-const pollInterval = setInterval(async () => {
-  const status = await checkStatus(jobId);
-  
-  if (status === 'completed') {
-    clearInterval(pollInterval);
-    // Get results from archive service
-    const results = await fetch(`/api/archive/results/${resultId}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
   }
-}, 10000);
+}
 ```
 
-### 4. Get Results
-```javascript
-const getResults = async () => {
-  const response = await fetch('/api/archive/results', {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  
-  const { data } = await response.json();
-  return data.results;
-};
+### Pagination Format
+
+```json
+{
+  "success": true,
+  "message": "Data retrieved successfully",
+  "data": {
+    "items": [
+      /* array of items */
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 100,
+      "totalPages": 5,
+      "hasNext": true,
+      "hasPrev": false
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
 ```
 
----
+### Archive Service Response Examples
 
-## 🔒 Security Best Practices
+**Validation Error Example:**
 
-1. **Always use HTTPS in production**
-2. **Store JWT tokens securely** (httpOnly cookies recommended)
-3. **Implement token refresh mechanism**
-4. **Handle rate limiting gracefully**
-5. **Validate all user inputs** according to the validation rules specified
-6. **Use strong passwords** that meet the validation requirements
-7. **Use idempotency keys for critical operations**
-8. **Implement proper error handling** and don't expose sensitive information
-9. **Monitor token balance before submissions**
-10. **Sanitize assessment data** to ensure scores are within valid ranges (0-100)
-11. **Implement client-side validation** in addition to server-side validation
-12. **Use proper authentication headers** for all protected endpoints
-13. **Confirm deletion operations** before calling DELETE endpoints (especially admin user deletion)
-14. **Understand deletion types**: Profile deletion vs. complete user deletion (admin only)
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "timestamp": "2024-01-15T10:30:00.000Z",
+    "details": {
+      "errors": [
+        {
+          "field": "persona_profile.archetype",
+          "message": "Archetype is required"
+        }
+      ]
+    }
+  }
+}
+```
 
----
+**Not Found Example:**
 
-## 📞 Support & Contact
-
-For technical support or questions about the API:
-- **Documentation:** This file and individual service docs
-- **Health Checks:** Use `/health` endpoints for service status
-- **Error Logs:** Check response error details for debugging
-
----
-
-**Last Updated:** 2024-01-21
-**API Version:** 1.0.0
-**Gateway Version:** 1.0.0
+```json
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Analysis result not found",
+    "timestamp": "2024-01-15T10:30:00.000Z"
+  }
+}
+```

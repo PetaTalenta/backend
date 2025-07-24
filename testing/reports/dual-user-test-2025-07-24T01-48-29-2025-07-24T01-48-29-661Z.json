@@ -1,0 +1,209 @@
+{
+  "testName": "dual-user-test-2025-07-24T01-48-29",
+  "startTime": "2025-07-24T01:48:29.650Z",
+  "endTime": "2025-07-24T01:48:29.660Z",
+  "duration": 10,
+  "results": {
+    "passed": 2,
+    "failed": 4,
+    "skipped": 0,
+    "total": 6
+  },
+  "successRate": 33.33,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "User 1 flow failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.register (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:51:22)\n    at async DualUserTest.registerUser (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:142:24)\n    at async DualUserTest.runSingleUserFlow (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:102:7)\n    at async Promise.allSettled (index 0)\n    at async DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:68:23)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)",
+        "response": {
+          "success": false,
+          "error": "NOT_FOUND",
+          "message": "Route POST /auth/register not found",
+          "timestamp": "2025-07-24T01:48:29.656Z"
+        }
+      },
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "User 2 flow failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.register (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:51:22)\n    at async DualUserTest.registerUser (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:142:24)\n    at async DualUserTest.runSingleUserFlow (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:102:7)\n    at async Promise.allSettled (index 1)\n    at async DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:68:23)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)",
+        "response": {
+          "success": false,
+          "error": "NOT_FOUND",
+          "message": "Route POST /auth/register not found",
+          "timestamp": "2025-07-24T01:48:29.657Z"
+        }
+      },
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Parallel user flows failed",
+      "error": {
+        "message": "2 user flows failed",
+        "stack": "Error: 2 user flows failed\n    at DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:88:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)"
+      },
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Dual User E2E Test failed",
+      "error": {
+        "message": "2 user flows failed",
+        "stack": "Error: 2 user flows failed\n    at DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:88:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)"
+      },
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Dual User E2E Test with 2 users",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.651Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Initialize Users",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.651Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User 1 initialized",
+      "data": {
+        "email": "testuser_1753321709651_e62s6d@example.com",
+        "username": "testuser_e62s6d"
+      },
+      "timestamp": "2025-07-24T01:48:29.651Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User 2 initialized",
+      "data": {
+        "email": "testuser_1753321709651_nvtgfe@example.com",
+        "username": "testuser_nvtgfe"
+      },
+      "timestamp": "2025-07-24T01:48:29.652Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Run Parallel User Flows",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.652Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Starting user flow",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.652Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Registering user",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.652Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Starting user flow",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.653Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Registering user",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.653Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: User registration failed",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.657Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: User flow failed: Request failed with status code 404",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.658Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: User registration failed",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: User flow failed: Request failed with status code 404",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "User 1 flow failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.register (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:51:22)\n    at async DualUserTest.registerUser (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:142:24)\n    at async DualUserTest.runSingleUserFlow (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:102:7)\n    at async Promise.allSettled (index 0)\n    at async DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:68:23)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)",
+        "response": {
+          "success": false,
+          "error": "NOT_FOUND",
+          "message": "Route POST /auth/register not found",
+          "timestamp": "2025-07-24T01:48:29.656Z"
+        }
+      },
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "User 2 flow failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.register (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:51:22)\n    at async DualUserTest.registerUser (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:142:24)\n    at async DualUserTest.runSingleUserFlow (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:102:7)\n    at async Promise.allSettled (index 1)\n    at async DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:68:23)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)",
+        "response": {
+          "success": false,
+          "error": "NOT_FOUND",
+          "message": "Route POST /auth/register not found",
+          "timestamp": "2025-07-24T01:48:29.657Z"
+        }
+      },
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Parallel execution completed: 0 success, 2 failures",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Parallel user flows failed",
+      "error": {
+        "message": "2 user flows failed",
+        "stack": "Error: 2 user flows failed\n    at DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:88:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)"
+      },
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Dual User E2E Test failed",
+      "error": {
+        "message": "2 user flows failed",
+        "stack": "Error: 2 user flows failed\n    at DualUserTest.runParallelUserFlows (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:88:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async DualUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\dual-user-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)"
+      },
+      "timestamp": "2025-07-24T01:48:29.659Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected all users from services",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.660Z"
+    }
+  ]
+}

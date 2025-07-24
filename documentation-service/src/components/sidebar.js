@@ -4,8 +4,10 @@ export function renderSidebar(apiData, currentSection) {
     { key: 'authentication', title: 'Authentication', icon: '🔐' },
     { key: 'schools', title: 'School Management', icon: '🏫' },
     { key: 'admin', title: 'Admin Management', icon: '👨‍💼' },
+    { key: 'adminUserManagement', title: 'Admin User Management', icon: '🗑️' },
     { key: 'assessment', title: 'Assessment Service', icon: '🎯' },
     { key: 'archive', title: 'Archive Service', icon: '📊' },
+    { key: 'chatbot', title: 'Chatbot Service', icon: '💬' },
     { key: 'websocket', title: 'WebSocket', icon: '🔔' },
     { key: 'health', title: 'Health & Monitoring', icon: '🔍' },
     { key: 'errors', title: 'Error Handling', icon: '❌' }

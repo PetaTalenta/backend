@@ -1,0 +1,203 @@
+{
+  "testName": "single-user-test-2025-07-24T02-24-59",
+  "startTime": "2025-07-24T02:24:59.554Z",
+  "endTime": "2025-07-24T02:25:26.444Z",
+  "duration": 26890,
+  "results": {
+    "passed": 7,
+    "failed": 2,
+    "skipped": 0,
+    "total": 9
+  },
+  "successRate": 77.78,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Failed to get profile persona",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.getResult (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:106:22)\n    at async SingleUserTest.getProfilePersona (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:192:24)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:33:7)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "RESULT_NOT_FOUND",
+            "message": "Analysis result not found"
+          }
+        }
+      },
+      "timestamp": "2025-07-24T02:25:26.443Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.getResult (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:106:22)\n    at async SingleUserTest.getProfilePersona (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:192:24)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:33:7)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "RESULT_NOT_FOUND",
+            "message": "Analysis result not found"
+          }
+        }
+      },
+      "timestamp": "2025-07-24T02:25:26.443Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.555Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.557Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser17533238995573haf15@example.com",
+        "username": "testuser3haf15"
+      },
+      "timestamp": "2025-07-24T02:24:59.559Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.559Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "4f49ae7e-348b-412f-a57e-56880249501b",
+        "email": "testuser17533238995573haf15@example.com"
+      },
+      "timestamp": "2025-07-24T02:24:59.657Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.657Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.715Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.715Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.747Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Update Profile",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.747Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile updated successfully",
+      "data": {
+        "username": "updatedwtn5xk"
+      },
+      "timestamp": "2025-07-24T02:24:59.787Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Submit Assessment",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.788Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment submitted successfully",
+      "data": {
+        "jobId": "e997d9fa-81f9-4302-b9f2-08a8dff442de",
+        "status": "queued"
+      },
+      "timestamp": "2025-07-24T02:24:59.921Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Wait for WebSocket Notification",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.921Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for assessment completion notification...",
+      "data": null,
+      "timestamp": "2025-07-24T02:24:59.921Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment completion notification received",
+      "data": {
+        "jobId": "e997d9fa-81f9-4302-b9f2-08a8dff442de",
+        "resultId": "e091e13b-51da-4b24-a07a-40d5105de7eb"
+      },
+      "timestamp": "2025-07-24T02:25:26.414Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 8: Get Profile Persona",
+      "data": null,
+      "timestamp": "2025-07-24T02:25:26.415Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Failed to get profile persona",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.getResult (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:106:22)\n    at async SingleUserTest.getProfilePersona (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:192:24)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:33:7)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "RESULT_NOT_FOUND",
+            "message": "Analysis result not found"
+          }
+        }
+      },
+      "timestamp": "2025-07-24T02:25:26.443Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.getResult (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:106:22)\n    at async SingleUserTest.getProfilePersona (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:192:24)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:33:7)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "RESULT_NOT_FOUND",
+            "message": "Analysis result not found"
+          }
+        }
+      },
+      "timestamp": "2025-07-24T02:25:26.443Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-07-24T02:25:26.444Z"
+    }
+  ]
+}

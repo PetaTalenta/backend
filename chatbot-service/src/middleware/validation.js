@@ -77,6 +77,44 @@ const validateQuery = (schema) => {
   };
 };
 
+/**
+ * Validate request URL parameters against schema
+ * @param {Object} schema - Joi schema
+ * @returns {Function} Express middleware
+ */
+const validateParams = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.params, {
+      abortEarly: false,
+      stripUnknown: true
+    });
+
+    if (error) {
+      const errorDetails = error.details.map(detail => detail.message);
+
+      logger.warn('Params validation failed', {
+        path: req.path,
+        method: req.method,
+        errors: errorDetails,
+        requestId: req.id
+      });
+
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'URL parameters validation failed',
+          details: errorDetails
+        }
+      });
+    }
+
+    // Replace request params with validated value
+    req.params = value;
+    next();
+  };
+};
+
 // Validation schemas
 const schemas = {
   // Create conversation schema
@@ -204,11 +242,49 @@ const schemas = {
       .messages({
         'date.format': 'end_date must be a valid ISO date'
       })
+  }),
+
+  // Phase 3: Assessment Integration Schemas
+
+  // Create conversation from assessment schema
+  createFromAssessment: Joi.object({
+    assessment_id: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'Assessment ID must be a valid UUID',
+        'any.required': 'Assessment ID is required'
+      }),
+    title: Joi.string().max(255).optional()
+      .messages({
+        'string.max': 'Title must be at most 255 characters long'
+      }),
+    auto_start_message: Joi.boolean().optional().default(true)
+      .messages({
+        'boolean.base': 'auto_start_message must be a boolean'
+      })
+  }),
+
+  // Assessment readiness check params schema
+  assessmentReadyParams: Joi.object({
+    userId: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'User ID must be a valid UUID',
+        'any.required': 'User ID is required'
+      })
+  }),
+
+  // Conversation suggestions params schema
+  conversationSuggestionsParams: Joi.object({
+    conversationId: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'Conversation ID must be a valid UUID',
+        'any.required': 'Conversation ID is required'
+      })
   })
 };
 
 module.exports = {
   validateBody,
   validateQuery,
+  validateParams,
   schemas
 };

@@ -1,0 +1,225 @@
+{
+  "testName": "single-user-test-2025-07-24T04-17-24",
+  "startTime": "2025-07-24T04:17:24.195Z",
+  "endTime": "2025-07-24T04:18:30.395Z",
+  "duration": 66200,
+  "results": {
+    "passed": 10,
+    "failed": 2,
+    "skipped": 0,
+    "total": 12
+  },
+  "successRate": 83.33,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Chatbot test failed",
+      "error": {
+        "message": "socket hang up",
+        "stack": "Error: socket hang up\n    at AxiosError.from (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:899:14)\n    at RedirectableRequest.handleRequestError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3228:25)\n    at RedirectableRequest.emit (node:events:530:35)\n    at eventHandlers.<computed> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\follow-redirects\\index.js:49:24)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketOnEnd (node:_http_client:542:5)\n    at Socket.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.sendMessage (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:142:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:239:29)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)"
+      },
+      "timestamp": "2025-07-24T04:18:30.393Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "socket hang up",
+        "stack": "Error: socket hang up\n    at AxiosError.from (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:899:14)\n    at RedirectableRequest.handleRequestError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3228:25)\n    at RedirectableRequest.emit (node:events:530:35)\n    at eventHandlers.<computed> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\follow-redirects\\index.js:49:24)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketOnEnd (node:_http_client:542:5)\n    at Socket.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.sendMessage (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:142:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:239:29)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)"
+      },
+      "timestamp": "2025-07-24T04:18:30.393Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.195Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.197Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser1753330644197rrq6wi@example.com",
+        "username": "testuserrrq6wi"
+      },
+      "timestamp": "2025-07-24T04:17:24.199Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.200Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "e6a6093c-7818-4a26-bddf-65dc36806d2f",
+        "email": "testuser1753330644197rrq6wi@example.com"
+      },
+      "timestamp": "2025-07-24T04:17:24.331Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.331Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.384Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.384Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.402Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Update Profile",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.402Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile updated successfully",
+      "data": {
+        "username": "updatedfeqg4p"
+      },
+      "timestamp": "2025-07-24T04:17:24.423Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Submit Assessment",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.424Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment submitted successfully",
+      "data": {
+        "jobId": "40d5da34-6572-45bc-84b3-e2b9cf1c2edf",
+        "status": "queued"
+      },
+      "timestamp": "2025-07-24T04:17:24.531Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Wait for WebSocket Notification",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.531Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for assessment completion notification...",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:24.531Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment completion notification received",
+      "data": {
+        "jobId": "40d5da34-6572-45bc-84b3-e2b9cf1c2edf",
+        "resultId": "0588f47f-2fc6-4299-84b1-76bea17bc076"
+      },
+      "timestamp": "2025-07-24T04:17:52.446Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 8: Get Profile Persona",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:52.446Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch processing to complete...",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:52.446Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile persona retrieved successfully",
+      "data": {
+        "archetype": "The Compassionate Analyst",
+        "careerCount": 4
+      },
+      "timestamp": "2025-07-24T04:17:58.474Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 9: Test Chatbot",
+      "data": null,
+      "timestamp": "2025-07-24T04:17:58.475Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Chatbot conversation created",
+      "data": {
+        "conversationId": "62ae5c3b-887d-466e-9c17-6c8dd09fc705"
+      },
+      "timestamp": "2025-07-24T04:18:07.039Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Sending message 1/5",
+      "data": null,
+      "timestamp": "2025-07-24T04:18:07.039Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Message 1 sent and responded",
+      "data": {
+        "userMessage": "Hello, I need career guidance based on my assessme...",
+        "assistantResponse": "Hello! I'm glad you're here and ready to explore y..."
+      },
+      "timestamp": "2025-07-24T04:18:14.365Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Sending message 2/5",
+      "data": null,
+      "timestamp": "2025-07-24T04:18:15.372Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Chatbot test failed",
+      "error": {
+        "message": "socket hang up",
+        "stack": "Error: socket hang up\n    at AxiosError.from (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:899:14)\n    at RedirectableRequest.handleRequestError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3228:25)\n    at RedirectableRequest.emit (node:events:530:35)\n    at eventHandlers.<computed> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\follow-redirects\\index.js:49:24)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketOnEnd (node:_http_client:542:5)\n    at Socket.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.sendMessage (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:142:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:239:29)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)"
+      },
+      "timestamp": "2025-07-24T04:18:30.393Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "socket hang up",
+        "stack": "Error: socket hang up\n    at AxiosError.from (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:899:14)\n    at RedirectableRequest.handleRequestError (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3228:25)\n    at RedirectableRequest.emit (node:events:530:35)\n    at eventHandlers.<computed> (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\follow-redirects\\index.js:49:24)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketOnEnd (node:_http_client:542:5)\n    at Socket.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.sendMessage (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:142:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:239:29)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)"
+      },
+      "timestamp": "2025-07-24T04:18:30.393Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-07-24T04:18:30.394Z"
+    }
+  ]
+}

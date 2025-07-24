@@ -5,8 +5,12 @@ const app = require('./app');
 const logger = require('./utils/logger');
 const { sequelize } = require('./models');
 const { startMetricsLogging } = require('./middleware/metrics');
+const AssessmentEventHandler = require('./services/assessmentEventHandler');
 
 const PORT = process.env.PORT || 3006;
+
+// Initialize assessment event handler
+let assessmentEventHandler = null;
 
 /**
  * Initialize services
@@ -25,6 +29,19 @@ const initializeServices = async () => {
 
     // Start metrics logging
     startMetricsLogging();
+
+    // Initialize assessment event handler (Phase 3)
+    try {
+      assessmentEventHandler = new AssessmentEventHandler();
+      await assessmentEventHandler.initialize();
+      logger.info('Assessment event handler initialized successfully');
+    } catch (error) {
+      logger.warn('Assessment event handler initialization failed', {
+        error: error.message,
+        enabled: process.env.ENABLE_ASSESSMENT_INTEGRATION
+      });
+      // Don't fail startup if assessment integration is disabled
+    }
 
     logger.info('All services initialized successfully');
   } catch (error) {
@@ -49,6 +66,12 @@ if (process.env.NODE_ENV !== 'test') {
       logger.info(`${signal} received, shutting down gracefully`);
 
       try {
+        // Close assessment event handler
+        if (assessmentEventHandler) {
+          await assessmentEventHandler.close();
+          logger.info('Assessment event handler closed');
+        }
+
         // Close database connection
         await sequelize.close();
         logger.info('Database connection closed');

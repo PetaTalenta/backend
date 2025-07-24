@@ -33,19 +33,19 @@ Membuat hasil analisis baru (hanya untuk internal service).
 ```json
 {
   "user_id": "uuid",
-  "job_id": "string",
   "assessment_name": "string",
-  "archetype": "string",
-  "analysis_data": {
-    "scores": {...},
-    "recommendations": [...],
-    "insights": {...}
+  "assessment_data": {
+    "riasec": {...},
+    "ocean": {...},
+    "viaIs": {...}
   },
-  "demographic_data": {
-    "age": 25,
-    "gender": "male",
-    "school_id": 123
-  }
+  "persona_profile": {
+    "personality_summary": "string",
+    "career_recommendations": [...],
+    "strengths": [...],
+    "development_areas": [...]
+  },
+  "status": "completed"
 }
 ```
 
@@ -75,11 +75,10 @@ Membuat multiple hasil analisis dalam satu request.
   "items": [
     {
       "user_id": "uuid",
-      "job_id": "string",
       "assessment_name": "string",
-      "archetype": "string",
-      "analysis_data": {...},
-      "demographic_data": {...}
+      "assessment_data": {...},
+      "persona_profile": {...},
+      "status": "completed"
     }
   ],
   "options": {
@@ -97,9 +96,9 @@ Memperbarui hasil analisis (akses internal tanpa validasi ownership).
 **Request Body:**
 ```json
 {
-  "analysis_data": {...},
-  "status": "completed",
-  "archetype": "updated_archetype"
+  "assessment_data": {...},
+  "persona_profile": {...},
+  "status": "completed"
 }
 ```
 
@@ -387,7 +386,7 @@ Invalidasi cache berdasarkan pattern.
 ## 🔄 Unified API v1 - Internal Endpoints
 
 ### 1. Advanced Analytics
-**GET** `/api/v1/analytics`
+**GET** `/archive/v1/analytics`
 
 Endpoint analitik lanjutan dengan filtering dan agregasi.
 
@@ -399,7 +398,7 @@ Endpoint analitik lanjutan dengan filtering dan agregasi.
 - `timeRange` (string) - Rentang waktu
 
 ### 2. Batch Operations
-**POST** `/api/v1/batch/:operation`
+**POST** `/archive/v1/batch/:operation`
 
 Operasi batch terpadu.
 
@@ -409,7 +408,7 @@ Operasi batch terpadu.
 - `cleanup` - Batch cleanup
 
 ### 3. Health Check Components
-**GET** `/api/v1/health/:component`
+**GET** `/archive/v1/health/:component`
 
 Health check komponen spesifik.
 
@@ -438,12 +437,13 @@ Membuat user untuk testing (hanya tersedia di development mode).
 
 ---
 
-## 🔍 Direct Access Routes
+## 🔍 Endpoint Access
 
-Service menyediakan direct access routes tanpa prefix `/archive` untuk komunikasi service-to-service yang lebih efisien:
+Semua endpoint menggunakan prefix `/archive` untuk konsistensi:
 
-- `/results/*` - Direct access ke results endpoints
-- `/jobs/*` - Direct access ke jobs endpoints
+- `/archive/results/*` - Results endpoints
+- `/archive/jobs/*` - Jobs endpoints
+- `/archive/v1/*` - Unified API endpoints
 
 ---
 

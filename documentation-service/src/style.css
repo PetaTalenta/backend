@@ -236,6 +236,28 @@ code {
   margin-bottom: 10px;
 }
 
+.endpoint-meta {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 15px 0;
+}
+
+.meta-item {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.meta-item:last-child {
+  margin-bottom: 0;
+}
+
+.meta-item strong {
+  color: #495057;
+  font-weight: 600;
+}
+
 /* Additional Styles */
 .endpoint-section h4 {
   color: #2c3e50;
@@ -290,5 +312,49 @@ code {
 
   .method-badge {
     align-self: flex-start;
+  }
+}
+
+/* Additional styles for archive service */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.field-descriptions {
+  background: #f8f9fa;
+  border-left: 4px solid #007bff;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 0 6px 6px 0;
+}
+
+.field-descriptions h4 {
+  color: #495057;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.field-descriptions ul {
+  list-style: none;
+  padding: 0;
+}
+
+.field-descriptions li {
+  padding: 5px 0;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.9rem;
+}
+
+.field-descriptions li:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,0 +1,224 @@
+{
+  "testName": "single-user-test-2025-07-24T03-37-36",
+  "startTime": "2025-07-24T03:37:36.641Z",
+  "endTime": "2025-07-24T03:38:08.584Z",
+  "duration": 31943,
+  "results": {
+    "passed": 8,
+    "failed": 2,
+    "skipped": 0,
+    "total": 10
+  },
+  "successRate": 80,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Chatbot test failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.createConversationFromAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:152:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:218:28)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "Route POST /conversations/from-assessment not found"
+          }
+        }
+      },
+      "timestamp": "2025-07-24T03:38:08.582Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.createConversationFromAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:152:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:218:28)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "Route POST /conversations/from-assessment not found"
+          }
+        }
+      },
+      "timestamp": "2025-07-24T03:38:08.583Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.642Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.644Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser1753328256644fu4hpk@example.com",
+        "username": "testuserfu4hpk"
+      },
+      "timestamp": "2025-07-24T03:37:36.646Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.647Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "3455656f-a5f2-49c0-8a92-627f928ab1fd",
+        "email": "testuser1753328256644fu4hpk@example.com"
+      },
+      "timestamp": "2025-07-24T03:37:36.743Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.744Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.808Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.808Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.824Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Update Profile",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.824Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile updated successfully",
+      "data": {
+        "username": "updatedj185vz"
+      },
+      "timestamp": "2025-07-24T03:37:36.870Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Submit Assessment",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.871Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment submitted successfully",
+      "data": {
+        "jobId": "a287b3be-b91f-4686-b517-b2d76287cfe7",
+        "status": "queued"
+      },
+      "timestamp": "2025-07-24T03:37:36.986Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Wait for WebSocket Notification",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.987Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for assessment completion notification...",
+      "data": null,
+      "timestamp": "2025-07-24T03:37:36.987Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment completion notification received",
+      "data": {
+        "jobId": "a287b3be-b91f-4686-b517-b2d76287cfe7",
+        "resultId": "5fc4622d-6861-4deb-8704-0d257dd7a423"
+      },
+      "timestamp": "2025-07-24T03:38:02.524Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 8: Get Profile Persona",
+      "data": null,
+      "timestamp": "2025-07-24T03:38:02.525Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch processing to complete...",
+      "data": null,
+      "timestamp": "2025-07-24T03:38:02.525Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile persona retrieved successfully",
+      "data": {
+        "archetype": "The Compassionate Perfectionist",
+        "careerCount": 4
+      },
+      "timestamp": "2025-07-24T03:38:08.559Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 9: Test Chatbot",
+      "data": null,
+      "timestamp": "2025-07-24T03:38:08.560Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Chatbot test failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.createConversationFromAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:152:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:218:28)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "Route POST /conversations/from-assessment not found"
+          }
+        }
+      },
+      "timestamp": "2025-07-24T03:38:08.582Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 404",
+        "stack": "AxiosError: Request failed with status code 404\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.createConversationFromAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:152:22)\n    at async SingleUserTest.testChatbot (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:218:28)\n    at async SingleUserTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\single-user-test.js:34:7)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "Route POST /conversations/from-assessment not found"
+          }
+        }
+      },
+      "timestamp": "2025-07-24T03:38:08.583Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-07-24T03:38:08.584Z"
+    }
+  ]
+}

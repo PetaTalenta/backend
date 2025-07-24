@@ -191,7 +191,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       AUTH_SERVICE_URL: http://auth-service:3001
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ANALYSIS_TOKEN_COST: 1
@@ -337,6 +337,20 @@ services:
       # Rate Limiting for Free Models
       FREE_MODEL_RATE_LIMIT_PER_MINUTE: ${FREE_MODEL_RATE_LIMIT_PER_MINUTE}
       MAX_CONVERSATION_HISTORY_TOKENS: ${MAX_CONVERSATION_HISTORY_TOKENS}
+      # Phase 3: Assessment Integration
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      RABBITMQ_EXCHANGE: atma_events
+      RABBITMQ_QUEUE: chatbot_assessment_events
+      RABBITMQ_ROUTING_KEY: analysis_complete
+      RABBITMQ_CONNECTION_TIMEOUT: 10000
+      RABBITMQ_RECONNECT_DELAY: 5000
+      RABBITMQ_MAX_RECONNECT_ATTEMPTS: 10
+      ENABLE_ASSESSMENT_INTEGRATION: "true"
+      ENABLE_EVENT_DRIVEN_CONVERSATIONS: "true"
+      ENABLE_PERSONALIZED_WELCOME_MESSAGES: "true"
+      ENABLE_SUGGESTED_QUESTIONS: "true"
+      ENABLE_ASSESSMENT_CONTEXT_OPTIMIZATION: "true"
     ports:
       - "3006:3006"
     depends_on:
@@ -379,7 +393,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -442,7 +456,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -505,7 +519,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -568,7 +582,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -631,7 +645,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -694,7 +708,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -757,7 +771,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -820,7 +834,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -883,7 +897,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -946,7 +960,7 @@ services:
       TOKEN_COUNT_TIMEOUT: 5000
       ENABLE_TOKEN_COUNT_FALLBACK: true
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      ARCHIVE_SERVICE_URL: http://archive-service:3002/archive
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       WORKER_CONCURRENCY: 10
@@ -992,31 +1006,7 @@ services:
       - atma-network
     restart: unless-stopped
 
-  # Testing Service
-  testing-service:
-    build:
-      context: ./testing
-      dockerfile: Dockerfile
-    container_name: atma-testing-service
-    environment:
-      NODE_ENV: testing
-      API_BASE_URL: http://api-gateway:3000
-      WEBSOCKET_URL: http://notification-service:3005
-      TEST_USER_COUNT: 100
-      TEST_CONCURRENCY: 100
-    volumes:
-      - ./testing:/app
-      - /app/node_modules
-    networks:
-      - atma-network
-    depends_on:
-      - api-gateway
-      - notification-service
-      - auth-service
-      - assessment-service
-      - archive-service
-    restart: "no"
-    command: ["tail", "-f", "/dev/null"]
+
 
   # Cloudflare Tunnel
   cloudflared:
@@ -1031,6 +1021,17 @@ services:
     depends_on:
       - api-gateway
       - documentation-service
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep cloudflared | grep -v grep || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 # Networks
 networks:

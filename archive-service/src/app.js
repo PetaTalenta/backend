@@ -30,6 +30,7 @@ const adminRoutes = require('./routes/admin');
 const healthRoutes = require('./routes/health');
 const unifiedRoutes = require('./routes/unified');
 const metricsRoutes = require('./routes/metrics');
+const directJobsRoutes = require('./routes/directJobs');
 
 // Create Express app
 const app = express();
@@ -87,21 +88,17 @@ app.use((req, res, next) => {
 app.use(metricsMiddleware);
 app.use(cacheMetricsMiddleware);
 
-// Routes
-// New unified API routes (v1)
-app.use('/api/v1', unifiedRoutes);
-
-// Legacy routes (maintain backward compatibility)
-app.use('/archive', resultsRoutes);
-app.use('/archive', statsRoutes);
+// Routes - Standardized with /archive prefix for consistency
+app.use('/archive/results', resultsRoutes);
+app.use('/archive/stats', statsRoutes);
 app.use('/archive/demographics', demographicsRoutes);
+app.use('/archive/jobs', directJobsRoutes);
+app.use('/archive/v1', unifiedRoutes); // Unified API under archive prefix
+app.use('/archive/admin', adminRoutes);
+app.use('/archive/metrics', metricsRoutes);
+app.use('/archive/health', healthRoutes);
 
-// Direct access routes (for services that call without /archive prefix)
-app.use('/results', resultsRoutes);
-app.use('/jobs', resultsRoutes);
-
-app.use('/admin', adminRoutes);
-app.use('/metrics', metricsRoutes);
+// Root health endpoint (for service discovery)
 app.use('/', healthRoutes);
 
 // Root endpoint

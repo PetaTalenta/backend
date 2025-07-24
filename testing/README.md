@@ -1,232 +1,140 @@
-# ATMA Backend Testing Suite
+# ATMA E2E Testing Suite
 
-Comprehensive E2E and Load Testing suite untuk ATMA (AI-Driven Talent Mapping Assessment) Backend.
+Comprehensive End-to-End testing suite for ATMA Backend Services with WebSocket support and complete user flow testing.
 
-## 📋 Overview
+## Overview
 
-Testing suite ini mencakup:
-- **E2E Testing**: Testing end-to-end untuk satu user journey lengkap
-- **Load Testing**: Testing dengan 50 user concurrent untuk mengukur performa sistem
+This testing suite covers the complete user journey:
+1. User registration with random email
+2. User login
+3. WebSocket connection
+4. Profile update
+5. Assessment submission
+6. WebSocket notification handling
+7. Profile persona retrieval
+8. Chatbot interaction
+9. Account deletion
 
-## 🚀 Quick Start
+## Features
 
-### Prerequisites
-- Node.js (v14 atau lebih baru)
-- ATMA Backend services berjalan:
-  - API Gateway (port 3000)
-  - Auth Service (port 3001)
-  - Archive Service (port 3002)
-  - Assessment Service (port 3003)
-  - Notification Service (port 3005)
+- **Dual User Testing**: Tests 2 users simultaneously
+- **WebSocket Integration**: Real-time notification testing
+- **Random Data Generation**: Unique emails and usernames
+- **Complete API Coverage**: All major endpoints tested
+- **Stress Testing**: Multiple concurrent users
+- **Cleanup Support**: Automatic test data cleanup
+- **Detailed Logging**: Comprehensive test reporting
 
-### Installation
+## Prerequisites
+
+1. ATMA Backend services running:
+   - API Gateway (port 3000)
+   - Auth Service (port 3001)
+   - Assessment Service (port 3002)
+   - Archive Service (port 3003)
+   - Notification Service (port 3005)
+   - Chatbot Service (port 3006)
+
+2. Database properly initialized
+3. All services healthy and responding
+
+## Installation
+
 ```bash
 cd testing
 npm install
 ```
 
-### Running Tests
+## Configuration
 
-#### E2E Test (Single User Journey)
+Edit `.env` file to configure:
+- API endpoints
+- Timeouts
+- Test parameters
+- Email domains
+
+## Usage
+
+### Run All Tests
 ```bash
-npm run test:e2e
+npm test
 ```
 
-#### Load Test (50 Users Concurrent)
+### Run Single User Test
 ```bash
-npm run test:load
+npm run test:single
 ```
 
-#### Run All Tests
+### Run Dual User Test
 ```bash
-npm run test:all
+npm run test:dual
 ```
 
-## 📊 Test Scenarios
-
-### E2E Test Flow
-1. **User Registration** - Register satu user dengan data random
-2. **User Login** - Login dengan credentials yang baru dibuat
-3. **Update Profile** - Update profile dengan data lengkap
-4. **Submit Assessment** - Submit assessment dengan data RIASEC, OCEAN, dan VIA-IS
-5. **Wait for Completion** - Monitor via WebSocket untuk notifikasi completion
-6. **Check Assessment** - Retrieve hasil assessment dari archive service
-7. **Delete Account** - Cleanup dengan menghapus akun user
-
-### Load Test Flow
-Sama seperti E2E test, tetapi dijalankan untuk 50 users secara concurrent:
-- 50 user register dengan data random
-- 50 login bersama
-- 50 update profile mereka
-- 50 submit assessment
-- 50 menunggu assessment selesai lewat WebSocket
-- 50 user cek assessment results
-- 50 user hapus akun mereka
-
-## 📈 Metrics & Reporting
-
-### Response Time Metrics
-- **Min**: Response time tercepat
-- **Max**: Response time terlambat  
-- **Avg**: Response time rata-rata
-- **P95**: 95th percentile response time
-- **P99**: 99th percentile response time
-
-### Performance Metrics
-- **Success Rate**: Persentase request yang berhasil
-- **Throughput**: Requests per second
-- **Concurrent Users**: Jumlah user yang ditest bersamaan
-- **Total Duration**: Total waktu testing
-
-### Stage-by-Stage Analysis
-Setiap stage akan menampilkan:
-- Success rate dan failure count
-- Response time statistics
-- Throughput rate
-- Error details (jika ada)
-
-## 🌐 WebSocket Configuration
-
-**Important**: WebSocket connections sekarang melewati API Gateway sebagai single entry point:
-
-- **Before**: Direct connection ke `http://localhost:3005` (notification service)
-- **After**: Connection melalui `http://localhost:3000` (API Gateway)
-
-API Gateway akan secara otomatis mem-proxy WebSocket connections ke notification service. Ini memberikan:
-- Konsistensi dengan arsitektur microservices
-- Centralized routing dan monitoring
-- Better security dan rate limiting
-
-## ⚙️ Configuration
-
-Edit `config.js` untuk mengubah:
-
-```javascript
-{
-  test: {
-    userCount: 50,           // Jumlah user untuk load test
-    concurrency: 10,         // Concurrent operations
-    delayBetweenStages: 2000, // Delay antar stage (ms)
-    assessmentTimeout: 300000, // Timeout untuk assessment (5 menit)
-    cleanupDelay: 1000       // Delay saat cleanup (ms)
-  }
-}
-```
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-1. **Connection Refused**
-   ```
-   Error: connect ECONNREFUSED 127.0.0.1:3000
-   ```
-   - Pastikan semua services ATMA berjalan
-   - Check port configuration di config.js
-
-2. **WebSocket Authentication Failed**
-   ```
-   WebSocket authentication failed: Invalid token
-   ```
-   - Pastikan JWT token valid dan belum expired
-   - Check API Gateway dan notification service berjalan
-   - WebSocket connections sekarang melalui API Gateway (port 3000)
-
-3. **Assessment Timeout**
-   ```
-   Assessment completion timeout
-   ```
-   - Increase `assessmentTimeout` di config.js
-   - Check assessment service performance
-
-4. **Rate Limiting**
-   ```
-   Rate limit exceeded
-   ```
-   - Reduce `concurrency` di config.js
-   - Increase `delayBetweenStages`
-
-### Debug Mode
-
-Enable debug logging:
+### Run Stress Test
 ```bash
-DEBUG=* npm run test:load
+npm run test:stress
 ```
 
-## 📁 File Structure
-
-```
-testing/
-├── package.json          # Dependencies dan scripts
-├── config.js            # Configuration untuk testing
-├── utils.js             # Utility functions
-├── e2e-test.js          # E2E testing script
-├── load-test.js         # Load testing script
-└── README.md            # Documentation ini
+### Run WebSocket Only Test
+```bash
+npm run test:websocket
 ```
 
-## 🎯 Expected Results
-
-### Successful E2E Test
-```
-🧪 ATMA E2E Testing Started
-=== Test 1: User Registration ===
-✓ User registered successfully in 245ms
-
-=== Test 2: User Login ===
-✓ User logged in successfully in 156ms
-
-... (semua stages berhasil)
-
-📊 E2E TEST REPORT
-✅ All E2E tests passed successfully!
+### Run Chatbot Test
+```bash
+npm run test:chatbot
 ```
 
-### Successful Load Test
-```
-🚀 ATMA Load Testing Started
-=== Stage 1: User Registration ===
-✓ Registered 50/50 users
-
-... (semua stages berhasil)
-
-📊 LOAD TEST REPORT
-📈 Registration:
-   Success Rate: 100.00% (50/50)
-   Throughput: 12.34 requests/second
-   Response Times:
-     Min: 123ms
-     Max: 567ms
-     Avg: 234ms
-     P95: 456ms
-     P99: 523ms
+### Clean Test Data
+```bash
+npm run clean
 ```
 
-## 🔒 Security Notes
+## Test Structure
 
-- Test users menggunakan email dan password random
-- JWT tokens di-handle secara aman
-- Cleanup otomatis menghapus test data
-- Tidak menggunakan data production
+- `test-runner.js` - Main test orchestrator
+- `single-user-test.js` - Single user complete flow
+- `dual-user-test.js` - Two users parallel testing
+- `stress-test.js` - Multiple users stress testing
+- `websocket-test.js` - WebSocket specific testing
+- `chatbot-test.js` - Chatbot interaction testing
+- `lib/` - Shared utilities and helpers
+- `data/` - Test data and fixtures
+- `reports/` - Test execution reports
 
-## 📞 Support
+## Test Flow
 
-Jika mengalami issues:
-1. Check semua services ATMA berjalan
-2. Verify configuration di config.js
-3. Check logs untuk error details
-4. Reduce concurrency jika ada performance issues
+Each test follows this sequence:
+1. **Setup**: Generate random user data
+2. **Register**: Create new user account
+3. **Login**: Authenticate and get JWT token
+4. **WebSocket**: Connect and authenticate WebSocket
+5. **Profile**: Update user profile information
+6. **Assessment**: Submit assessment data
+7. **Notification**: Wait for WebSocket notifications
+8. **Results**: Retrieve assessment results
+9. **Chatbot**: Test chatbot interactions
+10. **Cleanup**: Delete test account (optional)
 
-## 🚧 Limitations
+## Error Handling
 
-- Delete account endpoint mungkin belum tersedia (akan skip dengan warning)
-- WebSocket testing memerlukan notification service aktif
-- Assessment processing time tergantung pada AI service performance
-- Rate limiting bisa mempengaruhi hasil jika terlalu aggressive
+- Network timeouts
+- Authentication failures
+- WebSocket connection issues
+- API response validation
+- Service unavailability
 
-## 📝 Notes
+## Reporting
 
-- Testing ini menggunakan data dummy/random
-- Semua test data akan di-cleanup setelah testing
-- Pastikan database dalam kondisi bersih sebelum testing
-- Monitor resource usage selama load testing
+Test results are logged to:
+- Console (real-time)
+- `reports/` directory (detailed logs)
+- JSON format for CI/CD integration
+
+## Troubleshooting
+
+1. **Services Not Running**: Check docker-compose status
+2. **Connection Refused**: Verify service ports
+3. **Authentication Errors**: Check JWT token validity
+4. **WebSocket Issues**: Verify notification service
+5. **Timeout Errors**: Increase timeout values in .env

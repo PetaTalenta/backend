@@ -157,11 +157,24 @@ const close = async() => {
 const checkHealth = async() => {
   try {
     if (!connection || !channel) {
+      logger.warn('RabbitMQ connection or channel not initialized');
       return false;
     }
 
-    // Check if connection is still open
-    return connection.isOpen && channel.isOpen;
+    // Check if connection and channel are still open
+    if (!connection.isOpen || !channel.isOpen) {
+      logger.warn('RabbitMQ connection or channel is closed');
+      return false;
+    }
+
+    // Perform a simple operation to test connectivity
+    try {
+      await channel.checkQueue(config.queue);
+      return true;
+    } catch (queueError) {
+      logger.warn('RabbitMQ queue check failed', { error: queueError.message });
+      return false;
+    }
   } catch (error) {
     logger.error('Error checking RabbitMQ health', { error: error.message });
     return false;

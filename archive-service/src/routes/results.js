@@ -30,8 +30,15 @@ router.use(authenticateService);
  * GET /archive/results
  * Get analysis results for authenticated user
  */
-router.get('/results',
-  authenticateToken,
+router.get('/',
+  (req, res, next) => {
+    // Allow both authenticated users and internal services
+    if (req.isInternalService) {
+      return next();
+    }
+    // For user requests, require authentication
+    authenticateToken(req, res, next);
+  },
   validateQuery(listResultsQuerySchema),
   resultsController.getResults
 );
@@ -40,8 +47,15 @@ router.get('/results',
  * GET /archive/results/:id
  * Get specific analysis result by ID
  */
-router.get('/results/:id',
-  authenticateToken,
+router.get('/:id',
+  (req, res, next) => {
+    // Allow both authenticated users and internal services
+    if (req.isInternalService) {
+      return next();
+    }
+    // For user requests, require authentication
+    authenticateToken(req, res, next);
+  },
   validateParams(uuidParamSchema),
   resultsController.getResultById
 );
@@ -50,7 +64,7 @@ router.get('/results/:id',
  * POST /archive/results
  * Create new analysis result (internal service only)
  */
-router.post('/results',
+router.post('/',
   requireServiceAuth,
   validateBody(createAnalysisResultSchema),
   resultsController.createResult
@@ -60,7 +74,7 @@ router.post('/results',
  * POST /archive/results/batch
  * Create multiple analysis results in batch (internal service only)
  */
-router.post('/results/batch',
+router.post('/batch',
   requireServiceAuth,
   resultsController.createResultsBatch
 );
@@ -69,7 +83,7 @@ router.post('/results/batch',
  * PUT /archive/results/:id
  * Update analysis result
  */
-router.put('/results/:id',
+router.put('/:id',
   validateParams(uuidParamSchema),
   validateBody(updateAnalysisResultSchema),
   (req, res, next) => {
@@ -87,7 +101,7 @@ router.put('/results/:id',
  * DELETE /archive/results/:id
  * Delete analysis result (user only)
  */
-router.delete('/results/:id',
+router.delete('/:id',
   authenticateToken,
   validateParams(uuidParamSchema),
   resultsController.deleteResult

@@ -1,0 +1,79 @@
+{
+  "testName": "chatbot-test-2025-07-24T01-52-38",
+  "startTime": "2025-07-24T01:52:38.165Z",
+  "endTime": "2025-07-24T01:52:38.412Z",
+  "duration": 247,
+  "results": {
+    "passed": 1,
+    "failed": 1,
+    "skipped": 0,
+    "total": 2
+  },
+  "successRate": 50,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Chatbot E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 400",
+        "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.submitAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:90:22)\n    at async ChatbotTest.setup (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\chatbot-test.js:69:32)\n    at async ChatbotTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\chatbot-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Validation failed",
+            "details": {
+              "assessmentName": "Assessment name must be one of: AI-Driven Talent Mapping, AI-Based IQ Test, Custom Assessment"
+            }
+          }
+        }
+      },
+      "timestamp": "2025-07-24T01:52:38.384Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Chatbot-focused E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:38.165Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Setup Test Environment",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:38.167Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Chatbot E2E Test failed",
+      "error": {
+        "message": "Request failed with status code 400",
+        "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async APIClient.submitAssessment (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\api-client.js:90:22)\n    at async ChatbotTest.setup (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\chatbot-test.js:69:32)\n    at async ChatbotTest.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\chatbot-test.js:23:7)\n    at async TestRunner.runSingleTest (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:89:7)\n    at async TestRunner.run (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:36:11)\n    at async TestRunner.runWithConfig (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\test-runner.js:201:12)",
+        "response": {
+          "success": false,
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Validation failed",
+            "details": {
+              "assessmentName": "Assessment name must be one of: AI-Driven Talent Mapping, AI-Based IQ Test, Custom Assessment"
+            }
+          }
+        }
+      },
+      "timestamp": "2025-07-24T01:52:38.384Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Cleanup",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:38.385Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test account cleaned up",
+      "data": null,
+      "timestamp": "2025-07-24T01:52:38.411Z"
+    }
+  ]
+}

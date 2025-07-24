@@ -1,20 +1,21 @@
 /**
  * Archive Service Integration
- * Service for communicating with Archive Service for job status sync
+ * Service for communicating with Archive Service for job status sync and result creation
  */
 
 const axios = require('axios');
 const logger = require('../utils/logger');
 
-const ARCHIVE_SERVICE_URL = process.env.ARCHIVE_SERVICE_URL || 'http://localhost:3002/archive';
+// Fix: Remove /archive suffix since routes already use /archive prefix
+const ARCHIVE_SERVICE_URL = process.env.ARCHIVE_SERVICE_URL || 'http://localhost:3002';
 
 const archiveClient = axios.create({
   baseURL: ARCHIVE_SERVICE_URL,
-  timeout: 5000,
+  timeout: 10000, // Increased timeout for better reliability
   headers: {
     'Content-Type': 'application/json',
     'X-Internal-Service': 'true',
-    'X-Service-Key': process.env.INTERNAL_SERVICE_KEY
+    'X-Service-Key': process.env.INTERNAL_SERVICE_KEY || 'internal_service_secret_key_change_in_production'
   }
 });
 
@@ -33,7 +34,7 @@ const syncJobStatus = async (jobId, status, additionalData = {}) => {
       additionalData 
     });
 
-    const response = await archiveClient.put(`/jobs/${jobId}/status`, {
+    const response = await archiveClient.put(`/archive/jobs/${jobId}/status`, {
       status,
       ...additionalData
     });
@@ -65,13 +66,13 @@ const getJobStatus = async (jobId) => {
   try {
     logger.info('Getting job status from Archive Service', { jobId });
 
-    const response = await archiveClient.get(`/jobs/${jobId}`);
-    
-    logger.info('Job status retrieved from Archive Service', { 
-      jobId, 
-      status: response.data.data.status 
+    const response = await archiveClient.get(`/archive/jobs/${jobId}`);
+
+    logger.info('Job status retrieved from Archive Service', {
+      jobId,
+      status: response.data.data.status
     });
-    
+
     return response.data.data;
   } catch (error) {
     if (error.response?.status === 404) {
@@ -104,7 +105,7 @@ const createJob = async (jobId, userId, assessmentData, assessmentName = 'AI-Dri
       userId
     });
 
-    const response = await archiveClient.post('/jobs', {
+    const response = await archiveClient.post('/archive/jobs', {
       job_id: jobId,
       user_id: userId,
       assessment_data: assessmentData,
@@ -132,6 +133,60 @@ const createJob = async (jobId, userId, assessmentData, assessmentName = 'AI-Dri
 };
 
 /**
+ * Create analysis result directly in Archive Service
+ * @param {String} userId - User ID
+ * @param {Object} assessmentData - Assessment data
+ * @param {Object} personaProfile - Persona profile result
+ * @param {String} assessmentName - Assessment name
+ * @param {String} status - Result status ('completed', 'processing', 'failed')
+ * @param {String} errorMessage - Error message if status is 'failed'
+ * @returns {Promise<Object>} - Created result
+ */
+const createAnalysisResult = async (userId, assessmentData, personaProfile, assessmentName = 'AI-Driven Talent Mapping', status = 'completed', errorMessage = null) => {
+  try {
+    logger.info('Creating analysis result in Archive Service', {
+      userId,
+      assessmentName,
+      status,
+      hasPersonaProfile: !!personaProfile
+    });
+
+    const requestBody = {
+      user_id: userId,
+      assessment_data: assessmentData,
+      persona_profile: personaProfile,
+      assessment_name: assessmentName,
+      status: status
+    };
+
+    // Add error message if status is failed
+    if (status === 'failed' && errorMessage) {
+      requestBody.error_message = errorMessage;
+    }
+
+    const response = await archiveClient.post('/archive/results', requestBody);
+
+    logger.info('Analysis result created in Archive Service successfully', {
+      userId,
+      resultId: response.data.data.id,
+      status: response.data.data.status
+    });
+
+    return response.data.data;
+  } catch (error) {
+    logger.error('Failed to create analysis result in Archive Service', {
+      userId,
+      assessmentName,
+      status,
+      error: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText
+    });
+    throw error;
+  }
+};
+
+/**
  * Check Archive Service health
  * @returns {Promise<Boolean>} - Health status
  */
@@ -150,9 +205,76 @@ const checkHealth = async () => {
   }
 };
 
+/**
+ * Get analysis result by ID from Archive Service
+ * @param {String} resultId - Result ID
+ * @returns {Promise<Object|null>} - Result data or null if not found
+ */
+const getAnalysisResult = async (resultId) => {
+  try {
+    logger.info('Getting analysis result from Archive Service', { resultId });
+
+    const response = await archiveClient.get(`/archive/results/${resultId}`);
+
+    logger.info('Analysis result retrieved from Archive Service', {
+      resultId,
+      status: response.data.data.status
+    });
+
+    return response.data.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      logger.warn('Analysis result not found in Archive Service', { resultId });
+      return null;
+    }
+
+    logger.error('Failed to get analysis result from Archive Service', {
+      resultId,
+      error: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText
+    });
+    throw error;
+  }
+};
+
+/**
+ * Update analysis result in Archive Service
+ * @param {String} resultId - Result ID
+ * @param {Object} updateData - Data to update
+ * @returns {Promise<Object>} - Updated result
+ */
+const updateAnalysisResult = async (resultId, updateData) => {
+  try {
+    logger.info('Updating analysis result in Archive Service', {
+      resultId,
+      updateFields: Object.keys(updateData)
+    });
+
+    const response = await archiveClient.put(`/archive/results/${resultId}`, updateData);
+
+    logger.info('Analysis result updated in Archive Service successfully', {
+      resultId
+    });
+
+    return response.data.data;
+  } catch (error) {
+    logger.error('Failed to update analysis result in Archive Service', {
+      resultId,
+      error: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText
+    });
+    throw error;
+  }
+};
+
 module.exports = {
   syncJobStatus,
   getJobStatus,
   createJob,
+  createAnalysisResult,
+  getAnalysisResult,
+  updateAnalysisResult,
   checkHealth
 };

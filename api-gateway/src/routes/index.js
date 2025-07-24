@@ -126,7 +126,7 @@ router.delete('/archive/admin/users/:userId', verifyToken, verifyAdmin, adminLim
 router.get('/archive/admin/users', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
 
 // Unified API v1 endpoints
-router.get('/archive/api/v1/stats', (req, res, next) => {
+router.get('/archive/v1/stats', (req, res, next) => {
   // Flexible authentication based on type parameter
   const type = req.query.type || 'user';
   if (['system', 'demographic', 'performance'].includes(type)) {
@@ -138,6 +138,11 @@ router.get('/archive/api/v1/stats', (req, res, next) => {
   }
 }, archiveServiceProxy);
 
+router.get('/archive/v1/analytics', verifyInternalService, archiveServiceProxy);
+router.get('/archive/v1/data/:type', verifyToken, archiveLimiter, archiveServiceProxy);
+router.post('/archive/v1/batch/:operation', verifyInternalService, archiveServiceProxy);
+router.get('/archive/v1/health/:component?', archiveServiceProxy);
+
 // Health endpoints (no authentication required)
 router.get('/archive/health/detailed', archiveServiceProxy);
 router.get('/archive/health', archiveServiceProxy);
@@ -148,24 +153,7 @@ if (process.env.NODE_ENV === 'development') {
   router.use('/archive/dev', verifyInternalService, archiveServiceProxy);
 }
 
-// ===== DIRECT ACCESS ROUTES FOR ARCHIVE SERVICE =====
-// These routes provide direct access without /archive prefix as mentioned in documentation
-
-// Direct Results endpoints (for service-to-service communication)
-router.post('/results/batch', verifyInternalService, archiveServiceProxy);
-router.get('/results/:id', verifyInternalService, archiveServiceProxy);
-router.put('/results/:id', verifyInternalService, archiveServiceProxy);
-router.delete('/results/:id', verifyInternalService, archiveServiceProxy);
-router.get('/results', verifyInternalService, archiveServiceProxy);
-router.post('/results', verifyInternalService, archiveServiceProxy);
-
-// Direct Jobs endpoints (for service-to-service communication)
-router.get('/jobs/stats', verifyInternalService, archiveServiceProxy);
-router.put('/jobs/:jobId/status', verifyInternalService, archiveServiceProxy);
-router.get('/jobs/:jobId', verifyInternalService, archiveServiceProxy);
-router.delete('/jobs/:jobId', verifyInternalService, archiveServiceProxy);
-router.get('/jobs', verifyInternalService, archiveServiceProxy);
-router.post('/jobs', verifyInternalService, archiveServiceProxy);
+// Note: Direct access routes removed - all routes now use /archive prefix for consistency
 
 // ===== ASSESSMENT SERVICE ROUTES =====
 
@@ -195,7 +183,13 @@ router.get('/chatbot/health/ready', chatbotServiceProxy);
 router.get('/chatbot/health/live', chatbotServiceProxy);
 router.get('/chatbot/health/metrics', chatbotServiceProxy);
 
-// Conversation endpoints (protected)
+// Phase 3: Assessment Integration endpoints (protected)
+router.get('/chatbot/assessment-ready/:userId', verifyToken, chatLimiter, chatbotServiceProxy);
+router.post('/chatbot/assessment/from-assessment', verifyToken, chatLimiter, chatbotServiceProxy);
+router.get('/chatbot/conversations/:conversationId/suggestions', verifyToken, chatLimiter, chatbotServiceProxy);
+router.post('/chatbot/auto-initialize', verifyToken, chatLimiter, chatbotServiceProxy);
+
+// Conversation endpoints (protected) - must come after specific routes
 router.use('/chatbot/conversations', verifyToken, chatLimiter, chatbotServiceProxy);
 
 // Root endpoint (service information)

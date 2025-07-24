@@ -1,0 +1,133 @@
+{
+  "testName": "test-runner-2025-07-24T01-48-29",
+  "startTime": "2025-07-24T01:48:29.559Z",
+  "endTime": "2025-07-24T01:48:29.681Z",
+  "duration": 122,
+  "results": {
+    "passed": 3,
+    "failed": 4,
+    "skipped": 1,
+    "total": 8
+  },
+  "successRate": 37.5,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Test: Single User Test",
+      "error": {},
+      "timestamp": "2025-07-24T01:48:29.650Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Test: Dual User Test",
+      "error": {},
+      "timestamp": "2025-07-24T01:48:29.662Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Test: WebSocket Test",
+      "error": {},
+      "timestamp": "2025-07-24T01:48:29.670Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Test: Chatbot Test",
+      "error": {},
+      "timestamp": "2025-07-24T01:48:29.678Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting comprehensive E2E test suite",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.559Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: System Health Check",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.560Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "System health check passed",
+      "data": {},
+      "timestamp": "2025-07-24T01:48:29.600Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Test: Single User Test",
+      "error": {},
+      "timestamp": "2025-07-24T01:48:29.650Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Test: Dual User Test",
+      "error": {},
+      "timestamp": "2025-07-24T01:48:29.662Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Test: WebSocket Test",
+      "error": {},
+      "timestamp": "2025-07-24T01:48:29.670Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Test: Chatbot Test",
+      "error": {},
+      "timestamp": "2025-07-24T01:48:29.678Z"
+    },
+    {
+      "level": "SKIPPED",
+      "message": "Stress Test",
+      "reason": "Disabled in configuration",
+      "timestamp": "2025-07-24T01:48:29.679Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Final test report generated",
+      "data": {
+        "totalTests": 4,
+        "passedTests": 0,
+        "failedTests": 4,
+        "totalDuration": 77,
+        "successRate": "0.00%",
+        "results": [
+          {
+            "name": "Single User Test",
+            "status": "FAILED",
+            "duration": 49,
+            "error": "Request failed with status code 404"
+          },
+          {
+            "name": "Dual User Test",
+            "status": "FAILED",
+            "duration": 12,
+            "error": "2 user flows failed"
+          },
+          {
+            "name": "WebSocket Test",
+            "status": "FAILED",
+            "duration": 8,
+            "error": "Request failed with status code 404"
+          },
+          {
+            "name": "Chatbot Test",
+            "status": "FAILED",
+            "duration": 8,
+            "error": "Request failed with status code 404"
+          }
+        ]
+      },
+      "timestamp": "2025-07-24T01:48:29.681Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "E2E Test Suite completed successfully",
+      "data": null,
+      "timestamp": "2025-07-24T01:48:29.681Z"
+    }
+  ]
+}

@@ -1,0 +1,266 @@
+{
+  "testName": "single-user-test-2025-07-24T04-36-07",
+  "startTime": "2025-07-24T04:36:07.818Z",
+  "endTime": "2025-07-24T04:37:40.422Z",
+  "duration": 92604,
+  "results": {
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "total": 17
+  },
+  "successRate": 100,
+  "errors": [],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:07.819Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:07.821Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser1753331767821br6mpv@example.com",
+        "username": "testuserbr6mpv"
+      },
+      "timestamp": "2025-07-24T04:36:07.824Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:07.825Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "2875cb05-6d7d-4776-a494-324aa895e981",
+        "email": "testuser1753331767821br6mpv@example.com"
+      },
+      "timestamp": "2025-07-24T04:36:07.954Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:07.954Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:08.033Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:08.034Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:08.060Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Update Profile",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:08.061Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile updated successfully",
+      "data": {
+        "username": "updatedl2s9ac"
+      },
+      "timestamp": "2025-07-24T04:36:08.111Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Submit Assessment",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:08.113Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment submitted successfully",
+      "data": {
+        "jobId": "66fdf57b-e0ce-4db1-ae10-97385c61d055",
+        "status": "queued"
+      },
+      "timestamp": "2025-07-24T04:36:08.269Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Wait for WebSocket Notification",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:08.270Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for assessment completion notification...",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:08.270Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment completion notification received",
+      "data": {
+        "jobId": "66fdf57b-e0ce-4db1-ae10-97385c61d055",
+        "resultId": "e82ca1be-b352-4b26-bc07-4a8b5cc472f4"
+      },
+      "timestamp": "2025-07-24T04:36:32.211Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 8: Get Profile Persona",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:32.212Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch processing to complete...",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:32.212Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile persona retrieved successfully",
+      "data": {
+        "archetype": "The Meticulous System Architect",
+        "careerCount": 5
+      },
+      "timestamp": "2025-07-24T04:36:38.260Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 9: Test Chatbot",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:38.261Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Chatbot conversation created",
+      "data": {
+        "conversationId": "221d38bb-d95c-44fd-823b-396462e951e1"
+      },
+      "timestamp": "2025-07-24T04:36:43.659Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Sending message 1/5",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:43.659Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Message 1 sent and responded",
+      "data": {
+        "userMessage": "Hello, I need career guidance based on my assessme...",
+        "assistantResponse": "Hello! I'm really glad you're here and ready to ex..."
+      },
+      "timestamp": "2025-07-24T04:36:50.909Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Sending message 2/5",
+      "data": null,
+      "timestamp": "2025-07-24T04:36:51.930Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Message 2 sent and responded",
+      "data": {
+        "userMessage": "What career paths would suit my personality type?...",
+        "assistantResponse": "I'd love to give you a clear, personalized answer ..."
+      },
+      "timestamp": "2025-07-24T04:37:04.192Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Sending message 3/5",
+      "data": null,
+      "timestamp": "2025-07-24T04:37:05.201Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Message 3 sent and responded",
+      "data": {
+        "userMessage": "Can you help me understand my strengths and weakne...",
+        "assistantResponse": "Absolutely — I'd be honored to help you understand..."
+      },
+      "timestamp": "2025-07-24T04:37:14.920Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Sending message 4/5",
+      "data": null,
+      "timestamp": "2025-07-24T04:37:15.930Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Message 4 sent and responded",
+      "data": {
+        "userMessage": "What skills should I focus on developing?...",
+        "assistantResponse": "Great question — and a powerful sign that you're r..."
+      },
+      "timestamp": "2025-07-24T04:37:31.531Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Sending message 5/5",
+      "data": null,
+      "timestamp": "2025-07-24T04:37:32.544Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Message 5 sent and responded",
+      "data": {
+        "userMessage": "Thank you for the guidance!...",
+        "assistantResponse": "You're so very welcome! 🌟\n\nThank *you* for showin..."
+      },
+      "timestamp": "2025-07-24T04:37:39.354Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Chatbot interaction completed successfully",
+      "data": null,
+      "timestamp": "2025-07-24T04:37:40.369Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 10: Cleanup Test Account",
+      "data": null,
+      "timestamp": "2025-07-24T04:37:40.369Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test account cleaned up successfully",
+      "data": null,
+      "timestamp": "2025-07-24T04:37:40.418Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Single User E2E Test completed successfully",
+      "data": null,
+      "timestamp": "2025-07-24T04:37:40.419Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-07-24T04:37:40.422Z"
+    }
+  ]
+}

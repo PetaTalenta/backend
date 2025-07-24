@@ -1,0 +1,44 @@
+{
+  "assessmentName": "AI-Driven Talent Mapping",
+  "riasec": {
+    "realistic": 75,
+    "investigative": 85,
+    "artistic": 65,
+    "social": 70,
+    "enterprising": 80,
+    "conventional": 60
+  },
+  "ocean": {
+    "openness": 88,
+    "conscientiousness": 75,
+    "extraversion": 72,
+    "agreeableness": 85,
+    "neuroticism": 35
+  },
+  "viaIs": {
+    "creativity": 82,
+    "curiosity": 90,
+    "judgment": 78,
+    "loveOfLearning": 95,
+    "perspective": 75,
+    "bravery": 68,
+    "perseverance": 85,
+    "honesty": 88,
+    "zest": 76,
+    "love": 82,
+    "kindness": 87,
+    "socialIntelligence": 74,
+    "teamwork": 79,
+    "fairness": 86,
+    "leadership": 72,
+    "forgiveness": 77,
+    "humility": 81,
+    "prudence": 73,
+    "selfRegulation": 84,
+    "appreciationOfBeauty": 69,
+    "gratitude": 89,
+    "hope": 83,
+    "humor": 71,
+    "spirituality": 58
+  }
+}
