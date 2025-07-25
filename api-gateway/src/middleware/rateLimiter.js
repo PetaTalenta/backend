@@ -131,11 +131,11 @@ const archiveLimiter = rateLimit({
 
 /**
  * Rate limiter khusus untuk chatbot endpoints
- * Allows reasonable conversation limits for users
+ * Reduced to 200 requests per 15 minutes for better resource management
  */
 const chatLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // Allow 500 requests per 15 minutes for chat operations
+  max: 200, // Allow 200 requests per 15 minutes for chat operations
   message: {
     success: false,
     error: 'CHAT_RATE_LIMIT_EXCEEDED',

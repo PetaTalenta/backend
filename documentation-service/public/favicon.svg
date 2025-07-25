@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="url(#grad1)" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- API icon - document with brackets -->
+  <rect x="25" y="20" width="50" height="60" rx="5" fill="white" opacity="0.9"/>
+  <rect x="30" y="25" width="40" height="50" rx="3" fill="none" stroke="#2563eb" stroke-width="2"/>
+  
+  <!-- Code brackets -->
+  <path d="M35 35 L32 40 L35 45" stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M65 35 L68 40 L65 45" stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Lines representing code/text -->
+  <line x1="40" y1="35" x2="60" y2="35" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="40" y1="40" x2="55" y2="40" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="40" y1="45" x2="60" y2="45" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Small dots for decoration -->
+  <circle cx="45" cy="55" r="1.5" fill="#2563eb"/>
+  <circle cx="50" cy="55" r="1.5" fill="#2563eb"/>
+  <circle cx="55" cy="55" r="1.5" fill="#2563eb"/>
+</svg>

@@ -44,7 +44,36 @@ Mendapatkan daftar hasil analisis untuk user yang terautentikasi.
   "success": true,
   "message": "Results retrieved successfully",
   "data": {
-    "results": [...],
+    "results": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440001",
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "assessment_data": {
+          "riasec": { /* 6 fields */ },
+          "ocean": { /* 5 fields */ },
+          "viaIs": { /* 24 fields */ },
+          "assessmentName": "AI-Driven Talent Mapping"
+        },
+        "persona_profile": {
+          "archetype": "The Analytical Innovator",
+          "shortSummary": "...",
+          "strengths": ["..."],
+          "weaknesses": ["..."],
+          "careerRecommendation": [{ /* career objects */ }],
+          "insights": ["..."],
+          "skillSuggestion": ["..."],
+          "possiblePitfalls": ["..."],
+          "riskTolerance": "moderate",
+          "workEnvironment": "...",
+          "roleModel": ["..."]
+        },
+        "status": "completed",
+        "error_message": null,
+        "assessment_name": "AI-Driven Talent Mapping",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "updated_at": "2024-01-15T10:35:00.000Z"
+      }
+    ],
     "pagination": {
       "page": 1,
       "limit": 10,
@@ -54,6 +83,10 @@ Mendapatkan daftar hasil analisis untuk user yang terautentikasi.
   }
 }
 ```
+
+**Results Array Structure:**
+- `results`: Array berisi objek hasil analisis dengan struktur lengkap seperti dijelaskan di bagian "Detailed Data Structures"
+- Setiap item dalam array memiliki semua field yang sama dengan response dari endpoint `/api/archive/results/:id`
 
 ### 2. Get Specific Result
 **GET** `/api/archive/results/:id`
@@ -82,10 +115,241 @@ Mendapatkan detail hasil analisis berdasarkan ID.
 ```
 
 **Field Descriptions:**
-- `assessment_data`: Data assessment yang dikirim user (RIASEC, OCEAN, VIA-IS)
-- `persona_profile`: Hasil analisis dan profil persona yang dihasilkan
+- `assessment_data`: Data assessment yang dikirim user (RIASEC, OCEAN, VIA-IS) - lihat detail struktur di bawah
+- `persona_profile`: Hasil analisis dan profil persona yang dihasilkan - lihat detail struktur di bawah
 - `status`: Status hasil analisis ('completed', 'processing', 'failed')
 - `error_message`: Pesan error jika status 'failed', null jika berhasil
+
+---
+
+## 📊 Detailed Data Structures
+
+### Assessment Data Structure (`assessment_data`)
+
+Data assessment lengkap yang dikirim user untuk dianalisis AI, terdiri dari 3 komponen utama:
+
+#### 1. RIASEC Assessment (Holland Code)
+**Deskripsi:** 6 dimensi kepribadian kerja dengan skala 0-100
+```json
+{
+  "riasec": {
+    "realistic": 75,        // Kecenderungan pada pekerjaan praktis, hands-on
+    "investigative": 85,    // Kecenderungan pada penelitian dan analisis
+    "artistic": 65,         // Kecenderungan pada kreativitas dan ekspresi
+    "social": 70,          // Kecenderungan pada interaksi dan membantu orang
+    "enterprising": 80,    // Kecenderungan pada kepemimpinan dan bisnis
+    "conventional": 60     // Kecenderungan pada organisasi dan detail
+  }
+}
+```
+
+#### 2. OCEAN Assessment (Big Five Personality)
+**Deskripsi:** 5 dimensi utama kepribadian manusia dengan skala 0-100
+```json
+{
+  "ocean": {
+    "openness": 88,           // Keterbukaan terhadap pengalaman baru
+    "conscientiousness": 75,  // Kehati-hatian, kedisiplinan, orientasi tujuan
+    "extraversion": 72,       // Kecenderungan sosial dan energi eksternal
+    "agreeableness": 85,      // Keramahan, kerjasama, kepercayaan
+    "neuroticism": 35         // Stabilitas emosional (skor rendah = stabil)
+  }
+}
+```
+
+#### 3. VIA-IS Assessment (Character Strengths)
+**Deskripsi:** 24 kekuatan karakter dengan skala 0-100
+```json
+{
+  "viaIs": {
+    // Wisdom & Knowledge
+    "creativity": 82,
+    "curiosity": 90,
+    "judgment": 78,
+    "loveOfLearning": 95,
+    "perspective": 75,
+
+    // Courage
+    "bravery": 68,
+    "perseverance": 85,
+    "honesty": 88,
+    "zest": 76,
+
+    // Humanity
+    "love": 82,
+    "kindness": 87,
+    "socialIntelligence": 74,
+
+    // Justice
+    "teamwork": 79,
+    "fairness": 86,
+    "leadership": 72,
+
+    // Temperance
+    "forgiveness": 77,
+    "humility": 81,
+    "prudence": 73,
+    "selfRegulation": 84,
+
+    // Transcendence
+    "appreciationOfBeauty": 69,
+    "gratitude": 89,
+    "hope": 83,
+    "humor": 71,
+    "spirituality": 58
+  }
+}
+```
+
+#### Complete Assessment Data Example
+```json
+{
+  "assessmentName": "AI-Driven Talent Mapping",
+  "riasec": { /* 6 fields as above */ },
+  "ocean": { /* 5 fields as above */ },
+  "viaIs": { /* 24 fields as above */ }
+}
+```
+
+**Validation Rules:**
+- Semua skor harus berupa integer antara 0-100
+- RIASEC: 6 dimensi wajib diisi
+- OCEAN: 5 dimensi wajib diisi
+- VIA-IS: 24 kekuatan karakter wajib diisi
+- Total: 35 field wajib (6 + 5 + 24)
+
+### Persona Profile Structure (`persona_profile`)
+
+Profil persona lengkap hasil analisis AI berdasarkan assessment data:
+
+#### Core Profile Fields
+```json
+{
+  "archetype": "The Analytical Innovator",
+  "shortSummary": "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif.",
+  "strengthSummary": "Kekuatan utama Anda terletak pada analisis mendalam, kreativitas, dan dorongan kuat untuk belajar hal baru. Ini membuat Anda mampu menghasilkan solusi unik di berbagai situasi kompleks.",
+  "weaknessSummary": "Area yang perlu dikembangkan meliputi keterampilan komunikasi interpersonal dan kemampuan bekerja dalam tim. Kecenderungan perfeksionisme dapat menghambat produktivitas jika tidak dikelola dengan baik."
+}
+```
+
+#### Strengths & Weaknesses
+```json
+{
+  "strengths": [
+    "Kemampuan analisis yang tajam",
+    "Kreativitas dan inovasi",
+    "Keingintahuan intelektual yang tinggi",
+    "Kemampuan belajar mandiri yang kuat",
+    "Pemecahan masalah yang sistematis"
+  ],
+  "weaknesses": [
+    "Kecenderungan perfeksionisme berlebihan",
+    "Kesulitan dalam komunikasi ide kompleks",
+    "Kurang sabar dengan proses yang lambat",
+    "Cenderung bekerja sendiri daripada dalam tim"
+  ]
+}
+```
+
+#### Career Recommendations
+```json
+{
+  "careerRecommendation": [
+    {
+      "careerName": "Data Scientist",
+      "careerProspect": {
+        "jobAvailability": "high",      // Ketersediaan lowongan kerja
+        "salaryPotential": "high",      // Potensi gaji
+        "careerProgression": "high",    // Peluang jenjang karir
+        "industryGrowth": "super high", // Pertumbuhan industri
+        "skillDevelopment": "super high" // Peluang pengembangan skill
+      }
+    },
+    {
+      "careerName": "Peneliti",
+      "careerProspect": {
+        "jobAvailability": "moderate",
+        "salaryPotential": "moderate",
+        "careerProgression": "moderate",
+        "industryGrowth": "moderate",
+        "skillDevelopment": "high"
+      }
+    },
+    {
+      "careerName": "Pengembang Software",
+      "careerProspect": {
+        "jobAvailability": "super high",
+        "salaryPotential": "high",
+        "careerProgression": "high",
+        "industryGrowth": "super high",
+        "skillDevelopment": "super high"
+      }
+    }
+  ]
+}
+```
+
+**Career Prospect Values:**
+- `super high`: Sangat tinggi (90-100%)
+- `high`: Tinggi (70-89%)
+- `moderate`: Sedang (40-69%)
+- `low`: Rendah (20-39%)
+- `super low`: Sangat rendah (0-19%)
+
+#### Development & Insights
+```json
+{
+  "insights": [
+    "Kembangkan keterampilan komunikasi untuk menyampaikan ide kompleks dengan lebih efektif",
+    "Latih kemampuan bekerja dalam tim untuk mengimbangi kecenderungan bekerja sendiri",
+    "Manfaatkan kekuatan analitis untuk memecahkan masalah sosial",
+    "Cari mentor yang dapat membantu mengembangkan keterampilan kepemimpinan",
+    "Tetapkan batas waktu untuk menghindari analisis berlebihan"
+  ],
+  "skillSuggestion": [
+    "Public Speaking",
+    "Leadership",
+    "Teamwork",
+    "Time Management",
+    "Delegation"
+  ],
+  "possiblePitfalls": [
+    "Mengisolasi diri dari tim karena terlalu fokus pada analisis individu",
+    "Menunda keputusan karena perfeksionisme berlebihan",
+    "Kurang membangun jaringan karena terlalu fokus pada teknis"
+  ]
+}
+```
+
+#### Work Environment & Role Models
+```json
+{
+  "riskTolerance": "moderate",
+  "workEnvironment": "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
+  "roleModel": [
+    "Marie Curie",
+    "Albert Einstein",
+    "B.J. Habibie"
+  ]
+}
+```
+
+#### Complete Persona Profile Schema
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `archetype` | String | ✓ | Nama archetype yang sesuai (max 100 char) |
+| `shortSummary` | String | ✓ | Ringkasan persona (1-2 paragraf, max 1000 char) |
+| `strengthSummary` | String | ✓ | Ringkasan kekuatan (1 paragraf, max 500 char) |
+| `strengths` | Array[String] | ✓ | 3-5 kekuatan utama |
+| `weaknessSummary` | String | ✓ | Ringkasan kelemahan (1 paragraf, max 500 char) |
+| `weaknesses` | Array[String] | ✓ | 3-5 kelemahan yang perlu diperhatikan |
+| `careerRecommendation` | Array[Object] | ✓ | 3-5 rekomendasi karir dengan prospek |
+| `insights` | Array[String] | ✓ | 3-5 insight pengembangan diri |
+| `skillSuggestion` | Array[String] | ✓ | 3-5 rekomendasi skill development |
+| `possiblePitfalls` | Array[String] | ✓ | 2-5 jebakan karir yang perlu diwaspadai |
+| `riskTolerance` | String | ✓ | Toleransi risiko (very high/high/moderate/low/very low) |
+| `workEnvironment` | String | ✓ | Deskripsi lingkungan kerja ideal (max 500 char) |
+| `roleModel` | Array[String] | ✓ | 2-3 role model inspiratif |
 
 ### 3. Update Result
 **PUT** `/api/archive/results/:id`
@@ -135,11 +399,39 @@ Mendapatkan daftar job analisis untuk user yang terautentikasi.
   "success": true,
   "message": "Jobs retrieved successfully",
   "data": {
-    "jobs": [...],
+    "jobs": [
+      {
+        "job_id": "job_12345abcdef",
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "status": "processing",
+        "assessment_name": "AI-Driven Talent Mapping",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "updated_at": "2024-01-15T10:32:00.000Z",
+        "result_id": null
+      },
+      {
+        "job_id": "job_67890ghijkl",
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "status": "completed",
+        "assessment_name": "AI-Driven Talent Mapping",
+        "created_at": "2024-01-14T09:15:00.000Z",
+        "updated_at": "2024-01-14T09:18:00.000Z",
+        "result_id": "550e8400-e29b-41d4-a716-446655440003"
+      }
+    ],
     "total": 25
   }
 }
 ```
+
+**Jobs Array Structure:**
+- `job_id`: String - ID unik untuk job analisis
+- `user_id`: UUID - ID user yang memiliki job
+- `status`: String - Status job ("pending", "processing", "completed", "failed")
+- `assessment_name`: String - Nama assessment yang dijalankan
+- `created_at`: Timestamp - Waktu job dibuat
+- `updated_at`: Timestamp - Waktu terakhir job diupdate
+- `result_id`: UUID/null - ID hasil analisis jika job completed, null jika belum selesai
 
 ### 2. Get Job Status
 **GET** `/api/archive/jobs/:jobId`
@@ -213,11 +505,36 @@ Mendapatkan statistik untuk user yang terautentikasi.
     "total_results": 25,
     "total_jobs": 30,
     "completed_assessments": 25,
-    "archetype_distribution": {...},
-    "recent_activity": [...]
+    "archetype_distribution": {
+      "The Analytical Innovator": 8,
+      "The Creative Collaborator": 6,
+      "The Strategic Leader": 4,
+      "The Empathetic Helper": 7
+    },
+    "recent_activity": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440001",
+        "archetype": "The Analytical Innovator",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "status": "completed"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440002",
+        "archetype": "The Creative Collaborator",
+        "created_at": "2024-01-14T15:20:00.000Z",
+        "status": "completed"
+      }
+    ]
   }
 }
 ```
+
+**Statistics Data Structure:**
+- `total_results`: Number - Total hasil analisis yang dimiliki user
+- `total_jobs`: Number - Total job yang pernah dijalankan user
+- `completed_assessments`: Number - Total assessment yang berhasil diselesaikan
+- `archetype_distribution`: Object - Distribusi archetype yang pernah didapat user
+- `recent_activity`: Array - Aktivitas terbaru user (max 10 item terbaru)
 
 ### 2. Get User Overview
 **GET** `/api/archive/stats/overview`
@@ -235,11 +552,45 @@ Mendapatkan overview statistik untuk dashboard user.
       "this_month": 5,
       "success_rate": 0.96
     },
-    "recent_results": [...],
-    "archetype_summary": {...}
+    "recent_results": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440001",
+        "archetype": "The Analytical Innovator",
+        "assessment_name": "AI-Driven Talent Mapping",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "status": "completed"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440002",
+        "archetype": "The Creative Collaborator",
+        "assessment_name": "AI-Driven Talent Mapping",
+        "created_at": "2024-01-14T15:20:00.000Z",
+        "status": "completed"
+      }
+    ],
+    "archetype_summary": {
+      "most_common": "The Analytical Innovator",
+      "frequency": 3,
+      "last_archetype": "The Creative Collaborator",
+      "unique_archetypes": 4,
+      "archetype_trend": "consistent"
+    }
   }
 }
 ```
+
+**Overview Data Structure:**
+- `summary`: Object - Ringkasan statistik user
+  - `total_assessments`: Total assessment yang diselesaikan
+  - `this_month`: Assessment yang diselesaikan bulan ini
+  - `success_rate`: Tingkat keberhasilan (0.0 - 1.0)
+- `recent_results`: Array - 5 hasil terbaru dengan info dasar
+- `archetype_summary`: Object - Ringkasan pola archetype user
+  - `most_common`: Archetype yang paling sering muncul
+  - `frequency`: Berapa kali archetype tersebut muncul
+  - `last_archetype`: Archetype terakhir yang didapat
+  - `unique_archetypes`: Jumlah archetype unik yang pernah didapat
+  - `archetype_trend`: Pola trend archetype ("consistent", "varied", "evolving")
 
 ---
 
@@ -325,6 +676,174 @@ Mengecek status kesehatan service (tidak memerlukan autentikasi).
 4. **Rate Limiting:** Semua endpoint tunduk pada rate limiting gateway
 5. **CORS:** Service mendukung CORS untuk akses dari frontend
 6. **Compression:** Response otomatis dikompresi untuk menghemat bandwidth
+
+---
+
+## 📋 Complete Response Examples
+
+### Example: Complete Analysis Result Response
+```json
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "user_id": "550e8400-e29b-41d4-a716-446655440002",
+    "assessment_data": {
+      "assessmentName": "AI-Driven Talent Mapping",
+      "riasec": {
+        "realistic": 75,
+        "investigative": 85,
+        "artistic": 65,
+        "social": 70,
+        "enterprising": 80,
+        "conventional": 60
+      },
+      "ocean": {
+        "openness": 88,
+        "conscientiousness": 75,
+        "extraversion": 72,
+        "agreeableness": 85,
+        "neuroticism": 35
+      },
+      "viaIs": {
+        "creativity": 82,
+        "curiosity": 90,
+        "judgment": 78,
+        "loveOfLearning": 95,
+        "perspective": 75,
+        "bravery": 68,
+        "perseverance": 85,
+        "honesty": 88,
+        "zest": 76,
+        "love": 82,
+        "kindness": 87,
+        "socialIntelligence": 74,
+        "teamwork": 79,
+        "fairness": 86,
+        "leadership": 72,
+        "forgiveness": 77,
+        "humility": 81,
+        "prudence": 73,
+        "selfRegulation": 84,
+        "appreciationOfBeauty": 69,
+        "gratitude": 89,
+        "hope": 83,
+        "humor": 71,
+        "spirituality": 58
+      }
+    },
+    "persona_profile": {
+      "archetype": "The Analytical Innovator",
+      "shortSummary": "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif.",
+      "strengthSummary": "Kekuatan utama Anda terletak pada analisis mendalam, kreativitas, dan dorongan kuat untuk belajar hal baru. Ini membuat Anda mampu menghasilkan solusi unik di berbagai situasi kompleks.",
+      "strengths": [
+        "Kemampuan analisis yang tajam",
+        "Kreativitas dan inovasi",
+        "Keingintahuan intelektual yang tinggi",
+        "Kemampuan belajar mandiri yang kuat",
+        "Pemecahan masalah yang sistematis"
+      ],
+      "weaknessSummary": "Area yang perlu dikembangkan meliputi keterampilan komunikasi interpersonal dan kemampuan bekerja dalam tim. Kecenderungan perfeksionisme dapat menghambat produktivitas jika tidak dikelola dengan baik.",
+      "weaknesses": [
+        "Kecenderungan perfeksionisme berlebihan",
+        "Kesulitan dalam komunikasi ide kompleks",
+        "Kurang sabar dengan proses yang lambat",
+        "Cenderung bekerja sendiri daripada dalam tim"
+      ],
+      "careerRecommendation": [
+        {
+          "careerName": "Data Scientist",
+          "careerProspect": {
+            "jobAvailability": "high",
+            "salaryPotential": "high",
+            "careerProgression": "high",
+            "industryGrowth": "super high",
+            "skillDevelopment": "super high"
+          }
+        },
+        {
+          "careerName": "Peneliti",
+          "careerProspect": {
+            "jobAvailability": "moderate",
+            "salaryPotential": "moderate",
+            "careerProgression": "moderate",
+            "industryGrowth": "moderate",
+            "skillDevelopment": "high"
+          }
+        },
+        {
+          "careerName": "Pengembang Software",
+          "careerProspect": {
+            "jobAvailability": "super high",
+            "salaryPotential": "high",
+            "careerProgression": "high",
+            "industryGrowth": "super high",
+            "skillDevelopment": "super high"
+          }
+        }
+      ],
+      "insights": [
+        "Kembangkan keterampilan komunikasi untuk menyampaikan ide kompleks dengan lebih efektif",
+        "Latih kemampuan bekerja dalam tim untuk mengimbangi kecenderungan bekerja sendiri",
+        "Manfaatkan kekuatan analitis untuk memecahkan masalah sosial",
+        "Cari mentor yang dapat membantu mengembangkan keterampilan kepemimpinan",
+        "Tetapkan batas waktu untuk menghindari analisis berlebihan"
+      ],
+      "skillSuggestion": [
+        "Public Speaking",
+        "Leadership",
+        "Teamwork",
+        "Time Management",
+        "Delegation"
+      ],
+      "possiblePitfalls": [
+        "Mengisolasi diri dari tim karena terlalu fokus pada analisis individu",
+        "Menunda keputusan karena perfeksionisme berlebihan",
+        "Kurang membangun jaringan karena terlalu fokus pada teknis"
+      ],
+      "riskTolerance": "moderate",
+      "workEnvironment": "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
+      "roleModel": [
+        "Marie Curie",
+        "Albert Einstein",
+        "B.J. Habibie"
+      ]
+    },
+    "status": "completed",
+    "error_message": null,
+    "assessment_name": "AI-Driven Talent Mapping",
+    "created_at": "2024-01-15T10:30:00.000Z",
+    "updated_at": "2024-01-15T10:35:00.000Z"
+  }
+}
+```
+
+---
+
+## 📝 Important Notes
+
+### Data Consistency
+1. **Assessment Data:** Selalu berisi 35 field (6 RIASEC + 5 OCEAN + 24 VIA-IS)
+2. **Persona Profile:** Selalu berisi 13 field utama sesuai schema
+3. **Status Values:** Hanya 3 nilai valid: 'completed', 'processing', 'failed'
+4. **Score Range:** Semua skor assessment dalam rentang 0-100
+
+### Response Variations
+1. **Processing Status:** `persona_profile` bisa null jika status 'processing'
+2. **Failed Status:** `persona_profile` null dan `error_message` berisi detail error
+3. **Completed Status:** `persona_profile` lengkap dan `error_message` null
+
+### Performance Considerations
+1. **Pagination:** Gunakan pagination untuk list endpoints
+2. **Filtering:** Manfaatkan parameter filter untuk mengurangi data transfer
+3. **Caching:** Response di-cache untuk meningkatkan performa
+
+### Data Privacy
+1. **User Isolation:** User hanya bisa mengakses data milik sendiri
+2. **Admin Access:** Admin memiliki akses terbatas untuk debugging
+3. **Data Retention:** Data disimpan sesuai kebijakan retention
+
+---
 
 ## 🔗 Related Services
 - **Auth Service:** Untuk autentikasi dan manajemen user

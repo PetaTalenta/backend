@@ -6,14 +6,20 @@ ATMA Notification Service menyediakan real-time notifications melalui WebSocket 
 
 ## Server Information
 
-- **URL**: `http://localhost:3000` (melalui API Gateway - recommended)
+- **Service Name**: notification-service
+- **Internal Port**: 3005
+- **External Access**: Via API Gateway
+- **Production WebSocket URL**: `https://api.chhrone.web.id`
+- **Development WebSocket URL**: `http://localhost:3000`
+- **Production HTTP Base URL**: `https://api.chhrone.web.id/api/notifications`
+- **Development HTTP Base URL**: `http://localhost:3000/api/notifications`
 - **Direct URL**: `http://localhost:3005` (langsung ke notification service - deprecated)
 - **Protocol**: Socket.IO v4.7.2
 - **Authentication**: JWT Token required
 - **CORS**: Enabled untuk semua origins
 - **Timeout**: 10 detik untuk autentikasi setelah connect
 
-**⚠️ Important:** Mulai sekarang, gunakan API Gateway (`http://localhost:3000`) sebagai entry point untuk WebSocket connections. Koneksi langsung ke notification service masih didukung untuk backward compatibility, tetapi tidak direkomendasikan.
+**⚠️ Important:** Gunakan API Gateway sebagai entry point untuk semua koneksi. Koneksi langsung ke notification service masih didukung untuk backward compatibility, tetapi tidak direkomendasikan.
 
 ## Konsep Dasar
 
@@ -43,7 +49,7 @@ npm install socket.io-client
 
 ### 2. Basic Setup
 - Import socket.io-client
-- Connect ke `http://localhost:3000` (API Gateway) atau `http://localhost:3005` (direct)
+- Connect ke `https://api.chhrone.web.id` (Production) atau `http://localhost:3000` (Development)
 - Set autoConnect: false untuk kontrol manual
 - Emit `authenticate` event dengan JWT token setelah connect
 
@@ -156,14 +162,15 @@ Data: {
 ```
 
 ### Environment Variables
-- **Development**: `http://localhost:3000` (API Gateway) atau `http://localhost:3005` (direct)
-- **Production**: Sesuaikan dengan domain production
+- **Production**: `https://api.chhrone.web.id`
+- **Development**: `http://localhost:3000` (via API Gateway)
+- **Direct Access**: `http://localhost:3005` (deprecated)
 - **CORS**: Sudah dikonfigurasi untuk allow all origins
 
 ## Testing & Debugging
 
 ### 1. Manual Testing
-- Connect ke `http://localhost:3000` (API Gateway) dengan Socket.IO client
+- Connect ke `https://api.chhrone.web.id` (Production) atau `http://localhost:3000` (Development) dengan Socket.IO client
 - Test authentication dengan valid JWT token
 - Verify events diterima dengan benar
 
@@ -173,8 +180,9 @@ Data: {
 - Check console logs untuk connection events
 
 ### 3. Health Check Endpoint
-- `GET http://localhost:3000/api/notifications/health` (melalui API Gateway)
-- `GET http://localhost:3005/health` (direct ke notification service)
+- `GET https://api.chhrone.web.id/api/notifications/health` (Production)
+- `GET http://localhost:3000/api/notifications/health` (Development)
+- `GET http://localhost:3005/health` (direct ke notification service - deprecated)
 - Response berisi connection count dan service status
 
 ## Production Considerations
@@ -203,7 +211,7 @@ Data: {
 4. **Connection Failed**: Periksa service berjalan di port 3005
 
 ### Debug Steps
-1. Check service status: `GET http://localhost:3000/api/notifications/health` (via Gateway)
+1. Check service status: `GET https://api.chhrone.web.id/api/notifications/health` (Production) atau `GET http://localhost:3000/api/notifications/health` (Development)
 2. Enable debug mode: `localStorage.debug = 'socket.io-client:socket'`
 3. Monitor network tab untuk WebSocket connections
 4. Verify JWT token payload dan expiry
@@ -256,7 +264,7 @@ Data: {
 
 ### ✅ Basic Setup
 - [ ] Install `socket.io-client`
-- [ ] Setup connection ke `http://localhost:3000` (API Gateway recommended)
+- [ ] Setup connection ke `https://api.chhrone.web.id` (Production) atau `http://localhost:3000` (Development)
 - [ ] Implement authentication dengan JWT token
 - [ ] Handle connection states
 

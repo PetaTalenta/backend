@@ -1,44 +1,75 @@
-# ATMA API Documentation
+# ATMA API Documentation Service
 
-Documentation service sederhana untuk ATMA API Gateway menggunakan vanilla JavaScript dan Vite.
+Interactive documentation service for the AI-Driven Talent Mapping Assessment (ATMA) backend ecosystem. This service provides comprehensive API documentation for all ATMA services with an intuitive, searchable interface.
 
-## Features
+## 🚀 Features
 
-- 📋 Overview API Gateway
-- 🔐 Authentication & User Management
-- 👨‍💼 Admin Management
-- 🎯 Assessment Service
-- 📊 Archive Service
-- 🔔 WebSocket Notifications
-- ❌ Error Handling
+- **Interactive API Documentation** - Browse all ATMA API endpoints with detailed examples
+- **Real-time Search** - Find endpoints quickly with intelligent search functionality
+- **Syntax Highlighting** - Beautiful code highlighting for all programming languages
+- **Copy to Clipboard** - One-click copying of code examples and endpoints
+- **Responsive Design** - Works perfectly on desktop, tablet, and mobile devices
+- **Service Overview** - Comprehensive overview of the ATMA ecosystem architecture
 
-## Tech Stack
+## 📋 Services Documented
 
-- Vanilla JavaScript
-- Vite
-- CSS3
-- Prism.js (untuk syntax highlighting)
+### 🔐 Auth Service (Port 3001)
+- User registration and authentication
+- JWT token management
+- Profile management
+- Password changes and account deletion
 
-## Getting Started
+### 🎯 Assessment Service (Port 3003)
+- AI-driven personality assessments
+- RIASEC, OCEAN, and VIA-IS frameworks
+- Job queue monitoring and status tracking
+- Assessment submission and processing
+
+### 📊 Archive Service (Port 3002)
+- Assessment results retrieval
+- Historical data and statistics
+- Data export functionality
+- Result management and deletion
+
+### 💬 Chatbot Service (Port 3004)
+- AI-powered career guidance conversations
+- Assessment interpretation and recommendations
+- Conversation management
+- Intelligent suggestion system
+
+## 🛠 Technology Stack
+
+- **Frontend**: Vanilla JavaScript with Vite
+- **Styling**: Custom CSS with modern design principles
+- **Syntax Highlighting**: PrismJS
+- **Build Tool**: Vite for fast development and optimized builds
+- **Base URL**: `https://api.chhrone.web.id`
+
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js (v16 atau lebih baru)
-- npm atau yarn
+- Node.js (v16 or higher)
+- npm or yarn
 
 ### Installation
 
-1. Install dependencies:
-```bash
-npm install
-```
+1. **Clone or navigate to the documentation service directory**
+   ```bash
+   cd documentation-service
+   ```
 
-2. Start development server:
-```bash
-npm run dev
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-3. Open browser di `http://localhost:3010`
+3. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:3007`
 
 ### Build for Production
 
@@ -46,26 +77,110 @@ npm run dev
 npm run build
 ```
 
+The built files will be in the `dist` directory.
+
 ### Preview Production Build
 
 ```bash
 npm run preview
 ```
 
-## Project Setup
+## 📁 Project Structure
 
-```sh
-npm install
+```
+documentation-service/
+├── public/
+│   └── favicon.svg              # Service favicon
+├── src/
+│   ├── data/                    # API documentation data
+│   │   ├── auth-service.js      # Auth service endpoints
+│   │   ├── assessment-service.js # Assessment service endpoints
+│   │   ├── archive-service.js   # Archive service endpoints
+│   │   └── chatbot-service.js   # Chatbot service endpoints
+│   ├── styles/
+│   │   ├── main.css            # Main application styles
+│   │   └── prism.css           # Syntax highlighting styles
+│   └── main.js                 # Main application logic
+├── index.html                  # Main HTML file
+├── vite.config.js             # Vite configuration
+├── package.json               # Project dependencies
+└── README.md                  # This file
 ```
 
-### Compile and Hot-Reload for Development
+## 🎨 Features Overview
 
-```sh
-npm run dev
-```
+### Navigation
+- **Sticky sidebar** with service navigation
+- **Smooth scrolling** to sections
+- **Active section highlighting** based on scroll position
+- **Responsive mobile menu** for smaller screens
 
-### Type-Check, Compile and Minify for Production
+### Search Functionality
+- **Real-time filtering** of endpoints
+- **Search across** endpoint titles, paths, and descriptions
+- **Instant results** with no page reload
 
-```sh
-npm run build
-```
+### Code Examples
+- **Multiple language examples** (JavaScript, Python, cURL)
+- **Syntax highlighting** for all code blocks
+- **Copy to clipboard** functionality
+- **Tabbed interface** for different programming languages
+
+### Interactive Elements
+- **Collapsible sections** for better organization
+- **Hover effects** and smooth transitions
+- **Method badges** with color coding (GET, POST, PUT, DELETE)
+- **Authentication indicators** for protected endpoints
+
+## 🔧 Configuration
+
+### Base URL Configuration
+The base URL is configured to `https://api.chhrone.web.id` and can be updated in the service data files if needed.
+
+### Rate Limiting Information
+Each service has different rate limits:
+- **Auth Service**: 2500 requests per 15 minutes
+- **Assessment Service**: 1000 requests per 1 hour
+- **Archive Service**: 2000 requests per 15 minutes
+- **Chatbot Service**: 200 requests per 15 minutes
+
+### Development Server
+The development server runs on port 3007 by default. This can be changed in `vite.config.js`.
+
+## 📚 API Documentation Structure
+
+Each service documentation includes:
+- **Service overview** with description and technical details
+- **Authentication requirements** and token usage
+- **Rate limiting information** for each endpoint
+- **Request/response examples** with real data
+- **Parameter documentation** with types and validation rules
+- **Error handling** with common error codes and responses
+
+## 🤝 Contributing
+
+To add new endpoints or update existing documentation:
+
+1. **Update service data files** in `src/data/`
+2. **Follow the existing structure** for consistency
+3. **Test the changes** in development mode
+4. **Ensure all examples work** with the actual API
+
+## 📄 License
+
+This documentation service is part of the ATMA backend ecosystem.
+
+## 🔗 Related Services
+
+- **Auth Service**: User authentication and management
+- **Assessment Service**: AI-driven personality assessments  
+- **Archive Service**: Data storage and retrieval
+- **Chatbot Service**: AI-powered career guidance
+
+## 📞 Support
+
+For questions about the API documentation or to report issues, please contact the ATMA development team.
+
+---
+
+**Built with ❤️ for the ATMA ecosystem**

@@ -18,7 +18,7 @@ Manual mendukung implementasi untuk:
 
 ### Basic Connection Flow
 1. Install `socket.io-client`
-2. Connect ke `http://localhost:3005`
+2. Connect ke `https://api.chhrone.web.id` (Production) atau `http://localhost:3000` (Development)
 3. Emit `authenticate` dengan JWT token
 4. Listen untuk notification events
 

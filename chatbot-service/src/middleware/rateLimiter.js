@@ -130,10 +130,11 @@ const freeModelLimiter = rateLimit({
 
 /**
  * Create general API rate limiter
+ * Reduced to 200 requests per 15 minutes for better resource management
  */
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // 1000 requests per 15 minutes
+  max: 200, // 200 requests per 15 minutes
   message: {
     success: false,
     error: {

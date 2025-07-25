@@ -409,29 +409,61 @@ Berikut adalah data asesmen yang akan dianalisis. Skor berada dalam skala 0-100.
 ${viaIsSection}
 </DATA_ASSESSMENT>
 
-# PROSES BERPIKIR HOLISTIK (METODOLOGI INTI)
-Sebelum menghasilkan output JSON, lakukan proses penalaran internal berikut. Ini adalah proses untuk membangun pemahaman dari dasar, tanpa bias pada satu tema awal.
+# PROSES ANALISIS TALENT MAPPING
 
-**Langkah 1: Pemetaan Lanskap Data (The Data Landscape)**
-- **Ekstrak Sinyal Kunci:** Dari setiap blok asesmen (RIASEC, OCEAN, VIA-IS), identifikasi poin-poin data yang paling signifikan (skor tertinggi dan terendah). Jangan menyimpulkan apa pun dulu. Cukup petakan fakta-fakta mentah ini.
-- **Contoh Catatan Mental:**
-  - *RIASEC:* Investigative (tinggi), Social (rendah).
-  - *OCEAN:* Openness (tinggi), Agreeableness (rendah), Neuroticism (sedang-tinggi).
-  - *VIA-IS:* Top strength: Judgment, Critical Thinking.
+### Langkah 1: Pengumpulan Data Psikometrik
+**Tujuan:** Mengidentifikasi kepribadian, minat karier, dan kekuatan karakter individu.
+**Alat dan Teknik:**
+* **OCEAN (Big Five Personality):** untuk mengukur lima dimensi kepribadian: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism.
+* **RIASEC:** untuk mengetahui tipe minat karier (Realistic, Investigative, Artistic, Social, Enterprising, Conventional).
+* **VIA-IS:** untuk mengenali kekuatan karakter seperti integritas, kreativitas, kepemimpinan, empati, dsb.
 
-**Langkah 2: Sintesis Multi-Dimensi (Weaving the Fabric)**
-- Sekarang, lihat semua sinyal kunci dari Langkah 1 sebagai sebuah jaring yang saling berhubungan. Tugas Anda adalah menenun benang-benang ini untuk melihat gambaran utuh yang muncul.
-- **Identifikasi Kluster Sinergi (Kekuatan Gabungan):** Cari kelompok data dari tes yang berbeda yang saling memperkuat.
-  - *Contoh:* "Investigative (tinggi)" + "VIA-IS: Judgment" + "OCEAN: Openness (tinggi)" secara bersama-sama membentuk kluster kekuatan yang sangat kuat dalam **analisis kritis dan pemecahan masalah kreatif**. Ini akan menjadi dasar untuk "strengths".
-- **Identifikasi Kluster Tegangan (Tantangan & Kompleksitas):** Cari kombinasi data yang menciptakan friksi atau kompleksitas unik. Di sinilah wawasan paling mendalam berada.
-  - *Contoh:* "Openness (tinggi)" (terbuka pada ide baru) + "Conventional (sedang-tinggi)" (suka prosedur) menciptakan tegangan antara **inovasi dan kebutuhan akan keteraturan**. Ini bisa menjadi "weakness" ("kesulitan beradaptasi di lingkungan yang kacau") atau "insight" ("cari peran inovasi dalam sistem yang sudah ada").
-  - *Contoh lain:* "Conscientiousness (tinggi)" + "Neuroticism (tinggi)" menunjuk ke **profil perfeksionis yang cemas**, sebuah tantangan inti yang harus dibahas.
+---
+### Langkah 2: Analisis Individual Profil
 
-**Langkah 3: Formulasi Profil yang Muncul (The Emergent Profile)**
-- Profil persona tidak ditentukan di awal, tetapi *muncul* dari sintesis di Langkah 2.
-- **"archetype" & "shortSummary":** Berdasarkan gambaran utuh (kluster sinergi dan tegangan), formulasikan sebuah arketipe dan ringkasan yang menangkap esensi individu secara akurat. Contoh: Bukan lagi "Strategic Analyst," tetapi mungkin "The Meticulous Systems Analyst" untuk mencerminkan tegangan antara "Investigative" dan "Conventional".
-- **"strengths" & "weaknesses":** Terjemahkan "Kluster Sinergi" menjadi kekuatan konkret. Terjemahkan "Kluster Tegangan" menjadi area pengembangan yang jujur dan actionable.
-- **"insights", "workEnvironment", "careerRecommendation":** Semua elemen ini harus secara langsung menjawab hasil sintesis holistik. Rekomendasi karir harus menyeimbangkan semua faktor—memanfaatkan sinergi sambil menyediakan struktur untuk mengelola tegangan.
+**Tujuan:** Menganalisis hasil tes untuk membentuk personal trait profile.
+**Analisis:**
+* **OCEAN:** Menentukan kecenderungan kepribadian dominan dan potensi tantangan perilaku.
+* **RIASEC:** Menemukan tipe minat karier yang paling menonjol (1–3 kode dominan).
+* **VIA-IS:** Mengidentifikasi *signature strengths* (5 kekuatan teratas) yang menjadi fondasi potensi dan motivasi.
+
+**Output:** Peta profil individu (Personality–Interest–Strength Matrix).
+
+---
+### Langkah 3: Integrasi Profil ke dalam Klaster Potensi
+
+**Tujuan:** Mengelompokkan individu ke dalam klaster atau zona potensi berbasis kombinasi hasil asesmen.
+**Metode:**
+* **Mapping Matrix:** Menghubungkan kombinasi OCEAN + RIASEC + VIA-IS ke dalam klaster (misalnya: *Creative Leader*, *Analytical Problem Solver*, *Empathic Helper*, dll).
+* **Algoritma Klasifikasi (jika digital):** Gunakan logika machine learning/statistik (misal: *decision tree* atau *K-means*) untuk otomatisasi klaster.
+
+**Output:** Setiap individu tergolong ke dalam kategori profil talenta tertentu.
+
+---
+
+### Langkah 4: Pemetaan Kesesuaian (Talent–Role Matching)
+
+**Tujuan:** Menghubungkan klaster talenta dengan bidang studi, profesi, atau peran yang sesuai.
+**Strategi:**
+* **Korelasi Profil–Peran:** Gunakan basis data kompetensi peran/jabatan dan padankan dengan profil kepribadian, minat, dan kekuatan.
+**Contoh:**
+* **OCEAN:** High Conscientiousness + RIASEC Conventional → cocok untuk pekerjaan manajerial struktural.
+* **VIA-IS:** High Leadership + RIASEC Enterprising → cocok untuk peran kepemimpinan atau wirausaha.
+
+**Output:** Rekomendasi bidang studi atau karier yang relevan dan akurat.
+
+---
+
+### Langkah 5: Perencanaan dan Intervensi Pengembangan
+
+**Tujuan:** Merancang rencana pengembangan individual berbasis profil talent.
+**Rencana Pengembangan:**
+* **Short-term:** Workshop, mentoring, tugas berbasis proyek sesuai kekuatan/minat.
+* **Mid/Long-term:** Perencanaan karier, penempatan kerja, atau penyesuaian program pendidikan.
+* **Coaching/Counseling:** Pendampingan dalam proses pengambilan keputusan karier atau *personal branding*.
+
+**Output:** *Individual Talent Development Plan (ITDP)* – peta jalan pengembangan berdasarkan potensi unik individu.
+
 
 # CATATAN
 - Jangan terjemahkan terminologi bahasa inggris ke bahasa indonesia

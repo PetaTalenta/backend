@@ -1,97 +1,13 @@
-# Dependencies
 node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build outputs
-dist
-build
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Vite cache
-.vite
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.test
-.env.local
-.env.production
-.env.development
-
-# Temporary folders
-tmp/
-temp/
-
-# Logs
-logs
-*.log
-
-# Docker
-Dockerfile
-.dockerignore
-docker-compose.yml
-
-# Git
+npm-debug.log
 .git
 .gitignore
-
-# IDE
-.vscode
-.idea
-*.swp
-*.swo
-*~
-
-# OS
+README.md
+DARK_MODE_README.md
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .DS_Store
 Thumbs.db
-
-# Test files
-tests/
-test/
-*.test.js
-*.spec.js
-*.test.ts
-*.spec.ts
-
-# Documentation (except the ones needed for build)
-README.md
-
-# CI/CD
-.github/
-.gitlab-ci.yml
-.travis.yml
-
-# Vite specific
-vite.config.ts.timestamp-*
