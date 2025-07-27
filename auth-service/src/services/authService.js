@@ -208,20 +208,30 @@ const loginUser = async (credentials) => {
   try {
     // For login, always fetch from database to ensure we have password_hash
     // Cache doesn't store password_hash for security reasons
+    logger.info('Debug - Looking for user with email', { email });
     const user = await User.findOne({
       where: {
         email,
-        user_type: 'user',
         is_active: true
       }
     });
 
+    logger.info('Debug - User found', { found: user ? 'YES' : 'NO' });
+    if (user) {
+      logger.info('Debug - User details', { id: user.id, email: user.email, user_type: user.user_type, is_active: user.is_active });
+    }
+
     if (!user) {
+      logger.info('Debug - No user found, throwing error');
       throw new Error('Invalid email or password');
     }
 
     // Compare password
+    logger.info('Debug - About to compare password');
+    logger.info('Debug - Password from request', { password });
+    logger.info('Debug - Hash from DB', { hash: user.password_hash });
     const isPasswordValid = await comparePassword(password, user.password_hash);
+    logger.info('Debug - Password comparison result', { isPasswordValid });
     if (!isPasswordValid) {
       throw new Error('Invalid email or password');
     }

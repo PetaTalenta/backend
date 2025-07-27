@@ -373,6 +373,202 @@ export const chatbotServiceData = {
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
+      method: "POST",
+      path: "/api/chatbot/assessment/from-assessment",
+      title: "Create Conversation from Assessment",
+      description: "Create a new conversation session based on user's assessment results with personalized context and suggestions.",
+      authentication: "Bearer Token Required",
+      rateLimit: "200 requests per 15 minutes",
+      requestBody: {
+        assessment_id: "550e8400-e29b-41d4-a716-446655440000",
+        conversation_type: "career_guidance",
+        include_suggestions: true
+      },
+      parameters: [
+        {
+          name: "assessment_id",
+          type: "string",
+          required: true,
+          description: "UUID of the assessment result to base conversation on"
+        },
+        {
+          name: "conversation_type",
+          type: "string",
+          required: false,
+          description: "Type of conversation: 'career_guidance', 'skill_development', 'personality_insights' (default: 'career_guidance')"
+        },
+        {
+          name: "include_suggestions",
+          type: "boolean",
+          required: false,
+          description: "Include AI-generated conversation starters (default: true)"
+        }
+      ],
+      response: {
+        success: true,
+        data: {
+          conversationId: "550e8400-e29b-41d4-a716-446655440000",
+          title: "Career Guidance Based on Your Assessment",
+          context: "assessment",
+          assessmentId: "550e8400-e29b-41d4-a716-446655440000",
+          createdAt: "2024-01-01T10:00:00Z",
+          status: "active",
+          personalizedWelcome: {
+            messageId: "550e8400-e29b-41d4-a716-446655440001",
+            content: "Hello! I've reviewed your assessment results showing strong investigative and enterprising traits. I'm here to help you explore career paths that align with your analytical and leadership strengths.",
+            timestamp: "2024-01-01T10:00:00Z",
+            type: "text"
+          },
+          suggestions: [
+            {
+              id: "suggestion_1",
+              title: "Explore Data Science Careers",
+              description: "Discuss how your analytical skills translate to data science opportunities"
+            },
+            {
+              id: "suggestion_2",
+              title: "Leadership Development Path",
+              description: "Learn about developing your natural leadership abilities"
+            }
+          ]
+        },
+        message: "Assessment-based conversation created successfully"
+      },
+      example: `curl -X POST https://api.chhrone.web.id/api/chatbot/assessment/from-assessment \\
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "assessment_id": "550e8400-e29b-41d4-a716-446655440000",
+    "conversation_type": "career_guidance",
+    "include_suggestions": true
+  }'`
+    },
+    {
+      method: "POST",
+      path: "/api/chatbot/auto-initialize",
+      title: "Auto-Initialize Chatbot",
+      description: "Automatically create and initialize a conversation based on user's latest assessment results.",
+      authentication: "Bearer Token Required",
+      rateLimit: "200 requests per 15 minutes",
+      requestBody: {
+        user_id: "550e8400-e29b-41d4-a716-446655440000",
+        conversation_type: "career_guidance"
+      },
+      parameters: [
+        {
+          name: "user_id",
+          type: "string",
+          required: true,
+          description: "UUID of the user to initialize conversation for"
+        },
+        {
+          name: "conversation_type",
+          type: "string",
+          required: false,
+          description: "Type of conversation to initialize (default: 'career_guidance')"
+        }
+      ],
+      response: {
+        success: true,
+        data: {
+          conversationId: "550e8400-e29b-41d4-a716-446655440000",
+          title: "AI Career Guidance Session",
+          context: "assessment",
+          userId: "550e8400-e29b-41d4-a716-446655440000",
+          assessmentId: "550e8400-e29b-41d4-a716-446655440001",
+          createdAt: "2024-01-01T10:00:00Z",
+          status: "active",
+          initialized: true,
+          welcomeMessage: {
+            messageId: "550e8400-e29b-41d4-a716-446655440002",
+            content: "Welcome! I've automatically set up this conversation based on your recent assessment. Let's explore your career potential together!",
+            timestamp: "2024-01-01T10:00:00Z",
+            type: "text"
+          }
+        },
+        message: "Chatbot auto-initialized successfully"
+      },
+      example: `curl -X POST https://api.chhrone.web.id/api/chatbot/auto-initialize \\
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "conversation_type": "career_guidance"
+  }'`
+    },
+    {
+      method: "GET",
+      path: "/api/chatbot/conversations/:id/messages",
+      title: "Get Conversation Messages",
+      description: "Retrieve all messages from a specific conversation with pagination and filtering options.",
+      authentication: "Bearer Token Required",
+      rateLimit: "200 requests per 15 minutes",
+      parameters: [
+        {
+          name: "id",
+          type: "string",
+          required: true,
+          description: "UUID of the conversation"
+        },
+        {
+          name: "page",
+          type: "integer",
+          required: false,
+          description: "Page number for pagination (default: 1)"
+        },
+        {
+          name: "limit",
+          type: "integer",
+          required: false,
+          description: "Number of messages per page (default: 50, max: 100)"
+        },
+        {
+          name: "include_usage",
+          type: "boolean",
+          required: false,
+          description: "Include usage tracking information (default: false)"
+        }
+      ],
+      response: {
+        success: true,
+        data: {
+          conversationId: "550e8400-e29b-41d4-a716-446655440000",
+          messages: [
+            {
+              id: "550e8400-e29b-41d4-a716-446655440001",
+              content: "Hello! I'm here to help you understand your assessment results.",
+              sender: "ai",
+              timestamp: "2024-01-01T10:00:00Z",
+              type: "text"
+            },
+            {
+              id: "550e8400-e29b-41d4-a716-446655440002",
+              content: "I'd like to understand what my RIASEC scores mean for my career.",
+              sender: "user",
+              timestamp: "2024-01-01T10:01:00Z",
+              type: "text"
+            }
+          ],
+          pagination: {
+            currentPage: 1,
+            totalPages: 3,
+            totalMessages: 25,
+            hasNextPage: true,
+            hasPreviousPage: false
+          },
+          conversationInfo: {
+            title: "Career Guidance Session",
+            context: "assessment",
+            status: "active",
+            createdAt: "2024-01-01T10:00:00Z"
+          }
+        },
+        message: "Messages retrieved successfully"
+      },
+      example: `curl -X GET "https://api.chhrone.web.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages?page=1&limit=50" \\
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+    },
+    {
       method: "GET",
       path: "/api/chatbot/health",
       title: "Service Health Check",

@@ -720,6 +720,55 @@ export const archiveServiceData = {
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
+      method: "DELETE",
+      path: "/api/archive/admin/users/:userId",
+      title: "Delete User (Admin)",
+      description: "Admin endpoint untuk menghapus user dengan soft delete. Hanya dapat diakses oleh admin dengan role 'admin' atau 'superadmin'.",
+      authentication: "Admin Bearer Token Required",
+      rateLimit: "5000 requests per 15 minutes",
+      parameters: [
+        {
+          name: "userId",
+          type: "UUID",
+          required: true,
+          description: "ID user yang akan dihapus"
+        }
+      ],
+      response: {
+        success: true,
+        message: "User deleted successfully",
+        data: {
+          deletedUserId: "550e8400-e29b-41d4-a716-446655440000",
+          originalEmail: "user@example.com",
+          newEmail: "deleted_1705312200_user@example.com",
+          deletedAt: "2024-01-15T10:30:00.000Z",
+          deletedBy: {
+            adminId: "550e8400-e29b-41d4-a716-446655440001",
+            adminUsername: "admin_user"
+          }
+        }
+      },
+      errorResponses: [
+        {
+          code: "USER_NOT_FOUND",
+          status: 404,
+          message: "User not found"
+        },
+        {
+          code: "UNAUTHORIZED",
+          status: 401,
+          message: "Admin authentication required"
+        },
+        {
+          code: "FORBIDDEN",
+          status: 403,
+          message: "Insufficient admin privileges"
+        }
+      ],
+      example: `curl -X DELETE http://localhost:3000/api/archive/admin/users/550e8400-e29b-41d4-a716-446655440000 \\
+  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
+    },
+    {
       method: "GET",
       path: "/api/archive/health",
       title: "Service Health",

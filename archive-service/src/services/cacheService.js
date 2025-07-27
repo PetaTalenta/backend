@@ -27,6 +27,7 @@ class CacheService {
     if (process.env.DISABLE_REDIS === 'true') {
       logger.info('Redis disabled by configuration - cache service will run in no-op mode');
       this.isConnected = false;
+      this.client = null;
       return;
     }
 
@@ -41,7 +42,11 @@ class CacheService {
         maxRetriesPerRequest: 1, // Reduced retries for faster failure
         lazyConnect: true,
         connectTimeout: 3000, // 3 second timeout
-        commandTimeout: 2000  // 2 second command timeout
+        commandTimeout: 2000,  // 2 second command timeout
+        // Disable automatic reconnection to prevent spam logs
+        enableOfflineQueue: false,
+        autoResubscribe: false,
+        autoResendUnfulfilledCommands: false
       };
 
       this.client = redis.createClient(redisConfig);
@@ -58,8 +63,14 @@ class CacheService {
 
       this.client.on('error', (err) => {
         this.isConnected = false;
-        // Change to warn level to reduce noise
-        logger.warn('Redis client error - cache will be disabled', { error: err.message });
+        // Only log the first error to avoid spam, then disable the client
+        if (this.client) {
+          logger.warn('Redis client error - cache will be disabled', { error: err.message });
+          // Disconnect and nullify client to prevent further error events
+          this.client.removeAllListeners();
+          this.client.disconnect().catch(() => {}); // Ignore disconnect errors
+          this.client = null;
+        }
       });
 
       this.client.on('end', () => {
@@ -78,9 +89,13 @@ class CacheService {
       logger.info('Cache service initialized successfully');
     } catch (error) {
       logger.warn('Failed to initialize cache service - running without cache', { error: error.message });
-      // Don't throw error - allow service to run without cache
+      // Clean up client and prevent further connection attempts
+      if (this.client) {
+        this.client.removeAllListeners();
+        this.client.disconnect().catch(() => {}); // Ignore disconnect errors
+        this.client = null;
+      }
       this.isConnected = false;
-      this.client = null;
     }
   }
 
@@ -302,11 +317,16 @@ class CacheService {
   async close() {
     if (this.client) {
       try {
+        this.client.removeAllListeners();
         await this.client.quit();
         this.isConnected = false;
+        this.client = null;
         logger.info('Cache service closed');
       } catch (error) {
-        logger.error('Error closing cache service', { error: error.message });
+        // Suppress error logging for close operations when Redis is unavailable
+        logger.debug('Cache service close completed with errors (expected when Redis unavailable)', { error: error.message });
+        this.isConnected = false;
+        this.client = null;
       }
     }
   }

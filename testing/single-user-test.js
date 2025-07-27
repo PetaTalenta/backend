@@ -14,6 +14,7 @@ class SingleUserTest {
     this.jobId = null;
     this.resultId = null;
     this.conversationId = null;
+    this.personaProfile = null;
   }
 
   async run() {
@@ -197,6 +198,9 @@ class SingleUserTest {
       const response = await this.apiClient.getResult(this.resultId);
 
       if (response.success && response.data.persona_profile) {
+        // Store persona profile for chatbot conversation creation
+        this.personaProfile = response.data.persona_profile;
+
         this.logger.success('Profile persona retrieved successfully', {
           archetype: response.data.persona_profile.archetype,
           careerCount: response.data.persona_profile.careerRecommendation?.length || 0

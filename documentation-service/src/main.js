@@ -13,10 +13,12 @@ import { assessmentServiceData } from './data/assessment-service.js';
 import { archiveServiceData } from './data/archive-service.js';
 import { chatbotServiceData } from './data/chatbot-service.js';
 import { notificationServiceData } from './data/notification-service.js';
+import { globalEndpointsData } from './data/global-endpoints.js';
 
 class DocumentationApp {
   constructor() {
     this.services = {
+      'global-endpoints': globalEndpointsData,
       'auth-service': authServiceData,
       'assessment-service': assessmentServiceData,
       'archive-service': archiveServiceData,

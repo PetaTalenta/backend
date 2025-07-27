@@ -33,7 +33,7 @@ const getProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    // Get user with profile using optimized query
+    // Get user with profile using optimized query with fresh data
     const user = await User.findByPk(userId, {
       include: [{
         model: UserProfile,
@@ -46,7 +46,8 @@ const getProfile = async (req, res, next) => {
           attributes: ['id', 'name', 'city', 'province']
         }]
       }],
-      attributes: { exclude: ['password_hash'] }
+      attributes: { exclude: ['password_hash'] },
+      reload: true // Force reload from database to ensure fresh token_balance
     });
 
     if (!user) {
@@ -394,8 +395,10 @@ const getTokenBalance = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
+    // Force fresh data from database to ensure consistency with profile endpoint
     const user = await User.findByPk(userId, {
-      attributes: ['id', 'email', 'token_balance']
+      attributes: ['id', 'email', 'token_balance'],
+      reload: true // Force reload from database
     });
 
     if (!user) {

@@ -17,7 +17,7 @@ router.use(authenticateService);
  * GET /archive/stats
  * Get statistics for authenticated user
  */
-router.get('/stats',
+router.get('/',
   authenticateToken,
   statsController.getUserStats
 );
@@ -26,7 +26,7 @@ router.get('/stats',
  * GET /archive/stats/overview
  * Get overview statistics for authenticated user (frontend accessible)
  */
-router.get('/stats/overview',
+router.get('/overview',
   authenticateToken,
   statsController.getUserOverview
 );
@@ -35,7 +35,7 @@ router.get('/stats/overview',
  * GET /archive/stats/summary
  * Get summary statistics (internal service only)
  */
-router.get('/stats/summary',
+router.get('/summary',
   requireServiceAuth,
   statsController.getSummaryStats
 );

@@ -1,0 +1,15 @@
+{
+  "testName": "login-token-test",
+  "startTime": "2025-07-25T13:21:19.719Z",
+  "endTime": "2025-07-25T13:21:21.459Z",
+  "duration": 1740,
+  "results": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "total": 0
+  },
+  "successRate": 0,
+  "errors": [],
+  "logs": []
+}
