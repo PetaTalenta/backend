@@ -8,10 +8,10 @@ const { v4: uuidv4 } = require('uuid');
 
 // Configuration
 const BASE_URL = process.env.ARCHIVE_SERVICE_URL || 'http://localhost:3002';
-const SERVICE_SECRET = process.env.SERVICE_SECRET || 'your-service-secret';
+const SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'f8c1af59d85da6581036e18b4b9e0ec35d1fdefe1a93837d5b4746c9984ea4c1';
 
-// Test data
-const validUserId = uuidv4();
+// Test data - using existing user ID from database
+const validUserId = 'a577cbc8-dd04-4ecd-bad9-7d485fee9020'; // azumacchi9@gmail.com
 const invalidUserId = 'invalid-uuid';
 
 const validPersonaProfile = {
@@ -60,7 +60,8 @@ const validPersonaProfile = {
 const client = axios.create({
   baseURL: BASE_URL,
   headers: {
-    'X-Service-Secret': SERVICE_SECRET,
+    'X-Internal-Service': 'true',
+    'X-Service-Key': SERVICE_KEY,
     'Content-Type': 'application/json'
   }
 });
@@ -72,7 +73,7 @@ const tests = [
   {
     name: 'Valid Create Request',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: validUserId,
       assessment_data: { score: 85, category: 'high' },
@@ -86,7 +87,7 @@ const tests = [
   {
     name: 'Invalid UUID',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: invalidUserId,
       persona_profile: validPersonaProfile,
@@ -98,7 +99,7 @@ const tests = [
   {
     name: 'Missing Required Fields',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: validUserId,
       status: 'completed'
@@ -110,7 +111,7 @@ const tests = [
   {
     name: 'Invalid Status',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: validUserId,
       persona_profile: validPersonaProfile,
@@ -122,7 +123,7 @@ const tests = [
   {
     name: 'Failed Status Without Error Message',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: validUserId,
       status: 'failed'
@@ -134,7 +135,7 @@ const tests = [
   {
     name: 'Security Test - Dangerous Fields',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: validUserId,
       assessment_data: {
@@ -153,7 +154,7 @@ const tests = [
   {
     name: 'Persona Profile Validation - Missing Fields',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: validUserId,
       persona_profile: {
@@ -168,7 +169,7 @@ const tests = [
   {
     name: 'Persona Profile Validation - Invalid Array Lengths',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: validUserId,
       persona_profile: {
@@ -184,14 +185,14 @@ const tests = [
   {
     name: 'Query Parameter Validation',
     method: 'GET',
-    url: '/results?page=invalid&limit=abc',
+    url: '/archive/results?page=invalid&limit=abc',
     expectedStatus: 400,
     shouldPass: false
   },
   {
     name: 'Large Request Test',
     method: 'POST',
-    url: '/results',
+    url: '/archive/results',
     data: {
       user_id: validUserId,
       assessment_data: {

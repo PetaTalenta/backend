@@ -10,10 +10,10 @@ const logger = require('../utils/logger');
 const router = express.Router();
 
 /**
- * GET /health
+ * GET / (mounted at /archive/health and /)
  * Basic health check endpoint
  */
-router.get('/health', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     // Test database connection
     const isDatabaseConnected = await testConnection();
@@ -51,10 +51,10 @@ router.get('/health', async (req, res) => {
 });
 
 /**
- * GET /health/detailed
+ * GET /detailed (mounted at /archive/health/detailed)
  * Detailed health check with more information
  */
-router.get('/health/detailed', async (req, res) => {
+router.get('/detailed', async (req, res) => {
   try {
     const isDatabaseConnected = await testConnection();
     

@@ -65,16 +65,25 @@ const validateBusinessLogic = async (data) => {
     data.assessment_data = sanitizedData;
   }
 
-  // 4. Validate persona profile structure if present
+  // 4. Validate persona profile structure if present - Updated to match analysis-worker schema
   if (data.persona_profile && typeof data.persona_profile === 'object') {
-    const requiredFields = ['archetype', 'shortSummary', 'strengths', 'weaknesses', 'careerRecommendation'];
+    const requiredFields = [
+      'archetype', 'coreMotivators', 'learningStyle', 'shortSummary', 'strengthSummary',
+      'strengths', 'weaknessSummary', 'weaknesses', 'careerRecommendation', 'insights',
+      'skillSuggestion', 'possiblePitfalls', 'riskTolerance', 'workEnvironment',
+      'roleModel', 'developmentActivities'
+    ];
     const missingFields = requiredFields.filter(field => !data.persona_profile[field]);
 
     if (missingFields.length > 0) {
       throw new Error(`Persona profile missing required fields: ${missingFields.join(', ')}`);
     }
 
-    // Validate array fields
+    // Validate array fields with updated requirements
+    if (!Array.isArray(data.persona_profile.coreMotivators) || data.persona_profile.coreMotivators.length < 2) {
+      throw new Error('Persona profile must have at least 2 core motivators');
+    }
+
     if (!Array.isArray(data.persona_profile.strengths) || data.persona_profile.strengths.length < 3) {
       throw new Error('Persona profile must have at least 3 strengths');
     }
@@ -85,6 +94,46 @@ const validateBusinessLogic = async (data) => {
 
     if (!Array.isArray(data.persona_profile.careerRecommendation) || data.persona_profile.careerRecommendation.length < 3) {
       throw new Error('Persona profile must have at least 3 career recommendations');
+    }
+
+    if (!Array.isArray(data.persona_profile.insights) || data.persona_profile.insights.length < 3) {
+      throw new Error('Persona profile must have at least 3 insights');
+    }
+
+    if (!Array.isArray(data.persona_profile.skillSuggestion) || data.persona_profile.skillSuggestion.length < 3) {
+      throw new Error('Persona profile must have at least 3 skill suggestions');
+    }
+
+    if (!Array.isArray(data.persona_profile.possiblePitfalls) || data.persona_profile.possiblePitfalls.length < 2) {
+      throw new Error('Persona profile must have at least 2 possible pitfalls');
+    }
+
+    if (!Array.isArray(data.persona_profile.roleModel) || data.persona_profile.roleModel.length < 2) {
+      throw new Error('Persona profile must have at least 2 role models');
+    }
+
+    // Validate riskTolerance enum
+    const validRiskTolerances = ['very high', 'high', 'moderate', 'low', 'very low'];
+    if (!validRiskTolerances.includes(data.persona_profile.riskTolerance)) {
+      throw new Error(`Risk tolerance must be one of: ${validRiskTolerances.join(', ')}`);
+    }
+
+    // Validate developmentActivities structure
+    if (!data.persona_profile.developmentActivities || typeof data.persona_profile.developmentActivities !== 'object') {
+      throw new Error('Development activities must be an object');
+    }
+
+    const devActivities = data.persona_profile.developmentActivities;
+    if (!Array.isArray(devActivities.extracurricular) || devActivities.extracurricular.length < 2) {
+      throw new Error('Development activities must have at least 2 extracurricular activities');
+    }
+
+    if (!Array.isArray(devActivities.projectIdeas) || devActivities.projectIdeas.length < 2) {
+      throw new Error('Development activities must have at least 2 project ideas');
+    }
+
+    if (!Array.isArray(devActivities.bookRecommendations) || devActivities.bookRecommendations.length < 2) {
+      throw new Error('Development activities must have at least 2 book recommendations');
     }
   }
 

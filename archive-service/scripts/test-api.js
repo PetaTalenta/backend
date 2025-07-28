@@ -7,10 +7,10 @@ require('dotenv').config();
 const axios = require('axios');
 
 const BASE_URL = `http://localhost:${process.env.PORT || 3002}`;
-const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'internal_service_secret_key_change_in_production';
+const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'f8c1af59d85da6581036e18b4b9e0ec35d1fdefe1a93837d5b4746c9984ea4c1';
 
-// Test data
-const testUserId = '550e8400-e29b-41d4-a716-446655440001';
+// Test data - using existing user ID from database
+const testUserId = 'a577cbc8-dd04-4ecd-bad9-7d485fee9020'; // azumacchi9@gmail.com
 const testAnalysisResult = {
   user_id: testUserId,
   assessment_data: {
@@ -30,19 +30,47 @@ const testAnalysisResult = {
       neuroticism: 30
     }
   },
-  persona_profile: [{
+  persona_profile: {
     archetype: "The Test Innovator",
     shortSummary: "A test profile for API testing",
     strengths: ["Testing", "Debugging", "Problem solving"],
-    weakness: ["Impatience with bugs"],
-    careerRecommendation: [{
-      career: "QA Engineer",
-      reason: "Great at finding issues"
-    }],
-    insights: ["Focus on test automation"],
-    workEnvironment: "Collaborative testing environment",
-    roleModel: ["Test Guru"]
-  }],
+    weaknesses: ["Impatience with bugs", "Perfectionism", "Overthinking"],
+    careerRecommendation: [
+      {
+        careerName: "QA Engineer",
+        careerProspect: {
+          jobAvailability: "high",
+          salaryPotential: "high",
+          careerProgression: "high",
+          industryGrowth: "high",
+          skillDevelopment: "high"
+        }
+      },
+      {
+        careerName: "Software Engineer",
+        careerProspect: {
+          jobAvailability: "high",
+          salaryPotential: "high",
+          careerProgression: "high",
+          industryGrowth: "high",
+          skillDevelopment: "high"
+        }
+      },
+      {
+        careerName: "DevOps Engineer",
+        careerProspect: {
+          jobAvailability: "moderate",
+          salaryPotential: "high",
+          careerProgression: "high",
+          industryGrowth: "high",
+          skillDevelopment: "high"
+        }
+      }
+    ],
+    insights: ["Focus on test automation", "Strong analytical skills", "Excellent problem solving"],
+    workEnvironment: "Collaborative testing environment with opportunities for growth",
+    roleModel: ["Test Guru", "Kent Beck", "Martin Fowler", "Uncle Bob"]
+  },
   status: "completed"
 };
 

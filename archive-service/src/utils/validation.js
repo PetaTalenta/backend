@@ -32,13 +32,84 @@ const assessmentDataSchema = Joi.object().unknown(true).custom((value, helpers) 
   return value;
 });
 
-// Career recommendation schema with enhanced validation
+// Book recommendation schema for development activities
+const bookRecommendationSchema = Joi.object({
+  title: Joi.string().trim().min(1).max(200).required()
+    .messages({
+      'string.empty': 'Book title cannot be empty',
+      'string.max': 'Book title must be at most 200 characters',
+      'any.required': 'Book title is required'
+    }),
+  author: Joi.string().trim().min(1).max(100).required()
+    .messages({
+      'string.empty': 'Book author cannot be empty',
+      'string.max': 'Book author must be at most 100 characters',
+      'any.required': 'Book author is required'
+    }),
+  reason: Joi.string().trim().min(1).max(500).required()
+    .messages({
+      'string.empty': 'Book reason cannot be empty',
+      'string.max': 'Book reason must be at most 500 characters',
+      'any.required': 'Book reason is required'
+    })
+});
+
+// Development activities schema
+const developmentActivitiesSchema = Joi.object({
+  extracurricular: Joi.array().items(
+    Joi.string().trim().min(1).max(200)
+  ).min(2).max(4).required()
+    .messages({
+      'array.min': 'Must have at least 2 extracurricular activities',
+      'array.max': 'Must have at most 4 extracurricular activities',
+      'any.required': 'Extracurricular activities are required'
+    }),
+  projectIdeas: Joi.array().items(
+    Joi.string().trim().min(1).max(300)
+  ).min(2).max(4).required()
+    .messages({
+      'array.min': 'Must have at least 2 project ideas',
+      'array.max': 'Must have at most 4 project ideas',
+      'any.required': 'Project ideas are required'
+    }),
+  bookRecommendations: Joi.array().items(bookRecommendationSchema).min(2).max(3).required()
+    .messages({
+      'array.min': 'Must have at least 2 book recommendations',
+      'array.max': 'Must have at most 3 book recommendations',
+      'any.required': 'Book recommendations are required'
+    })
+}).required();
+
+// Career recommendation schema with enhanced validation - Updated to match analysis-worker
 const careerRecommendationSchema = Joi.object({
   careerName: Joi.string().trim().min(1).max(100).required()
     .messages({
       'string.empty': 'Career name cannot be empty',
       'string.max': 'Career name must be at most 100 characters',
       'any.required': 'Career name is required'
+    }),
+  justification: Joi.string().trim().min(10).max(1000).required()
+    .messages({
+      'string.empty': 'Career justification cannot be empty',
+      'string.min': 'Career justification must be at least 10 characters',
+      'string.max': 'Career justification must be at most 1000 characters',
+      'any.required': 'Career justification is required'
+    }),
+  firstSteps: Joi.array().items(
+    Joi.string().trim().min(1).max(300)
+  ).min(2).max(4).required()
+    .messages({
+      'array.min': 'Must have at least 2 first steps',
+      'array.max': 'Must have at most 4 first steps',
+      'any.required': 'First steps are required'
+    }),
+  relatedMajors: Joi.array().items(
+    Joi.string().trim().min(1).max(100)
+  ).min(2).max(5).required()
+    .messages({
+      'array.min': 'Must have at least 2 related majors',
+      'array.max': 'Must have at most 5 related majors',
+      'any.required': 'Related majors are required'
     }),
   careerProspect: Joi.object({
     jobAvailability: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
@@ -72,13 +143,27 @@ const careerRecommendationSchema = Joi.object({
     })
 });
 
-// Persona profile schema with enhanced validation and sanitization
+// Persona profile schema with enhanced validation and sanitization - Updated to match analysis-worker
 const personaProfileSchema = Joi.object({
   archetype: Joi.string().trim().min(1).max(100).required()
     .messages({
       'string.empty': 'Archetype cannot be empty',
       'string.max': 'Archetype must be at most 100 characters',
       'any.required': 'Archetype is required'
+    }),
+  coreMotivators: Joi.array().items(
+    Joi.string().trim().min(1).max(100)
+  ).min(2).max(4).required()
+    .messages({
+      'array.min': 'Must have at least 2 core motivators',
+      'array.max': 'Must have at most 4 core motivators',
+      'any.required': 'Core motivators are required'
+    }),
+  learningStyle: Joi.string().trim().min(1).max(200).required()
+    .messages({
+      'string.empty': 'Learning style cannot be empty',
+      'string.max': 'Learning style must be at most 200 characters',
+      'any.required': 'Learning style is required'
     }),
   shortSummary: Joi.string().trim().min(10).max(1000).required()
     .messages({
@@ -87,6 +172,13 @@ const personaProfileSchema = Joi.object({
       'string.max': 'Short summary must be at most 1000 characters',
       'any.required': 'Short summary is required'
     }),
+  strengthSummary: Joi.string().trim().min(10).max(1000).required()
+    .messages({
+      'string.empty': 'Strength summary cannot be empty',
+      'string.min': 'Strength summary must be at least 10 characters',
+      'string.max': 'Strength summary must be at most 1000 characters',
+      'any.required': 'Strength summary is required'
+    }),
   strengths: Joi.array().items(
     Joi.string().trim().min(1).max(200)
   ).min(3).max(5).required()
@@ -94,6 +186,13 @@ const personaProfileSchema = Joi.object({
       'array.min': 'Must have at least 3 strengths',
       'array.max': 'Must have at most 5 strengths',
       'any.required': 'Strengths are required'
+    }),
+  weaknessSummary: Joi.string().trim().min(10).max(1000).required()
+    .messages({
+      'string.empty': 'Weakness summary cannot be empty',
+      'string.min': 'Weakness summary must be at least 10 characters',
+      'string.max': 'Weakness summary must be at most 1000 characters',
+      'any.required': 'Weakness summary is required'
     }),
   weaknesses: Joi.array().items(
     Joi.string().trim().min(1).max(200)
@@ -117,6 +216,27 @@ const personaProfileSchema = Joi.object({
       'array.max': 'Must have at most 5 insights',
       'any.required': 'Insights are required'
     }),
+  skillSuggestion: Joi.array().items(
+    Joi.string().trim().min(1).max(200)
+  ).min(3).max(5).required()
+    .messages({
+      'array.min': 'Must have at least 3 skill suggestions',
+      'array.max': 'Must have at most 5 skill suggestions',
+      'any.required': 'Skill suggestions are required'
+    }),
+  possiblePitfalls: Joi.array().items(
+    Joi.string().trim().min(1).max(300)
+  ).min(2).max(5).required()
+    .messages({
+      'array.min': 'Must have at least 2 possible pitfalls',
+      'array.max': 'Must have at most 5 possible pitfalls',
+      'any.required': 'Possible pitfalls are required'
+    }),
+  riskTolerance: Joi.string().valid('very high', 'high', 'moderate', 'low', 'very low').required()
+    .messages({
+      'any.only': 'Risk tolerance must be one of: very high, high, moderate, low, very low',
+      'any.required': 'Risk tolerance is required'
+    }),
   workEnvironment: Joi.string().trim().min(1).max(500).required()
     .messages({
       'string.empty': 'Work environment cannot be empty',
@@ -125,12 +245,13 @@ const personaProfileSchema = Joi.object({
     }),
   roleModel: Joi.array().items(
     Joi.string().trim().min(1).max(100)
-  ).min(4).max(5).required()
+  ).min(2).max(3).required()
     .messages({
-      'array.min': 'Must have at least 4 role models',
-      'array.max': 'Must have at most 5 role models',
+      'array.min': 'Must have at least 2 role models',
+      'array.max': 'Must have at most 3 role models',
       'any.required': 'Role models are required'
-    })
+    }),
+  developmentActivities: developmentActivitiesSchema
 }).required();
 
 // Create analysis result schema with enhanced validation
