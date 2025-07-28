@@ -11,6 +11,12 @@ const personaProfileSchema = Joi.object({
   archetype: Joi.string().required()
     .description('Nama archetype yang paling sesuai dengan persona'),
 
+  coreMotivators: Joi.array().items(Joi.string()).min(2).max(4).required()
+    .description('Fundamental drivers atau motivasi inti dari persona'),
+
+  learningStyle: Joi.string().required()
+    .description('Gaya belajar yang paling efektif untuk persona'),
+
   shortSummary: Joi.string().required()
     .description('Ringkasan singkat tentang persona (1-2 paragraf)'),
 
@@ -30,6 +36,12 @@ const personaProfileSchema = Joi.object({
     Joi.object({
       careerName: Joi.string().required()
         .description('Nama karir atau profesi yang direkomendasikan'),
+      justification: Joi.string().required()
+        .description('Penjelasan mengapa karir ini cocok berdasarkan data psikometrik'),
+      firstSteps: Joi.array().items(Joi.string()).min(2).max(4).required()
+        .description('Langkah konkret yang bisa diambil untuk mengeksplorasi karir ini'),
+      relatedMajors: Joi.array().items(Joi.string()).min(2).max(5).required()
+        .description('Jurusan kuliah yang relevan dengan karir ini'),
       careerProspect: Joi.object({
         jobAvailability: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
           .description('Sejauh mana lapangan pekerjaan tersedia di bidang tersebut'),
@@ -62,7 +74,26 @@ const personaProfileSchema = Joi.object({
     .description('Deskripsi lingkungan kerja yang ideal untuk persona'),
 
   roleModel: Joi.array().items(Joi.string()).min(2).max(3).required()
-    .description('Daftar role model yang relevan dan inspiratif')
+    .description('Daftar role model yang relevan dan inspiratif'),
+
+  developmentActivities: Joi.object({
+    extracurricular: Joi.array().items(Joi.string()).min(2).max(4).required()
+      .description('Kegiatan ekstrakurikuler yang disarankan'),
+    projectIdeas: Joi.array().items(Joi.string()).min(2).max(4).required()
+      .description('Ide proyek untuk membangun portfolio dan skills'),
+    bookRecommendations: Joi.array().items(
+      Joi.object({
+        title: Joi.string().required()
+          .description('Judul buku'),
+        author: Joi.string().required()
+          .description('Nama penulis'),
+        reason: Joi.string().required()
+          .description('Alasan mengapa buku ini cocok untuk persona')
+      })
+    ).min(2).max(3).required()
+      .description('Rekomendasi buku dengan alasan spesifik')
+  }).required()
+    .description('Aktivitas pengembangan yang disesuaikan dengan konteks siswa SMA')
 
 }).required();
 
@@ -71,6 +102,8 @@ const personaProfileSchema = Joi.object({
  */
 const personaProfileExample = {
   archetype: "The Analytical Innovator",
+  coreMotivators: ["Problem-Solving", "Learning & Mastery", "Creative Expression"],
+  learningStyle: "Visual & Kinesthetic",
   shortSummary: "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif.",
   strengthSummary: "Kekuatan utama Anda terletak pada analisis mendalam, kreativitas, dan dorongan kuat untuk belajar hal baru. Ini membuat Anda mampu menghasilkan solusi unik di berbagai situasi kompleks.",
   strengths: [
@@ -91,6 +124,13 @@ const personaProfileExample = {
   careerRecommendation: [
     {
       careerName: "Data Scientist",
+      justification: "Sangat cocok karena menggabungkan kekuatan analitis (OCEAN: Conscientiousness) dan minat investigatif (RIASEC: Investigative) Anda. Peran ini memungkinkan Anda memecahkan masalah kompleks menggunakan data, yang sejalan dengan arketipe 'Analytical Innovator'.",
+      firstSteps: [
+        "Ikuti kursus online 'Intro to Python for Data Science'",
+        "Coba analisis dataset sederhana dari Kaggle.com",
+        "Tonton video 'Day in the Life of a Data Scientist' di YouTube"
+      ],
+      relatedMajors: ["Statistika", "Ilmu Komputer", "Matematika", "Sistem Informasi"],
       careerProspect: {
         jobAvailability: "high",
         salaryPotential: "high",
@@ -101,6 +141,13 @@ const personaProfileExample = {
     },
     {
       careerName: "Peneliti",
+      justification: "Minat investigatif yang tinggi dan keterbukaan terhadap pengalaman baru membuat Anda cocok untuk dunia penelitian. Kemampuan analitis mendalam mendukung proses riset yang sistematis.",
+      firstSteps: [
+        "Bergabung dengan program penelitian siswa di sekolah",
+        "Baca jurnal ilmiah populer seperti Scientific American",
+        "Ikuti webinar tentang metodologi penelitian"
+      ],
+      relatedMajors: ["Psikologi", "Biologi", "Fisika", "Kimia", "Sosiologi"],
       careerProspect: {
         jobAvailability: "moderate",
         salaryPotential: "moderate",
@@ -111,6 +158,13 @@ const personaProfileExample = {
     },
     {
       careerName: "Pengembang Software",
+      justification: "Kombinasi kreativitas dan kemampuan analitis yang kuat sangat sesuai untuk pengembangan software. Keterbukaan terhadap teknologi baru mendukung adaptasi di industri yang dinamis.",
+      firstSteps: [
+        "Mulai belajar bahasa pemrograman Python atau JavaScript",
+        "Buat proyek sederhana seperti kalkulator atau to-do list",
+        "Bergabung dengan komunitas programmer lokal atau online"
+      ],
+      relatedMajors: ["Teknik Informatika", "Ilmu Komputer", "Sistem Informasi", "Teknik Komputer"],
       careerProspect: {
         jobAvailability: "super high",
         salaryPotential: "high",
@@ -145,7 +199,27 @@ const personaProfileExample = {
     "Marie Curie",
     "Albert Einstein",
     "B.J. Habibie"
-  ]
+  ],
+  developmentActivities: {
+    extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],
+    projectIdeas: [
+      "Membuat visualisasi data dari topik yang disukai (misal: statistik tim sepak bola favorit)",
+      "Mendesain aplikasi sederhana untuk memecahkan masalah di sekolah",
+      "Menulis blog yang menjelaskan konsep sains yang rumit dengan cara sederhana"
+    ],
+    bookRecommendations: [
+      {
+        title: "Sapiens: A Brief History of Humankind",
+        author: "Yuval Noah Harari",
+        reason: "Untuk memuaskan rasa ingin tahu intelektualmu yang tinggi."
+      },
+      {
+        title: "Thinking, Fast and Slow",
+        author: "Daniel Kahneman",
+        reason: "Untuk memahami bias kognitif dan mempertajam analisismu."
+      }
+    ]
+  }
 };
 
 module.exports = {

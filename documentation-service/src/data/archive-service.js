@@ -102,6 +102,8 @@ export const archiveServiceData = {
               },
               persona_profile: {
                 archetype: "The Analytical Innovator",
+                coreMotivators: ["Problem-Solving", "Learning & Mastery", "Creative Expression"],
+                learningStyle: "Visual & Kinesthetic (Belajar paling baik dengan melihat contoh dan langsung mencoba)",
                 shortSummary: "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif.",
                 strengthSummary: "Kekuatan utama Anda terletak pada analisis mendalam, kreativitas, dan dorongan kuat untuk belajar hal baru. Ini membuat Anda mampu menghasilkan solusi unik di berbagai situasi kompleks.",
                 strengths: [
@@ -122,6 +124,13 @@ export const archiveServiceData = {
                 careerRecommendation: [
                   {
                     careerName: "Data Scientist",
+                    justification: "Sangat cocok karena menggabungkan kekuatan analitis (OCEAN: Conscientiousness) dan minat investigatif (RIASEC: Investigative) Anda. Peran ini memungkinkan Anda memecahkan masalah kompleks menggunakan data, yang sejalan dengan arketipe 'Analytical Innovator'.",
+                    firstSteps: [
+                      "Ikuti kursus online 'Intro to Python for Data Science'",
+                      "Coba analisis dataset sederhana dari Kaggle.com",
+                      "Tonton video 'Day in the Life of a Data Scientist' di YouTube"
+                    ],
+                    relatedMajors: ["Statistika", "Ilmu Komputer", "Matematika", "Sistem Informasi"],
                     careerProspect: {
                       jobAvailability: "high",
                       salaryPotential: "high",
@@ -132,6 +141,13 @@ export const archiveServiceData = {
                   },
                   {
                     careerName: "Peneliti",
+                    justification: "Minat investigatif yang tinggi dan keterbukaan terhadap pengalaman baru membuat Anda cocok untuk dunia penelitian. Kemampuan analitis mendalam mendukung proses riset yang sistematis.",
+                    firstSteps: [
+                      "Bergabung dengan program penelitian siswa di sekolah",
+                      "Baca jurnal ilmiah populer seperti Scientific American",
+                      "Ikuti webinar tentang metodologi penelitian"
+                    ],
+                    relatedMajors: ["Psikologi", "Biologi", "Fisika", "Kimia", "Sosiologi"],
                     careerProspect: {
                       jobAvailability: "moderate",
                       salaryPotential: "moderate",
@@ -142,6 +158,13 @@ export const archiveServiceData = {
                   },
                   {
                     careerName: "Pengembang Software",
+                    justification: "Kombinasi kreativitas dan kemampuan analitis yang kuat sangat sesuai untuk pengembangan software. Keterbukaan terhadap teknologi baru mendukung adaptasi di industri yang dinamis.",
+                    firstSteps: [
+                      "Mulai belajar bahasa pemrograman Python atau JavaScript",
+                      "Buat proyek sederhana seperti kalkulator atau to-do list",
+                      "Bergabung dengan komunitas programmer lokal atau online"
+                    ],
+                    relatedMajors: ["Teknik Informatika", "Ilmu Komputer", "Sistem Informasi", "Teknik Komputer"],
                     careerProspect: {
                       jobAvailability: "super high",
                       salaryPotential: "high",
@@ -176,7 +199,27 @@ export const archiveServiceData = {
                   "Marie Curie",
                   "Albert Einstein",
                   "B.J. Habibie"
-                ]
+                ],
+                developmentActivities: {
+                  extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],
+                  projectIdeas: [
+                    "Membuat visualisasi data dari topik yang disukai (misal: statistik tim sepak bola favorit)",
+                    "Mendesain aplikasi sederhana untuk memecahkan masalah di sekolah",
+                    "Menulis blog yang menjelaskan konsep sains yang rumit dengan cara sederhana"
+                  ],
+                  bookRecommendations: [
+                    {
+                      title: "Sapiens: A Brief History of Humankind",
+                      author: "Yuval Noah Harari",
+                      reason: "Untuk memuaskan rasa ingin tahu intelektualmu yang tinggi."
+                    },
+                    {
+                      title: "Thinking, Fast and Slow",
+                      author: "Daniel Kahneman",
+                      reason: "Untuk memahami bias kognitif dan mempertajam analisismu."
+                    }
+                  ]
+                }
               },
               status: "completed",
               error_message: null,
@@ -262,6 +305,8 @@ export const archiveServiceData = {
           },
           persona_profile: {
             archetype: "The Analytical Innovator",
+            coreMotivators: ["Problem-Solving", "Learning & Mastery", "Creative Expression"],
+            learningStyle: "Visual & Kinesthetic (Belajar paling baik dengan melihat contoh dan langsung mencoba)",
             shortSummary: "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif.",
             strengthSummary: "Kekuatan utama Anda terletak pada analisis mendalam, kreativitas, dan dorongan kuat untuk belajar hal baru. Ini membuat Anda mampu menghasilkan solusi unik di berbagai situasi kompleks.",
             strengths: [
@@ -282,6 +327,13 @@ export const archiveServiceData = {
             careerRecommendation: [
               {
                 careerName: "Data Scientist",
+                justification: "Sangat cocok karena menggabungkan kekuatan analitis (OCEAN: Conscientiousness) dan minat investigatif (RIASEC: Investigative) Anda. Peran ini memungkinkan Anda memecahkan masalah kompleks menggunakan data, yang sejalan dengan arketipe 'Analytical Innovator'.",
+                firstSteps: [
+                  "Ikuti kursus online 'Intro to Python for Data Science'",
+                  "Coba analisis dataset sederhana dari Kaggle.com",
+                  "Tonton video 'Day in the Life of a Data Scientist' di YouTube"
+                ],
+                relatedMajors: ["Statistika", "Ilmu Komputer", "Matematika", "Sistem Informasi"],
                 careerProspect: {
                   jobAvailability: "high",
                   salaryPotential: "high",
@@ -292,6 +344,13 @@ export const archiveServiceData = {
               },
               {
                 careerName: "Peneliti",
+                justification: "Minat investigatif yang tinggi dan keterbukaan terhadap pengalaman baru membuat Anda cocok untuk dunia penelitian. Kemampuan analitis mendalam mendukung proses riset yang sistematis.",
+                firstSteps: [
+                  "Bergabung dengan program penelitian siswa di sekolah",
+                  "Baca jurnal ilmiah populer seperti Scientific American",
+                  "Ikuti webinar tentang metodologi penelitian"
+                ],
+                relatedMajors: ["Psikologi", "Biologi", "Fisika", "Kimia", "Sosiologi"],
                 careerProspect: {
                   jobAvailability: "moderate",
                   salaryPotential: "moderate",
@@ -302,6 +361,13 @@ export const archiveServiceData = {
               },
               {
                 careerName: "Pengembang Software",
+                justification: "Kombinasi kreativitas dan kemampuan analitis yang kuat sangat sesuai untuk pengembangan software. Keterbukaan terhadap teknologi baru mendukung adaptasi di industri yang dinamis.",
+                firstSteps: [
+                  "Mulai belajar bahasa pemrograman Python atau JavaScript",
+                  "Buat proyek sederhana seperti kalkulator atau to-do list",
+                  "Bergabung dengan komunitas programmer lokal atau online"
+                ],
+                relatedMajors: ["Teknik Informatika", "Ilmu Komputer", "Sistem Informasi", "Teknik Komputer"],
                 careerProspect: {
                   jobAvailability: "super high",
                   salaryPotential: "high",
@@ -336,7 +402,27 @@ export const archiveServiceData = {
               "Marie Curie",
               "Albert Einstein",
               "B.J. Habibie"
-            ]
+            ],
+            developmentActivities: {
+              extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],
+              projectIdeas: [
+                "Membuat visualisasi data dari topik yang disukai (misal: statistik tim sepak bola favorit)",
+                "Mendesain aplikasi sederhana untuk memecahkan masalah di sekolah",
+                "Menulis blog yang menjelaskan konsep sains yang rumit dengan cara sederhana"
+              ],
+              bookRecommendations: [
+                {
+                  title: "Sapiens: A Brief History of Humankind",
+                  author: "Yuval Noah Harari",
+                  reason: "Untuk memuaskan rasa ingin tahu intelektualmu yang tinggi."
+                },
+                {
+                  title: "Thinking, Fast and Slow",
+                  author: "Daniel Kahneman",
+                  reason: "Untuk memahami bias kognitif dan mempertajam analisismu."
+                }
+              ]
+            }
           },
           status: "completed",
           error_message: null,
@@ -834,5 +920,79 @@ export const archiveServiceData = {
     "Rate Limiting: Semua endpoint tunduk pada rate limiting gateway",
     "CORS: Service mendukung CORS untuk akses dari frontend",
     "Compression: Response otomatis dikompresi untuk menghemat bandwidth"
-  ]
+  ],
+  personaProfileSchema: {
+    description: "Struktur lengkap persona_profile dengan field-field baru yang telah ditambahkan",
+    newFields: {
+      coreMotivators: {
+        type: "Array[String]",
+        required: true,
+        minItems: 2,
+        maxItems: 4,
+        description: "Fundamental drivers atau motivasi inti dari persona yang mengidentifikasi 'mengapa' di balik tindakan siswa"
+      },
+      learningStyle: {
+        type: "String",
+        required: true,
+        description: "Gaya belajar yang paling efektif untuk persona, menjelaskan cara terbaik siswa menyerap informasi baru"
+      },
+      careerRecommendationEnhancements: {
+        justification: {
+          type: "String",
+          required: true,
+          description: "Penjelasan mengapa karir ini cocok berdasarkan data psikometrik (OCEAN, RIASEC, VIA-IS) dan arketipe persona"
+        },
+        firstSteps: {
+          type: "Array[String]",
+          required: true,
+          minItems: 2,
+          maxItems: 4,
+          description: "Langkah konkret, immediate, dan low-barrier yang bisa diambil siswa SMA untuk mengeksplorasi karir ini"
+        },
+        relatedMajors: {
+          type: "Array[String]",
+          required: true,
+          minItems: 2,
+          maxItems: 5,
+          description: "Jurusan kuliah yang relevan dengan karir ini, menciptakan jembatan dari SMA ke perencanaan pendidikan tinggi"
+        }
+      },
+      developmentActivities: {
+        type: "Object",
+        required: true,
+        description: "Aktivitas pengembangan yang disesuaikan dengan konteks siswa SMA",
+        properties: {
+          extracurricular: {
+            type: "Array[String]",
+            required: true,
+            minItems: 2,
+            maxItems: 4,
+            description: "Kegiatan ekstrakurikuler yang disarankan (klub sekolah atau aktivitas)"
+          },
+          projectIdeas: {
+            type: "Array[String]",
+            required: true,
+            minItems: 2,
+            maxItems: 4,
+            description: "Ide proyek konkret untuk membangun portfolio dan skills"
+          },
+          bookRecommendations: {
+            type: "Array[Object]",
+            required: true,
+            minItems: 2,
+            maxItems: 3,
+            description: "Rekomendasi buku dengan alasan spesifik mengapa cocok untuk persona",
+            itemProperties: {
+              title: "String - Judul buku",
+              author: "String - Nama penulis",
+              reason: "String - Alasan mengapa buku ini cocok untuk persona"
+            }
+          }
+        }
+      }
+    },
+    totalFields: 16,
+    previousFields: 13,
+    addedFields: 3
+  }
 };

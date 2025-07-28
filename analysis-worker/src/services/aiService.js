@@ -109,9 +109,20 @@ const responseSchema = {
       type: Type.STRING,
       description: "Nama archetype yang paling sesuai",
     },
+    coreMotivators: {
+      type: Type.ARRAY,
+      minItems: 2,
+      maxItems: 4,
+      items: { type: Type.STRING, description: "Motivasi fundamental" },
+      description: "Fundamental drivers atau motivasi inti dari persona",
+    },
+    learningStyle: {
+      type: Type.STRING,
+      description: "Gaya belajar yang paling efektif untuk persona",
+    },
     shortSummary: {
       type: Type.STRING,
-      description: "Ringkasan singkat (1-2 paragraf) tentang persona",
+      description: "Ringkasan singkat (1-2 paragraf) tentang persona user",
     },
     strengthSummary: {
       type: Type.STRING,
@@ -122,7 +133,7 @@ const responseSchema = {
       minItems: 3,
       maxItems: 5,
       items: { type: Type.STRING, description: "Kekuatan spesifik" },
-      description: "Daftar kekuatan persona",
+      description: "Daftar kekuatan utama persona",
     },
     weaknessSummary: {
       type: Type.STRING,
@@ -146,11 +157,29 @@ const responseSchema = {
         "Daftar rekomendasi karir sesuai persona, beserta prospeknya",
       items: {
         type: Type.OBJECT,
-        required: ["careerName", "careerProspect"],
+        required: ["careerName", "justification", "firstSteps", "relatedMajors", "careerProspect"],
         properties: {
           careerName: {
             type: Type.STRING,
             description: "Nama karir atau profesi yang direkomendasikan",
+          },
+          justification: {
+            type: Type.STRING,
+            description: "Penjelasan mengapa karir ini cocok berdasarkan data psikometrik",
+          },
+          firstSteps: {
+            type: Type.ARRAY,
+            minItems: 2,
+            maxItems: 4,
+            items: { type: Type.STRING, description: "Langkah konkret" },
+            description: "Langkah konkret yang bisa diambil untuk mengeksplorasi karir ini",
+          },
+          relatedMajors: {
+            type: Type.ARRAY,
+            minItems: 2,
+            maxItems: 5,
+            items: { type: Type.STRING, description: "Nama jurusan" },
+            description: "Jurusan kuliah yang relevan dengan karir ini",
           },
           careerProspect: {
             type: Type.OBJECT,
@@ -244,9 +273,56 @@ const responseSchema = {
       },
       description: "Daftar role model inspiratif",
     },
+    developmentActivities: {
+      type: Type.OBJECT,
+      required: ["extracurricular", "projectIdeas", "bookRecommendations"],
+      properties: {
+        extracurricular: {
+          type: Type.ARRAY,
+          minItems: 2,
+          maxItems: 4,
+          items: { type: Type.STRING, description: "Nama kegiatan ekstrakurikuler" },
+          description: "Kegiatan ekstrakurikuler yang disarankan",
+        },
+        projectIdeas: {
+          type: Type.ARRAY,
+          minItems: 2,
+          maxItems: 4,
+          items: { type: Type.STRING, description: "Ide proyek konkret" },
+          description: "Ide proyek untuk membangun portfolio dan skills",
+        },
+        bookRecommendations: {
+          type: Type.ARRAY,
+          minItems: 2,
+          maxItems: 3,
+          items: {
+            type: Type.OBJECT,
+            required: ["title", "author", "reason"],
+            properties: {
+              title: {
+                type: Type.STRING,
+                description: "Judul buku",
+              },
+              author: {
+                type: Type.STRING,
+                description: "Nama penulis",
+              },
+              reason: {
+                type: Type.STRING,
+                description: "Alasan mengapa buku ini cocok untuk persona",
+              },
+            },
+          },
+          description: "Rekomendasi buku dengan alasan spesifik",
+        },
+      },
+      description: "Aktivitas pengembangan yang disesuaikan dengan konteks siswa SMA",
+    },
   },
   required: [
     "archetype",
+    "coreMotivators",
+    "learningStyle",
     "shortSummary",
     "strengthSummary",
     "strengths",
@@ -259,6 +335,7 @@ const responseSchema = {
     "riskTolerance",
     "workEnvironment",
     "roleModel",
+    "developmentActivities",
   ],
 };
 
@@ -409,66 +486,38 @@ Berikut adalah data asesmen yang akan dianalisis. Skor berada dalam skala 0-100.
 ${viaIsSection}
 </DATA_ASSESSMENT>
 
-# PROSES ANALISIS TALENT MAPPING
+# PRINSIP ANALISIS HOLISTIK (WAJIB DIIKUTI)
 
-### Langkah 1: Pengumpulan Data Psikometrik
-**Tujuan:** Mengidentifikasi kepribadian, minat karier, dan kekuatan karakter individu.
-**Alat dan Teknik:**
-* **OCEAN (Big Five Personality):** untuk mengukur lima dimensi kepribadian: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism.
-* **RIASEC:** untuk mengetahui tipe minat karier (Realistic, Investigative, Artistic, Social, Enterprising, Conventional).
-* **VIA-IS:** untuk mengenali kekuatan karakter seperti integritas, kreativitas, kepemimpinan, empati, dsb.
+Ini adalah prinsip utama yang harus memandu seluruh analisis Anda. Fleksibilitas dan kejujuran lebih penting daripada sekadar mengikuti formula yang kaku.
 
----
-### Langkah 2: Analisis Individual Profil
+1.  **Cari Pola, Bukan Hanya Skor Tertinggi:** Jangan hanya mengambil skor teratas dari setiap tes. Lihatlah keseluruhan data untuk menemukan pola yang konsisten. Kombinasi skor sedang di beberapa area bisa lebih bermakna daripada satu skor tinggi yang terisolasi.
 
-**Tujuan:** Menganalisis hasil tes untuk membentuk personal trait profile.
-**Analisis:**
-* **OCEAN:** Menentukan kecenderungan kepribadian dominan dan potensi tantangan perilaku.
-* **RIASEC:** Menemukan tipe minat karier yang paling menonjol (1–3 kode dominan).
-* **VIA-IS:** Mengidentifikasi *signature strengths* (5 kekuatan teratas) yang menjadi fondasi potensi dan motivasi.
+2.  **Kejujuran Konstruktif:**
+    *   **Jika semua skor RIASEC rendah:** Akui secara jujur bahwa minat karier siswa belum terbentuk secara spesifik. Jelaskan bahwa ini adalah hal yang wajar dan berikan saran untuk **fase eksplorasi** (mencoba berbagai ekskul, magang singkat, atau proyek pribadi) untuk menemukan minat.
+    *   **Jika semua skor Kekuatan Karakter (VIA-IS) tidak menonjol:** Jangan memaksakan adanya "kekuatan super". Jelaskan bahwa ini adalah area yang sangat baik untuk dikembangkan secara sadar. Fokuskan rekomendasi pada cara membangun karakter dan kebiasaan positif, alih-alih mengasumsikan kekuatan itu sudah ada.
 
-**Output:** Peta profil individu (Personality–Interest–Strength Matrix).
+3.  **Fokus pada Data yang Paling Jelas:** Jika hasil dari satu alat tes (misal: OCEAN) sangat jelas dan menonjol, sementara yang lain (misal: RIASEC) menyebar atau rendah, jadikan data yang jelas itu sebagai jangkar analisis. Gunakan data yang kurang jelas sebagai konteks atau area untuk dieksplorasi lebih lanjut.
+
+4.  **Personalisasi Penuh:** Hindari kalimat template. Setiap laporan harus terasa unik. Buatlah **Arketipe Potensi** yang deskriptif dan personal untuk setiap siswa, alih-alih menggunakan kategori yang sudah ada.
 
 ---
-### Langkah 3: Integrasi Profil ke dalam Klaster Potensi
+# PROSES ANALISIS (Sebagai Panduan)
 
-**Tujuan:** Mengelompokkan individu ke dalam klaster atau zona potensi berbasis kombinasi hasil asesmen.
-**Metode:**
-* **Mapping Matrix:** Menghubungkan kombinasi OCEAN + RIASEC + VIA-IS ke dalam klaster (misalnya: *Creative Leader*, *Analytical Problem Solver*, *Empathic Helper*, dll).
-* **Algoritma Klasifikasi (jika digital):** Gunakan logika machine learning/statistik (misal: *decision tree* atau *K-means*) untuk otomatisasi klaster.
+Gunakan 5 langkah ini sebagai kerangka kerja, namun selalu terapkan **Prinsip Analisis Holistik** di setiap langkahnya.
 
-**Output:** Setiap individu tergolong ke dalam kategori profil talenta tertentu.
-
----
-
-### Langkah 4: Pemetaan Kesesuaian (Talent–Role Matching)
-
-**Tujuan:** Menghubungkan klaster talenta dengan bidang studi, profesi, atau peran yang sesuai.
-**Strategi:**
-* **Korelasi Profil–Peran:** Gunakan basis data kompetensi peran/jabatan dan padankan dengan profil kepribadian, minat, dan kekuatan.
-**Contoh:**
-* **OCEAN:** High Conscientiousness + RIASEC Conventional → cocok untuk pekerjaan manajerial struktural.
-* **VIA-IS:** High Leadership + RIASEC Enterprising → cocok untuk peran kepemimpinan atau wirausaha.
-
-**Output:** Rekomendasi bidang studi atau karier yang relevan dan akurat.
-
----
-
-### Langkah 5: Perencanaan dan Intervensi Pengembangan
-
-**Tujuan:** Merancang rencana pengembangan individual berbasis profil talent.
-**Rencana Pengembangan:**
-* **Short-term:** Workshop, mentoring, tugas berbasis proyek sesuai kekuatan/minat.
-* **Mid/Long-term:** Perencanaan karier, penempatan kerja, atau penyesuaian program pendidikan.
-* **Coaching/Counseling:** Pendampingan dalam proses pengambilan keputusan karier atau *personal branding*.
-
-**Output:** *Individual Talent Development Plan (ITDP)* – peta jalan pengembangan berdasarkan potensi unik individu.
+1.  **Pahami Data:** Tinjau semua data (OCEAN, RIASEC, VIA-IS) secara keseluruhan.
+2.  **Analisis Individual:** Uraikan setiap hasil tes dengan bahasa yang mudah dipahami, sambil menerapkan prinsip kejujuran konstruktif.
+3.  **Sintesis & Buat Arketipe:** Gabungkan semua wawasan untuk menciptakan satu **Arketipe Potensi** yang unik dan deskriptif (contoh: "The Creative Communicator", "The Practical Musician"). Jelaskan mengapa arketipe ini cocok.
+4.  **Rekomendasi Eksplorasi:** Berikan rekomendasi konkret untuk jurusan kuliah, jalur karier, dan kegiatan pengembangan diri (ekskul, kursus online, buku, proyek). Hubungkan setiap rekomendasi kembali ke data analisis.
+5.  **Rencana Aksi & Refleksi:** Buat langkah-langkah praktis dan pertanyaan reflektif untuk membantu siswa memulai perjalanan pengembangan dirinya.
 
 
 # CATATAN
 - Jangan terjemahkan terminologi bahasa inggris ke bahasa indonesia
 - Jangan terjemahkan nama pekerjaan bahasa inggris
 - Jangan terjemahkan sesuatu yang tidak memiliki kata pasti di KBBI
+- Jangan Bersifat afirmatif dan kekurangan TIDAK BOLEH DITUTUPI
+- Refer ke pengguna sebagai ANDA
 `
 };
 

@@ -464,12 +464,23 @@ Mendapatkan daftar hasil assessment user.
         "created_at": "2024-01-15T10:30:00.000Z",
         "persona_profile": {
           "archetype": "The Innovator",
+          "coreMotivators": ["Problem-Solving", "Learning & Mastery", "Innovation"],
+          "learningStyle": "Visual & Kinesthetic (Learn best through examples and hands-on practice)",
           "shortSummary": "You are a natural innovator with strong analytical thinking and problem-solving abilities. You thrive in environments that challenge your intellect and allow you to explore new ideas.",
-          "strengths": ["Problem Solving", "Analytical Thinking", "Innovation"],
-          "weaknesses": ["Communication", "Leadership", "Time Management"],
+          "strengthSummary": "Your main strengths lie in deep analysis, creativity, and strong drive to learn new things. This enables you to generate unique solutions in various complex situations.",
+          "strengths": ["Problem Solving", "Analytical Thinking", "Innovation", "Intellectual Curiosity", "Independent Learning"],
+          "weaknessSummary": "You tend to overthink, be perfectionist, and sometimes lack patience with slow processes or working with others.",
+          "weaknesses": ["Communication", "Leadership", "Time Management", "Social Skills", "Delegation"],
           "careerRecommendation": [
             {
               "careerName": "Software Engineer",
+              "justification": "Perfect fit combining your analytical strengths and innovation drive. This role allows you to solve complex problems using technology, aligning with your 'Innovator' archetype.",
+              "firstSteps": [
+                "Start learning Python or JavaScript programming",
+                "Build simple projects like calculator or to-do list",
+                "Join local or online programming communities"
+              ],
+              "relatedMajors": ["Computer Science", "Software Engineering", "Information Systems", "Computer Engineering"],
               "careerProspect": {
                 "jobAvailability": "high",
                 "salaryPotential": "high",
@@ -480,6 +491,13 @@ Mendapatkan daftar hasil assessment user.
             },
             {
               "careerName": "Data Scientist",
+              "justification": "Excellent match for your investigative nature and analytical skills. This role enables you to solve complex problems using data, perfectly suited for your systematic thinking approach.",
+              "firstSteps": [
+                "Take online course 'Intro to Python for Data Science'",
+                "Try analyzing simple datasets from Kaggle.com",
+                "Watch 'Day in the Life of a Data Scientist' videos"
+              ],
+              "relatedMajors": ["Statistics", "Computer Science", "Mathematics", "Information Systems"],
               "careerProspect": {
                 "jobAvailability": "high",
                 "salaryPotential": "high",
@@ -492,15 +510,49 @@ Mendapatkan daftar hasil assessment user.
           "insights": [
             "Your investigative nature makes you excellent at research and analysis",
             "You prefer working independently on complex problems",
-            "Technology and innovation sectors align well with your personality"
+            "Technology and innovation sectors align well with your personality",
+            "Develop communication skills to convey complex ideas more effectively",
+            "Practice teamwork to balance your tendency to work alone"
           ],
+          "skillSuggestion": [
+            "Public Speaking",
+            "Leadership",
+            "Teamwork",
+            "Time Management",
+            "Delegation"
+          ],
+          "possiblePitfalls": [
+            "Isolating yourself from team due to excessive focus on individual analysis",
+            "Delaying decisions due to excessive perfectionism",
+            "Lack of networking due to excessive focus on technical aspects"
+          ],
+          "riskTolerance": "moderate",
           "workEnvironment": "You thrive in quiet, organized environments where you can focus deeply on complex problems. You prefer minimal interruptions and value intellectual autonomy.",
           "roleModel": [
             "Elon Musk",
             "Steve Jobs",
-            "Bill Gates",
-            "Mark Zuckerberg"
-          ]
+            "Bill Gates"
+          ],
+          "developmentActivities": {
+            "extracurricular": ["Robotics Club", "National Science Olympiad", "English Debate Club"],
+            "projectIdeas": [
+              "Create data visualization from favorite topics (e.g., favorite football team statistics)",
+              "Design simple app to solve school problems",
+              "Write blog explaining complex science concepts in simple ways"
+            ],
+            "bookRecommendations": [
+              {
+                "title": "Sapiens: A Brief History of Humankind",
+                "author": "Yuval Noah Harari",
+                "reason": "To satisfy your high intellectual curiosity."
+              },
+              {
+                "title": "Thinking, Fast and Slow",
+                "author": "Daniel Kahneman",
+                "reason": "To understand cognitive biases and sharpen your analysis."
+              }
+            ]
+          }
         }
       }
     ],
@@ -581,12 +633,23 @@ Mendapatkan detail hasil assessment.
     },
     "persona_profile": {
       "archetype": "The Innovator",
+      "coreMotivators": ["Problem-Solving", "Learning & Mastery", "Innovation"],
+      "learningStyle": "Visual & Kinesthetic (Learn best through examples and hands-on practice)",
       "shortSummary": "You are a natural innovator with strong analytical thinking and problem-solving abilities. You thrive in environments that challenge your intellect and allow you to explore new ideas.",
-      "strengths": ["Problem Solving", "Analytical Thinking", "Innovation"],
-      "weaknesses": ["Communication", "Leadership", "Time Management"],
+      "strengthSummary": "Your main strengths lie in deep analysis, creativity, and strong drive to learn new things. This enables you to generate unique solutions in various complex situations.",
+      "strengths": ["Problem Solving", "Analytical Thinking", "Innovation", "Intellectual Curiosity", "Independent Learning"],
+      "weaknessSummary": "You tend to overthink, be perfectionist, and sometimes lack patience with slow processes or working with others.",
+      "weaknesses": ["Communication", "Leadership", "Time Management", "Social Skills", "Delegation"],
       "careerRecommendation": [
         {
           "careerName": "Software Engineer",
+          "justification": "Perfect fit combining your analytical strengths and innovation drive. This role allows you to solve complex problems using technology, aligning with your 'Innovator' archetype.",
+          "firstSteps": [
+            "Start learning Python or JavaScript programming",
+            "Build simple projects like calculator or to-do list",
+            "Join local or online programming communities"
+          ],
+          "relatedMajors": ["Computer Science", "Software Engineering", "Information Systems", "Computer Engineering"],
           "careerProspect": {
             "jobAvailability": "high",
             "salaryPotential": "high",
@@ -597,6 +660,13 @@ Mendapatkan detail hasil assessment.
         },
         {
           "careerName": "Data Scientist",
+          "justification": "Excellent match for your investigative nature and analytical skills. This role enables you to solve complex problems using data, perfectly suited for your systematic thinking approach.",
+          "firstSteps": [
+            "Take online course 'Intro to Python for Data Science'",
+            "Try analyzing simple datasets from Kaggle.com",
+            "Watch 'Day in the Life of a Data Scientist' videos"
+          ],
+          "relatedMajors": ["Statistics", "Computer Science", "Mathematics", "Information Systems"],
           "careerProspect": {
             "jobAvailability": "high",
             "salaryPotential": "high",
@@ -609,10 +679,45 @@ Mendapatkan detail hasil assessment.
       "insights": [
         "Your investigative nature makes you excellent at research and analysis",
         "You prefer working independently on complex problems",
-        "Technology and innovation sectors align well with your personality"
+        "Technology and innovation sectors align well with your personality",
+        "Develop communication skills to convey complex ideas more effectively",
+        "Practice teamwork to balance your tendency to work alone"
       ],
+      "skillSuggestion": [
+        "Public Speaking",
+        "Leadership",
+        "Teamwork",
+        "Time Management",
+        "Delegation"
+      ],
+      "possiblePitfalls": [
+        "Isolating yourself from team due to excessive focus on individual analysis",
+        "Delaying decisions due to excessive perfectionism",
+        "Lack of networking due to excessive focus on technical aspects"
+      ],
+      "riskTolerance": "moderate",
       "workEnvironment": "You thrive in quiet, organized environments where you can focus deeply on complex problems. You prefer minimal interruptions and value intellectual autonomy.",
-      "roleModel": ["Elon Musk", "Steve Jobs", "Bill Gates", "Mark Zuckerberg"]
+      "roleModel": ["Elon Musk", "Steve Jobs", "Bill Gates"],
+      "developmentActivities": {
+        "extracurricular": ["Robotics Club", "National Science Olympiad", "English Debate Club"],
+        "projectIdeas": [
+          "Create data visualization from favorite topics (e.g., favorite football team statistics)",
+          "Design simple app to solve school problems",
+          "Write blog explaining complex science concepts in simple ways"
+        ],
+        "bookRecommendations": [
+          {
+            "title": "Sapiens: A Brief History of Humankind",
+            "author": "Yuval Noah Harari",
+            "reason": "To satisfy your high intellectual curiosity."
+          },
+          {
+            "title": "Thinking, Fast and Slow",
+            "author": "Daniel Kahneman",
+            "reason": "To understand cognitive biases and sharpen your analysis."
+          }
+        ]
+      }
     },
     "error_message": null,
     "created_at": "2024-01-15T10:30:00.000Z",
@@ -1506,12 +1611,23 @@ X-Service-Key: <internal_service_secret_key>
   },
   "persona_profile": {
     "archetype": "The Innovator",
+    "coreMotivators": ["Problem-Solving", "Learning & Mastery", "Innovation"],
+    "learningStyle": "Visual & Kinesthetic (Learn best through examples and hands-on practice)",
     "shortSummary": "You are a natural innovator with strong analytical thinking and problem-solving abilities. You thrive in environments that challenge your intellect and allow you to explore new ideas.",
-    "strengths": ["Problem Solving", "Analytical Thinking", "Innovation"],
-    "weaknesses": ["Communication", "Leadership", "Time Management"],
+    "strengthSummary": "Your main strengths lie in deep analysis, creativity, and strong drive to learn new things. This enables you to generate unique solutions in various complex situations.",
+    "strengths": ["Problem Solving", "Analytical Thinking", "Innovation", "Intellectual Curiosity", "Independent Learning"],
+    "weaknessSummary": "You tend to overthink, be perfectionist, and sometimes lack patience with slow processes or working with others.",
+    "weaknesses": ["Communication", "Leadership", "Time Management", "Social Skills", "Delegation"],
     "careerRecommendation": [
       {
         "careerName": "Software Engineer",
+        "justification": "Perfect fit combining your analytical strengths and innovation drive. This role allows you to solve complex problems using technology, aligning with your 'Innovator' archetype.",
+        "firstSteps": [
+          "Start learning Python or JavaScript programming",
+          "Build simple projects like calculator or to-do list",
+          "Join local or online programming communities"
+        ],
+        "relatedMajors": ["Computer Science", "Software Engineering", "Information Systems", "Computer Engineering"],
         "careerProspect": {
           "jobAvailability": "high",
           "salaryPotential": "high",
@@ -1522,6 +1638,13 @@ X-Service-Key: <internal_service_secret_key>
       },
       {
         "careerName": "Data Scientist",
+        "justification": "Excellent match for your investigative nature and analytical skills. This role enables you to solve complex problems using data, perfectly suited for your systematic thinking approach.",
+        "firstSteps": [
+          "Take online course 'Intro to Python for Data Science'",
+          "Try analyzing simple datasets from Kaggle.com",
+          "Watch 'Day in the Life of a Data Scientist' videos"
+        ],
+        "relatedMajors": ["Statistics", "Computer Science", "Mathematics", "Information Systems"],
         "careerProspect": {
           "jobAvailability": "high",
           "salaryPotential": "high",
@@ -1534,10 +1657,45 @@ X-Service-Key: <internal_service_secret_key>
     "insights": [
       "Your investigative nature makes you excellent at research and analysis",
       "You prefer working independently on complex problems",
-      "Technology and innovation sectors align well with your personality"
+      "Technology and innovation sectors align well with your personality",
+      "Develop communication skills to convey complex ideas more effectively",
+      "Practice teamwork to balance your tendency to work alone"
     ],
+    "skillSuggestion": [
+      "Public Speaking",
+      "Leadership",
+      "Teamwork",
+      "Time Management",
+      "Delegation"
+    ],
+    "possiblePitfalls": [
+      "Isolating yourself from team due to excessive focus on individual analysis",
+      "Delaying decisions due to excessive perfectionism",
+      "Lack of networking due to excessive focus on technical aspects"
+    ],
+    "riskTolerance": "moderate",
     "workEnvironment": "You thrive in quiet, organized environments where you can focus deeply on complex problems. You prefer minimal interruptions and value intellectual autonomy.",
-    "roleModel": ["Elon Musk", "Steve Jobs", "Bill Gates", "Mark Zuckerberg"]
+    "roleModel": ["Elon Musk", "Steve Jobs", "Bill Gates"],
+    "developmentActivities": {
+      "extracurricular": ["Robotics Club", "National Science Olympiad", "English Debate Club"],
+      "projectIdeas": [
+        "Create data visualization from favorite topics (e.g., favorite football team statistics)",
+        "Design simple app to solve school problems",
+        "Write blog explaining complex science concepts in simple ways"
+      ],
+      "bookRecommendations": [
+        {
+          "title": "Sapiens: A Brief History of Humankind",
+          "author": "Yuval Noah Harari",
+          "reason": "To satisfy your high intellectual curiosity."
+        },
+        {
+          "title": "Thinking, Fast and Slow",
+          "author": "Daniel Kahneman",
+          "reason": "To understand cognitive biases and sharpen your analysis."
+        }
+      ]
+    }
   },
   "assessment_name": "AI-Driven Talent Mapping",
   "status": "completed",
