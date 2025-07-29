@@ -13,6 +13,12 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
+// Add simple request logging for debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 // Start server
 const server = app.listen(config.port, () => {
   console.log(`

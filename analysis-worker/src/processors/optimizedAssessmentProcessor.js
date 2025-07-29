@@ -149,7 +149,8 @@ const processAssessmentOptimized = async (jobData) => {
   const { jobId, userId, userEmail, assessmentData, assessmentName = 'AI-Driven Talent Mapping', userIP } = jobData;
   const processingTimeout = parseInt(process.env.PROCESSING_TIMEOUT || '1800000'); // 30 minutes
   const startTime = Date.now();
-  
+  let deduplicationResult = null; // Declare outside try block
+
   try {
     // Audit: Job received
     auditLogger.logJobEvent(AUDIT_EVENTS.JOB_RECEIVED, jobData);
@@ -165,17 +166,17 @@ const processAssessmentOptimized = async (jobData) => {
     if (!rateLimitResult.allowed) {
       const error = createError(ERROR_TYPES.RATE_LIMIT_ERROR, `Rate limit exceeded: ${rateLimitResult.reason}`);
       error.retryAfter = rateLimitResult.retryAfter;
-      
+
       auditLogger.logJobEvent(AUDIT_EVENTS.JOB_FAILED, jobData, {
         reason: 'RATE_LIMIT_EXCEEDED',
         rateLimitReason: rateLimitResult.reason
       });
-      
+
       throw error;
     }
 
     // Step 2: Job deduplication check
-    const deduplicationResult = jobDeduplicationService.checkDuplicate(jobId, userId, assessmentData);
+    deduplicationResult = jobDeduplicationService.checkDuplicate(jobId, userId, assessmentData);
     
     if (deduplicationResult.isDuplicate) {
       auditLogger.logJobEvent(AUDIT_EVENTS.JOB_DUPLICATE_DETECTED, jobData, {

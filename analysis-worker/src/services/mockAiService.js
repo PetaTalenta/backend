@@ -64,15 +64,33 @@ const generateMockPersonaProfile = async (assessmentData, jobId) => {
     // Generate short summary
     const shortSummary = generateShortSummary(archetype, topRiasec, ocean);
 
+    // Generate additional required fields
+    const coreMotivators = generateCoreMotivators(riasec, ocean);
+    const learningStyle = generateLearningStyle(ocean);
+    const strengthSummary = generateStrengthSummary(strengths);
+    const weaknessSummary = generateWeaknessSummary(weaknesses);
+    const skillSuggestion = generateSkillSuggestions(riasec, ocean);
+    const possiblePitfalls = generatePossiblePitfalls(riasec, ocean);
+    const riskTolerance = generateRiskTolerance(ocean);
+    const developmentActivities = generateDevelopmentActivities(riasec, ocean);
+
     const mockProfile = {
       archetype,
+      coreMotivators,
+      learningStyle,
       shortSummary,
+      strengthSummary,
       strengths,
+      weaknessSummary,
       weaknesses,
       careerRecommendation,
       insights,
+      skillSuggestion,
+      possiblePitfalls,
+      riskTolerance,
       workEnvironment,
-      roleModel
+      roleModel,
+      developmentActivities
     };
 
     logger.info('Mock persona profile generated successfully', {
@@ -439,17 +457,17 @@ const generateRoleModels = (topInterest, secondInterest) => {
   // Remove duplicates
   const uniqueRoleModels = [...new Set(roleModels)];
 
-  // Ensure minimum 4 role models
-  if (uniqueRoleModels.length < 4) {
+  // Ensure minimum 2 role models (matching schema)
+  if (uniqueRoleModels.length < 2) {
     const additionalModels = ['Albert Einstein', 'Oprah Winfrey', 'Steve Jobs', 'Marie Curie'];
-    for (let i = 0; i < additionalModels.length && uniqueRoleModels.length < 4; i++) {
+    for (let i = 0; i < additionalModels.length && uniqueRoleModels.length < 2; i++) {
       if (!uniqueRoleModels.includes(additionalModels[i])) {
         uniqueRoleModels.push(additionalModels[i]);
       }
     }
   }
 
-  return uniqueRoleModels.slice(0, 5); // Limit to 5
+  return uniqueRoleModels.slice(0, 3); // Limit to 3 (matching schema max)
 };
 
 /**
@@ -469,6 +487,182 @@ const generateShortSummary = (archetype, topRiasec, ocean) => {
   summary += 'Kombinasi unik dari analytical thinking dan practical approach membuat Anda valuable dalam berbagai konteks profesional.';
   
   return summary;
+};
+
+/**
+ * Generate core motivators
+ */
+const generateCoreMotivators = (riasec, ocean) => {
+  const motivators = [];
+
+  // Based on top RIASEC scores
+  const sortedRiasec = Object.entries(riasec).sort((a, b) => b[1] - a[1]);
+  const topInterest = sortedRiasec[0][0];
+
+  const motivatorMap = {
+    'realistic': ['Problem-Solving', 'Hands-on Work', 'Technical Mastery'],
+    'investigative': ['Learning & Discovery', 'Research & Analysis', 'Knowledge Building'],
+    'artistic': ['Creative Expression', 'Innovation', 'Aesthetic Achievement'],
+    'social': ['Helping Others', 'Community Impact', 'Relationship Building'],
+    'enterprising': ['Leadership', 'Achievement', 'Influence & Persuasion'],
+    'conventional': ['Organization', 'Efficiency', 'Structure & Order']
+  };
+
+  if (motivatorMap[topInterest]) {
+    motivators.push(...motivatorMap[topInterest].slice(0, 2));
+  }
+
+  // Add based on personality
+  if (ocean.openness > 60) {
+    motivators.push('Continuous Learning');
+  }
+  if (ocean.conscientiousness > 60) {
+    motivators.push('Excellence & Quality');
+  }
+
+  return motivators.slice(0, 4);
+};
+
+/**
+ * Generate learning style
+ */
+const generateLearningStyle = (ocean) => {
+  if (ocean.openness > 70) {
+    return 'Experiential & Exploratory';
+  } else if (ocean.conscientiousness > 70) {
+    return 'Structured & Systematic';
+  } else if (ocean.extraversion > 60) {
+    return 'Collaborative & Interactive';
+  } else {
+    return 'Visual & Kinesthetic';
+  }
+};
+
+/**
+ * Generate strength summary
+ */
+const generateStrengthSummary = (strengths) => {
+  return `Kekuatan utama Anda terletak pada ${strengths.slice(0, 3).join(', ').toLowerCase()}. Kombinasi unik dari kemampuan ini membuat Anda mampu memberikan kontribusi yang valuable dalam berbagai situasi dan tantangan.`;
+};
+
+/**
+ * Generate weakness summary
+ */
+const generateWeaknessSummary = (weaknesses) => {
+  return `Area yang perlu dikembangkan meliputi ${weaknesses.slice(0, 2).join(' dan ').toLowerCase()}. Dengan awareness dan usaha yang konsisten, area-area ini dapat menjadi kekuatan di masa depan.`;
+};
+
+/**
+ * Generate skill suggestions
+ */
+const generateSkillSuggestions = (riasec, ocean) => {
+  const suggestions = [];
+
+  const sortedRiasec = Object.entries(riasec).sort((a, b) => b[1] - a[1]);
+  const topInterest = sortedRiasec[0][0];
+
+  const skillMap = {
+    'realistic': ['Technical problem-solving', 'Project management', 'Quality control'],
+    'investigative': ['Data analysis', 'Research methodology', 'Critical thinking'],
+    'artistic': ['Creative thinking', 'Design principles', 'Innovation techniques'],
+    'social': ['Communication skills', 'Emotional intelligence', 'Team collaboration'],
+    'enterprising': ['Leadership skills', 'Strategic planning', 'Negotiation'],
+    'conventional': ['Process optimization', 'Data management', 'Attention to detail']
+  };
+
+  if (skillMap[topInterest]) {
+    suggestions.push(...skillMap[topInterest]);
+  }
+
+  // Add digital literacy
+  suggestions.push('Digital literacy', 'Adaptability');
+
+  return suggestions.slice(0, 5);
+};
+
+/**
+ * Generate possible pitfalls
+ */
+const generatePossiblePitfalls = (riasec, ocean) => {
+  const pitfalls = [];
+
+  const sortedRiasec = Object.entries(riasec).sort((a, b) => b[1] - a[1]);
+  const topInterest = sortedRiasec[0][0];
+
+  const pitfallMap = {
+    'realistic': ['Mengabaikan aspek interpersonal', 'Terlalu fokus pada detail teknis'],
+    'investigative': ['Analysis paralysis', 'Kurang action-oriented'],
+    'artistic': ['Perfectionism yang berlebihan', 'Kesulitan dengan struktur'],
+    'social': ['Burnout karena terlalu fokus pada orang lain', 'Kesulitan membuat keputusan sulit'],
+    'enterprising': ['Overconfidence', 'Mengabaikan detail penting'],
+    'conventional': ['Resistance to change', 'Terlalu rigid dalam pendekatan']
+  };
+
+  if (pitfallMap[topInterest]) {
+    pitfalls.push(...pitfallMap[topInterest]);
+  }
+
+  // Add based on personality
+  if (ocean.neuroticism > 60) {
+    pitfalls.push('Overthinking dan anxiety');
+  }
+
+  return pitfalls.slice(0, 4);
+};
+
+/**
+ * Generate risk tolerance
+ */
+const generateRiskTolerance = (ocean) => {
+  const riskScore = (ocean.openness + ocean.extraversion - ocean.neuroticism) / 3;
+
+  if (riskScore > 70) return 'high';
+  if (riskScore > 50) return 'moderate';
+  if (riskScore > 30) return 'low';
+  return 'very low';
+};
+
+/**
+ * Generate development activities
+ */
+const generateDevelopmentActivities = (riasec, ocean) => {
+  const sortedRiasec = Object.entries(riasec).sort((a, b) => b[1] - a[1]);
+  const topInterest = sortedRiasec[0][0];
+
+  const extracurricularMap = {
+    'realistic': ['Klub Robotik', 'Olimpiade Sains', 'Maker Space'],
+    'investigative': ['Klub Penelitian', 'Science Fair', 'Debat Ilmiah'],
+    'artistic': ['Klub Seni', 'Creative Writing', 'Design Competition'],
+    'social': ['Volunteer Work', 'Student Council', 'Peer Mentoring'],
+    'enterprising': ['Business Club', 'Entrepreneurship Competition', 'Leadership Training'],
+    'conventional': ['Student Government', 'Academic Committee', 'Event Organization']
+  };
+
+  const projectMap = {
+    'realistic': ['Membuat prototype sederhana', 'Eksperimen sains praktis'],
+    'investigative': ['Research project', 'Data analysis project'],
+    'artistic': ['Portfolio kreatif', 'Art installation'],
+    'social': ['Community service project', 'Social impact initiative'],
+    'enterprising': ['Business plan competition', 'Startup simulation'],
+    'conventional': ['Process improvement project', 'Database management']
+  };
+
+  return {
+    extracurricular: extracurricularMap[topInterest] || ['Academic Club', 'Volunteer Work'],
+    projectIdeas: projectMap[topInterest] || ['Personal development project', 'Skill-building initiative'],
+    bookRecommendations: [
+      {
+        title: 'Mindset: The New Psychology of Success',
+        author: 'Carol Dweck',
+        reason: 'Untuk mengembangkan growth mindset yang essential untuk kesuksesan'
+      },
+      {
+        title: 'The 7 Habits of Highly Effective People',
+        author: 'Stephen Covey',
+        reason: 'Untuk membangun kebiasaan yang mendukung pencapaian tujuan'
+      }
+    ]
+  };
 };
 
 module.exports = {

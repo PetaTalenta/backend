@@ -8,13 +8,30 @@ const logger = require('../utils/logger');
  * Global error handler middleware
  */
 const errorHandler = (err, req, res, next) => {
-  // Log the error
+  // Log the error with comprehensive context
   logger.error('Error occurred', {
+    // Error details
     error: err.message,
+    errorName: err.name,
     stack: err.stack,
-    path: req.path,
+
+    // Request context
     method: req.method,
-    ip: req.ip
+    path: req.path,
+    originalUrl: req.originalUrl,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+    referer: req.get('referer'),
+    requestId: req.requestId,
+
+    // Query and params
+    query: req.query,
+    params: req.params,
+
+    // Additional context
+    timestamp: new Date().toISOString(),
+    hasBody: req.body && Object.keys(req.body).length > 0,
+    contentType: req.get('content-type')
   });
   
   // Default error response
@@ -74,17 +91,61 @@ const errorHandler = (err, req, res, next) => {
  * Not found handler middleware
  */
 const notFoundHandler = (req, res) => {
-  logger.warn('Route not found', {
-    path: req.path,
+  // Collect comprehensive request information for debugging
+  const requestInfo = {
+    // Basic request info
     method: req.method,
-    ip: req.ip
+    path: req.path,
+    originalUrl: req.originalUrl,
+    baseUrl: req.baseUrl,
+    url: req.url,
+
+    // Network info
+    ip: req.ip,
+    protocol: req.protocol,
+    hostname: req.hostname,
+
+    // Query and params
+    query: req.query,
+    params: req.params,
+
+    // Headers (selective for security)
+    headers: {
+      'user-agent': req.get('user-agent'),
+      'referer': req.get('referer'),
+      'accept': req.get('accept'),
+      'content-type': req.get('content-type'),
+      'authorization': req.get('authorization') ? '[PRESENT]' : '[NOT_PRESENT]',
+      'x-forwarded-for': req.get('x-forwarded-for'),
+      'x-real-ip': req.get('x-real-ip')
+    },
+
+    // Request context
+    requestId: req.requestId,
+    timestamp: new Date().toISOString(),
+
+    // Body info (for non-GET requests, but don't log sensitive data)
+    hasBody: req.body && Object.keys(req.body).length > 0,
+    bodyKeys: req.body ? Object.keys(req.body) : [],
+    contentLength: req.get('content-length')
+  };
+
+  // Log with comprehensive information
+  logger.warn('Route not found - Detailed request information', requestInfo);
+
+  // Also log a simpler version for quick scanning
+  logger.warn(`404 - ${req.method} ${req.originalUrl} from ${req.ip}`, {
+    userAgent: req.get('user-agent'),
+    referer: req.get('referer')
   });
-  
+
   res.status(404).json({
     success: false,
     error: {
       code: 'NOT_FOUND',
-      message: `Route ${req.method} ${req.path} not found`
+      message: `Route ${req.method} ${req.originalUrl} not found`,
+      requestId: req.requestId,
+      timestamp: new Date().toISOString()
     }
   });
 };

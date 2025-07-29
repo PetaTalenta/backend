@@ -192,7 +192,7 @@ const createAnalysisResult = async (userId, assessmentData, personaProfile, asse
  */
 const checkHealth = async () => {
   try {
-    const response = await archiveClient.get('/health', {
+    const response = await archiveClient.get('/archive/health', {
       timeout: 3000 // Shorter timeout for health check
     });
 

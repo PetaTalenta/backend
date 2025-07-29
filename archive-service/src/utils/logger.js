@@ -54,9 +54,9 @@ const fileFormat = winston.format.combine(
 
 // Define which transports the logger must use
 const transports = [
-  // Console transport
+  // Console transport - show all logs in both environments
   new winston.transports.Console({
-    level: process.env.NODE_ENV === 'production' ? 'warn' : 'debug',
+    level: process.env.LOG_LEVEL || 'info',
     format: consoleFormat
   }),
   

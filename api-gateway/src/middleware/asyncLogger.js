@@ -38,21 +38,31 @@ const logger = winston.createLogger({
   ]
 });
 
-// Console transport for development with better formatting
-if (process.env.NODE_ENV === 'development') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.timestamp({ format: 'HH:mm:ss' }),
-      winston.format.printf(({ timestamp, level, message }) => {
-        if (typeof message === 'object') {
-          return `${timestamp} [${level}] ${message.type || 'LOG'}: ${message.method || ''} ${message.url || ''} ${message.statusCode ? `(${message.statusCode})` : ''} ${message.duration ? `${message.duration}ms` : ''}`;
+// Console transport for both development and production
+// In production, show only important logs (info and above)
+logger.add(new winston.transports.Console({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.timestamp({ format: 'HH:mm:ss' }),
+    winston.format.printf(({ timestamp, level, message }) => {
+      if (typeof message === 'object') {
+        // Format request/proxy logs nicely
+        if (message.type === 'request') {
+          return `${timestamp} [${level}] REQUEST: ${message.method} ${message.url} → ${message.statusCode} (${message.duration}ms)`;
+        } else if (message.type === 'proxy_request') {
+          return `${timestamp} [${level}] PROXY: ${message.method} ${message.url} → ${message.service}`;
+        } else if (message.type === 'proxy_response') {
+          return `${timestamp} [${level}] PROXY: ${message.method} ${message.url} ← ${message.statusCode} (${message.duration}ms)`;
+        } else if (message.type === 'proxy_error') {
+          return `${timestamp} [${level}] PROXY ERROR: ${message.method} ${message.url} - ${message.error}`;
         }
-        return `${timestamp} [${level}] ${message}`;
-      })
-    )
-  }));
-}
+        return `${timestamp} [${level}] ${message.type || 'LOG'}: ${JSON.stringify(message)}`;
+      }
+      return `${timestamp} [${level}] ${message}`;
+    })
+  )
+}));
 
 /**
  * Async request logging middleware
@@ -79,7 +89,10 @@ const asyncRequestLogger = (req, res, next) => {
     const duration = Date.now() - startTime;
     const hrDuration = process.hrtime(startHrTime);
     const hrDurationMs = hrDuration[0] * 1000 + hrDuration[1] / 1e6;
-    
+
+    // Debug console log to verify middleware is working
+    console.log(`[DEBUG] Request: ${req.method} ${req.url} → ${res.statusCode} (${duration}ms)`);
+
     // Async logging (non-blocking)
     setImmediate(() => {
       logger.info({

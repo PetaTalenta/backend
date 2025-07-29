@@ -107,33 +107,33 @@ const responseSchema = {
   properties: {
     archetype: {
       type: Type.STRING,
-      description: "Nama archetype yang paling sesuai",
+      description: "Nama archetype yang paling sesuai, misal: The Analytical Innovator",
     },
     coreMotivators: {
       type: Type.ARRAY,
-      minItems: 2,
+      minItems: 4,
       maxItems: 4,
       items: { type: Type.STRING, description: "Motivasi fundamental" },
       description: "Fundamental drivers atau motivasi inti dari persona",
     },
     learningStyle: {
       type: Type.STRING,
-      description: "Gaya belajar yang paling efektif untuk persona",
+      description: "Gaya belajar yang paling efektif untuk persona ini, misal: Visual & Kinesthetic, Anda dapat mendapatkan pengalaman belajar paling baik dengan melihat contoh dan langsung mencoba ",
     },
     shortSummary: {
       type: Type.STRING,
-      description: "Ringkasan singkat (1-2 paragraf) tentang persona user",
+      description: "Ringkasan singkat (2 paragraf) tentang persona user",
     },
     strengthSummary: {
       type: Type.STRING,
-      description: "Ringkasan kekuatan utama persona (1 paragraf)",
+      description: "Ringkasan kekuatan utama persona (2 paragraf)",
     },
     strengths: {
       type: Type.ARRAY,
-      minItems: 3,
+      minItems: 5,
       maxItems: 5,
-      items: { type: Type.STRING, description: "Kekuatan spesifik" },
-      description: "Daftar kekuatan utama persona",
+      items: { type: Type.STRING, description: "Kekuatan spesifik persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat." },
+      description: "Daftar kekuatan utama persona.",
     },
     weaknessSummary: {
       type: Type.STRING,
@@ -141,11 +141,11 @@ const responseSchema = {
     },
     weaknesses: {
       type: Type.ARRAY,
-      minItems: 3,
+      minItems: 5,
       maxItems: 5,
       items: {
         type: Type.STRING,
-        description: "Kelemahan atau area pengembangan",
+        description: "Kelemahan atau area pengembangan persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat.",
       },
       description: "Daftar kelemahan persona",
     },
@@ -161,22 +161,22 @@ const responseSchema = {
         properties: {
           careerName: {
             type: Type.STRING,
-            description: "Nama karir atau profesi yang direkomendasikan",
+            description: "Nama karir atau profesi yang  direkomendasikan, fokus data yang dipakai adalah RIASEC dan VIAIS lalu OCEAN adalah pendukung",
           },
           justification: {
             type: Type.STRING,
-            description: "Penjelasan mengapa karir ini cocok berdasarkan data psikometrik",
+            description: "Penjelasan mengapa karir ini cocok berdasarkan data psikometrik diatas",
           },
           firstSteps: {
             type: Type.ARRAY,
-            minItems: 2,
+            minItems: 4,
             maxItems: 4,
             items: { type: Type.STRING, description: "Langkah konkret" },
-            description: "Langkah konkret yang bisa diambil untuk mengeksplorasi karir ini",
+            description: "Langkah konkret yang bisa diambil untuk mengeksplorasi karir ini bagi siswa SMA",
           },
           relatedMajors: {
             type: Type.ARRAY,
-            minItems: 2,
+            minItems: 5,
             maxItems: 5,
             items: { type: Type.STRING, description: "Nama jurusan" },
             description: "Jurusan kuliah yang relevan dengan karir ini",
@@ -228,28 +228,28 @@ const responseSchema = {
     },
     insights: {
       type: Type.ARRAY,
-      minItems: 3,
+      minItems: 5,
       maxItems: 5,
-      items: { type: Type.STRING, description: "Saran pengembangan diri" },
+      items: { type: Type.STRING, description: "Saran pengembangan diri, berdasarkan kelemahan yang didapatkan sebelumnya juga data psikometrik" },
       description: "Insight atau saran actionable",
     },
     skillSuggestion: {
       type: Type.ARRAY,
-      minItems: 3,
+      minItems: 5,
       maxItems: 5,
       items: {
         type: Type.STRING,
-        description: "Keahlian atau kompetensi yang disarankan untuk dikembangkan",
+        description: "Keahlian atau kompetensi yang disarankan untuk dikembangkan berdasarkan kekuatan yang didapatkan sebelumnya juga data psikometrik",
       },
       description: "Rekomendasi pengembangan skill jangka pendek dan menengah",
     },
     possiblePitfalls: {
       type: Type.ARRAY,
-      minItems: 2,
+      minItems: 3,
       maxItems: 5,
       items: {
         type: Type.STRING,
-        description: "Kesalahan atau jebakan karir yang perlu diwaspadai",
+        description: "Kesalahan atau jebakan karir yang perlu diwaspadai, khususnya dengan data OCEAN dan RIASEC, VIAIS adalah pendukung",
       },
       description: "Hal-hal yang sebaiknya dihindari untuk pengembangan optimal",
     },
@@ -269,7 +269,7 @@ const responseSchema = {
       maxItems: 3,
       items: {
         type: Type.STRING,
-        description: "Nama role model yang relevan",
+        description: "Nama role model yang relevan dengan persona",
       },
       description: "Daftar role model inspiratif",
     },
@@ -286,14 +286,14 @@ const responseSchema = {
         },
         projectIdeas: {
           type: Type.ARRAY,
-          minItems: 2,
+          minItems: 4,
           maxItems: 4,
-          items: { type: Type.STRING, description: "Ide proyek konkret" },
+          items: { type: Type.STRING, description: "Ide proyek konkret yang bisa dilakukan siswa SMA dengan tingkatan mudah, menengah, sulit dan extreme, extreme adalah biasanya untuk outliers." },
           description: "Ide proyek untuk membangun portfolio dan skills",
         },
         bookRecommendations: {
           type: Type.ARRAY,
-          minItems: 2,
+          minItems: 3,
           maxItems: 3,
           items: {
             type: Type.OBJECT,
@@ -512,7 +512,9 @@ Gunakan 5 langkah ini sebagai kerangka kerja, namun selalu terapkan **Prinsip An
 5.  **Rencana Aksi & Refleksi:** Buat langkah-langkah praktis dan pertanyaan reflektif untuk membantu siswa memulai perjalanan pengembangan dirinya.
 
 
-# CATATAN
+# 
+- Penjelasan gunakan bahasa Indonesia formal dan professional namun yang mudah dipahami oleh siswa
+- Jangan struktur bahasa gunakan pembahasan yang kaku
 - Jangan terjemahkan terminologi bahasa inggris ke bahasa indonesia
 - Jangan terjemahkan nama pekerjaan bahasa inggris
 - Jangan terjemahkan sesuatu yang tidak memiliki kata pasti di KBBI

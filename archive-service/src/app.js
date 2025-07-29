@@ -84,6 +84,25 @@ app.use((req, res, next) => {
   next();
 });
 
+// Enhanced request logging middleware
+app.use((req, res, next) => {
+  // Log all incoming requests with detailed information
+  logger.info('Incoming request', {
+    method: req.method,
+    originalUrl: req.originalUrl,
+    path: req.path,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+    referer: req.get('referer'),
+    requestId: req.requestId,
+    query: Object.keys(req.query).length > 0 ? req.query : undefined,
+    hasBody: req.body && Object.keys(req.body).length > 0,
+    contentType: req.get('content-type'),
+    timestamp: new Date().toISOString()
+  });
+  next();
+});
+
 // Metrics collection middleware
 app.use(metricsMiddleware);
 app.use(cacheMetricsMiddleware);
