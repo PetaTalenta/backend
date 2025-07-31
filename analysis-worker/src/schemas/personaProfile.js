@@ -23,13 +23,13 @@ const personaProfileSchema = Joi.object({
   strengthSummary: Joi.string().required()
     .description('Ringkasan kekuatan utama persona (1 paragraf)'),
 
-  strengths: Joi.array().items(Joi.string()).min(3).max(5).required()
+  strengths: Joi.array().items(Joi.string()).min(3).max(6).required()
     .description('Daftar kekuatan/strength dari persona'),
 
   weaknessSummary: Joi.string().required()
     .description('Ringkasan kelemahan utama persona (1 paragraf)'),
 
-  weaknesses: Joi.array().items(Joi.string()).min(3).max(5).required()
+  weaknesses: Joi.array().items(Joi.string()).min(3).max(6).required()
     .description('Daftar kelemahan/weakness dari persona'),
 
   careerRecommendation: Joi.array().items(
@@ -52,7 +52,9 @@ const personaProfileSchema = Joi.object({
         industryGrowth: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
           .description('Pertumbuhan industri terkait profesi ini di masa depan'),
         skillDevelopment: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
-          .description('Peluang mengembangkan keahlian di profesi ini')
+          .description('Peluang mengembangkan keahlian di profesi ini'),
+        aiOvertake: Joi.string().valid('super high', 'high', 'moderate', 'low', 'super low').required()
+          .description('Seberapa besar kemungkinan profesi ini akan digantikan oleh AI di masa depan')
       }).required()
     })
   ).min(3).max(5).required()
@@ -61,7 +63,7 @@ const personaProfileSchema = Joi.object({
   insights: Joi.array().items(Joi.string()).min(3).max(5).required()
     .description('Daftar insight atau saran pengembangan diri'),
 
-  skillSuggestion: Joi.array().items(Joi.string()).min(3).max(5).required()
+  skillSuggestion: Joi.array().items(Joi.string()).min(3).max(6).required()
     .description('Rekomendasi pengembangan skill jangka pendek dan menengah'),
 
   possiblePitfalls: Joi.array().items(Joi.string()).min(2).max(5).required()
@@ -90,7 +92,7 @@ const personaProfileSchema = Joi.object({
         reason: Joi.string().required()
           .description('Alasan mengapa buku ini cocok untuk persona')
       })
-    ).min(2).max(3).required()
+    ).min(2).max(6).required()
       .description('Rekomendasi buku dengan alasan spesifik')
   }).required()
     .description('Aktivitas pengembangan yang disesuaikan dengan konteks siswa SMA')
@@ -136,7 +138,8 @@ const personaProfileExample = {
         salaryPotential: "high",
         careerProgression: "high",
         industryGrowth: "super high",
-        skillDevelopment: "super high"
+        skillDevelopment: "super high",
+        aiOvertake: "low"
       }
     },
     {
@@ -153,7 +156,8 @@ const personaProfileExample = {
         salaryPotential: "moderate",
         careerProgression: "moderate",
         industryGrowth: "moderate",
-        skillDevelopment: "high"
+        skillDevelopment: "high",
+        aiOvertake: "moderate"
       }
     },
     {
@@ -170,7 +174,8 @@ const personaProfileExample = {
         salaryPotential: "high",
         careerProgression: "high",
         industryGrowth: "super high",
-        skillDevelopment: "super high"
+        skillDevelopment: "super high",
+        aiOvertake: "moderate"
       }
     }
   ],

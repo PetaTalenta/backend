@@ -130,10 +130,13 @@ const responseSchema = {
     },
     strengths: {
       type: Type.ARRAY,
-      minItems: 5,
-      maxItems: 5,
-      items: { type: Type.STRING, description: "Kekuatan spesifik persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat." },
-      description: "Daftar kekuatan utama persona.",
+      minItems: 4,
+      maxItems: 6,
+      items: {
+        type: Type.STRING,
+        description: "Kekuatan spesifik persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat. HANYA berisi konten kekuatan, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
+      },
+      description: "Daftar kekuatan utama persona. Array ini hanya berisi konten kekuatan, bukan kata 'justification'.",
     },
     weaknessSummary: {
       type: Type.STRING,
@@ -141,18 +144,18 @@ const responseSchema = {
     },
     weaknesses: {
       type: Type.ARRAY,
-      minItems: 5,
+      minItems: 4,
       maxItems: 5,
       items: {
         type: Type.STRING,
-        description: "Kelemahan atau area pengembangan persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat.",
+        description: "Kelemahan atau area pengembangan persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat. HANYA berisi konten kelemahan, JANGAN menambahkan kata 'justification' atau kata meta lainnya.",
       },
-      description: "Daftar kelemahan persona",
+      description: "Daftar kelemahan persona. Array ini hanya berisi konten kelemahan, bukan kata 'justification'.",
     },
     careerRecommendation: {
       type: Type.ARRAY,
-      minItems: 3,
-      maxItems: 5,
+      minItems: 4,
+      maxItems: 4,
       description:
         "Daftar rekomendasi karir sesuai persona, beserta prospeknya",
       items: {
@@ -171,15 +174,21 @@ const responseSchema = {
             type: Type.ARRAY,
             minItems: 4,
             maxItems: 4,
-            items: { type: Type.STRING, description: "Langkah konkret" },
-            description: "Langkah konkret yang bisa diambil untuk mengeksplorasi karir ini bagi siswa SMA",
+            items: {
+              type: Type.STRING,
+              description: "Langkah konkret yang bisa diambil siswa SMA. HANYA berisi konten langkah, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
+            },
+            description: "Langkah konkret yang bisa diambil untuk mengeksplorasi karir ini bagi siswa SMA. Array ini hanya berisi konten langkah, bukan kata 'justification'.",
           },
           relatedMajors: {
             type: Type.ARRAY,
-            minItems: 5,
+            minItems: 4,
             maxItems: 5,
-            items: { type: Type.STRING, description: "Nama jurusan" },
-            description: "Jurusan kuliah yang relevan dengan karir ini",
+            items: {
+              type: Type.STRING,
+              description: "Nama jurusan kuliah yang relevan. HANYA berisi nama jurusan, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
+            },
+            description: "Jurusan kuliah yang relevan dengan karir ini. Array ini hanya berisi nama jurusan, bukan kata 'justification'.",
           },
           careerProspect: {
             type: Type.OBJECT,
@@ -189,6 +198,7 @@ const responseSchema = {
               "careerProgression",
               "industryGrowth",
               "skillDevelopment",
+              "aiOvertake",
             ],
             properties: {
               jobAvailability: {
@@ -221,6 +231,12 @@ const responseSchema = {
                   "Peluang mengembangkan keahlian di profesi ini",
                 enum: ["super high", "high", "moderate", "low", "super low"],
               },
+              aiOvertake: {
+                type: Type.STRING,
+                description:
+                  "Seberapa besar kemungkinan profesi ini akan digantikan oleh AI di masa depan",
+                enum: ["super high", "high", "moderate", "low", "super low"],
+              },
             },
           },
         },
@@ -228,30 +244,33 @@ const responseSchema = {
     },
     insights: {
       type: Type.ARRAY,
-      minItems: 5,
+      minItems: 4,
       maxItems: 5,
-      items: { type: Type.STRING, description: "Saran pengembangan diri, berdasarkan kelemahan yang didapatkan sebelumnya juga data psikometrik" },
-      description: "Insight atau saran actionable",
+      items: {
+        type: Type.STRING,
+        description: "Saran pengembangan diri yang actionable, berdasarkan kelemahan yang didapatkan sebelumnya juga data psikometrik. HANYA berisi konten saran, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
+      },
+      description: "Insight atau saran actionable. Array ini hanya berisi konten saran, bukan kata 'justification'.",
     },
     skillSuggestion: {
       type: Type.ARRAY,
-      minItems: 5,
-      maxItems: 5,
+      minItems: 4,
+      maxItems: 6,
       items: {
         type: Type.STRING,
-        description: "Keahlian atau kompetensi yang disarankan untuk dikembangkan berdasarkan kekuatan yang didapatkan sebelumnya juga data psikometrik",
+        description: "Keahlian atau kompetensi yang disarankan untuk dikembangkan berdasarkan kekuatan yang didapatkan sebelumnya juga data psikometrik. HANYA berisi nama skill, JANGAN menambahkan kata 'justification' atau kata meta lainnya.",
       },
-      description: "Rekomendasi pengembangan skill jangka pendek dan menengah",
+      description: "Rekomendasi pengembangan skill jangka pendek dan menengah. Array ini hanya berisi nama skill, bukan kata 'justification'.",
     },
     possiblePitfalls: {
       type: Type.ARRAY,
-      minItems: 3,
+      minItems: 4,
       maxItems: 5,
       items: {
         type: Type.STRING,
-        description: "Kesalahan atau jebakan karir yang perlu diwaspadai, khususnya dengan data OCEAN dan RIASEC, VIAIS adalah pendukung",
+        description: "Kesalahan atau jebakan karir yang perlu diwaspadai, khususnya dengan data OCEAN dan RIASEC, VIAIS adalah pendukung. HANYA berisi konten jebakan/tantangan, JANGAN menambahkan kata 'justification' atau kata meta lainnya.",
       },
-      description: "Hal-hal yang sebaiknya dihindari untuk pengembangan optimal",
+      description: "Hal-hal yang sebaiknya dihindari untuk pengembangan optimal. Array ini hanya berisi konten jebakan/tantangan, bukan kata 'justification'.",
     },
     riskTolerance: {
       type: Type.STRING,
@@ -269,7 +288,7 @@ const responseSchema = {
       maxItems: 3,
       items: {
         type: Type.STRING,
-        description: "Nama role model yang relevan dengan persona",
+        description: "Nama role model yang relevan dengan persona dengan pencapaiannya, e.g: John Doe (Pendiri Perusahaan X)",
       },
       description: "Daftar role model inspiratif",
     },
@@ -281,20 +300,26 @@ const responseSchema = {
           type: Type.ARRAY,
           minItems: 2,
           maxItems: 4,
-          items: { type: Type.STRING, description: "Nama kegiatan ekstrakurikuler" },
-          description: "Kegiatan ekstrakurikuler yang disarankan",
+          items: {
+            type: Type.STRING,
+            description: "Nama kegiatan ekstrakurikuler yang spesifik. HANYA berisi nama kegiatan, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
+          },
+          description: "Kegiatan ekstrakurikuler yang disarankan. Array ini hanya berisi nama kegiatan, bukan kata 'justification'.",
         },
         projectIdeas: {
           type: Type.ARRAY,
           minItems: 4,
           maxItems: 4,
-          items: { type: Type.STRING, description: "Ide proyek konkret yang bisa dilakukan siswa SMA dengan tingkatan mudah, menengah, sulit dan extreme, extreme adalah biasanya untuk outliers." },
-          description: "Ide proyek untuk membangun portfolio dan skills",
+          items: {
+            type: Type.STRING,
+            description: "Ide proyek konkret yang bisa dilakukan siswa SMA dengan tingkatan mudah, menengah, sulit dan extreme, extreme adalah biasanya untuk outliers. HANYA berisi deskripsi proyek, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
+          },
+          description: "Ide proyek untuk membangun portfolio dan skills. Array ini hanya berisi deskripsi proyek, bukan kata 'justification'.",
         },
         bookRecommendations: {
           type: Type.ARRAY,
-          minItems: 3,
-          maxItems: 3,
+          minItems: 6,
+          maxItems: 6,
           items: {
             type: Type.OBJECT,
             required: ["title", "author", "reason"],
@@ -451,12 +476,20 @@ const responseSchema = {
  */
 const buildPrompt = (assessmentData) => {
   // Extract assessment data
-  const { riasec, ocean, viaIs } = assessmentData;
+  const { riasec, ocean, viaIs, industryScore } = assessmentData;
 
   // Build VIA-IS section
   const viaIsSection = Object.entries(viaIs)
     .map(([key, value]) => `- ${formatCamelCase(key)}: ${value}/100`)
     .join("\n");
+
+  // Build Industry Score section (optional)
+  let industryScoreSection = '';
+  if (industryScore && Object.keys(industryScore).length > 0) {
+    industryScoreSection = Object.entries(industryScore)
+      .map(([key, value]) => `- ${formatCamelCase(key)}: ${value}/100`)
+      .join("\n");
+  }
 
   // Build prompt
   return `
@@ -484,6 +517,9 @@ Berikut adalah data asesmen yang akan dianalisis. Skor berada dalam skala 0-100.
 
 ## VIA Character Strengths:
 ${viaIsSection}
+${industryScoreSection ? `
+## Industry Interest Scores:
+${industryScoreSection}` : ''}
 </DATA_ASSESSMENT>
 
 # PRINSIP ANALISIS HOLISTIK (WAJIB DIIKUTI)
@@ -508,11 +544,19 @@ Gunakan 5 langkah ini sebagai kerangka kerja, namun selalu terapkan **Prinsip An
 1.  **Pahami Data:** Tinjau semua data (OCEAN, RIASEC, VIA-IS) secara keseluruhan.
 2.  **Analisis Individual:** Uraikan setiap hasil tes dengan bahasa yang mudah dipahami, sambil menerapkan prinsip kejujuran konstruktif.
 3.  **Sintesis & Buat Arketipe:** Gabungkan semua wawasan untuk menciptakan satu **Arketipe Potensi** yang unik dan deskriptif (contoh: "The Creative Communicator", "The Practical Musician"). Jelaskan mengapa arketipe ini cocok.
-4.  **Rekomendasi Eksplorasi:** Berikan rekomendasi konkret untuk jurusan kuliah, jalur karier, dan kegiatan pengembangan diri (ekskul, kursus online, buku, proyek). Hubungkan setiap rekomendasi kembali ke data analisis.
+4.  **Rekomendasi Eksplorasi:** Berikan rekomendasi konkret untuk jurusan kuliah, jalur karier, dan kegiatan pengembangan diri (ekskul, kursus online, buku, proyek). Hubungkan setiap rekomendasi kembali ke data analisis. ${industryScoreSection ? 'Gunakan Industry Interest Scores untuk memberikan rekomendasi karir yang lebih spesifik dan relevan dengan minat industri yang tinggi.' : ''}
 5.  **Rencana Aksi & Refleksi:** Buat langkah-langkah praktis dan pertanyaan reflektif untuk membantu siswa memulai perjalanan pengembangan dirinya.
 
 
-# 
+# ATURAN PENTING UNTUK OUTPUT JSON
+
+## ATURAN ARRAY - SANGAT PENTING!
+- Semua array (insights, strengths, weaknesses, skillSuggestion, possiblePitfalls, firstSteps, relatedMajors) harus HANYA berisi konten yang diminta
+- JANGAN PERNAH menambahkan kata "justification" atau kata meta lainnya ke dalam array
+- Setiap item dalam array harus berupa konten aktual (insight, kekuatan, kelemahan, skill, dll), bukan kata kunci atau placeholder
+- Field "justification" HANYA ada di dalam object careerRecommendation, tidak di tempat lain
+
+## ATURAN UMUM
 - Penjelasan gunakan bahasa Indonesia formal dan professional namun yang mudah dipahami oleh siswa
 - Jangan struktur bahasa gunakan pembahasan yang kaku
 - Jangan terjemahkan terminologi bahasa inggris ke bahasa indonesia

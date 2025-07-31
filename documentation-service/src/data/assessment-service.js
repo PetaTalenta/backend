@@ -54,6 +54,32 @@ export const assessmentServiceData = {
           hope: 80,
           humor: 75,
           spirituality: 60
+        },
+        industryScore: {
+          teknologi: 70,
+          kesehatan: 70,
+          keuangan: 66,
+          pendidikan: 67,
+          rekayasa: 70,
+          pemasaran: 69,
+          hukum: 71,
+          kreatif: 64,
+          media: 69,
+          penjualan: 70,
+          sains: 71,
+          manufaktur: 69,
+          agrikultur: 69,
+          pemerintahan: 68,
+          konsultasi: 71,
+          pariwisata: 71,
+          logistik: 67,
+          energi: 69,
+          sosial: 71,
+          olahraga: 68,
+          properti: 72,
+          kuliner: 69,
+          perdagangan: 68,
+          telekomunikasi: 72
         }
       },
       parameters: [
@@ -80,6 +106,12 @@ export const assessmentServiceData = {
           type: "object",
           required: true,
           description: "VIA-IS character strengths - all 24 strengths must be provided, scores between 0-100"
+        },
+        {
+          name: "industryScore",
+          type: "object",
+          required: false,
+          description: "Industry interest scores - optional field with 24 industry categories, scores between 0-100"
         }
       ],
       response: {
@@ -118,6 +150,11 @@ export const assessmentServiceData = {
       "creativity": 80,
       "curiosity": 85,
       "judgment": 75
+    },
+    "industryScore": {
+      "teknologi": 70,
+      "kesehatan": 70,
+      "keuangan": 66
     }
   }'`
     },

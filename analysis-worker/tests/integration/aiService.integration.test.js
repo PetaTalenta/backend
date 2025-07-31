@@ -88,6 +88,17 @@ describe('AI Service Integration Tests', () => {
     }
   };
 
+  const mockAssessmentDataWithIndustryScore = {
+    ...mockAssessmentData,
+    industryScore: {
+      teknologi: 70,
+      kesehatan: 80,
+      keuangan: 60,
+      pendidikan: 75,
+      rekayasa: 85
+    }
+  };
+
   beforeAll(async () => {
     // Set test API key before initialization
     process.env.GOOGLE_AI_API_KEY = 'test_api_key_placeholder';
@@ -194,6 +205,47 @@ describe('AI Service Integration Tests', () => {
       expect(result.archetype).toBeDefined();
       
       // Verify that the operation completed successfully
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Using mock AI model'),
+        expect.objectContaining({ jobId })
+      );
+    }, 10000);
+
+    // Backward compatibility test
+    test('should generate persona profile without industryScore (backward compatibility)', async () => {
+      const jobId = 'test-job-backward-compat';
+
+      // Set environment to use mock AI
+      process.env.GOOGLE_AI_API_KEY = 'test_api_key_placeholder';
+
+      const result = await aiService.generatePersonaProfile(mockAssessmentData, jobId);
+
+      // Should return a valid result even without industryScore
+      expect(result).toBeDefined();
+      expect(result.archetype).toBeDefined();
+      expect(result.careerRecommendation).toBeDefined();
+      expect(Array.isArray(result.careerRecommendation)).toBe(true);
+
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Using mock AI model'),
+        expect.objectContaining({ jobId })
+      );
+    }, 10000);
+
+    test('should generate persona profile with industryScore', async () => {
+      const jobId = 'test-job-with-industry-score';
+
+      // Set environment to use mock AI
+      process.env.GOOGLE_AI_API_KEY = 'test_api_key_placeholder';
+
+      const result = await aiService.generatePersonaProfile(mockAssessmentDataWithIndustryScore, jobId);
+
+      // Should return a valid result with industryScore
+      expect(result).toBeDefined();
+      expect(result.archetype).toBeDefined();
+      expect(result.careerRecommendation).toBeDefined();
+      expect(Array.isArray(result.careerRecommendation)).toBe(true);
+
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('Using mock AI model'),
         expect.objectContaining({ jobId })

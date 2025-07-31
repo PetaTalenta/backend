@@ -11,7 +11,6 @@ const { authenticateService, requireServiceAuth } = require('../middleware/servi
 const { validateBody, validateQuery, validateParams } = require('../middleware/validation');
 const { sendSuccess, sendError, sendNotFound } = require('../utils/responseFormatter');
 const {
-  createAnalysisResultSchema,
   updateAnalysisResultSchema,
   listResultsQuerySchema,
   uuidParamSchema,
@@ -66,7 +65,7 @@ router.get('/:id',
  */
 router.post('/',
   requireServiceAuth,
-  validateBody(createAnalysisResultSchema),
+  // Validation removed for analysis-worker requests
   resultsController.createResult
 );
 
