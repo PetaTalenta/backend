@@ -157,7 +157,7 @@ const responseSchema = {
       minItems: 4,
       maxItems: 4,
       description:
-        "Daftar rekomendasi karir sesuai persona, beserta prospeknya",
+        "Daftar rekomendasi karir sesuai persona dan kecocokan industri, beserta prospeknya",
       items: {
         type: Type.OBJECT,
         required: ["careerName", "justification", "firstSteps", "relatedMajors", "careerProspect"],
@@ -172,8 +172,8 @@ const responseSchema = {
           },
           firstSteps: {
             type: Type.ARRAY,
-            minItems: 4,
-            maxItems: 4,
+            minItems: 3,
+            maxItems: 3,
             items: {
               type: Type.STRING,
               description: "Langkah konkret yang bisa diambil siswa SMA. HANYA berisi konten langkah, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
@@ -299,12 +299,12 @@ const responseSchema = {
         extracurricular: {
           type: Type.ARRAY,
           minItems: 2,
-          maxItems: 4,
+          maxItems: 3,
           items: {
             type: Type.STRING,
             description: "Nama kegiatan ekstrakurikuler yang spesifik. HANYA berisi nama kegiatan, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
           },
-          description: "Kegiatan ekstrakurikuler yang disarankan. Array ini hanya berisi nama kegiatan, bukan kata 'justification'.",
+          description: "Kegiatan ekstrakurikuler yang disarankan. Array ini hanya berisi nama kegiatan, bukan kata 'justification' atau kata meta lainnya.",
         },
         projectIdeas: {
           type: Type.ARRAY,
@@ -541,11 +541,25 @@ Ini adalah prinsip utama yang harus memandu seluruh analisis Anda. Fleksibilitas
 
 Gunakan 5 langkah ini sebagai kerangka kerja, namun selalu terapkan **Prinsip Analisis Holistik** di setiap langkahnya.
 
-1.  **Pahami Data:** Tinjau semua data (OCEAN, RIASEC, VIA-IS) secara keseluruhan.
-2.  **Analisis Individual:** Uraikan setiap hasil tes dengan bahasa yang mudah dipahami, sambil menerapkan prinsip kejujuran konstruktif.
-3.  **Sintesis & Buat Arketipe:** Gabungkan semua wawasan untuk menciptakan satu **Arketipe Potensi** yang unik dan deskriptif (contoh: "The Creative Communicator", "The Practical Musician"). Jelaskan mengapa arketipe ini cocok.
-4.  **Rekomendasi Eksplorasi:** Berikan rekomendasi konkret untuk jurusan kuliah, jalur karier, dan kegiatan pengembangan diri (ekskul, kursus online, buku, proyek). Hubungkan setiap rekomendasi kembali ke data analisis. ${industryScoreSection ? 'Gunakan Industry Interest Scores untuk memberikan rekomendasi karir yang lebih spesifik dan relevan dengan minat industri yang tinggi.' : ''}
-5.  **Rencana Aksi & Refleksi:** Buat langkah-langkah praktis dan pertanyaan reflektif untuk membantu siswa memulai perjalanan pengembangan dirinya.
+1. Pemindaian Data Awal:
+Tinjau semua skor dari RIASEC, OCEAN, VIA, dan Minat Industri. Catat skor tertinggi dan terendah, namun yang lebih penting adalah mengamati pola, klaster, dan korelasi. Misalnya, apakah skor tinggi pada Openness (OCEAN) berkorelasi dengan Artistic (RIASEC) yang tinggi? Apakah Conscientiousness yang tinggi sejalan dengan kekuatan utama VIA seperti "Ketekunan" atau "Pengendalian Diri"?
+
+2. Interpretasi Setiap Tes:
+RIASEC: Apa makna dari kode Holland tiga huruf (misalnya SIA, ERC)? Jika skor terlihat datar atau rendah, catat sebagai "minat yang tidak terdiferensiasi".
+OCEAN: Jelaskan profil kepribadian. Apakah individu ini lebih cenderung introvert atau ekstrovert? Terorganisir atau spontan? Terbuka pada pengalaman baru atau lebih menyukai rutinitas? Bagaimana tingkat Neuroticism memengaruhi potensinya?
+VIA: Identifikasi 3–5 kekuatan utama. Bagaimana kekuatan ini tercermin dalam perilaku sehari-hari?
+Minat Industri: Industri apa yang paling menarik bagi individu ini? Sejauh mana minat tersebut selaras dengan hasil RIASEC dan OCEAN?
+
+3. Sintesis & Pembentukan Arketipe:
+Gabungkan semua wawasan yang diperoleh. Apa narasi utama dari keseluruhan data ini? Buatlah satu "Arketipe Potensial" yang unik dan deskriptif, yang merangkum esensi individu tersebut.
+Contoh: "Pencerita Analitis", "Perancang Sistem yang Empatik", "Penjelajah yang Realistis".
+Sertakan alasan ringkas yang mendukung pemilihan arketipe ini berdasarkan sinergi data.
+
+4. Rumuskan Rekomendasi:
+Berdasarkan arketipe dan hasil sintesis data, buat rekomendasi konkret.
+Jurusan: Hubungkan jurusan yang relevan langsung dengan hasil RIASEC, OCEAN, dan kekuatan utama. (Contoh: Investigative tinggi + Openness tinggi → Ilmu Komputer dengan fokus pada AI, atau Ilmu Kognitif).
+Karier: Gunakan kode Holland, ciri kepribadian, dan skor Minat Industri untuk menyarankan jalur karier yang spesifik. Jelaskan alasan setiap rekomendasi secara jelas.
+Keterampilan: Keterampilan apa yang perlu dikembangkan untuk memaksimalkan kekuatan dan mengatasi area yang masih perlu ditingkatkan?
 
 
 # ATURAN PENTING UNTUK OUTPUT JSON
@@ -564,6 +578,7 @@ Gunakan 5 langkah ini sebagai kerangka kerja, namun selalu terapkan **Prinsip An
 - Jangan terjemahkan sesuatu yang tidak memiliki kata pasti di KBBI
 - Jangan Bersifat afirmatif dan kekurangan TIDAK BOLEH DITUTUPI
 - Refer ke pengguna sebagai ANDA
+- Pastikan tidak ada data yang diulangi 2x, misal rekomendasi karir 1 dan 3 itu sama persis
 `
 };
 
