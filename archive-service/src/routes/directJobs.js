@@ -5,6 +5,7 @@
 
 const express = require('express');
 const { authenticateService, requireServiceAuth } = require('../middleware/serviceAuth');
+const { authenticateToken } = require('../middleware/auth');
 const { validateBody, validateParams, validateQuery } = require('../middleware/validation');
 const {
   createAnalysisJobSchema,
@@ -17,8 +18,75 @@ const { sendSuccess, sendError, sendNotFound } = require('../utils/responseForma
 
 const router = express.Router();
 
+
+
 // Apply service authentication middleware to all routes
 router.use(authenticateService);
+
+/**
+ * GET /jobs (explicit route to handle /archive/jobs/jobs)
+ * Get jobs list for authenticated user or internal service
+ */
+router.get('/jobs',
+  (req, res, next) => {
+    // Allow both authenticated users and internal services
+    if (req.isInternalService) {
+      return next();
+    }
+    // For user requests, require authentication
+    authenticateToken(req, res, next);
+  },
+  validateQuery(listJobsQuerySchema),
+  async (req, res, next) => {
+    try {
+      let jobs;
+      if (req.isInternalService) {
+        // Internal services can get all jobs
+        jobs = await analysisJobsService.getJobs(req.query);
+      } else {
+        // Users can only get their own jobs
+        const userQuery = { ...req.query, user_id: req.user.id };
+        jobs = await analysisJobsService.getJobsByUser(req.user.id, userQuery);
+      }
+      return sendSuccess(res, 'Jobs retrieved successfully', jobs);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * GET / (root route for /archive/jobs)
+ * Get jobs list for authenticated user or internal service
+ * IMPORTANT: This route must be defined BEFORE /:jobId route
+ */
+router.get('/',
+  (req, res, next) => {
+    // Allow both authenticated users and internal services
+    if (req.isInternalService) {
+      return next();
+    }
+    // For user requests, require authentication
+    authenticateToken(req, res, next);
+  },
+  validateQuery(listJobsQuerySchema),
+  async (req, res, next) => {
+    try {
+      let jobs;
+      if (req.isInternalService) {
+        // Internal services can get all jobs
+        jobs = await analysisJobsService.getJobs(req.query);
+      } else {
+        // Users can only get their own jobs
+        const userQuery = { ...req.query, user_id: req.user.id };
+        jobs = await analysisJobsService.getJobsByUser(req.user.id, userQuery);
+      }
+      return sendSuccess(res, 'Jobs retrieved successfully', jobs);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 /**
  * POST /archive/jobs
@@ -39,14 +107,23 @@ router.post('/',
 
 /**
  * GET /archive/jobs/:jobId
- * Get job status by job ID
+ * Get job status by job ID with result data
+ * IMPORTANT: This route must be defined AFTER / route
  */
 router.get('/:jobId',
+  (req, res, next) => {
+    // Allow both authenticated users and internal services
+    if (req.isInternalService) {
+      return next();
+    }
+    // For user requests, require authentication
+    authenticateToken(req, res, next);
+  },
   validateParams(jobIdParamSchema),
   async (req, res, next) => {
     try {
       const { jobId } = req.params;
-      const job = await analysisJobsService.getJobByJobId(jobId);
+      const job = await analysisJobsService.getJobByJobIdWithResult(jobId);
 
       if (!job) {
         return sendNotFound(res, 'Job not found');
@@ -92,22 +169,7 @@ router.put('/:jobId/status',
   }
 );
 
-/**
- * GET /jobs
- * Get jobs list (internal service only)
- */
-router.get('/',
-  requireServiceAuth,
-  validateQuery(listJobsQuerySchema),
-  async (req, res, next) => {
-    try {
-      const jobs = await analysisJobsService.getJobs(req.query);
-      return sendSuccess(res, 'Jobs retrieved successfully', jobs);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
+
 
 /**
  * DELETE /jobs/:jobId

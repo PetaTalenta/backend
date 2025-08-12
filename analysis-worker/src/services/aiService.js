@@ -545,7 +545,8 @@ Gunakan 5 langkah ini sebagai kerangka kerja, namun selalu terapkan **Prinsip An
 Tinjau semua skor dari RIASEC, OCEAN, VIA, dan Minat Industri. Catat skor tertinggi dan terendah, namun yang lebih penting adalah mengamati pola, klaster, dan korelasi. Misalnya, apakah skor tinggi pada Openness (OCEAN) berkorelasi dengan Artistic (RIASEC) yang tinggi? Apakah Conscientiousness yang tinggi sejalan dengan kekuatan utama VIA seperti "Ketekunan" atau "Pengendalian Diri"?
 
 2. Interpretasi Setiap Tes:
-RIASEC: Apa makna dari kode Holland tiga huruf (misalnya SIA, ERC)? Jika skor terlihat datar atau rendah, catat sebagai "minat yang tidak terdiferensiasi".
+RIASEC: Apa makna dari kode Holland tiga huruf (misalnya SIA, ERC)? Jika skor terlihat 
+datar atau rendah, catat sebagai "minat yang tidak terdiferensiasi".
 OCEAN: Jelaskan profil kepribadian. Apakah individu ini lebih cenderung introvert atau ekstrovert? Terorganisir atau spontan? Terbuka pada pengalaman baru atau lebih menyukai rutinitas? Bagaimana tingkat Neuroticism memengaruhi potensinya?
 VIA: Identifikasi 3–5 kekuatan utama. Bagaimana kekuatan ini tercermin dalam perilaku sehari-hari?
 Minat Industri: Industri apa yang paling menarik bagi individu ini? Sejauh mana minat tersebut selaras dengan hasil RIASEC dan OCEAN?

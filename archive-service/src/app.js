@@ -103,9 +103,13 @@ app.use((req, res, next) => {
   next();
 });
 
+
+
 // Metrics collection middleware
 app.use(metricsMiddleware);
 app.use(cacheMetricsMiddleware);
+
+
 
 // Routes - Standardized with /archive prefix for consistency
 app.use('/archive/results', resultsRoutes);

@@ -13,7 +13,9 @@ const logger = require('../utils/logger');
 const authenticateService = (req, res, next) => {
   const isInternalService = req.headers[serviceAuthConfig.internalServiceHeader.toLowerCase()];
   const serviceKey = req.headers[serviceAuthConfig.headerName.toLowerCase()];
-  
+
+
+
   // Check if this is an internal service request
   if (isInternalService === 'true') {
     // Validate service key
@@ -59,11 +61,13 @@ const requireServiceAuth = (req, res, next) => {
   if (!req.isInternalService) {
     logger.warn('Unauthorized access to internal endpoint', {
       path: req.path,
+      originalUrl: req.originalUrl,
       method: req.method,
       ip: req.ip,
-      userAgent: req.get('User-Agent')
+      userAgent: req.get('User-Agent'),
+      headers: req.headers
     });
-    
+
     return res.status(403).json({
       success: false,
       error: {
@@ -72,7 +76,7 @@ const requireServiceAuth = (req, res, next) => {
       }
     });
   }
-  
+
   next();
 };
 

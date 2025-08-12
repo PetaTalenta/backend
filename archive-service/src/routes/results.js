@@ -5,7 +5,7 @@
 
 const express = require('express');
 const resultsController = require('../controllers/resultsController');
-const analysisJobsService = require('../services/analysisJobsService');
+
 const { authenticateToken } = require('../middleware/auth');
 const { authenticateService, requireServiceAuth } = require('../middleware/serviceAuth');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validation');
@@ -15,12 +15,13 @@ const {
   listResultsQuerySchema,
   uuidParamSchema,
   jobIdParamSchema,
-  createAnalysisJobSchema,
   updateAnalysisJobStatusSchema,
-  listJobsQuerySchema
+  createAnalysisJobSchema
 } = require('../utils/validation');
 
 const router = express.Router();
+
+
 
 // Apply service authentication middleware to all routes
 router.use(authenticateService);
@@ -217,33 +218,7 @@ router.put('/jobs/:jobId/status',
   }
 );
 
-/**
- * GET /archive/jobs
- * Get jobs for authenticated user
- */
-router.get('/jobs',
-  authenticateToken,
-  validateQuery(listJobsQuerySchema),
-  async (req, res, next) => {
-    try {
-      const { page, limit, status, assessment_name, sort, order } = req.query;
-      const offset = (page - 1) * limit;
-
-      const result = await analysisJobsService.getJobsByUser(req.user.id, {
-        limit,
-        offset,
-        status,
-        assessment_name,
-        sort,
-        order
-      });
-
-      return sendSuccess(res, 'Jobs retrieved successfully', result);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
+// Note: Jobs routes moved to /archive/jobs (directJobs.js) for better organization
 
 /**
  * GET /archive/jobs/stats

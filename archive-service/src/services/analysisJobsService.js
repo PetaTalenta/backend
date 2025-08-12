@@ -50,9 +50,44 @@ class AnalysisJobsService {
       const job = await AnalysisJob.findByJobId(jobId);
       return job;
     } catch (error) {
-      logger.error('Failed to get job by job ID', { 
-        jobId, 
-        error: error.message 
+      logger.error('Failed to get job by job ID', {
+        jobId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get job by job ID with result data
+   * @param {String} jobId - Job ID
+   * @returns {Promise<Object|null>} Job object with archetype only
+   */
+  async getJobByJobIdWithResult(jobId) {
+    try {
+      const job = await AnalysisJob.findByJobId(jobId, true); // includeAssociations = true
+
+      if (!job) {
+        return null;
+      }
+
+      const jobData = job.toJSON();
+
+      // If result exists, extract only archetype from persona_profile
+      if (jobData.result && jobData.result.persona_profile && jobData.result.persona_profile.archetype) {
+        jobData.archetype = jobData.result.persona_profile.archetype;
+      } else {
+        jobData.archetype = null;
+      }
+
+      // Remove the nested result object
+      delete jobData.result;
+
+      return jobData;
+    } catch (error) {
+      logger.error('Failed to get job by job ID with result', {
+        jobId,
+        error: error.message
       });
       throw error;
     }
@@ -147,10 +182,29 @@ class AnalysisJobsService {
    */
   async getJobsByUser(userId, options = {}) {
     try {
-      const result = await AnalysisJob.getJobsByUser(userId, options);
-      
+      // Ensure includeAssociations is set to true to fetch AnalysisResult data
+      const optionsWithAssociations = { ...options, includeAssociations: true };
+      const result = await AnalysisJob.getJobsByUser(userId, optionsWithAssociations);
+
+      // Transform jobs to extract only archetype from persona_profile
+      const transformedJobs = result.rows.map(job => {
+        const jobData = job.toJSON();
+
+        // If result exists, extract only archetype from persona_profile
+        if (jobData.result && jobData.result.persona_profile && jobData.result.persona_profile.archetype) {
+          jobData.archetype = jobData.result.persona_profile.archetype;
+        } else {
+          jobData.archetype = null;
+        }
+
+        // Remove the nested result object
+        delete jobData.result;
+
+        return jobData;
+      });
+
       return {
-        jobs: result.rows,
+        jobs: transformedJobs,
         pagination: {
           total: result.count,
           limit: options.limit || 10,
@@ -159,9 +213,75 @@ class AnalysisJobsService {
         }
       };
     } catch (error) {
-      logger.error('Failed to get jobs by user', { 
-        userId, 
-        error: error.message 
+      logger.error('Failed to get jobs by user', {
+        userId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get all jobs (for internal services)
+   * @param {Object} options - Query options
+   * @returns {Promise<Object>} Jobs with pagination info
+   */
+  async getJobs(options = {}) {
+    try {
+      // For internal services, we can get all jobs without user restriction
+      const { limit = 10, offset = 0, status, assessment_name } = options;
+
+      const whereClause = {};
+      if (status) {
+        whereClause.status = status;
+      }
+      if (assessment_name) {
+        whereClause.assessment_name = assessment_name;
+      }
+
+      const result = await AnalysisJob.findAndCountAll({
+        where: whereClause,
+        include: [
+          {
+            model: AnalysisResult,
+            as: 'result',
+            required: false
+          }
+        ],
+        order: [['created_at', 'DESC']],
+        limit,
+        offset
+      });
+
+      // Transform jobs to extract only archetype from persona_profile
+      const transformedJobs = result.rows.map(job => {
+        const jobData = job.toJSON();
+
+        // If result exists, extract only archetype from persona_profile
+        if (jobData.result && jobData.result.persona_profile && jobData.result.persona_profile.archetype) {
+          jobData.archetype = jobData.result.persona_profile.archetype;
+        } else {
+          jobData.archetype = null;
+        }
+
+        // Remove the nested result object
+        delete jobData.result;
+
+        return jobData;
+      });
+
+      return {
+        jobs: transformedJobs,
+        pagination: {
+          total: result.count,
+          limit: limit,
+          offset: offset,
+          hasMore: offset + limit < result.count
+        }
+      };
+    } catch (error) {
+      logger.error('Failed to get all jobs', {
+        error: error.message
       });
       throw error;
     }
@@ -177,9 +297,9 @@ class AnalysisJobsService {
       const stats = await AnalysisJob.getJobStats(userId);
       return stats;
     } catch (error) {
-      logger.error('Failed to get job statistics', { 
-        userId, 
-        error: error.message 
+      logger.error('Failed to get job statistics', {
+        userId,
+        error: error.message
       });
       throw error;
     }

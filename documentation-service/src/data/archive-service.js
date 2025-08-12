@@ -470,8 +470,8 @@ export const archiveServiceData = {
     {
       method: "GET",
       path: "/api/archive/jobs",
-      title: "Get User Jobs",
-      description: "Mendapatkan daftar job analisis untuk user yang terautentikasi.",
+      title: "Get User Jobs with Archetype Data",
+      description: "Mendapatkan daftar job analisis untuk user yang terautentikasi beserta archetype dari hasil analisis.",
       authentication: "Bearer Token Required",
       rateLimit: "5000 requests per 15 minutes",
       parameters: [
@@ -491,7 +491,7 @@ export const archiveServiceData = {
           name: "status",
           type: "string",
           required: false,
-          description: "Filter berdasarkan status: 'pending', 'processing', 'completed', 'failed'"
+          description: "Filter berdasarkan status: 'queued', 'processing', 'completed', 'failed'"
         },
         {
           name: "assessment_name",
@@ -518,25 +518,46 @@ export const archiveServiceData = {
         data: {
           jobs: [
             {
+              id: "550e8400-e29b-41d4-a716-446655440001",
               job_id: "job_12345abcdef",
               user_id: "550e8400-e29b-41d4-a716-446655440001",
               status: "processing",
+              result_id: null,
               assessment_name: "AI-Driven Talent Mapping",
               created_at: "2024-01-15T10:30:00.000Z",
               updated_at: "2024-01-15T10:32:00.000Z",
-              result_id: null
+              completed_at: null,
+              error_message: null,
+              priority: 0,
+              retry_count: 0,
+              max_retries: 3,
+              processing_started_at: "2024-01-15T10:31:00.000Z",
+              archetype: null
             },
             {
+              id: "550e8400-e29b-41d4-a716-446655440002",
               job_id: "job_67890ghijkl",
               user_id: "550e8400-e29b-41d4-a716-446655440001",
               status: "completed",
+              result_id: "550e8400-e29b-41d4-a716-446655440003",
               assessment_name: "AI-Driven Talent Mapping",
               created_at: "2024-01-14T09:15:00.000Z",
               updated_at: "2024-01-14T09:18:00.000Z",
-              result_id: "550e8400-e29b-41d4-a716-446655440003"
+              completed_at: "2024-01-14T09:18:00.000Z",
+              error_message: null,
+              priority: 0,
+              retry_count: 0,
+              max_retries: 3,
+              processing_started_at: "2024-01-14T09:16:00.000Z",
+              archetype: "The Analytical Innovator"
             }
           ],
-          total: 25
+          pagination: {
+            total: 25,
+            limit: 10,
+            offset: 0,
+            hasMore: true
+          }
         }
       },
       example: `curl -X GET "http://localhost:3000/api/archive/jobs?status=completed&page=1&limit=10" \\
@@ -545,8 +566,8 @@ export const archiveServiceData = {
     {
       method: "GET",
       path: "/api/archive/jobs/:jobId",
-      title: "Get Job Status",
-      description: "Mendapatkan status job berdasarkan job ID.",
+      title: "Get Job with Archetype Data",
+      description: "Mendapatkan detail job berdasarkan job ID beserta archetype dari hasil analisis.",
       authentication: "Bearer Token Required",
       rateLimit: "5000 requests per 15 minutes",
       parameters: [
@@ -561,16 +582,24 @@ export const archiveServiceData = {
         success: true,
         message: "Job retrieved successfully",
         data: {
-          job_id: "string",
-          user_id: "uuid",
-          status: "processing",
-          assessment_name: "string",
-          created_at: "timestamp",
-          updated_at: "timestamp",
-          result_id: "uuid"
+          id: "550e8400-e29b-41d4-a716-446655440001",
+          job_id: "job_12345abcdef",
+          user_id: "550e8400-e29b-41d4-a716-446655440001",
+          status: "completed",
+          result_id: "550e8400-e29b-41d4-a716-446655440003",
+          assessment_name: "AI-Driven Talent Mapping",
+          created_at: "2024-01-15T10:30:00.000Z",
+          updated_at: "2024-01-15T10:35:00.000Z",
+          completed_at: "2024-01-15T10:35:00.000Z",
+          error_message: null,
+          priority: 0,
+          retry_count: 0,
+          max_retries: 3,
+          processing_started_at: "2024-01-15T10:31:00.000Z",
+          archetype: "The Analytical Innovator"
         }
       },
-      example: `curl -X GET http://localhost:3000/api/archive/jobs/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X GET http://localhost:3000/api/archive/jobs/job_12345abcdef \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -919,7 +948,10 @@ export const archiveServiceData = {
     "Filtering: Beberapa endpoint mendukung filtering berdasarkan status dan parameter lainnya",
     "Rate Limiting: Semua endpoint tunduk pada rate limiting gateway",
     "CORS: Service mendukung CORS untuk akses dari frontend",
-    "Compression: Response otomatis dikompresi untuk menghemat bandwidth"
+    "Compression: Response otomatis dikompresi untuk menghemat bandwidth",
+    "Enhanced Jobs Endpoints: /api/archive/jobs dan /api/archive/jobs/:jobId sekarang hanya mengembalikan field archetype dari persona_profile untuk mengurangi ukuran response",
+    "Empty Results Handling: Jika job belum selesai atau gagal, field archetype akan bernilai null",
+    "Simplified Response: Hanya archetype yang dikembalikan dari persona_profile untuk mengoptimalkan performa dan mengurangi transfer data"
   ],
   personaProfileSchema: {
     description: "Struktur lengkap persona_profile dengan field-field baru yang telah ditambahkan",
