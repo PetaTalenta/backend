@@ -6,7 +6,9 @@ const rabbitmq = require('../config/rabbitmq');
 const logger = require('../utils/logger');
 const { processAssessmentOptimized } = require('../processors/optimizedAssessmentProcessor');
 const { validateJobMessage } = require('../utils/validator');
-const { initializeEventPublisher } = require('./eventPublisher');
+const { initializeEventPublisher, getEventPublisher } = require('./eventPublisher');
+const { updateAnalysisJobStatus } = require('../services/archiveService');
+const notificationService = require('../services/notificationService');
 
 // Consumer state
 let isConsuming = false;
@@ -228,6 +230,52 @@ const handleMessageError = async (message, jobData, error) => {
         shouldNotRetry,
         error: error.message
       });
+
+      // Before sending to DLQ, publish analysis.failed event and attempt status sync
+      try {
+        // Optional: update job status to failed in Archive Service
+        if (jobData?.jobId) {
+          updateAnalysisJobStatus(jobData.jobId, 'failed', { error_message: error.message })
+            .catch((statusErr) => {
+              logger.warn('Failed to update analysis job status to failed', {
+                jobId: jobData.jobId,
+                error: statusErr.message
+              });
+            });
+        }
+
+        // Try to publish failure event
+        try {
+          const eventPublisher = getEventPublisher();
+          eventPublisher.publishAnalysisFailed({
+            jobId: jobData?.jobId,
+            userId: jobData?.userId,
+            userEmail: jobData?.userEmail,
+            errorMessage: error.message,
+            assessmentName: jobData?.assessmentName || 'AI-Driven Talent Mapping',
+            retryCount
+          });
+        } catch (eventError) {
+          logger.warn('Failed to publish analysis.failed event, using fallback HTTP callback', {
+            jobId: jobData?.jobId,
+            error: eventError.message
+          });
+
+          // Fallback HTTP callback to assessment-service to mark job failed and refund tokens
+          notificationService.updateAssessmentJobStatusFailed(jobData?.jobId, null, error.message)
+            .catch((fallbackErr) => {
+              logger.error('Fallback HTTP callback to assessment-service failed', {
+                jobId: jobData?.jobId,
+                error: fallbackErr.message
+              });
+            });
+        }
+      } catch (notifyError) {
+        logger.warn('Error while sending failure notifications before DLQ', {
+          jobId: jobData?.jobId,
+          error: notifyError.message
+        });
+      }
 
       // Reject message without requeue (goes to DLQ)
       channel.nack(message, false, false);

@@ -387,7 +387,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -450,7 +450,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -513,7 +513,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -576,7 +576,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -639,7 +639,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -702,7 +702,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -765,7 +765,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -828,7 +828,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -891,7 +891,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
@@ -954,7 +954,7 @@ services:
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      GOOGLE_AI_MODEL: gemini-2.5-pro
+      GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
       USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
