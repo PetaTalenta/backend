@@ -469,7 +469,7 @@ Membuat percakapan berdasarkan hasil assessment.
 ```
 
 ### 2. Check Assessment Readiness
-**GET** `/api/chatbot/assessment/assessment-ready/:userId`
+**GET** `/api/chatbot/assessment-ready/:userId`
 
 Mengecek apakah user memiliki assessment yang siap untuk chatbot.
 
@@ -559,7 +559,7 @@ Mengecek apakah user memiliki assessment yang siap untuk chatbot.
 ```
 
 ### 3. Generate Conversation Suggestions
-**GET** `/api/chatbot/assessment/conversations/:conversationId/suggestions`
+**GET** `/api/chatbot/conversations/:conversationId/suggestions`
 
 Mendapatkan saran pertanyaan berdasarkan konteks percakapan.
 
@@ -582,7 +582,7 @@ Mendapatkan saran pertanyaan berdasarkan konteks percakapan.
 ```
 
 ### 4. Auto-Initialize Assessment Conversation
-**POST** `/api/chatbot/assessment/auto-initialize`
+**POST** `/api/chatbot/auto-initialize`
 
 Otomatis membuat percakapan berdasarkan assessment terbaru user.
 

@@ -43,12 +43,6 @@ router.delete('/:id',
   conversationController.deleteConversation
 );
 
-router.get('/:id/messages',
-  authenticateToken,
-  setUserContext,
-  validateQuery(schemas.getMessagesQuery),
-  conversationController.getConversationMessages
-);
 
 router.get('/:conversationId/usage',
   authenticateToken,

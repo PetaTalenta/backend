@@ -42,7 +42,7 @@ The Chatbot Service provides foundational conversation management capabilities i
 - `GET /conversations/:id` - Get specific conversation
 - `PUT /conversations/:id` - Update conversation
 - `DELETE /conversations/:id` - Soft delete conversation
-- `GET /conversations/:id/messages` - Get conversation messages
+- `GET /conversations/:conversationId/messages` - Get conversation messages
 
 ### Health & Monitoring
 - `GET /health` - Service health check

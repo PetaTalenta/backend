@@ -99,9 +99,9 @@ router.get('/conversations/:conversationId/suggestions',
   validateParams(schemas.conversationSuggestionsParams),
   async (req, res) => {
     try {
-      await assessmentController.generateSuggestions(req, res);
+      await assessmentController.getConversationSuggestions(req, res);
     } catch (error) {
-      logger.error('Route error: generateSuggestions', {
+      logger.error('Route error: getConversationSuggestions', {
         error: error.message,
         conversationId: req.params.conversationId,
         userId: req.user?.id
@@ -135,27 +135,6 @@ router.post('/auto-initialize',
   }
 );
 
-/**
- * Get conversation suggestions for assessment conversation
- * GET /conversations/:conversationId/suggestions
- */
-router.get('/conversations/:conversationId/suggestions',
-  async (req, res) => {
-    try {
-      await assessmentController.getConversationSuggestions(req, res);
-    } catch (error) {
-      logger.error('Route error: getConversationSuggestions', {
-        error: error.message,
-        conversationId: req.params.conversationId,
-        userId: req.user?.id
-      });
-      res.status(500).json({
-        error: 'Internal server error',
-        code: 'INTERNAL_ERROR'
-      });
-    }
-  }
-);
 
 /**
  * Health check for assessment integration

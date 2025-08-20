@@ -317,59 +317,35 @@ export const chatbotServiceData = {
     },
     {
       method: "GET",
-      path: "/api/chatbot/suggestions",
+      path: "/api/chatbot/conversations/:conversationId/suggestions",
       title: "Get Conversation Suggestions",
-      description: "Get AI-generated conversation starters and topics based on user's assessment results and history.",
+      description: "Get AI-generated suggestions for a specific conversation (assessment context only).",
       authentication: "Bearer Token Required",
       rateLimit: "200 requests per 15 minutes",
       parameters: [
         {
-          name: "context",
+          name: "conversationId",
           type: "string",
-          required: false,
-          description: "Context for suggestions: 'assessment', 'career', 'development'"
-        },
-        {
-          name: "limit",
-          type: "integer",
-          required: false,
-          description: "Number of suggestions to return (default: 5, max: 10)"
+          required: true,
+          description: "UUID of the conversation"
         }
       ],
       response: {
         success: true,
         data: {
           suggestions: [
-            {
-              id: "suggestion_1",
-              title: "Explore Your Leadership Potential",
-              description: "Discuss how your high enterprising scores translate to leadership opportunities",
-              context: "career",
-              priority: "high"
-            },
-            {
-              id: "suggestion_2",
-              title: "Understanding Your Creative Strengths",
-              description: "Learn how to leverage your artistic and creative abilities in your career",
-              context: "assessment",
-              priority: "medium"
-            },
-            {
-              id: "suggestion_3",
-              title: "Building on Your Social Skills",
-              description: "Explore careers that utilize your strong interpersonal abilities",
-              context: "development",
-              priority: "medium"
-            }
+            "What career paths align with my personality type?",
+            "How can I develop my identified strengths?",
+            "What skills should I focus on improving?"
           ],
-          basedOn: {
-            recentAssessments: 2,
-            personalityType: "ENFP",
-            topStrengths: ["creativity", "leadership", "social_intelligence"]
+          context: {
+            assessment_based: true,
+            conversation_stage: "initial",
+            user_archetype: "The Innovator"
           }
         }
       },
-      example: `curl -X GET "https://api.chhrone.web.id/api/chatbot/suggestions?context=career&limit=5" \\
+      example: `curl -X GET https://api.chhrone.web.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/suggestions \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -498,14 +474,14 @@ export const chatbotServiceData = {
     },
     {
       method: "GET",
-      path: "/api/chatbot/conversations/:id/messages",
+      path: "/api/chatbot/conversations/:conversationId/messages",
       title: "Get Conversation Messages",
       description: "Retrieve all messages from a specific conversation with pagination and filtering options.",
       authentication: "Bearer Token Required",
       rateLimit: "200 requests per 15 minutes",
       parameters: [
         {
-          name: "id",
+          name: "conversationId",
           type: "string",
           required: true,
           description: "UUID of the conversation"
