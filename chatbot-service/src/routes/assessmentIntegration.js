@@ -52,22 +52,6 @@ router.post('/from-assessment',
   }
 );
 
-/**
- * Test route without authentication
- * POST /test
- */
-router.post('/test',
-  async (req, res) => {
-    console.log('=== TEST ROUTE REACHED ===');
-    logger.info('Test route reached');
-    res.json({
-      success: true,
-      message: 'Test route working',
-      hasUser: !!req.user,
-      hasAuthHeader: !!req.headers.authorization
-    });
-  }
-);
 
 /**
  * Check assessment readiness for user
@@ -136,22 +120,5 @@ router.post('/auto-initialize',
 );
 
 
-/**
- * Health check for assessment integration
- * GET /health
- */
-router.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Assessment integration routes are healthy',
-    timestamp: new Date().toISOString(),
-    features: {
-      assessment_integration: process.env.ENABLE_ASSESSMENT_INTEGRATION === 'true',
-      event_driven_conversations: process.env.ENABLE_EVENT_DRIVEN_CONVERSATIONS === 'true',
-      personalized_welcome_messages: process.env.ENABLE_PERSONALIZED_WELCOME_MESSAGES === 'true',
-      suggested_questions: process.env.ENABLE_SUGGESTED_QUESTIONS === 'true'
-    }
-  });
-});
 
 module.exports = router;

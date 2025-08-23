@@ -181,7 +181,7 @@ const chatbotServiceProxy = createServiceProxy(config.services.chatbot, {
   pathRewrite: {
     '^/api/chatbot/health': '/health',                                    // Health endpoint
     '^/api/chatbot/assessment/from-assessment': '/assessment/from-assessment',  // Assessment integration endpoint
-    '^/api/chatbot/conversations/([^/]+)/suggestions': '/assessment/$1/suggestions', // Conversation suggestions
+    '^/api/chatbot/conversations/([^/]+)/suggestions': '/assessment/conversations/$1/suggestions', // Conversation suggestions
     '^/api/chatbot/auto-initialize': '/assessment/auto-initialize',       // Auto-initialize endpoint
     '^/api/chatbot/assessment-ready': '/assessment/assessment-ready',     // Assessment ready check
     '^/api/chatbot/conversations': '/conversations',                      // General conversations endpoint
