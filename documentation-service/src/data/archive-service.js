@@ -604,7 +604,7 @@ export const archiveServiceData = {
     },
     {
       method: "GET",
-      path: "/api/archive/jobs/stats",
+      path: "/api/archive/results/jobs/stats",
       title: "Get Job Statistics",
       description: "Mendapatkan statistik job untuk user yang terautentikasi.",
       authentication: "Bearer Token Required",
@@ -621,7 +621,7 @@ export const archiveServiceData = {
           success_rate: 0.94
         }
       },
-      example: `curl -X GET http://localhost:3000/api/archive/jobs/stats \\
+      example: `curl -X GET http://localhost:3000/api/archive/results/jobs/stats \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
