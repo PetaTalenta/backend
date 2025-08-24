@@ -42,51 +42,32 @@ Mendapatkan daftar hasil analisis untuk user yang terautentikasi.
 ```json
 {
   "success": true,
-  "message": "Results retrieved successfully",
   "data": {
     "results": [
       {
         "id": "550e8400-e29b-41d4-a716-446655440001",
         "user_id": "550e8400-e29b-41d4-a716-446655440002",
-        "assessment_data": {
-          "riasec": { /* 6 fields */ },
-          "ocean": { /* 5 fields */ },
-          "viaIs": { /* 24 fields */ },
-          "assessmentName": "AI-Driven Talent Mapping"
-        },
-        "persona_profile": {
-          "archetype": "The Analytical Innovator",
-          "shortSummary": "...",
-          "strengths": ["..."],
-          "weaknesses": ["..."],
-          "careerRecommendation": [{ /* career objects */ }],
-          "insights": ["..."],
-          "skillSuggestion": ["..."],
-          "possiblePitfalls": ["..."],
-          "riskTolerance": "moderate",
-          "workEnvironment": "...",
-          "roleModel": ["..."]
-        },
+        "persona_profile": { /* subset of fields; for full details use GET /api/archive/results/:id */ },
         "status": "completed",
-        "error_message": null,
         "assessment_name": "AI-Driven Talent Mapping",
-        "created_at": "2024-01-15T10:30:00.000Z",
-        "updated_at": "2024-01-15T10:35:00.000Z"
+        "created_at": "2024-01-15T10:30:00.000Z"
       }
     ],
     "pagination": {
       "page": 1,
       "limit": 10,
       "total": 50,
-      "totalPages": 5
+      "totalPages": 5,
+      "hasNext": true,
+      "hasPrev": false
     }
   }
 }
 ```
 
 **Results Array Structure:**
-- `results`: Array berisi objek hasil analisis dengan struktur lengkap seperti dijelaskan di bagian "Detailed Data Structures"
-- Setiap item dalam array memiliki semua field yang sama dengan response dari endpoint `/api/archive/results/:id`
+- `results`: Array berisi objek hasil analisis dengan subset field: `id`, `user_id`, `persona_profile` (ringkas), `status`, `assessment_name`, `created_at`
+- Untuk detail lengkap sebuah result (termasuk `updated_at`, `error_message`, struktur lengkap `assessment_data` dan `persona_profile`), gunakan endpoint `GET /api/archive/results/:id`
 
 ### 2. Get Specific Result
 **GET** `/api/archive/results/:id`
@@ -204,7 +185,6 @@ Data assessment lengkap yang dikirim user untuk dianalisis AI, terdiri dari 3 ko
 #### Complete Assessment Data Example
 ```json
 {
-  "assessmentName": "AI-Driven Talent Mapping",
   "riasec": { /* 6 fields as above */ },
   "ocean": { /* 5 fields as above */ },
   "viaIs": { /* 24 fields as above */ }
@@ -354,19 +334,28 @@ Profil persona lengkap hasil analisis AI berdasarkan assessment data:
 ### 3. Update Result
 **PUT** `/api/archive/results/:id`
 
-Memperbarui hasil analisis (hanya pemilik atau admin).
+Memperbarui hasil analisis.
+
+- Akses: pemilik data (JWT) atau internal service (dengan header internal)
+- Catatan: field yang boleh diupdate terutama `persona_profile`, `status`, `error_message`, `assessment_name`
 
 **Parameters:**
 - `id` (UUID) - ID hasil analisis
 
-**Request Body:**
+**Request Body (contoh):**
 ```json
 {
-  "assessment_data": {...},
-  "persona_profile": {...},
-  "status": "completed"
+  "persona_profile": { /* schema sesuai bagian Persona Profile */ },
+  "status": "completed",
+  "error_message": null,
+  "assessment_name": "AI-Driven Talent Mapping"
 }
 ```
+
+Rules penting:
+- Tidak boleh mengubah `user_id`, `id`, atau `created_at`
+- Jika `status` = `completed`, `persona_profile` tidak boleh null
+- Jika `status` = `failed`, `error_message` wajib diisi dan `persona_profile` akan diabaikan/null
 
 ### 4. Delete Result
 **DELETE** `/api/archive/results/:id`
@@ -388,10 +377,10 @@ Mendapatkan daftar job analisis untuk user yang terautentikasi.
 **Query Parameters:**
 - `page` (number, default: 1)
 - `limit` (number, default: 10)
-- `status` (string, optional) - pending, processing, completed, failed
+- `status` (string, optional) - queued, processing, completed, failed
 - `assessment_name` (string, optional)
-- `sort` (string, default: 'created_at')
-- `order` (string, default: 'DESC')
+- `sort` (string, default: 'created_at', allowed: 'created_at', 'updated_at')
+- `order` (string, default: 'DESC', allowed: 'ASC' | 'DESC')
 
 **Response:**
 ```json
@@ -407,7 +396,8 @@ Mendapatkan daftar job analisis untuk user yang terautentikasi.
         "assessment_name": "AI-Driven Talent Mapping",
         "created_at": "2024-01-15T10:30:00.000Z",
         "updated_at": "2024-01-15T10:32:00.000Z",
-        "result_id": null
+        "result_id": null,
+        "archetype": null
       },
       {
         "job_id": "job_67890ghijkl",
@@ -416,10 +406,16 @@ Mendapatkan daftar job analisis untuk user yang terautentikasi.
         "assessment_name": "AI-Driven Talent Mapping",
         "created_at": "2024-01-14T09:15:00.000Z",
         "updated_at": "2024-01-14T09:18:00.000Z",
-        "result_id": "550e8400-e29b-41d4-a716-446655440003"
+        "result_id": "550e8400-e29b-41d4-a716-446655440003",
+        "archetype": "The Analytical Innovator"
       }
     ],
-    "total": 25
+    "pagination": {
+      "total": 25,
+      "limit": 10,
+      "offset": 0,
+      "hasMore": true
+    }
   }
 }
 ```
@@ -453,17 +449,20 @@ Mendapatkan status job berdasarkan job ID.
     "assessment_name": "string",
     "created_at": "timestamp",
     "updated_at": "timestamp",
-    "result_id": "uuid"
+    "result_id": "uuid",
+    "archetype": "string|null"
   }
 }
 ```
 
 ### 3. Get Job Statistics
-**GET** `/api/archive/jobs/stats`
+**GET** `/api/archive/results/jobs/stats`
 
 Mendapatkan statistik job untuk user yang terautentikasi.
 
-**Response:**
+Catatan: Statistik dibuat dari data jobs user; struktur bisa menyesuaikan implementasi terbaru.
+
+**Response (contoh):**
 ```json
 {
   "success": true,
@@ -473,8 +472,7 @@ Mendapatkan statistik job untuk user yang terautentikasi.
     "pending": 5,
     "processing": 2,
     "completed": 40,
-    "failed": 3,
-    "success_rate": 0.94
+    "failed": 3
   }
 }
 ```
@@ -603,10 +601,12 @@ Endpoint statistik terpadu dengan parameter fleksibel.
 
 **Query Parameters:**
 - `type` (string) - user, system, demographic, performance
-- `scope` (string) - overview, detailed, analysis, summary
+- `scope` (string) - overview, detailed, analysis, summary, queue, insights
 - `timeRange` (string) - "1 day", "7 days", "30 days", "90 days"
 
-**Note:** Parameter `type` dengan nilai `system`, `demographic`, atau `performance` memerlukan autentikasi internal service.
+Akses:
+- `user` dapat diakses oleh user terautentikasi
+- `system`, `demographic`, `performance` hanya untuk internal service (X-Internal-Service + X-Service-Key)
 
 ### 2. Unified Data Retrieval
 **GET** `/api/archive/v1/data/:type`
@@ -619,9 +619,10 @@ Endpoint pengambilan data terpadu.
 **Query Parameters:**
 - `page` (number, default: 1)
 - `limit` (number, default: 10)
-- `sort` (string)
-- `order` (string)
+- `sort` (string, allowed: created_at, updated_at, status)
+- `order` (string, ASC|DESC)
 
+Catatan: akses `demographics` via endpoint ini memerlukan autentikasi internal service.
 ---
 
 ## ❌ Error Responses
@@ -689,7 +690,7 @@ Mengecek status kesehatan service (tidak memerlukan autentikasi).
     "id": "550e8400-e29b-41d4-a716-446655440001",
     "user_id": "550e8400-e29b-41d4-a716-446655440002",
     "assessment_data": {
-      "assessmentName": "AI-Driven Talent Mapping",
+
       "riasec": {
         "realistic": 75,
         "investigative": 85,

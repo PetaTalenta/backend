@@ -19,8 +19,9 @@ Authorization: Bearer <jwt_token>
 ```
 
 ## Rate Limiting
-- **Assessment Endpoints:** 100 requests per 15 minutes per user
-- **General Gateway:** 5000 requests per 15 minutes
+- Assessment Submit: 1000 requests per 1 hour per user
+- Endpoints lain mengikuti general gateway limiter
+- General Gateway: 5000 requests per 10 minutes
 
 ---
 
@@ -35,8 +36,10 @@ Submit data assessment untuk dianalisis oleh AI. Assessment terdiri dari 3 kompo
 ```
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
-X-Idempotency-Key: <unique_key> (optional)
+X-Idempotency-Key: <unique_key> (opsional)
+Idempotency-Key: <unique_key> (opsional)
 ```
+Catatan: Layanan menerima salah satu dari header di atas untuk idempotency.
 
 **Request Body:**
 ```json
@@ -91,6 +94,7 @@ X-Idempotency-Key: <unique_key> (optional)
 - `riasec` (required): RIASEC assessment with 6 dimensions (realistic, investigative, artistic, social, enterprising, conventional)
 - `ocean` (required): Big Five personality traits (openness, conscientiousness, extraversion, agreeableness, neuroticism)
 - `viaIs` (required): VIA-IS character strengths - all 24 strengths must be provided
+- `industryScore` (optional): Skor tambahan per industri (24 bidang). Hanya untuk kompatibilitas mundur; tidak mempengaruhi validasi utama.
 - All scores must be integers between 0-100
 
 **Response:**
@@ -114,6 +118,12 @@ X-Idempotency-Key: <unique_key> (optional)
 - **Idempotency:** Prevent duplicate submission dengan idempotency key
 - **Queue Position:** Informasi posisi dalam antrian processing
 - **Real-time Tracking:** Job ID untuk tracking status
+
+**Response Headers (Idempotency):**
+```
+X-Idempotency-Key: <masked_key>
+X-Idempotency-Cache: HIT | MISS
+```
 
 **Error Responses:**
 - `401 UNAUTHORIZED` - Token tidak valid
@@ -224,7 +234,7 @@ Membersihkan cache idempotency yang sudah expired (untuk maintenance).
 ```json
 {
   "success": true,
-  "message": "Idempotency cache cleaned up successfully",
+  "message": "Idempotency cache cleanup completed",
   "data": {
     "removedEntries": 25,
     "remainingEntries": 125
@@ -236,7 +246,7 @@ Membersihkan cache idempotency yang sudah expired (untuk maintenance).
 
 ## 🔍 Health Check
 
-### Service Health
+### 1) Service Health
 **GET** `/api/assessment/health`
 
 Mengecek status kesehatan service (tidak memerlukan autentikasi).
@@ -269,6 +279,59 @@ Mengecek status kesehatan service (tidak memerlukan autentikasi).
     "processing": 2,
     "completed": 950,
     "failed": 43
+  }
+}
+```
+
+### 2) Liveness Probe
+**GET** `/api/assessment/health/live`
+
+Menunjukkan apakah service hidup. Selalu 200 saat service berjalan.
+
+**Response:**
+```json
+{
+  "status": "alive",
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+### 3) Readiness Probe
+**GET** `/api/assessment/health/ready`
+
+Menunjukkan apakah service siap menerima traffic (memverifikasi koneksi RabbitMQ).
+
+**Response (200 Ready):**
+```json
+{
+  "status": "ready",
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**Response (503 Not Ready):**
+```json
+{
+  "status": "not_ready",
+  "reason": "RabbitMQ connection unavailable",
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+### 4) Queue Health
+**GET** `/api/assessment/health/queue`
+
+Health check khusus antrian RabbitMQ.
+
+**Response:**
+```json
+{
+  "status": "healthy|unhealthy",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "details": {
+    "messageCount": 0,
+    "consumerCount": 1,
+    "isHealthy": true
   }
 }
 ```

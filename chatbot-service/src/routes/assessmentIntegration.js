@@ -58,6 +58,8 @@ router.post('/from-assessment',
  * GET /assessment-ready/:userId
  */
 router.get('/assessment-ready/:userId',
+  authenticateToken,
+  setUserContext,
   validateParams(schemas.assessmentReadyParams),
   async (req, res) => {
     try {
@@ -80,6 +82,8 @@ router.get('/assessment-ready/:userId',
  * GET /conversations/:conversationId/suggestions
  */
 router.get('/conversations/:conversationId/suggestions',
+  authenticateToken,
+  setUserContext,
   validateParams(schemas.conversationSuggestionsParams),
   async (req, res) => {
     try {
@@ -103,6 +107,8 @@ router.get('/conversations/:conversationId/suggestions',
  * POST /auto-initialize
  */
 router.post('/auto-initialize',
+  authenticateToken,
+  setUserContext,
   async (req, res) => {
     try {
       await assessmentController.autoInitialize(req, res);

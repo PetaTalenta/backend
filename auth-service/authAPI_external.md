@@ -19,9 +19,9 @@ Authorization: Bearer <jwt_token>
 ```
 
 ## Rate Limiting
-- **Auth Endpoints:** 100 requests per 15 minutes per IP
-- **Admin Endpoints:** 50 requests per 15 minutes per IP
-- **General Gateway:** 5000 requests per 15 minutes
+- Auth Endpoints: 2500 requests per 15 minutes per IP
+- Admin Endpoints: 1000 requests per 15 minutes per IP
+- General Gateway: 5000 requests per 15 minutes
 
 ---
 
@@ -36,14 +36,16 @@ Registrasi user baru.
 **Request Body:**
 ```json
 {
+  "username": "johndoe",
   "email": "user@example.com",
-  "password": "myPassword1"
+  "password": "MyPassword1"
 }
 ```
 
 **Validation Rules:**
-- **email**: Valid email format, maximum 255 characters, required
-- **password**: Minimum 8 characters, must contain at least one letter and one number, required
+- username: Alphanumeric only, 3-100 characters, required
+- email: Valid email format, maximum 255 characters, required
+- password: Minimum 8 characters, must contain at least one letter and one number, required
 
 **Response Success (201):**
 ```json
@@ -53,7 +55,7 @@ Registrasi user baru.
     "user": {
       "id": "550e8400-e29b-41d4-a716-446655440000",
       "email": "user@example.com",
-      "username": null,
+      "username": "johndoe",
       "user_type": "user",
       "is_active": true,
       "token_balance": 5,
@@ -119,22 +121,30 @@ Registrasi batch user (untuk admin/testing).
 }
 
 ### POST /api/auth/login
-Login user.
+Login user (bisa pakai email ATAU username).
 
-**Authentication:** None (Public)
-**Rate Limit:** Auth Limiter (100/15min)
+- Authentication: None (Public)
+- Rate Limit: Auth Limiter (2500/15min)
 
-**Request Body:**
+Request Body (gunakan salah satu identifier: email atau username):
 ```json
 {
   "email": "user@example.com",
-  "password": "myPassword1"
+  "password": "MyPassword1"
+}
+```
+atau
+```json
+{
+  "username": "johndoe",
+  "password": "MyPassword1"
 }
 ```
 
-**Validation Rules:**
-- **email**: Valid email format, required
-- **password**: Required (no specific format validation for login)
+Validation Rules:
+- email: Valid email format, optional jika pakai username
+- username: Alphanumeric 3-100, optional jika pakai email
+- password: Required
 
 **Response Success (200):**
 ```json
@@ -160,15 +170,16 @@ Login user.
 ## 👤 Protected User Endpoints
 
 ### GET /api/auth/profile
-Mendapatkan profil user yang sedang login.
+Mengambil data user + profil (termasuk info sekolah terstruktur bila ada).
 
-**Authentication:** Bearer Token Required
-**Rate Limit:** General Gateway (5000/15min)
+- Authentication: Bearer Token Required
+- Rate Limit: General Gateway (5000/15min)
 
-**Response Success (200):**
+Response Success (200):
 ```json
 {
   "success": true,
+  "message": "Success",
   "data": {
     "user": {
       "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -177,25 +188,31 @@ Mendapatkan profil user yang sedang login.
       "user_type": "user",
       "is_active": true,
       "token_balance": 5,
+      "last_login": "2024-01-15T10:25:00.000Z",
       "created_at": "2024-01-15T10:30:00.000Z",
-      "updated_at": "2024-01-15T10:30:00.000Z"
-    },
-    "profile": {
-      "full_name": "John Doe",
-      "date_of_birth": "1990-01-15",
-      "gender": "male",
-      "school_id": 1
+      "profile": {
+        "full_name": "John Doe",
+        "date_of_birth": "1990-01-15",
+        "gender": "male",
+        "school_id": 1,
+        "school": { "id": 1, "name": "SMA 1", "city": "Jakarta", "province": "DKI Jakarta" },
+        "school_info": {
+          "type": "structured",
+          "school_id": 1,
+          "school": { "id": 1, "name": "SMA 1", "city": "Jakarta", "province": "DKI Jakarta" }
+        }
+      }
     }
   }
 }
 ```
 
 ### PUT /api/auth/profile
-Update profil user.
+Update data user dan/atau profil.
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
 
-**Request Body:**
+Request Body (semua optional):
 ```json
 {
   "username": "johndoe",
@@ -206,27 +223,34 @@ Update profil user.
 }
 ```
 
-**Validation Rules:**
-- **username**: Alphanumeric only, 3-100 characters, optional
-- **email**: Valid email format, maximum 255 characters, optional
-- **full_name**: Maximum 100 characters, optional
-- **school_id**: Positive integer, optional
-- **date_of_birth**: ISO date format (YYYY-MM-DD), cannot be future date, optional
-- **gender**: Must be one of: "male", "female"
+Validation Rules:
+- username: Alphanumeric 3-100
+- email: Email valid, max 255
+- full_name: 1-100 karakter
+- school_id: Integer positif dan harus ada di tabel schools
+- date_of_birth: ISO date (YYYY-MM-DD), tidak boleh di masa depan
+- gender: "male" atau "female"
+
+Catatan:
+- Bila school_id diisi, service memastikan school_id valid.
+- Response menyertakan objek profile dengan school_info terstruktur.
 
 ### DELETE /api/auth/profile
-Hapus profil user yang sedang login (soft delete).
+Hapus hanya profil (tabel user_profiles), bukan akun.
 
-**Authentication:** Bearer Token Required
-**Rate Limit:** General Gateway (5000/15min)
+- Authentication: Bearer Token Required
+- Rate Limit: General Gateway (5000/15min)
 
-**Response Success (200):**
+Response Success (200):
 ```json
 {
   "success": true,
   "message": "Profile deleted successfully"
 }
 ```
+
+Error (404) bila profil belum ada.
+
 
 **Response Error (404):**
 ```json
@@ -242,12 +266,12 @@ Hapus profil user yang sedang login (soft delete).
 **⚠️ Note:** Endpoint ini hanya menghapus profil user (user_profiles table), bukan akun user itu sendiri. Untuk menghapus akun user secara keseluruhan, gunakan endpoint DELETE /api/auth/account.
 
 ### DELETE /api/auth/account
-Hapus akun user yang sedang login secara keseluruhan (soft delete).
+Hapus akun user (soft delete) – mengubah email, reset token_balance=0, is_active=false, hapus profil.
 
-**Authentication:** Bearer Token Required
-**Rate Limit:** General Gateway (5000/15min)
+- Authentication: Bearer Token Required
+- Rate Limit: General Gateway (5000/15min)
 
-**Response Success (200):**
+Response Success (200):
 ```json
 {
   "success": true,
@@ -258,6 +282,9 @@ Hapus akun user yang sedang login secara keseluruhan (soft delete).
   }
 }
 ```
+
+Catatan: Setelah penghapusan, user tidak bisa login lagi.
+
 
 **Response Error (404):**
 ```json
@@ -281,19 +308,19 @@ Hapus akun user yang sedang login secara keseluruhan (soft delete).
 ### POST /api/auth/change-password
 Ubah password user.
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
 
-**Request Body:**
+Request Body:
 ```json
 {
-  "currentPassword": "oldPassword1",
-  "newPassword": "newPassword2"
+  "currentPassword": "OldPass1",
+  "newPassword": "NewPass2"
 }
 ```
 
-**Validation Rules:**
-- **currentPassword**: Required
-- **newPassword**: Minimum 8 characters, must contain at least one letter and one number, required
+Validation Rules:
+- currentPassword: Required
+- newPassword: Min 8 karakter, mengandung huruf dan angka (divalidasi via Joi + utils/password)
 
 ### POST /api/auth/logout
 Logout user.
@@ -301,18 +328,18 @@ Logout user.
 **Authentication:** Bearer Token Required
 
 ### GET /api/auth/token-balance
-Mendapatkan saldo token user.
+Mendapatkan saldo token user (legacy endpoint; gunakan GET /api/auth/profile untuk data terbaru yang terjamin fresh).
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
 
-**Response Success (200):**
+Response Success (200):
 ```json
 {
   "success": true,
+  "message": "Success",
   "data": {
-    "userId": "550e8400-e29b-41d4-a716-446655440000",
-    "tokenBalance": 5,
-    "lastUpdated": "2024-01-15T10:30:00.000Z"
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "token_balance": 5
   }
 }
 ```
@@ -322,16 +349,18 @@ Mendapatkan saldo token user.
 ## 🏫 School Management Endpoints
 
 ### GET /api/auth/schools
-Mendapatkan daftar sekolah.
+Mendapatkan daftar sekolah (mendukung pencarian dan paginasi cepat).
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
+- Query params: search, city, province, page=1, limit=20, useFullText=false
+- Response menyertakan pagination { total, page, limit, pages }
 
 ### POST /api/auth/schools
 Membuat sekolah baru.
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
 
-**Request Body:**
+Request Body:
 ```json
 {
   "name": "SMA Negeri 1 Jakarta",
@@ -341,53 +370,57 @@ Membuat sekolah baru.
 }
 ```
 
-**Validation Rules:**
-- **name**: Maximum 200 characters, required
-- **address**: Optional
-- **city**: Maximum 100 characters, optional
-- **province**: Maximum 100 characters, optional
+Validation Rules:
+- name: Max 200, required
+- address: Optional
+- city: Max 100, optional
+- province: Max 100, optional
 
 ### GET /api/auth/schools/by-location
 Mendapatkan sekolah berdasarkan lokasi.
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
+- Query params: province (wajib), city (opsional), limit=50
+- 400 bila province tidak dikirim
 
 ### GET /api/auth/schools/location-stats
 Mendapatkan statistik lokasi sekolah.
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
 
 ### GET /api/auth/schools/distribution
 Mendapatkan distribusi sekolah.
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
 
 ### GET /api/auth/schools/:schoolId/users
-Mendapatkan user berdasarkan sekolah.
+Mendapatkan user berdasarkan sekolah dengan paginasi.
 
-**Authentication:** Bearer Token Required
+- Authentication: Bearer Token Required
+- Query params: page=1, limit=20
+- 400 bila schoolId invalid
 
 ---
 
 ## 👨‍💼 Admin Authentication Endpoints
 
 ### POST /api/admin/login
-Login admin.
+Login admin (identifier bisa username ATAU email).
 
-**Authentication:** None (Public)
-**Rate Limit:** Auth Limiter (100/15min)
+- Authentication: None (Public)
+- Rate Limit: Auth Limiter (2500/15min)
 
-**Request Body:**
+Request Body:
 ```json
 {
-  "username": "admin",
+  "username": "admin", // atau email
   "password": "Admin123!"
 }
 ```
 
-**Validation Rules:**
-- **username**: Required (can be username or email)
-- **password**: Required (no specific format validation for login)
+Validation Rules:
+- username: Required (boleh username atau email)
+- password: Required
 
 **Response Success (200):**
 ```json
@@ -415,14 +448,14 @@ Login admin.
 ### GET /api/admin/profile
 Mendapatkan profil admin.
 
-**Authentication:** Bearer Token + Admin Role Required
-**Rate Limit:** Admin Limiter (50/15min)
+- Authentication: Bearer Token + Admin Role Required
+- Rate Limit: Admin Limiter (1000/15min)
 
 ### PUT /api/admin/profile
 Update profil admin.
 
-**Authentication:** Bearer Token + Admin Role Required
-**Rate Limit:** Admin Limiter (50/15min)
+- Authentication: Bearer Token + Admin Role Required
+- Rate Limit: Admin Limiter (1000/15min)
 
 **Request Body:**
 ```json
@@ -441,8 +474,8 @@ Update profil admin.
 ### POST /api/admin/change-password
 Ubah password admin.
 
-**Authentication:** Bearer Token + Admin Role Required
-**Rate Limit:** Admin Limiter (50/15min)
+- Authentication: Bearer Token + Admin Role Required
+- Rate Limit: Admin Limiter (1000/15min)
 
 **Request Body:**
 ```json
@@ -456,19 +489,19 @@ Ubah password admin.
 - **currentPassword**: Required
 - **newPassword**: Minimum 8 characters, must contain at least one letter and one number, required
 
-**⚠️ Note:** Admin password change currently uses weaker validation than admin registration. Consider using stronger validation for consistency.
+Catatan: Validasi password change admin saat ini sama aturan minimalnya dengan user (huruf+angka, min 8).
 
 ### POST /api/admin/logout
 Logout admin.
 
-**Authentication:** Bearer Token + Admin Role Required
-**Rate Limit:** Admin Limiter (50/15min)
+- Authentication: Bearer Token + Admin Role Required
+- Rate Limit: Admin Limiter (1000/15min)
 
 ### POST /api/admin/register
 Registrasi admin baru (Superadmin only).
 
-**Authentication:** Bearer Token + Superadmin Role Required
-**Rate Limit:** Admin Limiter (50/15min)
+- Authentication: Bearer Token + Superadmin Role Required
+- Rate Limit: Admin Limiter (1000/15min)
 
 **Request Body:**
 ```json
@@ -484,7 +517,7 @@ Registrasi admin baru (Superadmin only).
 **Validation Rules:**
 - **username**: Alphanumeric only, 3-100 characters, required
 - **email**: Valid email format, maximum 255 characters, required
-- **password**: Minimum 8 characters, maximum 128 characters, must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&), required
+- password: Minimum 8 characters, must contain at least one letter and one number, required
 - **full_name**: Maximum 255 characters, optional
 - **user_type**: Must be one of: "admin", "superadmin", "moderator", defaults to "admin"
 
@@ -597,11 +630,120 @@ Update token balance user (untuk admin).
 
 ## 🔒 Security Features
 
-1. **JWT Authentication:** Secure token-based authentication
-2. **Password Hashing:** Bcrypt dengan salt rounds
-3. **Rate Limiting:** Protection against brute force attacks
-4. **Input Validation:** Comprehensive request validation
-5. **Role-based Access:** Admin/User role separation
-6. **Audit Logging:** All authentication events logged
-7. **CORS Protection:** Cross-origin request protection
-8. **Helmet Security:** Security headers implementation
+1. JWT Authentication (Bearer)
+2. Password Hashing (bcrypt; rounds configurable via BCRYPT_ROUNDS)
+3. Rate Limiting (Gateway: general 5000, auth 2500, admin 1000 per 15 menit)
+4. Input Validation (Joi schemas)
+5. Role-based Access (user/admin/superadmin/moderator)
+6. Audit Logging (morgan + custom logger)
+7. CORS (allow all origins)
+8. Helmet (security headers)
+
+---
+
+## ❗ Contoh Response Error per Endpoint
+
+Berikut contoh-contoh response error yang umum untuk setiap endpoint. Struktur error mengikuti format global:
+
+```json
+{
+  "success": false,
+  "error": { "code": "...", "message": "...", "details": { } }
+}
+```
+
+- POST /api/auth/register
+  - 400 (VALIDATION_ERROR) – field tidak valid atau duplikat batch
+  - 400 (EMAIL_EXISTS) – email sudah terdaftar
+  - 400 (USERNAME_EXISTS) – username sudah terpakai
+
+- POST /api/auth/register/batch
+  - 400 (VALIDATION_ERROR) – body harus array users, maksimal 50
+  - 200 (partial) – data.results berisi success=false dengan error per item (mis: "Email already exists")
+
+- POST /api/auth/login
+  - 404 (IDENTIFIER_NOT_FOUND) – username/email tidak ditemukan
+  - 401 (INVALID_PASSWORD) – password salah
+
+- GET /api/auth/profile
+  - 401 (UNAUTHORIZED) – token tidak ada/invalid/expired
+  - 404 (USER_NOT_FOUND) – user tidak ditemukan
+
+- PUT /api/auth/profile
+  - 401 (UNAUTHORIZED)
+  - 400 (VALIDATION_ERROR) – data tidak valid (termasuk INVALID_SCHOOL_ID)
+  - 409 (EMAIL_EXISTS | USERNAME_EXISTS) – constrained oleh DB
+
+- DELETE /api/auth/profile
+  - 401 (UNAUTHORIZED)
+  - 404 (PROFILE_NOT_FOUND)
+
+- DELETE /api/auth/account
+  - 401 (UNAUTHORIZED)
+  - 404 (USER_NOT_FOUND)
+
+- POST /api/auth/change-password
+  - 401 (UNAUTHORIZED)
+  - 404 (USER_NOT_FOUND)
+  - 400 (VALIDATION_ERROR) – password baru tidak memenuhi syarat
+  - 400 (VALIDATION_ERROR) – current password salah (dibungkus sebagai error terkontrol)
+
+- POST /api/auth/logout
+  - 401 (UNAUTHORIZED)
+
+- GET /api/auth/token-balance
+  - 401 (UNAUTHORIZED)
+  - 404 (USER_NOT_FOUND)
+
+- GET /api/auth/schools
+  - 401 (UNAUTHORIZED)
+
+- POST /api/auth/schools
+  - 401 (UNAUTHORIZED)
+  - 400 (VALIDATION_ERROR)
+
+- GET /api/auth/schools/by-location
+  - 401 (UNAUTHORIZED)
+  - 400 (MISSING_PROVINCE)
+
+- GET /api/auth/schools/location-stats
+  - 401 (UNAUTHORIZED)
+
+- GET /api/auth/schools/distribution
+  - 401 (UNAUTHORIZED)
+
+- GET /api/auth/schools/:schoolId/users
+  - 401 (UNAUTHORIZED)
+  - 400 (INVALID_SCHOOL_ID)
+
+- POST /api/admin/login
+  - 401 (INVALID_CREDENTIALS) – bila kredensial tidak valid
+
+- GET /api/admin/profile
+  - 401 (UNAUTHORIZED) – bukan admin atau token invalid
+  - 404 (ADMIN_NOT_FOUND)
+
+- PUT /api/admin/profile
+  - 401 (UNAUTHORIZED)
+  - 400 (VALIDATION_ERROR)
+  - 409 (EMAIL_EXISTS | USERNAME_EXISTS)
+
+- POST /api/admin/change-password
+  - 401 (UNAUTHORIZED)
+  - 400 (VALIDATION_ERROR)
+
+- POST /api/admin/logout
+  - 401 (UNAUTHORIZED)
+
+- POST /api/admin/register (superadmin saja)
+  - 401 (UNAUTHORIZED)
+  - 403 (FORBIDDEN)
+  - 400 (VALIDATION_ERROR)
+  - 409 (EMAIL_EXISTS | USERNAME_EXISTS)
+
+- Admin User Management (via archive service)
+  - 401 (UNAUTHORIZED)
+  - 403 (FORBIDDEN)
+  - 404 (USER_NOT_FOUND)
+  - 400 (VALIDATION_ERROR) – untuk update token balance
+

@@ -194,14 +194,22 @@ Simple liveness probe untuk container orchestration.
 ### 3. Readiness Probe
 **GET** `/health/ready`
 
-Readiness probe untuk memastikan service siap menerima traffic.
+Readiness probe untuk memastikan service siap menerima traffic (memverifikasi koneksi RabbitMQ).
 
-**Response:**
+**Response (200 Ready):**
 ```json
 {
-  "status": "ready|not_ready",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "reason": "string"
+  "status": "ready",
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**Response (503 Not Ready):**
+```json
+{
+  "status": "not_ready",
+  "reason": "RabbitMQ connection unavailable",
+  "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
 

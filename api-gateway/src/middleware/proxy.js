@@ -121,9 +121,13 @@ const createServiceProxy = (serviceUrl, options = {}) => {
  */
 const authServiceProxy = createServiceProxy(config.services.auth, {
   pathRewrite: {
-    '^/api/auth/health': '/health', // Health endpoint langsung ke /health
-    '^/api/auth': '/auth', // Rewrite /api/auth to /auth
-    '^/api/admin': '/admin' // Keep /admin prefix
+    '^/api/health/metrics': '/health/metrics', // Global health metrics -> auth-service /health/metrics
+    '^/api/health/ready': '/health/ready',     // Global readiness -> auth-service /health/ready
+    '^/api/health/live': '/health/live',       // Global liveness -> auth-service /health/live
+    '^/api/health$': '/health',                // Global health -> auth-service /health
+    '^/api/auth/health': '/health',            // Auth health endpoint langsung ke /health
+    '^/api/auth': '/auth',                     // Rewrite /api/auth to /auth
+    '^/api/admin': '/admin'                    // Keep /admin prefix
   }
 });
 

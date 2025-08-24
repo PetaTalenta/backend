@@ -18,6 +18,10 @@ X-Internal-Service: true
 X-Service-Key: <internal_service_secret_key>
 ```
 
+Catatan:
+- Jika header `X-Internal-Service: true` dikirim, service akan memvalidasi `X-Service-Key`. Jika salah/absen akan mengembalikan 401 INVALID_SERVICE_KEY.
+- Jika header internal tidak dikirim, request diperlakukan sebagai request user biasa (beberapa endpoint tetap bisa diakses dengan JWT).
+
 **Service Key:** Didefinisikan dalam environment variable `INTERNAL_SERVICE_KEY`
 
 ---
@@ -25,7 +29,7 @@ X-Service-Key: <internal_service_secret_key>
 ## 🔄 Analysis Results - Internal Endpoints
 
 ### 1. Create Analysis Result
-**POST** `/results` atau `/archive/results`
+**POST** `/archive/results`
 
 Membuat hasil analisis baru (hanya untuk internal service).
 
@@ -65,7 +69,7 @@ Membuat hasil analisis baru (hanya untuk internal service).
 ```
 
 ### 2. Batch Create Results
-**POST** `/results/batch` atau `/archive/results/batch`
+**POST** `/archive/results/batch`
 
 Membuat multiple hasil analisis dalam satu request.
 
@@ -89,7 +93,7 @@ Membuat multiple hasil analisis dalam satu request.
 ```
 
 ### 3. Update Result (Internal)
-**PUT** `/results/:id` atau `/archive/results/:id`
+**PUT** `/archive/results/:id`
 
 Memperbarui hasil analisis (akses internal tanpa validasi ownership).
 
@@ -103,7 +107,7 @@ Memperbarui hasil analisis (akses internal tanpa validasi ownership).
 ```
 
 ### 4. Get Result (Internal)
-**GET** `/results/:id`
+**GET** `/archive/results/:id`
 
 Mendapatkan hasil analisis tanpa validasi ownership user.
 
@@ -112,7 +116,7 @@ Mendapatkan hasil analisis tanpa validasi ownership user.
 ## 🔄 Analysis Jobs - Internal Endpoints
 
 ### 1. Create Analysis Job
-**POST** `/jobs` atau `/archive/jobs`
+**POST** `/archive/jobs`
 
 Membuat job analisis baru.
 
@@ -143,7 +147,7 @@ Membuat job analisis baru.
 ```
 
 ### 2. Update Job Status
-**PUT** `/jobs/:jobId/status` atau `/archive/jobs/:jobId/status`
+**PUT** `/archive/jobs/:jobId/status`
 
 Memperbarui status job (digunakan oleh Analysis Worker).
 
@@ -159,12 +163,12 @@ Memperbarui status job (digunakan oleh Analysis Worker).
 ```
 
 ### 3. Get Job (Internal)
-**GET** `/jobs/:jobId`
+**GET** `/archive/jobs/:jobId`
 
 Mendapatkan detail job tanpa validasi ownership.
 
 ### 4. Batch Update Jobs
-**POST** `/api/v1/batch/update-jobs`
+**POST** `/archive/v1/batch/update-jobs`
 
 Memperbarui multiple jobs dalam satu request.
 
@@ -213,14 +217,9 @@ Mendapatkan statistik sistem untuk monitoring dan dashboard admin.
 ```
 
 ### 2. Performance Metrics
-**GET** `/api/v1/analytics?metric=performance`
+**GET** `/archive/metrics/performance`
 
-Mendapatkan metrik performa sistem.
-
-**Query Parameters:**
-- `metric=performance`
-- `aggregation=avg|sum|count`
-- `timeRange=1 day|7 days|30 days`
+Mendapatkan analisis performa sistem dan slow queries.
 
 ---
 
@@ -288,7 +287,7 @@ Mendapatkan tren demografis dari waktu ke waktu.
 ## 🔧 Batch Processing - Internal Endpoints
 
 ### 1. Get Batch Statistics
-**GET** `/archive/batch/stats`
+**GET** `/archive/results/batch/stats`
 
 Mendapatkan statistik batch processing.
 
@@ -307,12 +306,12 @@ Mendapatkan statistik batch processing.
 ```
 
 ### 2. Force Batch Process
-**POST** `/archive/batch/process`
+**POST** `/archive/results/batch/process`
 
 Memaksa pemrosesan batch saat ini.
 
 ### 3. Clear Batch Queue
-**POST** `/archive/batch/clear`
+**POST** `/archive/results/batch/clear`
 
 Membersihkan antrian batch (operasi darurat).
 
@@ -321,7 +320,7 @@ Membersihkan antrian batch (operasi darurat).
 ## 📊 Metrics & Monitoring - Internal Endpoints
 
 ### 1. Application Metrics
-**GET** `/metrics`
+**GET** `/archive/metrics`
 
 Mendapatkan metrik aplikasi untuk monitoring.
 
@@ -350,27 +349,27 @@ Mendapatkan metrik aplikasi untuk monitoring.
 ```
 
 ### 2. Database Metrics
-**GET** `/metrics/database`
+**GET** `/archive/metrics/database`
 
 Mendapatkan metrik database.
 
 ### 3. Cache Metrics
-**GET** `/metrics/cache`
+**GET** `/archive/metrics/cache`
 
 Mendapatkan metrik cache Redis.
 
 ### 4. Performance Metrics
-**GET** `/metrics/performance`
+**GET** `/archive/metrics/performance`
 
 Mendapatkan analisis performa.
 
 ### 5. Reset Metrics
-**POST** `/metrics/reset`
+**POST** `/archive/metrics/reset`
 
 Reset counter metrik.
 
 ### 6. Cache Invalidation
-**POST** `/metrics/cache/invalidate`
+**POST** `/archive/metrics/cache/invalidate`
 
 Invalidasi cache berdasarkan pattern.
 
@@ -423,7 +422,7 @@ Health check komponen spesifik.
 ## 🔧 Development Endpoints
 
 ### Create User (Development Only)
-**POST** `/archive/dev/create-user`
+**POST** `/archive/results/dev/create-user`
 
 Membuat user untuk testing (hanya tersedia di development mode).
 

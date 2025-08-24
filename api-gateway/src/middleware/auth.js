@@ -96,15 +96,17 @@ const verifyAdmin = (req, res, next) => {
       message: 'Authentication required'
     });
   }
-  
-  if (req.user.user_type !== 'admin') {
+
+  // Accept admin, superadmin, and moderator roles as admin access
+  const adminRoles = ['admin', 'superadmin', 'moderator'];
+  if (!adminRoles.includes(req.user.user_type)) {
     return res.status(403).json({
       success: false,
       error: 'FORBIDDEN',
       message: 'Admin access required'
     });
   }
-  
+
   next();
 };
 

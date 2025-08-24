@@ -44,6 +44,16 @@ The Chatbot Service provides foundational conversation management capabilities i
 - `DELETE /conversations/:id` - Soft delete conversation
 - `GET /conversations/:conversationId/messages` - Get conversation messages
 
+### Messages
+- `POST /conversations/:conversationId/messages` - Send a new message and get AI response
+- `POST /conversations/:conversationId/messages/:messageId/regenerate` - Regenerate AI response for a specific message
+
+### Usage Analytics
+- `GET /usage/stats` - Get usage statistics for authenticated user
+- `GET /usage/summary` - Get usage summary for dashboard
+- `GET /usage/system` - Get system-wide usage statistics (admin only)
+- `GET /conversations/:conversationId/usage` - Get usage statistics for a specific conversation
+
 ### Health & Monitoring
 - `GET /health` - Service health check
 - `GET /health/ready` - Readiness probe
@@ -52,10 +62,13 @@ The Chatbot Service provides foundational conversation management capabilities i
 
 ## Environment Configuration
 
+Lihat file contoh lengkap di `<repo-root>/chatbot-service/.env.example` untuk daftar variabel yang didukung. Beberapa yang penting:
+
 ```env
 # Server
 PORT=3006
 NODE_ENV=development
+ALLOWED_ORIGINS=*
 
 # Database
 DB_HOST=postgres
@@ -69,8 +82,17 @@ DB_SCHEMA=chat
 JWT_SECRET=your_jwt_secret
 INTERNAL_SERVICE_KEY=your_internal_key
 
+# OpenRouter (wajib untuk fitur AI)
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+DEFAULT_MODEL=qwen/qwen-2.5-coder-32b-instruct:free
+FALLBACK_MODEL=meta-llama/llama-3.2-3b-instruct:free
+EMERGENCY_FALLBACK_MODEL=openai/gpt-4o-mini
+USE_FREE_MODELS_ONLY=true
+
 # Rate Limiting
 RATE_LIMIT_CONVERSATIONS_PER_DAY=100
+FREE_MODEL_RATE_LIMIT_PER_MINUTE=20
 MAX_MESSAGE_LENGTH=4000
 
 # Logging
@@ -106,14 +128,16 @@ docker run -p 3006:3006 atma-chatbot-service
 
 ## Database Migration
 
-Before running the service, execute the database migration:
+Skrip migrasi berada di folder root repo: `<repo-root>/migrations/`.
+
+Before running the service, execute the database migration (jalankan dari root repo):
 
 ```sql
 -- Run the migration script
 psql -h localhost -U atma_user -d atma_db -f migrations/001_create_chat_schema.sql
 ```
 
-See `migrations/README.md` for detailed instructions.
+Untuk petunjuk lengkap, lihat `<repo-root>/migrations/README.md`.
 
 ## Integration
 
@@ -125,8 +149,10 @@ All endpoints (except health checks) require JWT authentication via the `Authori
 
 ### Rate Limiting
 - **Conversations**: 100 per day per user
-- **Messages**: 30 per minute per user
-- **General API**: 1000 requests per 15 minutes per user
+- **Messages (free models)**: 20 per minute per user
+- **General API**: 200 requests per 15 minutes per user
+
+Catatan: nilai di atas mencerminkan konfigurasi default di middleware saat ini. Sesuaikan melalui variabel lingkungan bila diperlukan.
 
 ## Architecture
 

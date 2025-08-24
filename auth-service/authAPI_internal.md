@@ -4,40 +4,39 @@
 Auth Service menyediakan API internal untuk komunikasi antar service dalam ekosistem ATMA. API ini digunakan oleh **Assessment Service**, **Archive Service**, **Analysis Worker**, dan service internal lainnya untuk verifikasi token dan manajemen user.
 
 **Service Information:**
-- **Service Name:** auth-service
-- **Internal Port:** 3001
-- **Internal Base URL:** `http://localhost:3001/`
-- **Version:** 1.0.0
+- Service Name: auth-service
+- Internal Port: 3001
+- Internal Base URL: `http://localhost:3001/`
+- Version: 1.0.0
+- Mounted Routes: `/auth`, `/admin`, `/health`
 
 ## Internal Authentication
 Semua endpoint internal menggunakan service authentication dengan header khusus.
 
-**Required Headers:**
+Required Headers (untuk endpoint internal yang protected):
 ```
 X-Internal-Service: true
 X-Service-Key: <internal_service_secret_key>
 ```
 
-**Service Key:** Didefinisikan dalam environment variable `INTERNAL_SERVICE_KEY`
+Service Key didefinisikan pada env `INTERNAL_SERVICE_KEY`. Endpoint verify-token tidak memerlukan header ini.
 
 ---
 
 ## 🔐 Token Verification - Internal Endpoints
 
 ### POST /auth/verify-token
-Memverifikasi validitas JWT token user untuk service-to-service communication.
+Verifikasi token JWT user.
 
-**Authentication:** Public (no authentication required)
-**Used by:** Assessment Service, Archive Service, Analysis Worker
+- Authentication: Public (tidak butuh service headers)
+- Used by: Assessment Service, Archive Service, Analysis Worker
 
-**Request Body:**
+Request Body:
 ```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
+{ "token": "<jwt>" }
 ```
 
-**Response Success (200):**
+Response Success (200):**
 ```json
 {
   "success": true,
@@ -46,13 +45,19 @@ Memverifikasi validitas JWT token user untuk service-to-service communication.
     "user": {
       "id": "550e8400-e29b-41d4-a716-446655440000",
       "email": "user@example.com",
-      "username": "johndoe",
-      "user_type": "user",
-      "is_active": true,
-      "token_balance": 100,
-      "created_at": "2024-01-15T10:30:00.000Z",
-      "updated_at": "2024-01-15T10:30:00.000Z"
+      "user_type": "user"
     }
+  }
+}
+```
+
+Response Invalid Token (200):
+```json
+{
+  "success": true,
+  "data": {
+    "valid": false,
+    "error": "Invalid or expired token"
   }
 }
 ```
@@ -85,19 +90,19 @@ Memverifikasi validitas JWT token user untuk service-to-service communication.
 ## 💰 Token Balance Management - Internal Endpoints
 
 ### PUT /auth/token-balance
-Update user token balance untuk service-to-service communication.
+Update token balance user (service-to-service).
 
-**Authentication:** Internal Service Authentication Required
-**Used by:** Assessment Service, Archive Service
+- Authentication: Internal Service Authentication Required
+- Used by: Assessment Service, Archive Service
 
-**Headers:**
+Headers:
 ```
 X-Internal-Service: true
 X-Service-Key: <internal_service_secret_key>
 Content-Type: application/json
 ```
 
-**Request Body:**
+Request Body:
 ```json
 {
   "userId": "550e8400-e29b-41d4-a716-446655440000",
@@ -106,22 +111,19 @@ Content-Type: application/json
 }
 ```
 
-**Request Parameters:**
-- `userId` (string, required): UUID of the user
-- `amount` (number, required): Amount to add/subtract (positive integer)
-- `operation` (string, required): Either "add" or "subtract"
+Request Parameters:
+- userId (UUID, required)
+- amount (integer, required)
+- operation ("add" | "subtract")
 
-**Response Success (200):**
+Response Success (200):**
 ```json
 {
   "success": true,
+  "message": "Token balance updated",
   "data": {
-    "userId": "550e8400-e29b-41d4-a716-446655440000",
-    "previousBalance": 100,
-    "newBalance": 50,
-    "operation": "subtract",
-    "amount": 50,
-    "timestamp": "2024-01-15T10:30:00.000Z"
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "new_balance": 50
   }
 }
 ```
@@ -137,12 +139,12 @@ Content-Type: application/json
 }
 ```
 
-**Response Insufficient Balance (400):**
+Response Insufficient Balance (400):
 ```json
 {
   "success": false,
   "error": {
-    "code": "INSUFFICIENT_BALANCE",
+    "code": "INSUFFICIENT_TOKENS",
     "message": "Insufficient token balance"
   }
 }
@@ -190,7 +192,7 @@ const verifyUserToken = async (token) => {
     },
     body: JSON.stringify({ token })
   });
-  
+
   const result = await response.json();
   return result.data.valid ? result.data.user : null;
 };
@@ -210,7 +212,7 @@ const deductTokens = async (userId, amount) => {
       operation: 'subtract'
     })
   });
-  
+
   return await response.json();
 };
 ```
@@ -226,7 +228,7 @@ const verifyAdminAccess = async (token) => {
     },
     body: JSON.stringify({ token })
   });
-  
+
   const result = await response.json();
   if (result.data.valid && result.data.user.user_type === 'admin') {
     return result.data.user;
@@ -247,6 +249,30 @@ const verifyAdminAccess = async (token) => {
 | `UNAUTHORIZED` | Missing or invalid internal service authentication | 401 |
 | `INVALID_TOKEN` | JWT token is invalid or expired | 200 (in verify-token response) |
 | `INTERNAL_ERROR` | Internal server error | 500 |
+
+---
+
+## ❗ Contoh Response Error per Endpoint (Internal)
+
+Semua error menggunakan format:
+
+```json
+{
+  "success": false,
+  "error": { "code": "...", "message": "...", "details": { } }
+}
+```
+
+- POST /auth/verify-token
+  - 200 (valid=false) – token invalid/expired
+  - 400 (VALIDATION_ERROR) – token tidak dikirim
+
+- PUT /auth/token-balance
+  - 401 (UNAUTHORIZED) – header internal salah/kurang
+  - 404 (USER_NOT_FOUND) – user tidak ada
+  - 400 (INSUFFICIENT_TOKENS) – saldo tidak cukup untuk subtract
+  - 400 (VALIDATION_ERROR) – body tidak valid: userId/amount/operation
+
 
 ---
 
