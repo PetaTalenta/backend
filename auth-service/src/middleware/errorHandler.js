@@ -31,8 +31,17 @@ const errorHandler = (err, req, res, next) => {
     errorMessage = 'Database validation failed';
   } else if (err.name === 'SequelizeUniqueConstraintError') {
     statusCode = 400;
-    errorCode = 'DUPLICATE_ERROR';
-    errorMessage = 'Resource already exists';
+    const field = (err && err.errors && err.errors[0] && err.errors[0].path) ? err.errors[0].path : '';
+    if (field && field.includes('email')) {
+      errorCode = 'EMAIL_EXISTS';
+      errorMessage = 'Email already exists';
+    } else if (field && field.includes('username')) {
+      errorCode = 'USERNAME_EXISTS';
+      errorMessage = 'Username already exists';
+    } else {
+      errorCode = 'DUPLICATE_ERROR';
+      errorMessage = 'Resource already exists';
+    }
   } else if (err.name === 'SequelizeForeignKeyConstraintError') {
     statusCode = 400;
     errorCode = 'REFERENCE_ERROR';
@@ -55,10 +64,22 @@ const errorHandler = (err, req, res, next) => {
       statusCode = 400;
       errorCode = 'EMAIL_EXISTS';
       errorMessage = 'Email already exists';
+    } else if (err.message.includes('Username already exists')) {
+      statusCode = 400;
+      errorCode = 'USERNAME_EXISTS';
+      errorMessage = 'Username already exists';
     } else if (err.message.includes('User not found')) {
       statusCode = 404;
       errorCode = 'USER_NOT_FOUND';
       errorMessage = 'User not found';
+    } else if (err.message.includes('Invalid username or email')) {
+      statusCode = 404;
+      errorCode = 'IDENTIFIER_NOT_FOUND';
+      errorMessage = 'Username or email not found';
+    } else if (err.message.includes('Invalid password')) {
+      statusCode = 401;
+      errorCode = 'INVALID_PASSWORD';
+      errorMessage = 'Invalid password';
     } else if (err.message.includes('Invalid email or password')) {
       statusCode = 401;
       errorCode = 'INVALID_CREDENTIALS';
@@ -80,9 +101,9 @@ const errorHandler = (err, req, res, next) => {
     error: {
       code: errorCode,
       message: errorMessage,
-      ...(process.env.NODE_ENV === 'development' && { 
+      ...(process.env.NODE_ENV === 'development' && {
         stack: err.stack,
-        details: err.message 
+        details: err.message
       })
     }
   });

@@ -132,7 +132,8 @@ class TestDataGenerator {
       users.push({
         user: this.generateRandomUser(),
         profileUpdate: this.generateProfileUpdate(),
-        assessment: this.generateAssessmentData(`AI-Driven Talent Mapping User ${i + 1}`),
+        // Use default/allowed assessment name to avoid validation errors
+        assessment: this.generateAssessmentData(),
         conversation: this.generateChatbotConversation(),
         messages: this.generateChatMessages()
       });

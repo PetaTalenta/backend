@@ -1,0 +1,184 @@
+{
+  "testName": "single-user-test-2025-08-24T01-18-30",
+  "startTime": "2025-08-24T01:18:30.708Z",
+  "endTime": "2025-08-24T01:23:39.420Z",
+  "duration": 308712,
+  "results": {
+    "passed": 10,
+    "failed": 0,
+    "skipped": 1,
+    "total": 11
+  },
+  "successRate": 90.91,
+  "errors": [],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:30.709Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:30.711Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser1755998310711chod5z@example.com",
+        "username": "testuserchod5z"
+      },
+      "timestamp": "2025-08-24T01:18:30.715Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:30.716Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "61e4321e-df63-4731-ab1b-89c48581ae7f",
+        "email": "testuser1755998310711chod5z@example.com"
+      },
+      "timestamp": "2025-08-24T01:18:31.319Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:31.320Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:31.527Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:31.527Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:31.800Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Update Profile",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:31.801Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile updated successfully",
+      "data": {
+        "username": "updatedgvff4v"
+      },
+      "timestamp": "2025-08-24T01:18:31.917Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Submit Assessment",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:31.917Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment submitted successfully",
+      "data": {
+        "jobId": "4e03eaab-f3a1-4a45-8250-6e4253f4e713",
+        "status": "queued"
+      },
+      "timestamp": "2025-08-24T01:18:32.431Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Wait for WebSocket Notification",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:32.431Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for assessment completion notification...",
+      "data": null,
+      "timestamp": "2025-08-24T01:18:32.432Z"
+    },
+    {
+      "level": "WARNING",
+      "message": "Failed to receive notification, falling back to polling archive job status",
+      "data": {},
+      "timestamp": "2025-08-24T01:23:32.442Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment completion detected via archive job polling",
+      "data": {
+        "jobId": "4e03eaab-f3a1-4a45-8250-6e4253f4e713",
+        "resultId": "a92476c0-572d-41b3-b542-a513938b2a9c",
+        "attempts": 1
+      },
+      "timestamp": "2025-08-24T01:23:33.028Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 8: Get Profile Persona",
+      "data": null,
+      "timestamp": "2025-08-24T01:23:33.028Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch processing to complete...",
+      "data": null,
+      "timestamp": "2025-08-24T01:23:33.028Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile persona retrieved successfully",
+      "data": {
+        "archetype": "The Balanced Professional",
+        "careerCount": 4
+      },
+      "timestamp": "2025-08-24T01:23:39.241Z"
+    },
+    {
+      "level": "SKIPPED",
+      "message": "Chatbot step",
+      "reason": "SKIP_CHATBOT is true",
+      "timestamp": "2025-08-24T01:23:39.241Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 10: Cleanup Test Account",
+      "data": null,
+      "timestamp": "2025-08-24T01:23:39.242Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test account cleaned up successfully",
+      "data": null,
+      "timestamp": "2025-08-24T01:23:39.419Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Single User E2E Test completed successfully",
+      "data": null,
+      "timestamp": "2025-08-24T01:23:39.419Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-08-24T01:23:39.420Z"
+    }
+  ]
+}

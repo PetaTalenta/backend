@@ -55,11 +55,7 @@ class ChatbotTest {
     this.testData = this.dataGenerator.generateTestSuite(1)[0];
     
     // Register and login user
-    await this.apiClient.register(this.testData.user);
-    await this.apiClient.login({
-      email: this.testData.user.email,
-      password: this.testData.user.password
-    });
+    await this.apiClient.registerAndLogin(this.testData.user);
     
     // Connect WebSocket
     await this.wsClient.connect();
@@ -110,16 +106,8 @@ class ChatbotTest {
         throw new Error('Assessment-based conversation creation failed');
       }
       
-      // Test auto-initialize
-      const autoConversation = await this.apiClient.autoInitializeChatbot();
-      
-      if (autoConversation.success && autoConversation.data.conversation) {
-        this.logger.success('Auto-initialized conversation created successfully', {
-          conversationId: autoConversation.data.conversation.id
-        });
-      } else {
-        throw new Error('Auto-initialize conversation creation failed');
-      }
+      // Removed auto-initialize flow: endpoint not intended for end users
+      // (Previously called /api/chatbot/auto-initialize)
       
     } catch (error) {
       this.logger.error('Conversation creation test failed', error);
@@ -182,46 +170,7 @@ class ChatbotTest {
     this.logger.step('Test Assessment Integration', 4);
     
     try {
-      // Test assessment readiness check
-      const readinessResponse = await this.apiClient.client.get(`/chatbot/assessment-ready/${this.apiClient.userId}`);
-      
-      if (readinessResponse.data.has_assessment && readinessResponse.data.ready_for_chatbot) {
-        this.logger.success('Assessment readiness check successful', {
-          hasAssessment: readinessResponse.data.has_assessment,
-          assessmentId: readinessResponse.data.assessment_id
-        });
-      } else {
-        throw new Error('Assessment not ready for chatbot integration');
-      }
-      
-      // Test conversation suggestions
-      const suggestionsResponse = await this.apiClient.client.get(`/chatbot/conversations/${this.conversationId}/suggestions`);
-      
-      if (suggestionsResponse.data.success && suggestionsResponse.data.data.suggestions) {
-        const suggestions = suggestionsResponse.data.data.suggestions;
-        this.logger.success('Conversation suggestions retrieved', {
-          suggestionCount: suggestions.length,
-          assessmentBased: suggestionsResponse.data.data.context?.assessment_based
-        });
-        
-        // Test sending a suggested message
-        if (suggestions.length > 0) {
-          const suggestionMessage = {
-            content: suggestions[0],
-            content_type: 'text'
-          };
-          
-          const suggestionResponse = await this.apiClient.sendMessage(this.conversationId, suggestionMessage);
-          
-          if (suggestionResponse.success) {
-            this.logger.success('Suggested message sent successfully');
-          } else {
-            throw new Error('Failed to send suggested message');
-          }
-        }
-      } else {
-        throw new Error('Failed to retrieve conversation suggestions');
-      }
+      // Skip endpoints not intended for end users: assessment-ready and conversation suggestions
       
     } catch (error) {
       this.logger.error('Assessment integration test failed', error);
@@ -262,14 +211,14 @@ class ChatbotTest {
       }
       
       // Test conversation update
-      const updateResponse = await this.apiClient.client.put(`/chatbot/conversations/${this.conversationId}`, {
+      const updateResponse = await this.apiClient.updateConversation(this.conversationId, {
         title: 'Updated Test Conversation',
         metadata: {
           updated_by_test: true
         }
       });
-      
-      if (updateResponse.data.success) {
+
+      if (updateResponse.success) {
         this.logger.success('Conversation updated successfully');
       } else {
         throw new Error('Conversation update failed');
@@ -346,7 +295,7 @@ class ChatbotTest {
       // Delete conversation if created
       if (this.conversationId) {
         try {
-          await this.apiClient.client.delete(`/chatbot/conversations/${this.conversationId}`);
+          await this.apiClient.deleteConversation(this.conversationId);
           this.logger.success('Test conversation deleted');
         } catch (error) {
           this.logger.warning('Failed to delete conversation (non-critical)', error);

@@ -7,7 +7,7 @@ class APIClient {
     this.token = null;
     this.userId = null;
     this.userEmail = null;
-    
+
     this.client = axios.create({
       baseURL: this.baseURL,
       timeout: parseInt(process.env.TEST_TIMEOUT) || 30000,
@@ -37,7 +37,7 @@ class APIClient {
         const url = error.config?.url || 'UNKNOWN';
         const status = error.response?.status || 'NO_RESPONSE';
         console.log(chalk.red(`✗ ${method} ${url} - ${status}`));
-        
+
         if (error.response?.data) {
           console.log(chalk.red(`  Error: ${JSON.stringify(error.response.data, null, 2)}`));
         }
@@ -158,6 +158,28 @@ class APIClient {
     return response.data;
   }
 
+
+  // Convenience helpers
+  async registerAndLogin(user) {
+    // Try register first; if it already returns a token, we're authenticated
+    const reg = await this.register(user);
+    if (reg?.success && reg?.data?.token) {
+      return reg;
+    }
+    // Fallback to explicit login
+    return await this.login({ email: user.email, password: user.password });
+  }
+
+  async updateConversation(conversationId, update) {
+    const response = await this.client.put(`/api/chatbot/conversations/${conversationId}`, update);
+    return response.data;
+  }
+
+  async deleteConversation(conversationId) {
+    const response = await this.client.delete(`/api/chatbot/conversations/${conversationId}`);
+    return response.data;
+  }
+
   // Health check
   async healthCheck() {
     const response = await this.client.get('/health');
@@ -169,7 +191,7 @@ class APIClient {
     if (!this.userId) {
       throw new Error('No user ID available for deletion');
     }
-    
+
     try {
       // Try to delete via admin endpoint (if available)
       const response = await this.client.delete(`/api/archive/admin/users/${this.userId}`);

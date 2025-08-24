@@ -2,6 +2,7 @@ const express = require('express');
 const { verifyToken, verifyInternalService, verifyAdmin } = require('../middleware/auth');
 const { authLimiter, assessmentLimiter, adminLimiter, archiveLimiter, chatLimiter } = require('../middleware/rateLimiter');
 const { authServiceProxy, archiveServiceProxy, assessmentServiceProxy, notificationServiceProxy, socketIOProxy, chatbotServiceProxy } = require('../middleware/proxy');
+const { adminServiceProxy } = require('../middleware/adminServiceProxy');
 
 const router = express.Router();
 
@@ -245,5 +246,11 @@ router.use('/archive/*', archiveServiceProxy);
 router.use('/assessment/*', assessmentServiceProxy);
 router.use('/notifications/*', notificationServiceProxy);
 router.use('/chatbot/*', chatbotServiceProxy);
+
+// ===== ADMIN-SERVICE ROUTES =====
+// Public admin login via admin-service
+router.post('/admin-service/admin/login', adminServiceProxy);
+// Protected admin-service routes
+router.use('/admin-service', verifyToken, verifyAdmin, adminLimiter, adminServiceProxy);
 
 module.exports = router;

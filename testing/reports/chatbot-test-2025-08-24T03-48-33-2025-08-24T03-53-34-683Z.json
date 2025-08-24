@@ -1,0 +1,59 @@
+{
+  "testName": "chatbot-test-2025-08-24T03-48-33",
+  "startTime": "2025-08-24T03:48:33.405Z",
+  "endTime": "2025-08-24T03:53:34.681Z",
+  "duration": 301276,
+  "results": {
+    "passed": 1,
+    "failed": 1,
+    "skipped": 0,
+    "total": 2
+  },
+  "successRate": 50,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Chatbot E2E Test failed",
+      "error": {
+        "message": "Timeout waiting for assessment d968e582-605b-492b-a4a8-ecda7cb9e6c2 to complete",
+        "stack": "Error: Timeout waiting for assessment d968e582-605b-492b-a4a8-ecda7cb9e6c2 to complete\n    at Timeout._onTimeout (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\websocket-client.js:157:16)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-08-24T03:53:34.329Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Chatbot-focused E2E Test",
+      "data": null,
+      "timestamp": "2025-08-24T03:48:33.406Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Setup Test Environment",
+      "data": null,
+      "timestamp": "2025-08-24T03:48:33.408Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Chatbot E2E Test failed",
+      "error": {
+        "message": "Timeout waiting for assessment d968e582-605b-492b-a4a8-ecda7cb9e6c2 to complete",
+        "stack": "Error: Timeout waiting for assessment d968e582-605b-492b-a4a8-ecda7cb9e6c2 to complete\n    at Timeout._onTimeout (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\websocket-client.js:157:16)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-08-24T03:53:34.329Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Cleanup",
+      "data": null,
+      "timestamp": "2025-08-24T03:53:34.330Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test account cleaned up",
+      "data": null,
+      "timestamp": "2025-08-24T03:53:34.681Z"
+    }
+  ]
+}

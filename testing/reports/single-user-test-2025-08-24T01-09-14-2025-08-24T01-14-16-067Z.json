@@ -1,0 +1,160 @@
+{
+  "testName": "single-user-test-2025-08-24T01-09-14",
+  "startTime": "2025-08-24T01:09:14.576Z",
+  "endTime": "2025-08-24T01:14:16.066Z",
+  "duration": 301490,
+  "results": {
+    "passed": 6,
+    "failed": 2,
+    "skipped": 0,
+    "total": 8
+  },
+  "successRate": 75,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Failed to receive notification",
+      "error": {
+        "message": "Timeout waiting for assessment 497c65e2-0350-4787-a3c2-c233268ccec3 to complete",
+        "stack": "Error: Timeout waiting for assessment 497c65e2-0350-4787-a3c2-c233268ccec3 to complete\n    at Timeout._onTimeout (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\websocket-client.js:139:16)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-08-24T01:14:16.064Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Timeout waiting for assessment 497c65e2-0350-4787-a3c2-c233268ccec3 to complete",
+        "stack": "Error: Timeout waiting for assessment 497c65e2-0350-4787-a3c2-c233268ccec3 to complete\n    at Timeout._onTimeout (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\websocket-client.js:139:16)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-08-24T01:14:16.065Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:14.577Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:14.579Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser1755997754579gnt19o@example.com",
+        "username": "testusergnt19o"
+      },
+      "timestamp": "2025-08-24T01:09:14.582Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:14.582Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "491b722b-1153-426c-965c-c39f46bfbc1c",
+        "email": "testuser1755997754579gnt19o@example.com"
+      },
+      "timestamp": "2025-08-24T01:09:15.198Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:15.199Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:15.391Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:15.392Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:15.663Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Update Profile",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:15.664Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile updated successfully",
+      "data": {
+        "username": "updatedx3zwab"
+      },
+      "timestamp": "2025-08-24T01:09:15.802Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Submit Assessment",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:15.803Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment submitted successfully",
+      "data": {
+        "jobId": "497c65e2-0350-4787-a3c2-c233268ccec3",
+        "status": "queued"
+      },
+      "timestamp": "2025-08-24T01:09:16.055Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Wait for WebSocket Notification",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:16.055Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for assessment completion notification...",
+      "data": null,
+      "timestamp": "2025-08-24T01:09:16.055Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Failed to receive notification",
+      "error": {
+        "message": "Timeout waiting for assessment 497c65e2-0350-4787-a3c2-c233268ccec3 to complete",
+        "stack": "Error: Timeout waiting for assessment 497c65e2-0350-4787-a3c2-c233268ccec3 to complete\n    at Timeout._onTimeout (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\websocket-client.js:139:16)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-08-24T01:14:16.064Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Single User E2E Test failed",
+      "error": {
+        "message": "Timeout waiting for assessment 497c65e2-0350-4787-a3c2-c233268ccec3 to complete",
+        "stack": "Error: Timeout waiting for assessment 497c65e2-0350-4787-a3c2-c233268ccec3 to complete\n    at Timeout._onTimeout (D:\\(program-projects)\\AI-Driven Talent Mapping Assessment\\atma-backend\\testing\\lib\\websocket-client.js:139:16)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "timestamp": "2025-08-24T01:14:16.065Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-08-24T01:14:16.066Z"
+    }
+  ]
+}

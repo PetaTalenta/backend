@@ -117,7 +117,7 @@ const generateMockPersonaProfile = async (assessmentData, jobId) => {
  */
 const generateStrengths = (riasec, ocean, viaIs) => {
   const strengths = [];
-  
+
   // RIASEC-based strengths
   if (riasec.realistic > 70) strengths.push('Kemampuan praktis dan hands-on yang kuat');
   if (riasec.investigative > 70) strengths.push('Kemampuan analitis dan problem-solving yang excellent');
@@ -150,25 +150,20 @@ const generateStrengths = (riasec, ocean, viaIs) => {
     }
   });
 
-  // Ensure minimum 3 strengths by adding generic ones if needed
-  if (strengths.length < 3) {
-    const genericStrengths = [
-      'Kemampuan adaptasi yang baik dalam berbagai situasi',
-      'Dedikasi dan komitmen terhadap pekerjaan',
-      'Kemampuan belajar dan berkembang secara berkelanjutan',
-      'Integritas dan etika kerja yang kuat',
-      'Kemampuan komunikasi yang efektif'
-    ];
-
-    // Add generic strengths until we have at least 3
-    for (let i = 0; i < genericStrengths.length && strengths.length < 3; i++) {
-      if (!strengths.includes(genericStrengths[i])) {
-        strengths.push(genericStrengths[i]);
-      }
-    }
+  // Ensure minimum 4 strengths by adding generic ones if needed (model expects 4-6)
+  const genericStrengths = [
+    'Kemampuan adaptasi yang baik dalam berbagai situasi',
+    'Dedikasi dan komitmen terhadap pekerjaan',
+    'Kemampuan belajar dan berkembang secara berkelanjutan',
+    'Integritas dan etika kerja yang kuat',
+    'Kemampuan komunikasi yang efektif',
+    'Pemikiran sistematis dan terstruktur'
+  ];
+  for (let i = 0; i < genericStrengths.length && strengths.length < 4; i++) {
+    if (!strengths.includes(genericStrengths[i])) strengths.push(genericStrengths[i]);
   }
 
-  return strengths.slice(0, 5); // Limit to 5 strengths
+  return strengths.slice(0, 6); // Limit to 6 strengths
 };
 
 /**
@@ -205,22 +200,16 @@ const generateWeaknesses = (riasec, ocean, viaIs) => {
     }
   });
 
-  // Ensure minimum 3 weaknesses by adding generic ones if needed
-  if (weaknesses.length < 3) {
-    const genericWeaknesses = [
-      'Perlu pengembangan dalam area komunikasi interpersonal',
-      'Dapat meningkatkan fleksibilitas dalam menghadapi perubahan',
-      'Membutuhkan pengembangan dalam manajemen waktu yang lebih efektif',
-      'Perlu peningkatan dalam kemampuan delegasi dan teamwork',
-      'Dapat mengembangkan patience dalam menghadapi proses yang lambat'
-    ];
-
-    // Add generic weaknesses until we have at least 3
-    for (let i = 0; i < genericWeaknesses.length && weaknesses.length < 3; i++) {
-      if (!weaknesses.includes(genericWeaknesses[i])) {
-        weaknesses.push(genericWeaknesses[i]);
-      }
-    }
+  // Ensure minimum 4 weaknesses (model expects 4-5)
+  const genericWeaknesses = [
+    'Perlu pengembangan dalam area komunikasi interpersonal',
+    'Dapat meningkatkan fleksibilitas dalam menghadapi perubahan',
+    'Membutuhkan pengembangan dalam manajemen waktu yang lebih efektif',
+    'Perlu peningkatan dalam kemampuan delegasi dan teamwork',
+    'Dapat mengembangkan patience dalam menghadapi proses yang lambat'
+  ];
+  for (let i = 0; i < genericWeaknesses.length && weaknesses.length < 4; i++) {
+    if (!weaknesses.includes(genericWeaknesses[i])) weaknesses.push(genericWeaknesses[i]);
   }
 
   return weaknesses.slice(0, 5); // Limit to 5 weaknesses
@@ -228,74 +217,151 @@ const generateWeaknesses = (riasec, ocean, viaIs) => {
 
 /**
  * Generate career recommendations based on RIASEC and OCEAN
+ * Must match original model format: exactly 4 items, each with
+ * { careerName, justification, firstSteps[3], relatedMajors[4-5], careerProspect{...} }
  */
 const generateCareerRecommendations = (riasec, ocean) => {
-  const careers = [];
+  const title = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-  // Get top 2 RIASEC interests
-  const riasecEntries = Object.entries(riasec).sort((a, b) => b[1] - a[1]).slice(0, 2);
-  const topInterests = riasecEntries.map(entry => entry[0]);
+  // Determine top 2 RIASEC interests
+  const sortedRiasec = Object.entries(riasec).sort((a, b) => b[1] - a[1]);
+  const topInterests = sortedRiasec.slice(0, 2).map(([k]) => k);
 
-  // Career mapping based on RIASEC combinations
+  // Maps
   const careerMap = {
-    'realistic': ['Software Engineer', 'Data Scientist', 'Mechanical Engineer', 'Architect'],
-    'investigative': ['Research Scientist', 'Data Analyst', 'Psychologist', 'Medical Doctor'],
-    'artistic': ['UX/UI Designer', 'Content Creator', 'Marketing Creative', 'Product Designer'],
-    'social': ['Human Resources Manager', 'Teacher', 'Counselor', 'Social Worker'],
-    'enterprising': ['Business Development Manager', 'Sales Director', 'Entrepreneur', 'Project Manager'],
-    'conventional': ['Financial Analyst', 'Operations Manager', 'Quality Assurance', 'Administrative Manager']
+    realistic: ['Software Engineer', 'Mechanical Engineer', 'Architect', 'Quality Assurance'],
+    investigative: ['Data Scientist', 'Research Scientist', 'Data Analyst', 'Psychologist'],
+    artistic: ['UX/UI Designer', 'Product Designer', 'Content Creator', 'Marketing Creative'],
+    social: ['Teacher', 'Counselor', 'Human Resources Manager', 'Social Worker'],
+    enterprising: ['Business Development Manager', 'Project Manager', 'Entrepreneur', 'Sales Director'],
+    conventional: ['Financial Analyst', 'Operations Manager', 'Administrative Manager', 'Accountant']
   };
 
-  // Generate careers based on top interests
-  topInterests.forEach(interest => {
-    if (careerMap[interest]) {
-      careerMap[interest].forEach(career => {
-        if (!careers.find(c => c.careerName === career)) {
-          careers.push({
-            careerName: career,
-            careerProspect: generateCareerProspect(career, riasec, ocean)
-          });
-        }
-      });
+  const majorsMap = {
+    realistic: ['Teknik Informatika', 'Teknik Mesin', 'Teknik Industri', 'Arsitektur', 'Sistem Informasi'],
+    investigative: ['Ilmu Komputer', 'Statistika', 'Matematika', 'Fisika', 'Biologi'],
+    artistic: ['Desain Komunikasi Visual', 'Desain Produk', 'Seni Rupa', 'Arsitektur Interior', 'Ilmu Komunikasi'],
+    social: ['Psikologi', 'Pendidikan', 'Kesejahteraan Sosial', 'Bimbingan Konseling', 'Ilmu Komunikasi'],
+    enterprising: ['Manajemen', 'Bisnis', 'Pemasaran', 'Kewirausahaan', 'Hubungan Internasional'],
+    conventional: ['Akuntansi', 'Sistem Informasi', 'Administrasi Bisnis', 'Keuangan', 'Perpajakan']
+  };
+
+  const stepMap = {
+    realistic: [
+      'Ikuti kursus dasar pemrograman (Python/JavaScript)',
+      'Bangun proyek sederhana dan unggah ke GitHub',
+      'Ikut komunitas atau kompetisi teknis lokal'
+    ],
+    investigative: [
+      'Ambil kursus analisis data atau metodologi riset',
+      'Kerjakan mini riset/analisis dataset dari Kaggle',
+      'Baca paper populer dan tulis ringkasannya'
+    ],
+    artistic: [
+      'Bangun portofolio visual di Behance/Dribbble',
+      'Pelajari prinsip desain dan prototyping (Figma)',
+      'Ikut challenge desain mingguan'
+    ],
+    social: [
+      'Aktif di kegiatan volunteer/organisasi sosial',
+      'Latih komunikasi publik dan empati terstruktur',
+      'Cari mentor di bidang pelayanan/pendidikan'
+    ],
+    enterprising: [
+      'Ikut kompetisi business plan atau wirausaha',
+      'Pelajari dasar-dasar sales dan negosiasi',
+      'Bangun proyek mini (jualan kecil/organisasi event)'
+    ],
+    conventional: [
+      'Pelajari Excel/Spreadsheet lanjutan',
+      'Ikuti kursus akuntansi/operasional dasar',
+      'Buat proyek perbaikan proses sederhana'
+    ]
+  };
+
+  const oceanStrengths = [];
+  if (ocean.openness >= 60) oceanStrengths.push('Openness tinggi');
+  if (ocean.conscientiousness >= 60) oceanStrengths.push('Conscientiousness tinggi');
+  if (ocean.extraversion >= 60) oceanStrengths.push('Extraversion tinggi');
+  if (ocean.agreeableness >= 60) oceanStrengths.push('Agreeableness tinggi');
+
+  const buildJustification = (interest, name) => {
+    const oceanText = oceanStrengths.length ? ` dan kekuatan OCEAN (${oceanStrengths.join(', ')})` : '';
+    const interestText = title(interest);
+    const focusMap = {
+      realistic: 'pendekatan praktis dan problem-solving teknis',
+      investigative: 'analisis mendalam dan riset berbasis data',
+      artistic: 'kreativitas dan eksplorasi ide',
+      social: 'interaksi manusia dan dampak sosial',
+      enterprising: 'inisiatif, kepemimpinan, dan orientasi hasil',
+      conventional: 'ketelitian proses dan efisiensi sistem'
+    };
+    return `Cocok dengan minat ${interestText}${oceanText}. Peran "${name}" memanfaatkan ${focusMap[interest]}.`;
+  };
+
+  const pickMajors = (interest) => majorsMap[interest]?.slice(0, 4) || ['Manajemen', 'Ilmu Komputer', 'Statistika', 'Psikologi'];
+
+  const addCareer = (list, name, interest) => {
+    list.push({
+      careerName: name,
+      justification: buildJustification(interest, name),
+      firstSteps: stepMap[interest].slice(0, 3),
+      relatedMajors: pickMajors(interest),
+      careerProspect: generateCareerProspect(name, riasec, ocean)
+    });
+  };
+
+  const selected = [];
+  const seen = new Set();
+
+  // Prefer careers from top 2 interests
+  for (const interest of topInterests) {
+    const options = careerMap[interest] || [];
+    for (const name of options) {
+      if (selected.length >= 4) break;
+      if (seen.has(name)) continue;
+      seen.add(name);
+      addCareer(selected, name, interest);
+      if (selected.length >= 4) break;
     }
-  });
+    if (selected.length >= 4) break;
+  }
 
-  // Ensure minimum 3 careers by adding generic ones if needed
-  if (careers.length < 3) {
-    const genericCareers = [
-      { careerName: 'Business Analyst', careerProspect: generateCareerProspect('Business Analyst', riasec, ocean) },
-      { careerName: 'Project Coordinator', careerProspect: generateCareerProspect('Project Coordinator', riasec, ocean) },
-      { careerName: 'Operations Specialist', careerProspect: generateCareerProspect('Operations Specialist', riasec, ocean) },
-      { careerName: 'Customer Success Manager', careerProspect: generateCareerProspect('Customer Success Manager', riasec, ocean) }
-    ];
-
-    // Add generic careers until we have at least 3
-    for (let i = 0; i < genericCareers.length && careers.length < 3; i++) {
-      if (!careers.find(c => c.careerName === genericCareers[i].careerName)) {
-        careers.push(genericCareers[i]);
+  // Fallback pool across all interests if not enough
+  if (selected.length < 4) {
+    const all = Object.entries(careerMap);
+    for (const [interest, names] of all) {
+      for (const name of names) {
+        if (selected.length >= 4) break;
+        if (seen.has(name)) continue;
+        seen.add(name);
+        addCareer(selected, name, interest);
       }
+      if (selected.length >= 4) break;
     }
   }
 
-  return careers.slice(0, 5); // Limit to 5 careers (max allowed by schema)
+  // Ensure exactly 4 items
+  return selected.slice(0, 4);
 };
 
 /**
  * Generate career prospect for a specific career
  */
-const generateCareerProspect = (career, riasec, ocean) => {
+const generateCareerProspect = (career) => {
   // Base prospects for different career types
   const techCareers = ['Software Engineer', 'Data Scientist', 'Data Analyst', 'UX/UI Designer'];
   const businessCareers = ['Business Development Manager', 'Sales Director', 'Project Manager'];
-  const creativeCareers = ['Content Creator', 'Marketing Creative', 'Product Designer'];
-  const serviceCareers = ['Teacher', 'Counselor', 'Human Resources Manager'];
+  const creativeCareers = ['Content Creator', 'Marketing Creative', 'Product Designer', 'UX/UI Designer'];
+  const serviceCareers = ['Teacher', 'Counselor', 'Human Resources Manager', 'Social Worker'];
 
   let baseProspect = {
     jobAvailability: 'moderate',
     salaryPotential: 'moderate',
     careerProgression: 'moderate',
     industryGrowth: 'moderate',
-    skillDevelopment: 'moderate'
+    skillDevelopment: 'moderate',
+    aiOvertake: 'moderate'
   };
 
   if (techCareers.includes(career)) {
@@ -304,7 +370,8 @@ const generateCareerProspect = (career, riasec, ocean) => {
       salaryPotential: 'high',
       careerProgression: 'high',
       industryGrowth: 'super high',
-      skillDevelopment: 'super high'
+      skillDevelopment: 'super high',
+      aiOvertake: 'moderate'
     };
   } else if (businessCareers.includes(career)) {
     baseProspect = {
@@ -312,7 +379,8 @@ const generateCareerProspect = (career, riasec, ocean) => {
       salaryPotential: 'high',
       careerProgression: 'super high',
       industryGrowth: 'high',
-      skillDevelopment: 'high'
+      skillDevelopment: 'high',
+      aiOvertake: 'moderate'
     };
   } else if (creativeCareers.includes(career)) {
     baseProspect = {
@@ -320,7 +388,8 @@ const generateCareerProspect = (career, riasec, ocean) => {
       salaryPotential: 'moderate',
       careerProgression: 'moderate',
       industryGrowth: 'high',
-      skillDevelopment: 'high'
+      skillDevelopment: 'high',
+      aiOvertake: 'low'
     };
   } else if (serviceCareers.includes(career)) {
     baseProspect = {
@@ -328,7 +397,8 @@ const generateCareerProspect = (career, riasec, ocean) => {
       salaryPotential: 'moderate',
       careerProgression: 'moderate',
       industryGrowth: 'moderate',
-      skillDevelopment: 'moderate'
+      skillDevelopment: 'moderate',
+      aiOvertake: 'low'
     };
   }
 
@@ -390,12 +460,17 @@ const generateInsights = (riasec, ocean, viaIs) => {
     insights.push('Kembangkan kekuatan karakter dominan Anda melalui praktik dan aplikasi yang konsisten');
   }
 
-  // Ensure we have at least 3 insights
-  while (insights.length < 3) {
-    insights.push('Terus kembangkan self-awareness dan adaptabilitas dalam menghadapi tantangan profesional');
+  // Ensure at least 4 items (model expects 4-5)
+  const fallback = [
+    'Tetapkan batasan waktu untuk menghindari overthinking',
+    'Bangun rutinitas refleksi mingguan untuk evaluasi kemajuan',
+    'Cari mentor yang dapat memberikan umpan balik jujur'
+  ];
+  for (let i = 0; i < fallback.length && insights.length < 4; i++) {
+    if (!insights.includes(fallback[i])) insights.push(fallback[i]);
   }
 
-  return insights.slice(0, 5); // Limit to 5 insights (max allowed by schema)
+  return insights.slice(0, 5);
 };
 
 /**
@@ -490,7 +565,7 @@ const generateShortSummary = (archetype, topRiasec, ocean) => {
 };
 
 /**
- * Generate core motivators
+ * Generate core motivators (exactly 4 items as per original model schema)
  */
 const generateCoreMotivators = (riasec, ocean) => {
   const motivators = [];
@@ -500,12 +575,12 @@ const generateCoreMotivators = (riasec, ocean) => {
   const topInterest = sortedRiasec[0][0];
 
   const motivatorMap = {
-    'realistic': ['Problem-Solving', 'Hands-on Work', 'Technical Mastery'],
-    'investigative': ['Learning & Discovery', 'Research & Analysis', 'Knowledge Building'],
-    'artistic': ['Creative Expression', 'Innovation', 'Aesthetic Achievement'],
-    'social': ['Helping Others', 'Community Impact', 'Relationship Building'],
-    'enterprising': ['Leadership', 'Achievement', 'Influence & Persuasion'],
-    'conventional': ['Organization', 'Efficiency', 'Structure & Order']
+    realistic: ['Problem-Solving', 'Hands-on Work', 'Technical Mastery'],
+    investigative: ['Learning & Discovery', 'Research & Analysis', 'Knowledge Building'],
+    artistic: ['Creative Expression', 'Innovation', 'Aesthetic Achievement'],
+    social: ['Helping Others', 'Community Impact', 'Relationship Building'],
+    enterprising: ['Leadership', 'Achievement', 'Influence & Persuasion'],
+    conventional: ['Organization', 'Efficiency', 'Structure & Order']
   };
 
   if (motivatorMap[topInterest]) {
@@ -518,6 +593,12 @@ const generateCoreMotivators = (riasec, ocean) => {
   }
   if (ocean.conscientiousness > 60) {
     motivators.push('Excellence & Quality');
+  }
+
+  // Ensure exactly 4 items by filling from a fallback pool
+  const fallback = ['Growth & Mastery', 'Impact', 'Autonomy', 'Innovation'];
+  for (let i = 0; i < fallback.length && motivators.length < 4; i++) {
+    if (!motivators.includes(fallback[i])) motivators.push(fallback[i]);
   }
 
   return motivators.slice(0, 4);
@@ -555,19 +636,19 @@ const generateWeaknessSummary = (weaknesses) => {
 /**
  * Generate skill suggestions
  */
-const generateSkillSuggestions = (riasec, ocean) => {
+const generateSkillSuggestions = (riasec) => {
   const suggestions = [];
 
   const sortedRiasec = Object.entries(riasec).sort((a, b) => b[1] - a[1]);
   const topInterest = sortedRiasec[0][0];
 
   const skillMap = {
-    'realistic': ['Technical problem-solving', 'Project management', 'Quality control'],
-    'investigative': ['Data analysis', 'Research methodology', 'Critical thinking'],
-    'artistic': ['Creative thinking', 'Design principles', 'Innovation techniques'],
-    'social': ['Communication skills', 'Emotional intelligence', 'Team collaboration'],
-    'enterprising': ['Leadership skills', 'Strategic planning', 'Negotiation'],
-    'conventional': ['Process optimization', 'Data management', 'Attention to detail']
+    realistic: ['Technical problem-solving', 'Project management', 'Quality control'],
+    investigative: ['Data analysis', 'Research methodology', 'Critical thinking'],
+    artistic: ['Creative thinking', 'Design principles', 'Innovation techniques'],
+    social: ['Communication skills', 'Emotional intelligence', 'Team collaboration'],
+    enterprising: ['Leadership skills', 'Strategic planning', 'Negotiation'],
+    conventional: ['Process optimization', 'Data management', 'Attention to detail']
   };
 
   if (skillMap[topInterest]) {
@@ -577,7 +658,13 @@ const generateSkillSuggestions = (riasec, ocean) => {
   // Add digital literacy
   suggestions.push('Digital literacy', 'Adaptability');
 
-  return suggestions.slice(0, 5);
+  // Ensure at least 4 items (model expects 4-6)
+  const fallback = ['Public Speaking', 'Time Management', 'Problem Solving'];
+  for (let i = 0; i < fallback.length && suggestions.length < 4; i++) {
+    if (!suggestions.includes(fallback[i])) suggestions.push(fallback[i]);
+  }
+
+  return suggestions.slice(0, 6);
 };
 
 /**
@@ -590,12 +677,12 @@ const generatePossiblePitfalls = (riasec, ocean) => {
   const topInterest = sortedRiasec[0][0];
 
   const pitfallMap = {
-    'realistic': ['Mengabaikan aspek interpersonal', 'Terlalu fokus pada detail teknis'],
-    'investigative': ['Analysis paralysis', 'Kurang action-oriented'],
-    'artistic': ['Perfectionism yang berlebihan', 'Kesulitan dengan struktur'],
-    'social': ['Burnout karena terlalu fokus pada orang lain', 'Kesulitan membuat keputusan sulit'],
-    'enterprising': ['Overconfidence', 'Mengabaikan detail penting'],
-    'conventional': ['Resistance to change', 'Terlalu rigid dalam pendekatan']
+    realistic: ['Mengabaikan aspek interpersonal', 'Terlalu fokus pada detail teknis'],
+    investigative: ['Analysis paralysis', 'Kurang action-oriented'],
+    artistic: ['Perfectionism yang berlebihan', 'Kesulitan dengan struktur'],
+    social: ['Burnout karena terlalu fokus pada orang lain', 'Kesulitan membuat keputusan sulit'],
+    enterprising: ['Overconfidence', 'Mengabaikan detail penting'],
+    conventional: ['Resistance to change', 'Terlalu rigid dalam pendekatan']
   };
 
   if (pitfallMap[topInterest]) {
@@ -607,7 +694,13 @@ const generatePossiblePitfalls = (riasec, ocean) => {
     pitfalls.push('Overthinking dan anxiety');
   }
 
-  return pitfalls.slice(0, 4);
+  // Ensure at least 4 items (model expects 4-5)
+  const fallback = ['Kurang konsisten eksekusi', 'Menghindari feedback sulit', 'Menunda keputusan penting'];
+  for (let i = 0; i < fallback.length && pitfalls.length < 4; i++) {
+    if (!pitfalls.includes(fallback[i])) pitfalls.push(fallback[i]);
+  }
+
+  return pitfalls.slice(0, 5);
 };
 
 /**
@@ -625,43 +718,46 @@ const generateRiskTolerance = (ocean) => {
 /**
  * Generate development activities
  */
-const generateDevelopmentActivities = (riasec, ocean) => {
+const generateDevelopmentActivities = (riasec) => {
   const sortedRiasec = Object.entries(riasec).sort((a, b) => b[1] - a[1]);
   const topInterest = sortedRiasec[0][0];
 
   const extracurricularMap = {
-    'realistic': ['Klub Robotik', 'Olimpiade Sains', 'Maker Space'],
-    'investigative': ['Klub Penelitian', 'Science Fair', 'Debat Ilmiah'],
-    'artistic': ['Klub Seni', 'Creative Writing', 'Design Competition'],
-    'social': ['Volunteer Work', 'Student Council', 'Peer Mentoring'],
-    'enterprising': ['Business Club', 'Entrepreneurship Competition', 'Leadership Training'],
-    'conventional': ['Student Government', 'Academic Committee', 'Event Organization']
+    realistic: ['Klub Robotik', 'Olimpiade Sains', 'Maker Space'],
+    investigative: ['Klub Penelitian', 'Science Fair', 'Debat Ilmiah'],
+    artistic: ['Klub Seni', 'Creative Writing', 'Design Competition'],
+    social: ['Volunteer Work', 'Student Council', 'Peer Mentoring'],
+    enterprising: ['Business Club', 'Entrepreneurship Competition', 'Leadership Training'],
+    conventional: ['Student Government', 'Academic Committee', 'Event Organization']
   };
 
   const projectMap = {
-    'realistic': ['Membuat prototype sederhana', 'Eksperimen sains praktis'],
-    'investigative': ['Research project', 'Data analysis project'],
-    'artistic': ['Portfolio kreatif', 'Art installation'],
-    'social': ['Community service project', 'Social impact initiative'],
-    'enterprising': ['Business plan competition', 'Startup simulation'],
-    'conventional': ['Process improvement project', 'Database management']
+    realistic: ['Membuat prototype sederhana', 'Eksperimen sains praktis', 'Mini project terstruktur', 'Tantangan ekstrem: produk siap pakai'],
+    investigative: ['Research project', 'Data analysis project', 'Eksperimen ilmiah menengah', 'Tantangan ekstrem: publikasi mini'],
+    artistic: ['Portfolio kreatif', 'Art installation', 'Redesign produk nyata', 'Tantangan ekstrem: pameran mandiri'],
+    social: ['Community service project', 'Social impact initiative', 'Peer mentoring terstruktur', 'Tantangan ekstrem: program sosial berkelanjutan'],
+    enterprising: ['Business plan competition', 'Startup simulation', 'MVP penjualan kecil', 'Tantangan ekstrem: pilot bisnis nyata'],
+    conventional: ['Process improvement project', 'Database management', 'SOP perbaikan proses', 'Tantangan ekstrem: sistem dokumentasi lengkap']
   };
 
+  // Ensure array lengths match model schema: extracurricular 2-3, projectIdeas exactly 4, bookRecommendations exactly 6
+  const extracurricular = (extracurricularMap[topInterest] || ['Academic Club', 'Volunteer Work']).slice(0, 3);
+  const projectIdeasBase = projectMap[topInterest] || ['Personal development project', 'Skill-building initiative', 'Mini project', 'Tantangan ekstrem: showcase'];
+  const projectIdeas = projectIdeasBase.slice(0, 4);
+
+  const books = [
+    { title: 'Mindset: The New Psychology of Success', author: 'Carol Dweck', reason: 'Mengembangkan growth mindset yang esensial untuk kesuksesan' },
+    { title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', reason: 'Memahami bias kognitif dan pengambilan keputusan' },
+    { title: 'Atomic Habits', author: 'James Clear', reason: 'Membangun kebiasaan efektif untuk pengembangan diri' },
+    { title: 'Deep Work', author: 'Cal Newport', reason: 'Maksimalkan fokus untuk hasil belajar yang mendalam' },
+    { title: 'Range', author: 'David Epstein', reason: 'Menghargai eksplorasi luas sebelum spesialisasi' },
+    { title: 'Grit', author: 'Angela Duckworth', reason: 'Menguatkan ketekunan dalam mencapai tujuan jangka panjang' }
+  ];
+
   return {
-    extracurricular: extracurricularMap[topInterest] || ['Academic Club', 'Volunteer Work'],
-    projectIdeas: projectMap[topInterest] || ['Personal development project', 'Skill-building initiative'],
-    bookRecommendations: [
-      {
-        title: 'Mindset: The New Psychology of Success',
-        author: 'Carol Dweck',
-        reason: 'Untuk mengembangkan growth mindset yang essential untuk kesuksesan'
-      },
-      {
-        title: 'The 7 Habits of Highly Effective People',
-        author: 'Stephen Covey',
-        reason: 'Untuk membangun kebiasaan yang mendukung pencapaian tujuan'
-      }
-    ]
+    extracurricular,
+    projectIdeas,
+    bookRecommendations: books
   };
 };
 

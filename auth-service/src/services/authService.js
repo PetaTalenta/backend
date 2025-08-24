@@ -1,4 +1,5 @@
 const { User } = require('../models');
+const { Op } = require('sequelize');
 const { hashPassword, comparePassword, validatePassword } = require('../utils/password');
 const { generateToken, verifyToken } = require('../utils/jwt');
 const logger = require('../utils/logger');
@@ -22,7 +23,7 @@ try {
  * @returns {Promise<Object>} User and token
  */
 const registerUser = async (userData, options = {}) => {
-  const { email, password } = userData;
+  const { username, email, password } = userData;
   const startTime = Date.now();
 
   try {
@@ -32,23 +33,38 @@ const registerUser = async (userData, options = {}) => {
       throw new Error(`Password validation failed: ${passwordValidation.errors.join(', ')}`);
     }
 
-    // Hash password before database operation
-    const password_hash = await hashPassword(password);
-
-    // Use findOrCreate to combine check and create in single atomic operation
-    const [user, created] = await User.findOrCreate({
-      where: { email },
-      defaults: {
-        email,
-        password_hash,
-        user_type: 'user',
-        token_balance: parseInt(process.env.DEFAULT_TOKEN_BALANCE) || 5
+    // Check for existing email/username to return specific errors
+    const existing = await User.findOne({
+      where: {
+        [Op.or]: [
+          { email },
+          { username }
+        ]
       }
     });
 
-    if (!created) {
-      throw new Error('Email already exists');
+    if (existing) {
+      if (existing.email === email) {
+        throw new Error('Email already exists');
+      }
+      if (existing.username === username) {
+        throw new Error('Username already exists');
+      }
+      // Fallback
+      throw new Error('User already exists');
     }
+
+    // Hash password before database operation
+    const password_hash = await hashPassword(password);
+
+    // Create user
+    const user = await User.create({
+      username,
+      email,
+      password_hash,
+      user_type: 'user',
+      token_balance: parseInt(process.env.DEFAULT_TOKEN_BALANCE) || 5
+    });
 
     // Generate JWT token
     const token = generateToken(user, 'user');
@@ -202,17 +218,20 @@ const registerUsersBatch = async (usersData) => {
  * @returns {Promise<Object>} User and token
  */
 const loginUser = async (credentials) => {
-  const { email, password } = credentials;
+  const { email, username, password } = credentials;
   const startTime = Date.now();
 
   try {
     // For login, always fetch from database to ensure we have password_hash
     // Cache doesn't store password_hash for security reasons
-    logger.info('Debug - Looking for user with email', { email });
+    logger.info('Debug - Looking for user with identifier', { email, username });
     const user = await User.findOne({
       where: {
-        email,
-        is_active: true
+        [Op.and]: [
+          { is_active: true },
+          email ? { email } : {},
+          !email && username ? { username } : {}
+        ]
       }
     });
 
@@ -223,7 +242,7 @@ const loginUser = async (credentials) => {
 
     if (!user) {
       logger.info('Debug - No user found, throwing error');
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid username or email');
     }
 
     // Compare password
@@ -233,7 +252,7 @@ const loginUser = async (credentials) => {
     const isPasswordValid = await comparePassword(password, user.password_hash);
     logger.info('Debug - Password comparison result', { isPasswordValid });
     if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid password');
     }
 
     // Cache the user for future requests (without password_hash)

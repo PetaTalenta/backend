@@ -10,10 +10,10 @@ const { verifyToken } = require('../utils/jwt');
  */
 const register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Register user
-    const result = await authService.registerUser({ email, password });
+    const result = await authService.registerUser({ username, email, password });
 
     logger.info('User registered successfully', {
       userId: result.user.id,
@@ -106,17 +106,17 @@ const registerBatch = async (req, res, next) => {
  */
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    
-    // Login user
-    const result = await authService.loginUser({ email, password });
-    
+    const { email, username, password } = req.body;
+
+    // Login user (allow email or username)
+    const result = await authService.loginUser({ email, username, password });
+
     logger.info('User login successful', {
       userId: result.user.id,
       email: result.user.email,
       ip: req.ip
     });
-    
+
     // Return success response
     res.status(200).json({
       success: true,

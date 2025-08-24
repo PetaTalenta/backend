@@ -3,6 +3,7 @@ const http = require('http');
 const https = require('https');
 const config = require('../config');
 const { withAsyncLogging } = require('./asyncProxyLogger');
+const { adminServiceProxy } = require('./adminServiceProxy');
 
 // HTTP Agent dengan connection pooling untuk optimisasi performa
 const httpAgent = new http.Agent({

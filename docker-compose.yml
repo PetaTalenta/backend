@@ -326,6 +326,7 @@ services:
       LOG_LEVEL: info
       LOG_FILE: logs/chatbot-service.log
       # OpenRouter Configuration
+
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL}
       DEFAULT_MODEL: ${DEFAULT_MODEL}
@@ -433,6 +434,28 @@ services:
       replicas: 10
 
 
+  # Admin Service
+  admin-service:
+    build:
+      context: ./admin-service
+      dockerfile: Dockerfile
+    container_name: atma-admin-service
+    environment:
+      NODE_ENV: production
+      PORT: 3007
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
+    ports:
+      - "3007:3007"
+    depends_on:
+      auth-service:
+        condition: service_started
+      archive-service:
+        condition: service_started
+    networks:
+      - atma-network
+    restart: unless-stopped
 
   # Documentation Service
   documentation-service:
@@ -448,7 +471,7 @@ services:
       - atma-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -473,7 +496,7 @@ services:
       - api-gateway
       - documentation-service
     healthcheck:
-      test: ["CMD-SHELL", "ps aux | grep cloudflared | grep -v grep || exit 1"]
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:20241/metrics || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

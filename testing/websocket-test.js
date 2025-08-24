@@ -53,11 +53,7 @@ class WebSocketTest {
     this.testData = this.dataGenerator.generateTestSuite(1)[0];
     
     // Register and login user
-    await this.apiClient.register(this.testData.user);
-    await this.apiClient.login({
-      email: this.testData.user.email,
-      password: this.testData.user.password
-    });
+    await this.apiClient.registerAndLogin(this.testData.user);
     
     this.logger.success('Test environment setup completed');
   }
@@ -122,7 +118,8 @@ class WebSocketTest {
         }
       }
       
-      // Reconnect with valid token
+      // Reconnect with valid token (ensure socket is connected first)
+      await this.wsClient.connect();
       await this.wsClient.authenticate(this.apiClient.token);
       
     } catch (error) {

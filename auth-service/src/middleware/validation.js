@@ -42,6 +42,13 @@ const validateBody = (schema) => {
 const schemas = {
   // User registration schema
   register: Joi.object({
+    username: Joi.string().alphanum().min(3).max(100).required()
+      .messages({
+        'string.alphanum': 'Username must contain only alphanumeric characters',
+        'string.min': 'Username must be at least 3 characters long',
+        'string.max': 'Username must be at most 100 characters long',
+        'any.required': 'Username is required'
+      }),
     email: Joi.string().email().required().max(255)
       .messages({
         'string.email': 'Email must be a valid email address',
@@ -61,18 +68,22 @@ const schemas = {
 
   // User login schema
   login: Joi.object({
-    email: Joi.string().email().required()
+    email: Joi.string().email()
       .messages({
-        'string.email': 'Email must be a valid email address',
-        'string.empty': 'Email is required',
-        'any.required': 'Email is required'
+        'string.email': 'Email must be a valid email address'
+      }),
+    username: Joi.string().alphanum().min(3).max(100)
+      .messages({
+        'string.alphanum': 'Username must contain only alphanumeric characters',
+        'string.min': 'Username must be at least 3 characters long',
+        'string.max': 'Username must be at most 100 characters long'
       }),
     password: Joi.string().required()
       .messages({
         'string.empty': 'Password is required',
         'any.required': 'Password is required'
       })
-  }),
+  }).xor('email','username'),
 
   // Change password schema
   changePassword: Joi.object({

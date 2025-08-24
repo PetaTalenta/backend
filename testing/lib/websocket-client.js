@@ -1,8 +1,26 @@
 const io = require('socket.io-client');
 const chalk = require('chalk');
 
+// Prefer API Gateway URL for WebSocket connections (see notification-service/WEBSOCKET_MANUAL.md)
+function resolveDefaultWsUrl() {
+  if (process.env.WEBSOCKET_URL) return process.env.WEBSOCKET_URL;
+  if (process.env.API_GATEWAY_URL) return process.env.API_GATEWAY_URL;
+  if (process.env.API_BASE_URL) {
+    try {
+      const u = new URL(process.env.API_BASE_URL);
+      return `${u.protocol}//${u.host}`;
+    } catch (e) {
+      // Fallback: strip trailing /api if present
+      return process.env.API_BASE_URL.replace(/\/api\/?$/, '');
+    }
+  }
+  return 'http://localhost:3000';
+}
+const DEFAULT_WS_URL = resolveDefaultWsUrl();
+
+
 class WebSocketClient {
-  constructor(url = process.env.WEBSOCKET_URL || 'http://localhost:3000') {
+  constructor(url = DEFAULT_WS_URL) {
     this.url = url;
     this.socket = null;
     this.isConnected = false;
@@ -26,7 +44,7 @@ class WebSocketClient {
       };
 
       const socketOptions = { ...defaultOptions, ...options };
-      
+
       this.socket = io(this.url, socketOptions);
 
       // Connection events

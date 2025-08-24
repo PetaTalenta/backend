@@ -220,6 +220,30 @@ const processAssessmentOptimized = async (jobData) => {
     // Step 4: Update job status to processing (async)
     updateAnalysisJobStatus(jobId, 'processing');
 
+    // Step 4.1: Publish analysis started event (async, non-blocking)
+    try {
+      const eventPublisher = getEventPublisher();
+      eventPublisher.publishAnalysisStarted({
+        jobId,
+        userId,
+        userEmail,
+        assessmentName: jobData.assessmentName || 'AI-Driven Talent Mapping',
+        estimatedProcessingTime: '1-3 minutes'
+      }).catch(eventError => {
+        logger.warn('Failed to publish analysis started event', {
+          jobId,
+          userId,
+          error: eventError.message
+        });
+      });
+    } catch (error) {
+      logger.warn('Failed to get event publisher for started event, skipping', {
+        jobId,
+        userId,
+        error: error.message
+      });
+    }
+
     // Step 5: Process with timeout
     const result = await withTimeout(async () => {
       // Generate persona profile using AI
