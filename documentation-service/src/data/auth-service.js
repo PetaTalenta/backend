@@ -1,7 +1,7 @@
 export const authServiceData = {
   name: "Auth Service",
   description: "Authentication, user management, and administration system for ATMA. Provides secure JWT-based authentication with role-based access control.",
-  baseUrl: "https://api.chhrone.web.id/api/auth",
+  baseUrl: "http://localhost:3000/api",
   version: "1.0.0",
   port: "3001",
   endpoints: [
@@ -9,14 +9,21 @@ export const authServiceData = {
       method: "POST",
       path: "/api/auth/register",
       title: "Register User",
-      description: "Register a new user account with email and password.",
+      description: "Register a new user account with username, email, and password.",
       authentication: null,
-      rateLimit: "2500 requests per 15 minutes",
+      rateLimit: "Auth Limiter (100/15min)",
       requestBody: {
+        username: "johndoe",
         email: "user@example.com",
-        password: "myPassword1"
+        password: "MyPassword1"
       },
       parameters: [
+        {
+          name: "username",
+          type: "string",
+          required: true,
+          description: "Alphanumeric only, 3-100 characters"
+        },
         {
           name: "email",
           type: "string",
@@ -36,7 +43,7 @@ export const authServiceData = {
           user: {
             id: "550e8400-e29b-41d4-a716-446655440000",
             email: "user@example.com",
-            username: null,
+            username: "johndoe",
             user_type: "user",
             is_active: true,
             token_balance: 5,
@@ -46,18 +53,24 @@ export const authServiceData = {
         },
         message: "User registered successfully"
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/auth/register \\
+      errorResponses: [
+        { code: "VALIDATION_ERROR", status: 400, message: "Request validation failed" },
+        { code: "EMAIL_EXISTS", status: 400, message: "Email already registered" },
+        { code: "USERNAME_EXISTS", status: 400, message: "Username already taken" }
+      ],
+      example: `curl -X POST http://localhost:3000/api/auth/register \\
   -H "Content-Type: application/json" \\
   -d '{
+    "username": "johndoe",
     "email": "user@example.com",
-    "password": "myPassword1"
+    "password": "MyPassword1"
   }'`
     },
     {
       method: "POST",
       path: "/api/auth/login",
       title: "Login User",
-      description: "Authenticate user and obtain JWT token for API access.",
+      description: "Authenticate user using email or username and obtain JWT token for API access.",
       authentication: null,
       rateLimit: "2500 requests per 15 minutes",
       requestBody: {
@@ -68,8 +81,14 @@ export const authServiceData = {
         {
           name: "email",
           type: "string",
-          required: true,
-          description: "Valid email format"
+          required: false,
+          description: "Valid email format (use either email or username)"
+        },
+        {
+          name: "username",
+          type: "string",
+          required: false,
+          description: "Alphanumeric 3-100 (use either username or email)"
         },
         {
           name: "password",
@@ -93,12 +112,11 @@ export const authServiceData = {
         },
         message: "Login successful"
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/auth/login \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "email": "user@example.com",
-    "password": "myPassword1"
-  }'`
+      errorResponses: [
+        { code: "IDENTIFIER_NOT_FOUND", status: 404, message: "Username or email not found" },
+        { code: "INVALID_PASSWORD", status: 401, message: "Invalid password" }
+      ],
+      example: `# Login with email\ncurl -X POST http://localhost:3000/api/auth/login \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "email": "user@example.com",\n    "password": "myPassword1"\n  }'\n\n# Login with username\ncurl -X POST http://localhost:3000/api/auth/login \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "username": "johndoe",\n    "password": "myPassword1"\n  }'`
     },
     {
       method: "GET",
@@ -109,6 +127,7 @@ export const authServiceData = {
       rateLimit: "5000 requests per 15 minutes",
       response: {
         success: true,
+        message: "Success",
         data: {
           user: {
             id: "550e8400-e29b-41d4-a716-446655440000",
@@ -117,18 +136,28 @@ export const authServiceData = {
             user_type: "user",
             is_active: true,
             token_balance: 5,
+            last_login: "2024-01-15T10:25:00.000Z",
             created_at: "2024-01-15T10:30:00.000Z",
-            updated_at: "2024-01-15T10:30:00.000Z"
-          },
-          profile: {
-            full_name: "John Doe",
-            date_of_birth: "1990-01-15",
-            gender: "male",
-            school_id: 1
+            profile: {
+              full_name: "John Doe",
+              date_of_birth: "1990-01-15",
+              gender: "male",
+              school_id: 1,
+              school: { id: 1, name: "SMA 1", city: "Jakarta", province: "DKI Jakarta" },
+              school_info: {
+                type: "structured",
+                school_id: 1,
+                school: { id: 1, name: "SMA 1", city: "Jakarta", province: "DKI Jakarta" }
+              }
+            }
           }
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/auth/profile \\
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
+        { code: "USER_NOT_FOUND", status: 404, message: "User not found" }
+      ],
+      example: `curl -X GET http://localhost:3000/api/auth/profile \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -197,6 +226,12 @@ export const authServiceData = {
         },
         message: "Profile updated successfully"
       },
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
+        { code: "VALIDATION_ERROR", status: 400, message: "Invalid data (including INVALID_SCHOOL_ID)" },
+        { code: "EMAIL_EXISTS", status: 409, message: "Email already exists" },
+        { code: "USERNAME_EXISTS", status: 409, message: "Username already exists" }
+      ],
       example: `curl -X PUT https://api.chhrone.web.id/api/auth/profile \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
@@ -237,6 +272,11 @@ export const authServiceData = {
         success: true,
         message: "Password changed successfully"
       },
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
+        { code: "USER_NOT_FOUND", status: 404, message: "User not found" },
+        { code: "VALIDATION_ERROR", status: 400, message: "New password does not meet requirements or current password is incorrect" }
+      ],
       example: `curl -X POST https://api.chhrone.web.id/api/auth/change-password \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
@@ -248,19 +288,23 @@ export const authServiceData = {
     {
       method: "GET",
       path: "/api/auth/token-balance",
-      title: "Get Token Balance",
-      description: "Get the current token balance for the authenticated user.",
+      title: "Get Token Balance (Legacy)",
+      description: "Get the current token balance for the authenticated user (legacy endpoint; prefer GET /api/auth/profile for fresh data).",
       authentication: "Bearer Token Required",
       rateLimit: "5000 requests per 15 minutes",
       response: {
         success: true,
+        message: "Success",
         data: {
-          userId: "550e8400-e29b-41d4-a716-446655440000",
-          tokenBalance: 5,
-          lastUpdated: "2024-01-15T10:30:00.000Z"
+          user_id: "550e8400-e29b-41d4-a716-446655440000",
+          token_balance: 5
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/auth/token-balance \\
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
+        { code: "USER_NOT_FOUND", status: 404, message: "User not found" }
+      ],
+      example: `curl -X GET http://localhost:3000/api/auth/token-balance \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -278,7 +322,11 @@ export const authServiceData = {
           originalEmail: "user@example.com"
         }
       },
-      example: `curl -X DELETE https://api.chhrone.web.id/api/auth/account \\
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
+        { code: "USER_NOT_FOUND", status: 404, message: "User not found or already inactive" }
+      ],
+      example: `curl -X DELETE http://localhost:3000/api/auth/account \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -292,8 +340,202 @@ export const authServiceData = {
         success: true,
         message: "Logout successful"
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/auth/logout \\
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" }
+      ],
+      example: `curl -X POST http://localhost:3000/api/auth/logout \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+    },
+    {
+      method: "POST",
+      path: "/api/auth/register/batch",
+      title: "Batch Register Users",
+      description: "Register multiple users in a single request (max 50 users).",
+      authentication: null,
+      rateLimit: "Auth Limiter (100/15min)",
+      requestBody: {
+        users: [
+          { email: "user1@example.com", password: "myPassword1" },
+          { email: "user2@example.com", password: "anotherPass2" }
+        ]
+      },
+      parameters: [
+        { name: "users", type: "array", required: true, description: "Array of user objects (max 50)" }
+      ],
+      response: {
+        success: true,
+        message: "Batch user registration processed successfully",
+        data: { total: 2, successful: 2, failed: 0 }
+      },
+      example: `curl -X POST http://localhost:3000/api/auth/register/batch \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "users": [\n    { "email": "user1@example.com", "password": "myPassword1" },\n    { "email": "user2@example.com", "password": "anotherPass2" }\n  ]\n}'`
+    },
+    {
+      method: "DELETE",
+      path: "/api/auth/profile",
+      title: "Delete Profile",
+      description: "Delete only the user's profile (user_profiles table), not the account.",
+      authentication: "Bearer Token Required",
+      rateLimit: "5000 requests per 15 minutes",
+      response: { success: true, message: "Profile deleted successfully" },
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
+        { code: "PROFILE_NOT_FOUND", status: 404, message: "Profile not found" }
+      ],
+      example: `curl -X DELETE http://localhost:3000/api/auth/profile \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+    },
+    {
+      method: "GET",
+      path: "/api/auth/schools",
+      title: "List Schools",
+      description: "Get list of schools with fast search and pagination.",
+      authentication: "Bearer Token Required",
+      rateLimit: "5000 requests per 15 minutes",
+      parameters: [
+        { name: "search", type: "string", required: false },
+        { name: "city", type: "string", required: false },
+        { name: "province", type: "string", required: false },
+        { name: "page", type: "integer", required: false, description: "Default 1" },
+        { name: "limit", type: "integer", required: false, description: "Default 20" },
+        { name: "useFullText", type: "boolean", required: false, description: "Default false" }
+      ],
+      example: `curl -X GET "http://localhost:3000/api/auth/schools?search=SMA&page=1&limit=20" \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+    },
+    {
+      method: "POST",
+      path: "/api/auth/schools",
+      title: "Create School",
+      description: "Create a new school entry.",
+      authentication: "Bearer Token Required",
+      requestBody: { name: "SMA Negeri 1 Jakarta", address: "Jl. Sudirman No. 1", city: "Jakarta", province: "DKI Jakarta" },
+      parameters: [
+        { name: "name", type: "string", required: true },
+        { name: "address", type: "string", required: false },
+        { name: "city", type: "string", required: false },
+        { name: "province", type: "string", required: false }
+      ],
+      example: `curl -X POST http://localhost:3000/api/auth/schools \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "name": "SMA Negeri 1 Jakarta",\n  "address": "Jl. Sudirman No. 1",\n  "city": "Jakarta",\n  "province": "DKI Jakarta"\n}'`
+    },
+    {
+      method: "GET",
+      path: "/api/auth/schools/by-location",
+      title: "Schools by Location",
+      description: "Get schools filtered by province and optional city.",
+      authentication: "Bearer Token Required",
+      parameters: [
+        { name: "province", type: "string", required: true },
+        { name: "city", type: "string", required: false },
+        { name: "limit", type: "integer", required: false, description: "Default 50" }
+      ],
+      example: `curl -X GET "http://localhost:3000/api/auth/schools/by-location?province=DKI%20Jakarta&limit=50" \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+    },
+    {
+      method: "GET",
+      path: "/api/auth/schools/location-stats",
+      title: "School Location Stats",
+      description: "Get location statistics for schools.",
+      authentication: "Bearer Token Required"
+    },
+    {
+      method: "GET",
+      path: "/api/auth/schools/distribution",
+      title: "School Distribution",
+      description: "Get distribution of schools across locations.",
+      authentication: "Bearer Token Required"
+    },
+    {
+      method: "GET",
+      path: "/api/auth/schools/:schoolId/users",
+      title: "Users by School",
+      description: "Get users associated with a school with pagination.",
+      authentication: "Bearer Token Required",
+      parameters: [
+        { name: "schoolId", type: "path", required: true },
+        { name: "page", type: "integer", required: false, description: "Default 1" },
+        { name: "limit", type: "integer", required: false, description: "Default 20" }
+      ],
+      example: `curl -X GET "http://localhost:3000/api/auth/schools/1/users?page=1&limit=20" \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+    },
+    {
+      method: "POST",
+      path: "/api/admin/login",
+      title: "Admin Login",
+      description: "Admin login using username or email and password.",
+      authentication: null,
+      rateLimit: "Auth Limiter (2500/15min)",
+      requestBody: { username: "admin", password: "Admin123!" },
+      errorResponses: [
+        { code: "INVALID_CREDENTIALS", status: 401, message: "Invalid admin credentials" }
+      ],
+      example: `curl -X POST http://localhost:3000/api/admin/login \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "username": "admin",\n  "password": "Admin123!"\n}'`
+    },
+    {
+      method: "GET",
+      path: "/api/admin/profile",
+      title: "Get Admin Profile",
+      description: "Retrieve admin profile details.",
+      authentication: "Admin Bearer Token Required",
+      rateLimit: "Admin Limiter (1000/15min)",
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid admin token" },
+        { code: "ADMIN_NOT_FOUND", status: 404, message: "Admin not found" }
+      ],
+      example: `curl -X GET http://localhost:3000/api/admin/profile \\\n  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
+    },
+    {
+      method: "PUT",
+      path: "/api/admin/profile",
+      title: "Update Admin Profile",
+      description: "Update admin profile details.",
+      authentication: "Admin Bearer Token Required",
+      rateLimit: "Admin Limiter (1000/15min)",
+      requestBody: { username: "newusername", email: "newemail@atma.com", full_name: "Updated Admin Name" },
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid admin token" },
+        { code: "VALIDATION_ERROR", status: 400, message: "Invalid data" },
+        { code: "EMAIL_EXISTS", status: 409, message: "Email already exists" },
+        { code: "USERNAME_EXISTS", status: 409, message: "Username already exists" }
+      ],
+      example: `curl -X PUT http://localhost:3000/api/admin/profile \\\n  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "username": "newusername",\n  "email": "newemail@atma.com",\n  "full_name": "Updated Admin Name"\n}'`
+    },
+    {
+      method: "POST",
+      path: "/api/admin/change-password",
+      title: "Admin Change Password",
+      description: "Change admin password.",
+      authentication: "Admin Bearer Token Required",
+      rateLimit: "Admin Limiter (1000/15min)",
+      requestBody: { currentPassword: "OldAdmin123!", newPassword: "NewAdmin456!" },
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid admin token" },
+        { code: "VALIDATION_ERROR", status: 400, message: "Invalid password or failed validation" }
+      ],
+      example: `curl -X POST http://localhost:3000/api/admin/change-password \\\n  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "currentPassword": "OldAdmin123!",\n  "newPassword": "NewAdmin456!"\n}'`
+    },
+    {
+      method: "POST",
+      path: "/api/admin/logout",
+      title: "Admin Logout",
+      description: "Logout admin.",
+      authentication: "Admin Bearer Token Required",
+      rateLimit: "Admin Limiter (1000/15min)",
+      example: `curl -X POST http://localhost:3000/api/admin/logout \\\n  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
+    },
+    {
+      method: "POST",
+      path: "/api/admin/register",
+      title: "Register Admin (Superadmin Only)",
+      description: "Register a new admin user. Requires superadmin role.",
+      authentication: "Admin Bearer Token (Superadmin)",
+      rateLimit: "Admin Limiter (1000/15min)",
+      requestBody: { username: "newadmin", email: "newadmin@atma.com", password: "NewAdmin123!", full_name: "New Admin", user_type: "admin" },
+      errorResponses: [
+        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid admin token" },
+        { code: "FORBIDDEN", status: 403, message: "Insufficient permissions (superadmin required)" },
+        { code: "VALIDATION_ERROR", status: 400, message: "Invalid data" },
+        { code: "EMAIL_EXISTS", status: 409, message: "Email already exists" },
+        { code: "USERNAME_EXISTS", status: 409, message: "Username already exists" }
+      ],
+      example: `curl -X POST http://localhost:3000/api/admin/register \\\n  -H "Authorization: Bearer YOUR_SUPERADMIN_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "username": "newadmin",\n  "email": "newadmin@atma.com",\n  "password": "NewAdmin123!",\n  "full_name": "New Admin",\n  "user_type": "admin"\n}'`
     }
   ]
 };

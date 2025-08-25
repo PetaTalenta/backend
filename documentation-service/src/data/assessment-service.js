@@ -129,6 +129,7 @@ export const assessmentServiceData = {
       example: `curl -X POST https://api.chhrone.web.id/api/assessment/submit \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
+  -H "X-Idempotency-Key: YOUR_UNIQUE_KEY" \\
   -d '{
     "assessmentName": "AI-Driven Talent Mapping",
     "riasec": {
@@ -257,6 +258,50 @@ export const assessmentServiceData = {
         }
       },
       example: `curl -X GET https://api.chhrone.web.id/api/assessment/health`
+    },
+    {
+      method: "GET",
+      path: "/api/assessment/health/live",
+      title: "Liveness Probe",
+      description: "Simple liveness probe to verify the assessment service is running.",
+      authentication: null,
+      rateLimit: "No limit",
+      response: {
+        status: "alive",
+        timestamp: "2024-01-01T00:00:00.000Z"
+      },
+      example: `curl -X GET https://api.chhrone.web.id/api/assessment/health/live`
+    },
+    {
+      method: "GET",
+      path: "/api/assessment/health/ready",
+      title: "Readiness Probe",
+      description: "Readiness probe to check if dependencies are available and the service is ready to receive traffic.",
+      authentication: null,
+      rateLimit: "No limit",
+      response: {
+        status: "ready",
+        timestamp: "2024-01-01T00:00:00.000Z"
+      },
+      example: `curl -X GET https://api.chhrone.web.id/api/assessment/health/ready`
+    },
+    {
+      method: "GET",
+      path: "/api/assessment/health/queue",
+      title: "Queue Health",
+      description: "Queue health check exposing RabbitMQ queue statistics used by the assessment pipeline.",
+      authentication: null,
+      rateLimit: "No limit",
+      response: {
+        status: "healthy",
+        timestamp: "2024-01-01T00:00:00.000Z",
+        details: {
+          isHealthy: true,
+          messageCount: 5,
+          consumerCount: 2
+        }
+      },
+      example: `curl -X GET https://api.chhrone.web.id/api/assessment/health/queue`
     },
     {
       method: "GET",
