@@ -9,6 +9,7 @@ const { validatePersonaProfile } = require("../utils/validator");
 const mockAiService = require("./mockAiService");
 const TokenCounterService = require("./tokenCounterService");
 const UsageTracker = require("./usageTracker");
+const { createError, ERROR_TYPES } = require("../utils/errorHandler");
 
 // Initialize token counting services
 const tokenCounter = new TokenCounterService();
@@ -111,7 +112,7 @@ const responseSchema = {
     },
     coreMotivators: {
       type: Type.ARRAY,
-      minItems: 4,
+      minItems: 2,
       maxItems: 4,
       items: { type: Type.STRING, description: "Motivasi fundamental" },
       description: "Fundamental drivers atau motivasi inti dari persona",
@@ -130,7 +131,7 @@ const responseSchema = {
     },
     strengths: {
       type: Type.ARRAY,
-      minItems: 4,
+      minItems: 3,
       maxItems: 6,
       items: {
         type: Type.STRING,
@@ -144,8 +145,8 @@ const responseSchema = {
     },
     weaknesses: {
       type: Type.ARRAY,
-      minItems: 4,
-      maxItems: 5,
+      minItems: 3,
+      maxItems: 6,
       items: {
         type: Type.STRING,
         description: "Kelemahan atau area pengembangan persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat. HANYA berisi konten kelemahan, JANGAN menambahkan kata 'justification' atau kata meta lainnya.",
@@ -154,8 +155,8 @@ const responseSchema = {
     },
     careerRecommendation: {
       type: Type.ARRAY,
-      minItems: 4,
-      maxItems: 4,
+      minItems: 3,
+      maxItems: 5,
       description:
         "Daftar rekomendasi karir sesuai persona dan kecocokan industri, beserta prospeknya",
       items: {
@@ -173,7 +174,7 @@ const responseSchema = {
 
           relatedMajors: {
             type: Type.ARRAY,
-            minItems: 4,
+            minItems: 2,
             maxItems: 5,
             items: {
               type: Type.STRING,
@@ -235,7 +236,7 @@ const responseSchema = {
     },
     insights: {
       type: Type.ARRAY,
-      minItems: 4,
+      minItems: 3,
       maxItems: 5,
       items: {
         type: Type.STRING,
@@ -245,7 +246,7 @@ const responseSchema = {
     },
     skillSuggestion: {
       type: Type.ARRAY,
-      minItems: 4,
+      minItems: 3,
       maxItems: 6,
       items: {
         type: Type.STRING,
@@ -255,7 +256,7 @@ const responseSchema = {
     },
     possiblePitfalls: {
       type: Type.ARRAY,
-      minItems: 4,
+      minItems: 2,
       maxItems: 5,
       items: {
         type: Type.STRING,
@@ -300,7 +301,7 @@ const responseSchema = {
         extracurricular: {
           type: Type.ARRAY,
           minItems: 2,
-          maxItems: 3,
+          maxItems: 4,
           items: {
             type: Type.STRING,
             description: "Nama kegiatan ekstrakurikuler yang spesifik. HANYA berisi nama kegiatan, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
@@ -371,7 +372,7 @@ const responseSchema = {
     // Extract usage metadata from API response
     try {
       outputTokenData = await tokenCounter.extractUsageMetadata(response, jobId);
-      
+
       logger.info("AI response received", {
         jobId,
         tokens: outputTokenData.totalTokens,
@@ -382,23 +383,44 @@ const responseSchema = {
         jobId,
         error: tokenError.message
       });
-      
-      // Fallback to original logging format
+
+      // Fallback to original logging format (guard against undefined fields)
       logger.info("AI response received", {
         jobId,
-        responseLength: response.text.length,
-        thoughtsTokenCount: response.usageMetadata?.thoughtsTokenCount || 0,
-        candidatesTokenCount: response.usageMetadata?.candidatesTokenCount || 0,
+        responseLength: (typeof response?.text === 'string' ? response.text.length : 0),
+        thoughtsTokenCount: response?.usageMetadata?.thoughtsTokenCount || 0,
+        candidatesTokenCount: response?.usageMetadata?.candidatesTokenCount || 0,
       });
     }
 
-    // Parse JSON response directly (no need for manual parsing)
-    const personaProfile = JSON.parse(response.text);
+    // Ensure we have JSON text and parse safely
+    const rawText = typeof response?.text === 'string' ? response.text.trim() : '';
+    if (!rawText) {
+      const blockMsg = response?.promptFeedback?.blockReasonMessage || response?.promptFeedback?.blockReason || 'no text returned';
+      throw createError(
+        ERROR_TYPES.AI_RESPONSE_PARSE_ERROR,
+        `AI returned empty/undefined JSON text (${blockMsg})`
+      );
+    }
+
+    let personaProfile;
+    try {
+      personaProfile = JSON.parse(rawText);
+    } catch (parseErr) {
+      throw createError(
+        ERROR_TYPES.AI_RESPONSE_PARSE_ERROR,
+        `Failed to parse AI JSON: ${parseErr.message}`,
+        parseErr
+      );
+    }
 
     // Validate persona profile
     const validationResult = validatePersonaProfile(personaProfile);
     if (!validationResult.isValid) {
-      throw new Error(`Invalid persona profile: ${validationResult.error}`);
+      throw createError(
+        ERROR_TYPES.AI_RESPONSE_PARSE_ERROR,
+        `Invalid persona profile: ${validationResult.error}`
+      );
     }
 
     // Track usage statistics

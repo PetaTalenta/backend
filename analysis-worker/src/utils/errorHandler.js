@@ -124,7 +124,7 @@ const withRetry = async (operation, options = {}) => {
     maxRetries = parseInt(process.env.MAX_RETRIES || '3'),
     baseDelay = parseInt(process.env.RETRY_DELAY || '5000'),
     operationName = 'operation',
-    shouldRetry = (error) => error.isRetryable
+    shouldRetry = (error) => error?.isRetryable === true
   } = options;
   
   let lastError = null;

@@ -252,11 +252,12 @@ const processAssessmentOptimized = async (jobData) => {
         {
           operationName: 'AI persona generation',
           shouldRetry: (error) => {
-            // Retry network errors and AI service errors
-            return error.code === ERROR_TYPES.AI_SERVICE_ERROR.code ||
-                   error.code === 'ECONNREFUSED' ||
-                   error.code === 'ENOTFOUND' ||
-                   error.code === 'ETIMEDOUT';
+            // Retry network errors and AI service errors (guard against undefined error)
+            const code = error?.code;
+            return code === ERROR_TYPES.AI_SERVICE_ERROR.code ||
+                   code === 'ECONNREFUSED' ||
+                   code === 'ENOTFOUND' ||
+                   code === 'ETIMEDOUT';
           }
         }
       );
@@ -387,8 +388,8 @@ const processAssessmentOptimized = async (jobData) => {
     }
 
     // Handle token refund for certain error types
-    if (error.code === ERROR_TYPES.DUPLICATE_JOB_ERROR.code || 
-        error.code === ERROR_TYPES.RATE_LIMIT_ERROR.code) {
+    if (error?.code === ERROR_TYPES.DUPLICATE_JOB_ERROR.code ||
+        error?.code === ERROR_TYPES.RATE_LIMIT_ERROR.code) {
       
       // Queue token refund if tokens were consumed
       if (error.tokenData) {
@@ -398,8 +399,8 @@ const processAssessmentOptimized = async (jobData) => {
 
     // Audit: Job failed
     auditLogger.logJobEvent(AUDIT_EVENTS.JOB_FAILED, jobData, {
-      error: error.message,
-      errorCode: error.code,
+      error: error?.message,
+      errorCode: error?.code,
       processingTime: errorProcessingTime,
       jobHash: deduplicationResult?.jobHash
     });
@@ -407,8 +408,8 @@ const processAssessmentOptimized = async (jobData) => {
     // Save failed result (async)
     try {
       updateAnalysisJobStatus(jobId, 'failed', {
-        error_message: error.message,
-        error_code: error.code
+        error_message: error?.message,
+        error_code: error?.code
       });
     } catch (statusError) {
       logger.error('Failed to update job status to failed', {
@@ -428,7 +429,7 @@ const processAssessmentOptimized = async (jobData) => {
         errorMessage: error.message,
         assessmentName: jobData.assessmentName || 'AI-Driven Talent Mapping',
         processingTime: errorProcessingTime,
-        errorType: error.code || 'unknown'
+        errorType: error?.code || 'unknown'
       }).catch(eventError => {
         logger.warn('Failed to publish analysis failed event', {
           jobId,

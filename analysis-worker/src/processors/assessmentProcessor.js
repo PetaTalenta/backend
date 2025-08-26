@@ -38,11 +38,12 @@ const processAssessment = async (jobData) => {
         {
           operationName: 'AI persona generation',
           shouldRetry: (error) => {
-            // Retry network errors and AI service errors
-            return error.code === ERROR_TYPES.AI_SERVICE_ERROR.code ||
-                   error.code === 'ECONNREFUSED' ||
-                   error.code === 'ENOTFOUND' ||
-                   error.code === 'ETIMEDOUT';
+            // Retry network errors and AI service errors (guard against undefined error)
+            const code = error?.code;
+            return code === ERROR_TYPES.AI_SERVICE_ERROR.code ||
+                   code === 'ECONNREFUSED' ||
+                   code === 'ENOTFOUND' ||
+                   code === 'ETIMEDOUT';
           }
         }
       );
@@ -175,7 +176,7 @@ const processAssessment = async (jobData) => {
         userEmail,
         errorMessage: error.message,
         assessmentName,
-        errorType: error.code || 'unknown'
+        errorType: error?.code || 'unknown'
       });
 
       logger.info('Analysis failed event published', {
@@ -208,14 +209,14 @@ const processAssessment = async (jobData) => {
 
     // Determine if error is retryable for queue retry mechanism
     // AI service errors should not be retried to avoid consuming more tokens
-    const isRetryable = error.code === ERROR_TYPES.ARCHIVE_SERVICE_ERROR.code ||
-                        error.code === ERROR_TYPES.TIMEOUT_ERROR.code ||
-                        (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT');
+    const isRetryable = error?.code === ERROR_TYPES.ARCHIVE_SERVICE_ERROR.code ||
+                        error?.code === ERROR_TYPES.TIMEOUT_ERROR.code ||
+                        (error?.code === 'ECONNREFUSED' || error?.code === 'ENOTFOUND' || error?.code === 'ETIMEDOUT');
 
     // Don't retry AI service errors to prevent token consumption
-    const shouldNotRetry = error.code === ERROR_TYPES.AI_SERVICE_ERROR.code ||
-                           error.message.includes('AI service') ||
-                           error.message.includes('persona profile');
+    const shouldNotRetry = error?.code === ERROR_TYPES.AI_SERVICE_ERROR.code ||
+                           error?.message?.includes('AI service') ||
+                           error?.message?.includes('persona profile');
 
     throw createError(
       (isRetryable && !shouldNotRetry) ? ERROR_TYPES.INTERNAL_ERROR : ERROR_TYPES.VALIDATION_ERROR,

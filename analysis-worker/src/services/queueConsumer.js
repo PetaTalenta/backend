@@ -154,11 +154,14 @@ const handleMessageError = async (message, jobData, error) => {
     const retryCount = (jobData?.retryCount || 0) + 1;
 
     // Check if error should not be retried (AI service errors to prevent token consumption)
-    const shouldNotRetry = error.code === 'VALIDATION_ERROR' ||
-                           error.message.includes('AI service') ||
-                           error.message.includes('persona profile') ||
-                           error.message.includes('Invalid persona profile') ||
-                           error.message.includes('Failed to generate persona profile');
+    const errCode = error?.code;
+    const errMsg = error?.message || '';
+    const shouldNotRetry = errCode === 'VALIDATION_ERROR' ||
+                           errCode === 'AI_RESPONSE_PARSE_ERROR' ||
+                           errMsg.includes('AI service') ||
+                           errMsg.includes('persona profile') ||
+                           errMsg.includes('Invalid persona profile') ||
+                           errMsg.includes('Failed to generate persona profile');
 
     if (retryCount <= maxRetries && !shouldNotRetry) {
       // Retry the message by publishing a new message with updated retry count
