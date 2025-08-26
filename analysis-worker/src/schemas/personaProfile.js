@@ -76,13 +76,11 @@ const personaProfileSchema = Joi.object({
     .description('Deskripsi lingkungan kerja yang ideal untuk persona'),
 
   roleModel: Joi.array().items(Joi.string()).min(2).max(3).required()
-    .description('Daftar role model yang relevan dan inspiratif'),
+    .description('Daftar role model yang relevan dan inspiratif, sertakan title/jabatan utama, contoh: "John Doe (CEO Perusahaan X)"'),
 
   developmentActivities: Joi.object({
     extracurricular: Joi.array().items(Joi.string()).min(2).max(4).required()
       .description('Kegiatan ekstrakurikuler yang disarankan'),
-    projectIdeas: Joi.array().items(Joi.string()).min(2).max(4).required()
-      .description('Ide proyek untuk membangun portfolio dan skills'),
     bookRecommendations: Joi.array().items(
       Joi.object({
         title: Joi.string().required()
@@ -201,17 +199,12 @@ const personaProfileExample = {
   riskTolerance: "moderate",
   workEnvironment: "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
   roleModel: [
-    "Marie Curie",
-    "Albert Einstein",
-    "B.J. Habibie"
+    "Marie Curie (Physicist/Chemist, Nobel Laureate)",
+    "Albert Einstein (Theoretical Physicist)",
+    "B.J. Habibie (Former President of Indonesia, Engineer)"
   ],
   developmentActivities: {
     extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],
-    projectIdeas: [
-      "Membuat visualisasi data dari topik yang disukai (misal: statistik tim sepak bola favorit)",
-      "Mendesain aplikasi sederhana untuk memecahkan masalah di sekolah",
-      "Menulis blog yang menjelaskan konsep sains yang rumit dengan cara sederhana"
-    ],
     bookRecommendations: [
       {
         title: "Sapiens: A Brief History of Humankind",

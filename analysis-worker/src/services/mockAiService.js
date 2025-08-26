@@ -507,26 +507,26 @@ const generateWorkEnvironment = (riasec, ocean) => {
  */
 const generateRoleModels = (topInterest, secondInterest) => {
   const roleModelMap = {
-    'realistic': ['Elon Musk', 'Steve Wozniak', 'James Dyson'],
-    'investigative': ['Marie Curie', 'Stephen Hawking', 'Jane Goodall'],
-    'artistic': ['Steve Jobs', 'Jony Ive', 'David Kelley'],
-    'social': ['Oprah Winfrey', 'Nelson Mandela', 'Mother Teresa'],
-    'enterprising': ['Richard Branson', 'Jack Ma', 'Sara Blakely'],
-    'conventional': ['Warren Buffett', 'Tim Cook', 'Sheryl Sandberg']
+    'realistic': ['Elon Musk (CEO Tesla/SpaceX)', 'Steve Wozniak (Co-founder Apple)', 'James Dyson (Founder Dyson)'],
+    'investigative': ['Marie Curie (Physicist/Chemist, Nobel Laureate)', 'Stephen Hawking (Theoretical Physicist)', 'Jane Goodall (Primatologist)'],
+    'artistic': ['Steve Jobs (Co-founder Apple)', 'Jony Ive (Former Chief Design Officer, Apple)', 'David Kelley (Founder IDEO)'],
+    'social': ['Oprah Winfrey (Media Executive/Philanthropist)', 'Nelson Mandela (Former President of South Africa)', 'Mother Teresa (Humanitarian)'],
+    'enterprising': ['Richard Branson (Founder Virgin Group)', 'Jack Ma (Founder Alibaba)', 'Sara Blakely (Founder Spanx)'],
+    'conventional': ['Warren Buffett (CEO Berkshire Hathaway)', 'Tim Cook (CEO Apple)', 'Sheryl Sandberg (Former COO Meta)']
   };
 
   const roleModels = [];
-  
+
   if (roleModelMap[topInterest]) {
     roleModels.push(...roleModelMap[topInterest]);
   }
-  
+
   if (roleModelMap[secondInterest] && secondInterest !== topInterest) {
     roleModels.push(...roleModelMap[secondInterest].slice(0, 2));
   }
 
-  // Add some universal role models
-  const universalModels = ['Bill Gates', 'Michelle Obama', 'B.J. Habibie', 'Susi Pudjiastuti', 'Nadiem Makarim'];
+  // Add some universal role models with titles
+  const universalModels = ['Bill Gates (Co-founder Microsoft)', 'Michelle Obama (Former First Lady, Lawyer)', 'B.J. Habibie (Former President of Indonesia, Engineer)', 'Susi Pudjiastuti (Former Minister of Marine Affairs and Fisheries)', 'Nadiem Makarim (Minister of Education, Founder Gojek)'];
   roleModels.push(...universalModels);
 
   // Remove duplicates
@@ -534,7 +534,7 @@ const generateRoleModels = (topInterest, secondInterest) => {
 
   // Ensure minimum 2 role models (matching schema)
   if (uniqueRoleModels.length < 2) {
-    const additionalModels = ['Albert Einstein', 'Oprah Winfrey', 'Steve Jobs', 'Marie Curie'];
+    const additionalModels = ['Albert Einstein (Physicist)', 'Oprah Winfrey (Media Executive/Philanthropist)', 'Steve Jobs (Co-founder Apple)', 'Marie Curie (Physicist/Chemist, Nobel Laureate)'];
     for (let i = 0; i < additionalModels.length && uniqueRoleModels.length < 2; i++) {
       if (!uniqueRoleModels.includes(additionalModels[i])) {
         uniqueRoleModels.push(additionalModels[i]);
@@ -731,19 +731,8 @@ const generateDevelopmentActivities = (riasec) => {
     conventional: ['Student Government', 'Academic Committee', 'Event Organization']
   };
 
-  const projectMap = {
-    realistic: ['Membuat prototype sederhana', 'Eksperimen sains praktis', 'Mini project terstruktur', 'Tantangan ekstrem: produk siap pakai'],
-    investigative: ['Research project', 'Data analysis project', 'Eksperimen ilmiah menengah', 'Tantangan ekstrem: publikasi mini'],
-    artistic: ['Portfolio kreatif', 'Art installation', 'Redesign produk nyata', 'Tantangan ekstrem: pameran mandiri'],
-    social: ['Community service project', 'Social impact initiative', 'Peer mentoring terstruktur', 'Tantangan ekstrem: program sosial berkelanjutan'],
-    enterprising: ['Business plan competition', 'Startup simulation', 'MVP penjualan kecil', 'Tantangan ekstrem: pilot bisnis nyata'],
-    conventional: ['Process improvement project', 'Database management', 'SOP perbaikan proses', 'Tantangan ekstrem: sistem dokumentasi lengkap']
-  };
-
-  // Ensure array lengths match model schema: extracurricular 2-3, projectIdeas exactly 4, bookRecommendations exactly 6
+  // Ensure array lengths match model schema: extracurricular 2-3, bookRecommendations 2-6
   const extracurricular = (extracurricularMap[topInterest] || ['Academic Club', 'Volunteer Work']).slice(0, 3);
-  const projectIdeasBase = projectMap[topInterest] || ['Personal development project', 'Skill-building initiative', 'Mini project', 'Tantangan ekstrem: showcase'];
-  const projectIdeas = projectIdeasBase.slice(0, 4);
 
   const books = [
     { title: 'Mindset: The New Psychology of Success', author: 'Carol Dweck', reason: 'Mengembangkan growth mindset yang esensial untuk kesuksesan' },
@@ -756,7 +745,6 @@ const generateDevelopmentActivities = (riasec) => {
 
   return {
     extracurricular,
-    projectIdeas,
     bookRecommendations: books
   };
 };

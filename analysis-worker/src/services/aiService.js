@@ -164,7 +164,7 @@ const responseSchema = {
         properties: {
           careerName: {
             type: Type.STRING,
-            description: "Nama karir atau profesi yang  direkomendasikan, fokus data yang dipakai adalah RIASEC dan VIAIS lalu OCEAN adalah pendukung",
+            description: "Nama karir atau profesi yang direkomendasikan (utamakan pekerjaan umum yang dikenal luas; hindari jabatan niche/sangat spesifik). Fokus data yang dipakai adalah RIASEC dan VIAIS lalu OCEAN adalah pendukung",
           },
           justification: {
             type: Type.STRING,
@@ -288,13 +288,13 @@ const responseSchema = {
       maxItems: 3,
       items: {
         type: Type.STRING,
-        description: "Nama role model yang relevan dengan persona dengan pencapaiannya, e.g: John Doe (Pendiri Perusahaan X)",
+        description: "Nama role model beserta title/jabatan utamanya, format disarankan: Nama (Title/Jabatan), contoh: John Doe (CEO Perusahaan X)",
       },
-      description: "Daftar role model inspiratif",
+      description: "Daftar role model inspiratif (wajib sertakan title/jabatan)",
     },
     developmentActivities: {
       type: Type.OBJECT,
-      required: ["extracurricular", "projectIdeas", "bookRecommendations"],
+      required: ["extracurricular", "bookRecommendations"],
       properties: {
         extracurricular: {
           type: Type.ARRAY,
@@ -306,19 +306,9 @@ const responseSchema = {
           },
           description: "Kegiatan ekstrakurikuler yang disarankan. Array ini hanya berisi nama kegiatan, bukan kata 'justification' atau kata meta lainnya.",
         },
-        projectIdeas: {
-          type: Type.ARRAY,
-          minItems: 4,
-          maxItems: 4,
-          items: {
-            type: Type.STRING,
-            description: "Ide proyek konkret yang bisa dilakukan siswa SMA dengan tingkatan mudah, menengah, sulit dan extreme, extreme adalah biasanya untuk outliers. HANYA berisi deskripsi proyek, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
-          },
-          description: "Ide proyek untuk membangun portfolio dan skills. Array ini hanya berisi deskripsi proyek, bukan kata 'justification'.",
-        },
         bookRecommendations: {
           type: Type.ARRAY,
-          minItems: 6,
+          minItems: 2,
           maxItems: 6,
           items: {
             type: Type.OBJECT,
@@ -342,7 +332,7 @@ const responseSchema = {
         },
       },
       description: "Aktivitas pengembangan yang disesuaikan dengan konteks siswa SMA",
-    },
+    }
   },
   required: [
     "archetype",
@@ -580,6 +570,9 @@ Keterampilan: Keterampilan apa yang perlu dikembangkan untuk memaksimalkan kekua
 - Jangan Bersifat afirmatif dan kekurangan TIDAK BOLEH DITUTUPI
 - Refer ke pengguna sebagai ANDA
 - Pastikan tidak ada data yang diulangi 2x, misal rekomendasi karir 1 dan 3 itu sama persis
+- Rekomendasi karir harus berupa pekerjaan yang umum dikenal secara luas (hindari jabatan niche atau sangat spesifik)
+- Untuk daftar role model, sertakan title/jabatan utama dalam tanda kurung setelah nama (contoh: "B.J. Habibie (Former President of Indonesia, Engineer)")
+- Hapus bagian ide proyek: JANGAN membuat atau menyebutkan project ideas dalam output
 `
 };
 

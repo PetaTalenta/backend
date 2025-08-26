@@ -54,7 +54,7 @@ const bookRecommendationSchema = Joi.object({
     })
 });
 
-// Development activities schema
+// Development activities schema (projectIdeas removed)
 const developmentActivitiesSchema = Joi.object({
   extracurricular: Joi.array().items(
     Joi.string().trim().min(1).max(200)
@@ -64,18 +64,10 @@ const developmentActivitiesSchema = Joi.object({
       'array.max': 'Must have at most 4 extracurricular activities',
       'any.required': 'Extracurricular activities are required'
     }),
-  projectIdeas: Joi.array().items(
-    Joi.string().trim().min(1).max(300)
-  ).min(2).max(4).required()
-    .messages({
-      'array.min': 'Must have at least 2 project ideas',
-      'array.max': 'Must have at most 4 project ideas',
-      'any.required': 'Project ideas are required'
-    }),
-  bookRecommendations: Joi.array().items(bookRecommendationSchema).min(2).max(3).required()
+  bookRecommendations: Joi.array().items(bookRecommendationSchema).min(2).max(6).required()
     .messages({
       'array.min': 'Must have at least 2 book recommendations',
-      'array.max': 'Must have at most 3 book recommendations',
+      'array.max': 'Must have at most 6 book recommendations',
       'any.required': 'Book recommendations are required'
     })
 }).required();
