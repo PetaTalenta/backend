@@ -102,7 +102,12 @@ export const archiveServiceData = {
               },
               persona_profile: {
                 archetype: "The Analytical Innovator",
-                coreMotivators: ["Problem-Solving", "Learning & Mastery", "Creative Expression"],
+                coreMotivators: [
+                  "Problem-Solving",
+                  "Learning & Mastery",
+                  "Creative Expression",
+                  "Impact & Contribution"
+                ],
                 learningStyle: "Visual & Kinesthetic (Belajar paling baik dengan melihat contoh dan langsung mencoba)",
                 shortSummary: "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif.",
                 strengthSummary: "Kekuatan utama Anda terletak pada analisis mendalam, kreativitas, dan dorongan kuat untuk belajar hal baru. Ini membuat Anda mampu menghasilkan solusi unik di berbagai situasi kompleks.",
@@ -136,7 +141,8 @@ export const archiveServiceData = {
                       salaryPotential: "high",
                       careerProgression: "high",
                       industryGrowth: "super high",
-                      skillDevelopment: "super high"
+                      skillDevelopment: "super high",
+                      aiOvertake: "moderate"
                     }
                   },
                   {
@@ -153,7 +159,8 @@ export const archiveServiceData = {
                       salaryPotential: "moderate",
                       careerProgression: "moderate",
                       industryGrowth: "moderate",
-                      skillDevelopment: "high"
+                      skillDevelopment: "high",
+                      aiOvertake: "low"
                     }
                   },
                   {
@@ -170,7 +177,26 @@ export const archiveServiceData = {
                       salaryPotential: "high",
                       careerProgression: "high",
                       industryGrowth: "super high",
-                      skillDevelopment: "super high"
+                      skillDevelopment: "super high",
+                      aiOvertake: "moderate"
+                    }
+                  },
+                  {
+                    careerName: "Product Manager",
+                    justification: "Menggabungkan kemampuan analitis, komunikasi, dan kepemimpinan untuk memimpin pengembangan produk yang berdampak. Cocok bagi profil dengan kombinasi Investigative-Enterprising dan kreativitas tinggi.",
+                    firstSteps: [
+                      "Pelajari dasar-dasar manajemen produk (PM 101) melalui kursus online",
+                      "Buat studi kasus produk: analisis problem, solusi, dan metrik",
+                      "Ikuti komunitas Product Management lokal/online"
+                    ],
+                    relatedMajors: ["Manajemen Bisnis", "Sistem Informasi", "Ilmu Komputer", "Teknik Industri"],
+                    careerProspect: {
+                      jobAvailability: "high",
+                      salaryPotential: "high",
+                      careerProgression: "high",
+                      industryGrowth: "high",
+                      skillDevelopment: "super high",
+                      aiOvertake: "low"
                     }
                   }
                 ],
@@ -191,22 +217,19 @@ export const archiveServiceData = {
                 possiblePitfalls: [
                   "Mengisolasi diri dari tim karena terlalu fokus pada analisis individu",
                   "Menunda keputusan karena perfeksionisme berlebihan",
-                  "Kurang membangun jaringan karena terlalu fokus pada teknis"
+                  "Kurang membangun jaringan karena terlalu fokus pada teknis",
+                  "Terlalu fokus pada teknis hingga mengabaikan komunikasi",
+                  "Risiko burnout karena beban proyek dan standar tinggi"
                 ],
                 riskTolerance: "moderate",
                 workEnvironment: "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
                 roleModel: [
-                  "Marie Curie",
-                  "Albert Einstein",
-                  "B.J. Habibie"
+                  "Marie Curie (Physicist/Chemist, Nobel Laureate)",
+                  "Albert Einstein (Theoretical Physicist, Nobel Laureate)",
+                  "B.J. Habibie (Former President of Indonesia, Engineer)"
                 ],
                 developmentActivities: {
                   extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],
-                  projectIdeas: [
-                    "Membuat visualisasi data dari topik yang disukai (misal: statistik tim sepak bola favorit)",
-                    "Mendesain aplikasi sederhana untuk memecahkan masalah di sekolah",
-                    "Menulis blog yang menjelaskan konsep sains yang rumit dengan cara sederhana"
-                  ],
                   bookRecommendations: [
                     {
                       title: "Sapiens: A Brief History of Humankind",
@@ -305,7 +328,12 @@ export const archiveServiceData = {
           },
           persona_profile: {
             archetype: "The Analytical Innovator",
-            coreMotivators: ["Problem-Solving", "Learning & Mastery", "Creative Expression"],
+            coreMotivators: [
+              "Problem-Solving",
+              "Learning & Mastery",
+              "Creative Expression",
+              "Impact & Contribution"
+            ],
             learningStyle: "Visual & Kinesthetic (Belajar paling baik dengan melihat contoh dan langsung mencoba)",
             shortSummary: "Anda adalah seorang pemikir analitis dengan kecenderungan investigatif yang kuat dan kreativitas tinggi. Kombinasi antara kecerdasan logis-matematis dan keterbukaan terhadap pengalaman baru membuat Anda unggul dalam memecahkan masalah kompleks dengan pendekatan inovatif.",
             strengthSummary: "Kekuatan utama Anda terletak pada analisis mendalam, kreativitas, dan dorongan kuat untuk belajar hal baru. Ini membuat Anda mampu menghasilkan solusi unik di berbagai situasi kompleks.",
@@ -339,7 +367,8 @@ export const archiveServiceData = {
                   salaryPotential: "high",
                   careerProgression: "high",
                   industryGrowth: "super high",
-                  skillDevelopment: "super high"
+                  skillDevelopment: "super high",
+                  aiOvertake: "moderate"
                 }
               },
               {
@@ -356,7 +385,8 @@ export const archiveServiceData = {
                   salaryPotential: "moderate",
                   careerProgression: "moderate",
                   industryGrowth: "moderate",
-                  skillDevelopment: "high"
+                  skillDevelopment: "high",
+                  aiOvertake: "low"
                 }
               },
               {
@@ -373,7 +403,26 @@ export const archiveServiceData = {
                   salaryPotential: "high",
                   careerProgression: "high",
                   industryGrowth: "super high",
-                  skillDevelopment: "super high"
+                  skillDevelopment: "super high",
+                  aiOvertake: "moderate"
+                }
+              },
+              {
+                careerName: "Product Manager",
+                justification: "Menggabungkan kemampuan analitis, komunikasi, dan kepemimpinan untuk memimpin pengembangan produk yang berdampak. Cocok bagi profil dengan kombinasi Investigative-Enterprising dan kreativitas tinggi.",
+                firstSteps: [
+                  "Pelajari dasar-dasar manajemen produk (PM 101) melalui kursus online",
+                  "Buat studi kasus produk: analisis problem, solusi, dan metrik",
+                  "Ikuti komunitas Product Management lokal/online"
+                ],
+                relatedMajors: ["Manajemen Bisnis", "Sistem Informasi", "Ilmu Komputer", "Teknik Industri"],
+                careerProspect: {
+                  jobAvailability: "high",
+                  salaryPotential: "high",
+                  careerProgression: "high",
+                  industryGrowth: "high",
+                  skillDevelopment: "super high",
+                  aiOvertake: "low"
                 }
               }
             ],
@@ -394,22 +443,19 @@ export const archiveServiceData = {
             possiblePitfalls: [
               "Mengisolasi diri dari tim karena terlalu fokus pada analisis individu",
               "Menunda keputusan karena perfeksionisme berlebihan",
-              "Kurang membangun jaringan karena terlalu fokus pada teknis"
+              "Kurang membangun jaringan karena terlalu fokus pada teknis",
+              "Terlalu fokus pada teknis hingga mengabaikan komunikasi",
+              "Risiko burnout karena beban proyek dan standar tinggi"
             ],
             riskTolerance: "moderate",
             workEnvironment: "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
             roleModel: [
-              "Marie Curie",
-              "Albert Einstein",
-              "B.J. Habibie"
+              "Marie Curie (Physicist/Chemist, Nobel Laureate)",
+              "Albert Einstein (Theoretical Physicist, Nobel Laureate)",
+              "B.J. Habibie (Former President of Indonesia, Engineer)"
             ],
             developmentActivities: {
               extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],
-              projectIdeas: [
-                "Membuat visualisasi data dari topik yang disukai (misal: statistik tim sepak bola favorit)",
-                "Mendesain aplikasi sederhana untuk memecahkan masalah di sekolah",
-                "Menulis blog yang menjelaskan konsep sains yang rumit dengan cara sederhana"
-              ],
               bookRecommendations: [
                 {
                   title: "Sapiens: A Brief History of Humankind",
@@ -954,77 +1000,85 @@ export const archiveServiceData = {
     "Simplified Response: Hanya archetype yang dikembalikan dari persona_profile untuk mengoptimalkan performa dan mengurangi transfer data"
   ],
   personaProfileSchema: {
-    description: "Struktur lengkap persona_profile dengan field-field baru yang telah ditambahkan",
-    newFields: {
+    description: "Skema lengkap persona_profile (semua field wajib ada) sesuai spesifikasi terbaru",
+    fields: {
+      archetype: { type: "String", required: true },
       coreMotivators: {
         type: "Array[String]",
         required: true,
-        minItems: 2,
-        maxItems: 4,
-        description: "Fundamental drivers atau motivasi inti dari persona yang mengidentifikasi 'mengapa' di balik tindakan siswa"
+        items: "String",
+        length: 4,
+        description: "4 motivasi inti yang mendorong tindakan siswa"
       },
-      learningStyle: {
-        type: "String",
+      learningStyle: { type: "String", required: true },
+      shortSummary: { type: "String", required: true },
+      strengthSummary: { type: "String", required: true },
+      strengths: {
+        type: "Array[String]",
         required: true,
-        description: "Gaya belajar yang paling efektif untuk persona, menjelaskan cara terbaik siswa menyerap informasi baru"
+        minItems: 4,
+        maxItems: 6
       },
-      careerRecommendationEnhancements: {
-        justification: {
-          type: "String",
-          required: true,
-          description: "Penjelasan mengapa karir ini cocok berdasarkan data psikometrik (OCEAN, RIASEC, VIA-IS) dan arketipe persona"
-        },
-        firstSteps: {
-          type: "Array[String]",
-          required: true,
-          minItems: 2,
-          maxItems: 4,
-          description: "Langkah konkret, immediate, dan low-barrier yang bisa diambil siswa SMA untuk mengeksplorasi karir ini"
-        },
-        relatedMajors: {
-          type: "Array[String]",
-          required: true,
-          minItems: 2,
-          maxItems: 5,
-          description: "Jurusan kuliah yang relevan dengan karir ini, menciptakan jembatan dari SMA ke perencanaan pendidikan tinggi"
+      weaknessSummary: { type: "String", required: true },
+      weaknesses: {
+        type: "Array[String]",
+        required: true,
+        minItems: 4,
+        maxItems: 5
+      },
+      careerRecommendation: {
+        type: "Array[Object]",
+        required: true,
+        length: 4,
+        description: "4 rekomendasi karir yang umum dikenal (hindari jabatan niche/sangat spesifik)",
+        itemProperties: {
+          careerName: { type: "String", required: true, note: "Gunakan pekerjaan umum yang dikenal luas" },
+          justification: { type: "String", required: true },
+          firstSteps: { type: "Array[String]", required: true, length: 3 },
+          relatedMajors: { type: "Array[String]", required: true, minItems: 4, maxItems: 5, note: "Hanya nama jurusan" },
+          careerProspect: {
+            type: "Object", required: true, properties: {
+              jobAvailability: { type: "String", enum: ["super high", "high", "moderate", "low", "super low"], required: true },
+              salaryPotential: { type: "String", enum: ["super high", "high", "moderate", "low", "super low"], required: true },
+              careerProgression: { type: "String", enum: ["super high", "high", "moderate", "low", "super low"], required: true },
+              industryGrowth: { type: "String", enum: ["super high", "high", "moderate", "low", "super low"], required: true },
+              skillDevelopment: { type: "String", enum: ["super high", "high", "moderate", "low", "super low"], required: true },
+              aiOvertake: { type: "String", enum: ["super high", "high", "moderate", "low", "super low"], required: true }
+            }
+          }
         }
       },
+      insights: { type: "Array[String]", required: true, minItems: 4, maxItems: 5 },
+      skillSuggestion: { type: "Array[String]", required: true, minItems: 4, maxItems: 6 },
+      possiblePitfalls: { type: "Array[String]", required: true, minItems: 4, maxItems: 5 },
+      riskTolerance: { type: "String", required: true, enum: ["very high", "high", "moderate", "low", "very low"] },
+      workEnvironment: { type: "String", required: true },
+      roleModel: { type: "Array[String]", required: true, minItems: 2, maxItems: 3, format: "Nama (Title/Jabatan)" },
       developmentActivities: {
         type: "Object",
         required: true,
-        description: "Aktivitas pengembangan yang disesuaikan dengan konteks siswa SMA",
         properties: {
-          extracurricular: {
-            type: "Array[String]",
-            required: true,
-            minItems: 2,
-            maxItems: 4,
-            description: "Kegiatan ekstrakurikuler yang disarankan (klub sekolah atau aktivitas)"
-          },
-          projectIdeas: {
-            type: "Array[String]",
-            required: true,
-            minItems: 2,
-            maxItems: 4,
-            description: "Ide proyek konkret untuk membangun portfolio dan skills"
-          },
+          extracurricular: { type: "Array[String]", required: true, minItems: 2, maxItems: 3 },
           bookRecommendations: {
             type: "Array[Object]",
             required: true,
             minItems: 2,
-            maxItems: 3,
-            description: "Rekomendasi buku dengan alasan spesifik mengapa cocok untuk persona",
+            maxItems: 6,
             itemProperties: {
-              title: "String - Judul buku",
-              author: "String - Nama penulis",
-              reason: "String - Alasan mengapa buku ini cocok untuk persona"
+              title: "String",
+              author: "String",
+              reason: "String"
             }
           }
-        }
+        },
+        note: "Bagian projectIdeas telah DIHAPUS dari developmentActivities"
       }
     },
     totalFields: 16,
-    previousFields: 13,
-    addedFields: 3
+    notes: [
+      "Role model sekarang wajib menyertakan title/jabatan",
+      "Rekomendasi karir diarahkan ke pekerjaan yang umum dikenal",
+      "careerProspect menambahkan aiOvertake dengan enum yang sama"
+    ]
   }
 };
