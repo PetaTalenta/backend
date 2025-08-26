@@ -160,7 +160,7 @@ const responseSchema = {
         "Daftar rekomendasi karir sesuai persona dan kecocokan industri, beserta prospeknya",
       items: {
         type: Type.OBJECT,
-        required: ["careerName", "justification", "firstSteps", "relatedMajors", "careerProspect"],
+        required: ["careerName", "justification", "relatedMajors", "careerProspect"],
         properties: {
           careerName: {
             type: Type.STRING,
@@ -170,16 +170,7 @@ const responseSchema = {
             type: Type.STRING,
             description: "Penjelasan mengapa karir ini cocok berdasarkan data psikometrik diatas",
           },
-          firstSteps: {
-            type: Type.ARRAY,
-            minItems: 3,
-            maxItems: 3,
-            items: {
-              type: Type.STRING,
-              description: "Langkah konkret yang bisa diambil siswa SMA. HANYA berisi konten langkah, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
-            },
-            description: "Langkah konkret yang bisa diambil untuk mengeksplorasi karir ini bagi siswa SMA. Array ini hanya berisi konten langkah, bukan kata 'justification'.",
-          },
+
           relatedMajors: {
             type: Type.ARRAY,
             minItems: 4,
@@ -287,8 +278,18 @@ const responseSchema = {
       minItems: 2,
       maxItems: 3,
       items: {
-        type: Type.STRING,
-        description: "Nama role model beserta title/jabatan utamanya, format disarankan: Nama (Title/Jabatan), contoh: John Doe (CEO Perusahaan X)",
+        type: Type.OBJECT,
+        required: ["name", "title"],
+        properties: {
+          name: {
+            type: Type.STRING,
+            description: "Nama role model"
+          },
+          title: {
+            type: Type.STRING,
+            description: "Title atau jabatan utama role model"
+          }
+        }
       },
       description: "Daftar role model inspiratif (wajib sertakan title/jabatan)",
     },
@@ -556,7 +557,7 @@ Keterampilan: Keterampilan apa yang perlu dikembangkan untuk memaksimalkan kekua
 # ATURAN PENTING UNTUK OUTPUT JSON
 
 ## ATURAN ARRAY - SANGAT PENTING!
-- Semua array (insights, strengths, weaknesses, skillSuggestion, possiblePitfalls, firstSteps, relatedMajors) harus HANYA berisi konten yang diminta
+- Semua array (insights, strengths, weaknesses, skillSuggestion, possiblePitfalls, relatedMajors) harus HANYA berisi konten yang diminta
 - JANGAN PERNAH menambahkan kata "justification" atau kata meta lainnya ke dalam array
 - Setiap item dalam array harus berupa konten aktual (insight, kekuatan, kelemahan, skill, dll), bukan kata kunci atau placeholder
 - Field "justification" HANYA ada di dalam object careerRecommendation, tidak di tempat lain
@@ -571,7 +572,7 @@ Keterampilan: Keterampilan apa yang perlu dikembangkan untuk memaksimalkan kekua
 - Refer ke pengguna sebagai ANDA
 - Pastikan tidak ada data yang diulangi 2x, misal rekomendasi karir 1 dan 3 itu sama persis
 - Rekomendasi karir harus berupa pekerjaan yang umum dikenal secara luas (hindari jabatan niche atau sangat spesifik)
-- Untuk daftar role model, sertakan title/jabatan utama dalam tanda kurung setelah nama (contoh: "B.J. Habibie (Former President of Indonesia, Engineer)")
+- Untuk daftar role model, setiap item harus berupa object dengan field name dan title (contoh: {"name": "B.J. Habibie", "title": "Former President of Indonesia, Engineer"})
 - Hapus bagian ide proyek: JANGAN membuat atau menyebutkan project ideas dalam output
 `
 };

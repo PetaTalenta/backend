@@ -130,11 +130,7 @@ export const archiveServiceData = {
                   {
                     careerName: "Data Scientist",
                     justification: "Sangat cocok karena menggabungkan kekuatan analitis (OCEAN: Conscientiousness) dan minat investigatif (RIASEC: Investigative) Anda. Peran ini memungkinkan Anda memecahkan masalah kompleks menggunakan data, yang sejalan dengan arketipe 'Analytical Innovator'.",
-                    firstSteps: [
-                      "Ikuti kursus online 'Intro to Python for Data Science'",
-                      "Coba analisis dataset sederhana dari Kaggle.com",
-                      "Tonton video 'Day in the Life of a Data Scientist' di YouTube"
-                    ],
+
                     relatedMajors: ["Statistika", "Ilmu Komputer", "Matematika", "Sistem Informasi"],
                     careerProspect: {
                       jobAvailability: "high",
@@ -148,11 +144,7 @@ export const archiveServiceData = {
                   {
                     careerName: "Peneliti",
                     justification: "Minat investigatif yang tinggi dan keterbukaan terhadap pengalaman baru membuat Anda cocok untuk dunia penelitian. Kemampuan analitis mendalam mendukung proses riset yang sistematis.",
-                    firstSteps: [
-                      "Bergabung dengan program penelitian siswa di sekolah",
-                      "Baca jurnal ilmiah populer seperti Scientific American",
-                      "Ikuti webinar tentang metodologi penelitian"
-                    ],
+
                     relatedMajors: ["Psikologi", "Biologi", "Fisika", "Kimia", "Sosiologi"],
                     careerProspect: {
                       jobAvailability: "moderate",
@@ -166,11 +158,7 @@ export const archiveServiceData = {
                   {
                     careerName: "Pengembang Software",
                     justification: "Kombinasi kreativitas dan kemampuan analitis yang kuat sangat sesuai untuk pengembangan software. Keterbukaan terhadap teknologi baru mendukung adaptasi di industri yang dinamis.",
-                    firstSteps: [
-                      "Mulai belajar bahasa pemrograman Python atau JavaScript",
-                      "Buat proyek sederhana seperti kalkulator atau to-do list",
-                      "Bergabung dengan komunitas programmer lokal atau online"
-                    ],
+
                     relatedMajors: ["Teknik Informatika", "Ilmu Komputer", "Sistem Informasi", "Teknik Komputer"],
                     careerProspect: {
                       jobAvailability: "super high",
@@ -184,11 +172,7 @@ export const archiveServiceData = {
                   {
                     careerName: "Product Manager",
                     justification: "Menggabungkan kemampuan analitis, komunikasi, dan kepemimpinan untuk memimpin pengembangan produk yang berdampak. Cocok bagi profil dengan kombinasi Investigative-Enterprising dan kreativitas tinggi.",
-                    firstSteps: [
-                      "Pelajari dasar-dasar manajemen produk (PM 101) melalui kursus online",
-                      "Buat studi kasus produk: analisis problem, solusi, dan metrik",
-                      "Ikuti komunitas Product Management lokal/online"
-                    ],
+
                     relatedMajors: ["Manajemen Bisnis", "Sistem Informasi", "Ilmu Komputer", "Teknik Industri"],
                     careerProspect: {
                       jobAvailability: "high",
@@ -224,9 +208,9 @@ export const archiveServiceData = {
                 riskTolerance: "moderate",
                 workEnvironment: "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
                 roleModel: [
-                  "Marie Curie (Physicist/Chemist, Nobel Laureate)",
-                  "Albert Einstein (Theoretical Physicist, Nobel Laureate)",
-                  "B.J. Habibie (Former President of Indonesia, Engineer)"
+                  { name: "Marie Curie", title: "Physicist/Chemist, Nobel Laureate" },
+                  { name: "Albert Einstein", title: "Theoretical Physicist, Nobel Laureate" },
+                  { name: "B.J. Habibie", title: "Former President of Indonesia, Engineer" }
                 ],
                 developmentActivities: {
                   extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],
@@ -450,9 +434,9 @@ export const archiveServiceData = {
             riskTolerance: "moderate",
             workEnvironment: "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
             roleModel: [
-              "Marie Curie (Physicist/Chemist, Nobel Laureate)",
-              "Albert Einstein (Theoretical Physicist, Nobel Laureate)",
-              "B.J. Habibie (Former President of Indonesia, Engineer)"
+              { name: "Marie Curie", title: "Physicist/Chemist, Nobel Laureate" },
+              { name: "Albert Einstein", title: "Theoretical Physicist, Nobel Laureate" },
+              { name: "B.J. Habibie", title: "Former President of Indonesia, Engineer" }
             ],
             developmentActivities: {
               extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],
@@ -1034,7 +1018,6 @@ export const archiveServiceData = {
         itemProperties: {
           careerName: { type: "String", required: true, note: "Gunakan pekerjaan umum yang dikenal luas" },
           justification: { type: "String", required: true },
-          firstSteps: { type: "Array[String]", required: true, length: 3 },
           relatedMajors: { type: "Array[String]", required: true, minItems: 4, maxItems: 5, note: "Hanya nama jurusan" },
           careerProspect: {
             type: "Object", required: true, properties: {
@@ -1053,7 +1036,7 @@ export const archiveServiceData = {
       possiblePitfalls: { type: "Array[String]", required: true, minItems: 4, maxItems: 5 },
       riskTolerance: { type: "String", required: true, enum: ["very high", "high", "moderate", "low", "very low"] },
       workEnvironment: { type: "String", required: true },
-      roleModel: { type: "Array[String]", required: true, minItems: 2, maxItems: 3, format: "Nama (Title/Jabatan)" },
+      roleModel: { type: "Array[Object]", required: true, minItems: 2, maxItems: 3, itemProperties: { name: "String", title: "String" } },
       developmentActivities: {
         type: "Object",
         required: true,

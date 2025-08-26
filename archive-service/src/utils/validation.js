@@ -87,14 +87,7 @@ const careerRecommendationSchema = Joi.object({
       'string.max': 'Career justification must be at most 1000 characters',
       'any.required': 'Career justification is required'
     }),
-  firstSteps: Joi.array().items(
-    Joi.string().trim().min(1).max(300)
-  ).min(2).max(4).required()
-    .messages({
-      'array.min': 'Must have at least 2 first steps',
-      'array.max': 'Must have at most 4 first steps',
-      'any.required': 'First steps are required'
-    }),
+
   relatedMajors: Joi.array().items(
     Joi.string().trim().min(1).max(100)
   ).min(2).max(5).required()
@@ -236,7 +229,10 @@ const personaProfileSchema = Joi.object({
       'any.required': 'Work environment is required'
     }),
   roleModel: Joi.array().items(
-    Joi.string().trim().min(1).max(100)
+    Joi.object({
+      name: Joi.string().trim().min(1).max(100).required(),
+      title: Joi.string().trim().min(1).max(150).required()
+    })
   ).min(2).max(3).required()
     .messages({
       'array.min': 'Must have at least 2 role models',

@@ -38,8 +38,6 @@ const personaProfileSchema = Joi.object({
         .description('Nama karir atau profesi yang direkomendasikan'),
       justification: Joi.string().required()
         .description('Penjelasan mengapa karir ini cocok berdasarkan data psikometrik'),
-      firstSteps: Joi.array().items(Joi.string()).min(2).max(4).required()
-        .description('Langkah konkret yang bisa diambil untuk mengeksplorasi karir ini'),
       relatedMajors: Joi.array().items(Joi.string()).min(2).max(5).required()
         .description('Jurusan kuliah yang relevan dengan karir ini'),
       careerProspect: Joi.object({
@@ -75,8 +73,13 @@ const personaProfileSchema = Joi.object({
   workEnvironment: Joi.string().required()
     .description('Deskripsi lingkungan kerja yang ideal untuk persona'),
 
-  roleModel: Joi.array().items(Joi.string()).min(2).max(3).required()
-    .description('Daftar role model yang relevan dan inspiratif, sertakan title/jabatan utama, contoh: "John Doe (CEO Perusahaan X)"'),
+  roleModel: Joi.array().items(
+    Joi.object({
+      name: Joi.string().required().description('Nama role model'),
+      title: Joi.string().required().description('Title atau jabatan utama role model')
+    })
+  ).min(2).max(3).required()
+    .description('Daftar role model yang relevan dan inspiratif, sebagai objek {name, title}'),
 
   developmentActivities: Joi.object({
     extracurricular: Joi.array().items(Joi.string()).min(2).max(4).required()
@@ -125,11 +128,6 @@ const personaProfileExample = {
     {
       careerName: "Data Scientist",
       justification: "Sangat cocok karena menggabungkan kekuatan analitis (OCEAN: Conscientiousness) dan minat investigatif (RIASEC: Investigative) Anda. Peran ini memungkinkan Anda memecahkan masalah kompleks menggunakan data, yang sejalan dengan arketipe 'Analytical Innovator'.",
-      firstSteps: [
-        "Ikuti kursus online 'Intro to Python for Data Science'",
-        "Coba analisis dataset sederhana dari Kaggle.com",
-        "Tonton video 'Day in the Life of a Data Scientist' di YouTube"
-      ],
       relatedMajors: ["Statistika", "Ilmu Komputer", "Matematika", "Sistem Informasi"],
       careerProspect: {
         jobAvailability: "high",
@@ -143,11 +141,6 @@ const personaProfileExample = {
     {
       careerName: "Peneliti",
       justification: "Minat investigatif yang tinggi dan keterbukaan terhadap pengalaman baru membuat Anda cocok untuk dunia penelitian. Kemampuan analitis mendalam mendukung proses riset yang sistematis.",
-      firstSteps: [
-        "Bergabung dengan program penelitian siswa di sekolah",
-        "Baca jurnal ilmiah populer seperti Scientific American",
-        "Ikuti webinar tentang metodologi penelitian"
-      ],
       relatedMajors: ["Psikologi", "Biologi", "Fisika", "Kimia", "Sosiologi"],
       careerProspect: {
         jobAvailability: "moderate",
@@ -161,11 +154,6 @@ const personaProfileExample = {
     {
       careerName: "Pengembang Software",
       justification: "Kombinasi kreativitas dan kemampuan analitis yang kuat sangat sesuai untuk pengembangan software. Keterbukaan terhadap teknologi baru mendukung adaptasi di industri yang dinamis.",
-      firstSteps: [
-        "Mulai belajar bahasa pemrograman Python atau JavaScript",
-        "Buat proyek sederhana seperti kalkulator atau to-do list",
-        "Bergabung dengan komunitas programmer lokal atau online"
-      ],
       relatedMajors: ["Teknik Informatika", "Ilmu Komputer", "Sistem Informasi", "Teknik Komputer"],
       careerProspect: {
         jobAvailability: "super high",
@@ -199,9 +187,9 @@ const personaProfileExample = {
   riskTolerance: "moderate",
   workEnvironment: "Lingkungan kerja yang memberikan otonomi intelektual, menghargai inovasi, dan menyediakan tantangan kognitif yang berkelanjutan. Anda berkembang di tempat yang terstruktur namun fleksibel.",
   roleModel: [
-    "Marie Curie (Physicist/Chemist, Nobel Laureate)",
-    "Albert Einstein (Theoretical Physicist)",
-    "B.J. Habibie (Former President of Indonesia, Engineer)"
+    { name: "Marie Curie", title: "Physicist/Chemist, Nobel Laureate" },
+    { name: "Albert Einstein", title: "Theoretical Physicist" },
+    { name: "B.J. Habibie", title: "Former President of Indonesia, Engineer" }
   ],
   developmentActivities: {
     extracurricular: ["Klub Robotik", "Olimpiade Sains Nasional (OSN)", "Klub Debat Bahasa Inggris"],

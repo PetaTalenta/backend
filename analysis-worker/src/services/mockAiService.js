@@ -246,6 +246,7 @@ const generateCareerRecommendations = (riasec, ocean) => {
     conventional: ['Akuntansi', 'Sistem Informasi', 'Administrasi Bisnis', 'Keuangan', 'Perpajakan']
   };
 
+  // Deprecated: firstSteps removed from schema
   const stepMap = {
     realistic: [
       'Ikuti kursus dasar pemrograman (Python/JavaScript)',
@@ -305,7 +306,6 @@ const generateCareerRecommendations = (riasec, ocean) => {
     list.push({
       careerName: name,
       justification: buildJustification(interest, name),
-      firstSteps: stepMap[interest].slice(0, 3),
       relatedMajors: pickMajors(interest),
       careerProspect: generateCareerProspect(name, riasec, ocean)
     });
@@ -507,12 +507,36 @@ const generateWorkEnvironment = (riasec, ocean) => {
  */
 const generateRoleModels = (topInterest, secondInterest) => {
   const roleModelMap = {
-    'realistic': ['Elon Musk (CEO Tesla/SpaceX)', 'Steve Wozniak (Co-founder Apple)', 'James Dyson (Founder Dyson)'],
-    'investigative': ['Marie Curie (Physicist/Chemist, Nobel Laureate)', 'Stephen Hawking (Theoretical Physicist)', 'Jane Goodall (Primatologist)'],
-    'artistic': ['Steve Jobs (Co-founder Apple)', 'Jony Ive (Former Chief Design Officer, Apple)', 'David Kelley (Founder IDEO)'],
-    'social': ['Oprah Winfrey (Media Executive/Philanthropist)', 'Nelson Mandela (Former President of South Africa)', 'Mother Teresa (Humanitarian)'],
-    'enterprising': ['Richard Branson (Founder Virgin Group)', 'Jack Ma (Founder Alibaba)', 'Sara Blakely (Founder Spanx)'],
-    'conventional': ['Warren Buffett (CEO Berkshire Hathaway)', 'Tim Cook (CEO Apple)', 'Sheryl Sandberg (Former COO Meta)']
+    'realistic': [
+      { name: 'Elon Musk', title: 'CEO Tesla/SpaceX' },
+      { name: 'Steve Wozniak', title: 'Co-founder Apple' },
+      { name: 'James Dyson', title: 'Founder Dyson' }
+    ],
+    'investigative': [
+      { name: 'Marie Curie', title: 'Physicist/Chemist, Nobel Laureate' },
+      { name: 'Stephen Hawking', title: 'Theoretical Physicist' },
+      { name: 'Jane Goodall', title: 'Primatologist' }
+    ],
+    'artistic': [
+      { name: 'Steve Jobs', title: 'Co-founder Apple' },
+      { name: 'Jony Ive', title: 'Former Chief Design Officer, Apple' },
+      { name: 'David Kelley', title: 'Founder IDEO' }
+    ],
+    'social': [
+      { name: 'Oprah Winfrey', title: 'Media Executive/Philanthropist' },
+      { name: 'Nelson Mandela', title: 'Former President of South Africa' },
+      { name: 'Mother Teresa', title: 'Humanitarian' }
+    ],
+    'enterprising': [
+      { name: 'Richard Branson', title: 'Founder Virgin Group' },
+      { name: 'Jack Ma', title: 'Founder Alibaba' },
+      { name: 'Sara Blakely', title: 'Founder Spanx' }
+    ],
+    'conventional': [
+      { name: 'Warren Buffett', title: 'CEO Berkshire Hathaway' },
+      { name: 'Tim Cook', title: 'CEO Apple' },
+      { name: 'Sheryl Sandberg', title: 'Former COO Meta' }
+    ]
   };
 
   const roleModels = [];
@@ -526,17 +550,38 @@ const generateRoleModels = (topInterest, secondInterest) => {
   }
 
   // Add some universal role models with titles
-  const universalModels = ['Bill Gates (Co-founder Microsoft)', 'Michelle Obama (Former First Lady, Lawyer)', 'B.J. Habibie (Former President of Indonesia, Engineer)', 'Susi Pudjiastuti (Former Minister of Marine Affairs and Fisheries)', 'Nadiem Makarim (Minister of Education, Founder Gojek)'];
+  const universalModels = [
+    { name: 'Bill Gates', title: 'Co-founder Microsoft' },
+    { name: 'Michelle Obama', title: 'Former First Lady, Lawyer' },
+    { name: 'B.J. Habibie', title: 'Former President of Indonesia, Engineer' },
+    { name: 'Susi Pudjiastuti', title: 'Former Minister of Marine Affairs and Fisheries' },
+    { name: 'Nadiem Makarim', title: 'Minister of Education, Founder Gojek' }
+  ];
   roleModels.push(...universalModels);
 
-  // Remove duplicates
-  const uniqueRoleModels = [...new Set(roleModels)];
+  // Remove duplicates by name+title
+  const uniqueRoleModels = [];
+  const seen = new Set();
+  for (const rm of roleModels) {
+    const key = `${rm.name}|${rm.title}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueRoleModels.push(rm);
+    }
+  }
 
   // Ensure minimum 2 role models (matching schema)
   if (uniqueRoleModels.length < 2) {
-    const additionalModels = ['Albert Einstein (Physicist)', 'Oprah Winfrey (Media Executive/Philanthropist)', 'Steve Jobs (Co-founder Apple)', 'Marie Curie (Physicist/Chemist, Nobel Laureate)'];
+    const additionalModels = [
+      { name: 'Albert Einstein', title: 'Theoretical Physicist' },
+      { name: 'Oprah Winfrey', title: 'Media Executive/Philanthropist' },
+      { name: 'Steve Jobs', title: 'Co-founder Apple' },
+      { name: 'Marie Curie', title: 'Physicist/Chemist, Nobel Laureate' }
+    ];
     for (let i = 0; i < additionalModels.length && uniqueRoleModels.length < 2; i++) {
-      if (!uniqueRoleModels.includes(additionalModels[i])) {
+      const key = `${additionalModels[i].name}|${additionalModels[i].title}`;
+      if (!seen.has(key)) {
+        seen.add(key);
         uniqueRoleModels.push(additionalModels[i]);
       }
     }
