@@ -69,14 +69,26 @@ const ERROR_TYPES = {
     message: 'Error calling Notification service',
     isRetryable: true
   },
-  
+
+  // Job and rate limit errors
+  DUPLICATE_JOB_ERROR: {
+    code: 'DUPLICATE_JOB_ERROR',
+    message: 'Duplicate job detected',
+    isRetryable: false
+  },
+  RATE_LIMIT_ERROR: {
+    code: 'RATE_LIMIT_ERROR',
+    message: 'Rate limit exceeded',
+    isRetryable: true
+  },
+
   // Validation errors
   VALIDATION_ERROR: {
     code: 'VALIDATION_ERROR',
     message: 'Validation error',
     isRetryable: false
   },
-  
+
   // General errors
   TIMEOUT_ERROR: {
     code: 'TIMEOUT_ERROR',
