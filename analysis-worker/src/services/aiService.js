@@ -310,7 +310,7 @@ const responseSchema = {
         },
         bookRecommendations: {
           type: Type.ARRAY,
-          minItems: 2,
+          minItems: 6,
           maxItems: 6,
           items: {
             type: Type.OBJECT,
@@ -330,7 +330,7 @@ const responseSchema = {
               },
             },
           },
-          description: "Rekomendasi buku dengan alasan spesifik",
+          description: "Rekomendasi buku dengan alasan spesifik (wajib 6 item)",
         },
       },
       description: "Aktivitas pengembangan yang disesuaikan dengan konteks siswa SMA",
