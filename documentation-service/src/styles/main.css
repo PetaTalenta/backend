@@ -1218,3 +1218,214 @@ code[class*="language-"] {
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
+
+/* Sharing Documentation Styles */
+.sharing-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.sharing-section h3 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.sharing-section h4 {
+  color: var(--text-primary);
+  margin: 1.5rem 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.sharing-section h5 {
+  color: var(--text-secondary);
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.sharing-section p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.sharing-section ul {
+  margin: 0.5rem 0 1rem 1.5rem;
+  padding-left: 0;
+}
+
+.sharing-section li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.sharing-section li strong {
+  color: var(--text-primary);
+}
+
+/* Examples section */
+.examples-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--surface-dark);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+}
+
+.examples-section .example {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--background);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.examples-section .example:last-child {
+  margin-bottom: 0;
+}
+
+.examples-section h5 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Use cases */
+.use-cases {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--surface-dark);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+}
+
+.use-cases ul {
+  margin-top: 0.5rem;
+}
+
+.use-cases li {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background: var(--background);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--success-color);
+}
+
+/* Important notes */
+.important-notes {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--surface-dark);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+}
+
+.important-notes .note {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--background);
+  border-radius: var(--radius);
+  border: 1px solid var(--warning-color);
+  border-left: 4px solid var(--warning-color);
+}
+
+.important-notes .note:last-child {
+  margin-bottom: 0;
+}
+
+.important-notes h4 {
+  color: var(--warning-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Best practices */
+.best-practices {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--surface-dark);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+}
+
+.best-practices .practice {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--background);
+  border-radius: var(--radius);
+  border: 1px solid var(--success-color);
+  border-left: 4px solid var(--success-color);
+}
+
+.best-practices .practice:last-child {
+  margin-bottom: 0;
+}
+
+.best-practices h5 {
+  color: var(--success-color);
+  margin-bottom: 0.5rem;
+}
+
+/* API endpoint styling for sharing docs */
+.sharing-section .endpoint {
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sharing-section .endpoint-header {
+  background: var(--surface-dark);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sharing-section .endpoint-content {
+  padding: 1rem;
+}
+
+.sharing-section .endpoint-content h5 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sharing-section .endpoint-content pre {
+  margin: 0.5rem 0 1rem 0;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  overflow-x: auto;
+}
+
+/* Responsive adjustments for sharing docs */
+@media (max-width: 768px) {
+  .sharing-section {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .sharing-section .endpoint-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .examples-section .example,
+  .use-cases li,
+  .important-notes .note,
+  .best-practices .practice {
+    padding: 0.75rem;
+  }
+}

@@ -91,11 +91,11 @@ describe('AI Service Integration Tests', () => {
   const mockAssessmentDataWithIndustryScore = {
     ...mockAssessmentData,
     industryScore: {
-      teknologi: 70,
-      kesehatan: 80,
-      keuangan: 60,
-      pendidikan: 75,
-      rekayasa: 85
+      teknologi: 24,
+      kesehatan: 24,
+      keuangan: 24,
+      pendidikan: 24,
+      rekayasa: 24
     }
   };
 

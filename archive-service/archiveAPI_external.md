@@ -77,6 +77,9 @@ Mendapatkan detail hasil analisis berdasarkan ID.
 **Parameters:**
 - `id` (UUID) - ID hasil analisis
 
+**Authentication:**
+- **Not Required** - All analysis results are now always public and can be accessed without authentication
+
 **Response:**
 ```json
 {
@@ -89,6 +92,7 @@ Mendapatkan detail hasil analisis berdasarkan ID.
     "status": "completed",
     "error_message": null,
     "assessment_name": "AI-Driven Talent Mapping",
+    "is_public": true,
     "created_at": "timestamp",
     "updated_at": "timestamp"
   }
@@ -100,6 +104,44 @@ Mendapatkan detail hasil analisis berdasarkan ID.
 - `persona_profile`: Hasil analisis dan profil persona yang dihasilkan - lihat detail struktur di bawah
 - `status`: Status hasil analisis ('completed', 'processing', 'failed')
 - `error_message`: Pesan error jika status 'failed', null jika berhasil
+- `is_public`: Status public hasil analisis (selalu true - semua hasil analisis sekarang selalu public)
+
+### 3. Share Analysis Result
+**DISABLED** - All analysis results are now always public by default.
+
+<!-- Previous implementation:
+**PATCH** `/api/archive/results/:id/public`
+
+Mengubah status public/private dari hasil analisis untuk memungkinkan sharing.
+
+**Parameters:**
+- `id` (UUID) - ID hasil analisis
+
+**Request Body:**
+```json
+{
+  "is_public": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Analysis result made public successfully",
+  "data": {
+    "id": "uuid",
+    "is_public": true
+  }
+}
+```
+
+**Notes:**
+- Hanya pemilik hasil analisis yang dapat mengubah status public/private
+- Jika `is_public` = `true`, hasil analisis dapat diakses oleh siapa saja tanpa autentikasi
+- Jika `is_public` = `false`, hanya pemilik yang dapat mengakses hasil analisis
+- Status public dapat diubah kapan saja oleh pemilik
+-->
 
 ---
 

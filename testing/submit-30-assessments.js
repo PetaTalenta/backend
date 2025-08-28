@@ -9,7 +9,7 @@
  */
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000/api';
-const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'internal_service_secret_key_change_in_production';
+const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'f8c1af59d85da6581036e18b4b9e0ec35d1fdefe1a93837d5b4746c9984ea4c1';
 
 async function jsonFetch(url, opts = {}) {
   const res = await fetch(url, {
@@ -88,11 +88,12 @@ function generateAssessment(seed = 0) {
 }
 
 async function registerUser() {
-  const email = `loadtest_${Date.now()}_${Math.floor(Math.random()*100000)}@example.com`;
+  const username = `loadtest${Date.now()}${Math.floor(Math.random()*100000)}`;
+  const email = `${username}@example.com`;
   const password = 'AtmaTest123!'; // >=8 chars, letters+numbers
   const body = await jsonFetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, email, password }),
   });
   const { token, user } = body.data;
   return { token, user };

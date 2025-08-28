@@ -15,9 +15,7 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./migrations/production_database_init_fixed.sql:/docker-entrypoint-initdb.d/01-current_database_dump.sql
-      - ./migrations/current_database_dump_fixed.sql:/docker-entrypoint-initdb.d/02-production_database_init.sql
-      - ./migrations/001_create_chat_schema.sql:/docker-entrypoint-initdb.d/03-create_chat_schema.sql
+      - ./database_backup.sql:/docker-entrypoint-initdb.d/01-database_backup.sql
     ports:
       - "5432:5432"
     networks:
@@ -389,7 +387,7 @@ services:
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
-      USE_MOCK_MODEL: "false"
+      USE_MOCK_MODEL: "true"
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
@@ -431,7 +429,7 @@ services:
     volumes:
       - ./analysis-worker/logs:/app/logs
     deploy:
-      replicas: 10
+      replicas: 3
 
 
   # Admin Service

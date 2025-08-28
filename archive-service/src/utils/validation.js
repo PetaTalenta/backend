@@ -363,6 +363,15 @@ const listJobsQuerySchema = Joi.object({
   order: Joi.string().valid('asc', 'desc', 'ASC', 'DESC').default('desc')
 });
 
+// Toggle public status schema
+const togglePublicStatusSchema = Joi.object({
+  is_public: Joi.boolean().required()
+    .messages({
+      'boolean.base': 'is_public must be a boolean value',
+      'any.required': 'is_public is required'
+    })
+});
+
 module.exports = {
   createAnalysisResultSchema,
   updateAnalysisResultSchema,
@@ -374,5 +383,6 @@ module.exports = {
   listJobsQuerySchema,
   assessmentDataSchema,
   personaProfileSchema,
-  assessmentNameSchema
+  assessmentNameSchema,
+  togglePublicStatusSchema
 };

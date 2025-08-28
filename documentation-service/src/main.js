@@ -11,6 +11,7 @@ import 'prismjs/components/prism-http';
 import { authServiceData } from './data/auth-service.js';
 import { assessmentServiceData } from './data/assessment-service.js';
 import { archiveServiceData } from './data/archive-service.js';
+import { archiveServiceSharingDocs } from './data/archive-service-sharing-docs.js';
 import { chatbotServiceData } from './data/chatbot-service.js';
 import { notificationServiceData } from './data/notification-service.js';
 import { globalEndpointsData } from './data/global-endpoints.js';
@@ -22,6 +23,7 @@ class DocumentationApp {
       'auth-service': authServiceData,
       'assessment-service': assessmentServiceData,
       'archive-service': archiveServiceData,
+      'archive-service-sharing': archiveServiceSharingDocs,
       'chatbot-service': chatbotServiceData,
       'notification-service': notificationServiceData
     };
@@ -144,6 +146,11 @@ class DocumentationApp {
     const section = document.createElement('section');
     section.id = serviceKey;
     section.className = 'section service-section';
+
+    // Handle sharing docs format
+    if (serviceData.sections) {
+      return this.createSharingDocsSection(serviceKey, serviceData);
+    }
 
       // Start with simple content first
       const title = document.createElement('h2');
@@ -636,6 +643,219 @@ class DocumentationApp {
 
     troubleshootingSection.innerHTML = troubleshootingHTML;
     section.appendChild(troubleshootingSection);
+  }
+
+  createSharingDocsSection(serviceKey, serviceData) {
+    const section = document.createElement('section');
+    section.id = serviceKey;
+    section.className = 'section service-section';
+
+    // Title
+    const title = document.createElement('h2');
+    title.textContent = serviceData.title || 'Sharing Documentation';
+    section.appendChild(title);
+
+    // Render each section
+    serviceData.sections.forEach(sectionData => {
+      const subsection = document.createElement('div');
+      subsection.className = 'sharing-section';
+
+      // Section title with emoji
+      const sectionTitle = document.createElement('h3');
+      sectionTitle.innerHTML = `${sectionData.emoji || '📄'} ${sectionData.title}`;
+      subsection.appendChild(sectionTitle);
+
+      // Section content
+      if (sectionData.content) {
+        const content = document.createElement('p');
+        content.textContent = sectionData.content;
+        subsection.appendChild(content);
+      }
+
+      // Subsections
+      if (sectionData.subsections) {
+        sectionData.subsections.forEach(sub => {
+          const subTitle = document.createElement('h4');
+          subTitle.textContent = sub.title;
+          subsection.appendChild(subTitle);
+
+          if (sub.content) {
+            const subContent = document.createElement('ul');
+            sub.content.forEach(item => {
+              const li = document.createElement('li');
+              li.textContent = item;
+              subContent.appendChild(li);
+            });
+            subsection.appendChild(subContent);
+          }
+        });
+      }
+
+      // API Endpoints
+      if (sectionData.subsections && sectionData.subsections.some(s => s.method)) {
+        const endpointsDiv = document.createElement('div');
+        endpointsDiv.className = 'endpoints-container';
+
+        sectionData.subsections.forEach(endpoint => {
+          if (endpoint.method) {
+            const endpointDiv = document.createElement('div');
+            endpointDiv.className = 'endpoint';
+
+            const header = document.createElement('div');
+            header.className = 'endpoint-header';
+            header.innerHTML = `
+              <span class="method method-${endpoint.method.toLowerCase()}">${endpoint.method}</span>
+              <span class="path">${endpoint.path}</span>
+            `;
+            endpointDiv.appendChild(header);
+
+            const content = document.createElement('div');
+            content.className = 'endpoint-content';
+
+            const desc = document.createElement('p');
+            desc.textContent = endpoint.description;
+            content.appendChild(desc);
+
+            // Request body
+            if (endpoint.requestBody) {
+              const bodyDiv = document.createElement('div');
+              bodyDiv.innerHTML = `
+                <h5>Request Body:</h5>
+                <pre><code class="language-json">${JSON.stringify(endpoint.requestBody, null, 2)}</code></pre>
+              `;
+              content.appendChild(bodyDiv);
+            }
+
+            // Response
+            if (endpoint.response) {
+              const responseDiv = document.createElement('div');
+              responseDiv.innerHTML = `
+                <h5>Response:</h5>
+                <pre><code class="language-json">${JSON.stringify(endpoint.response, null, 2)}</code></pre>
+              `;
+              content.appendChild(responseDiv);
+            }
+
+            endpointDiv.appendChild(content);
+            endpointsDiv.appendChild(endpointDiv);
+          }
+        });
+
+        subsection.appendChild(endpointsDiv);
+      }
+
+      // Examples
+      if (sectionData.examples) {
+        const examplesDiv = document.createElement('div');
+        examplesDiv.className = 'examples-section';
+
+        const examplesTitle = document.createElement('h4');
+        examplesTitle.textContent = 'Usage Examples';
+        examplesDiv.appendChild(examplesTitle);
+
+        sectionData.examples.forEach(example => {
+          const exampleDiv = document.createElement('div');
+          exampleDiv.className = 'example';
+
+          const exampleTitle = document.createElement('h5');
+          exampleTitle.textContent = example.title;
+          exampleDiv.appendChild(exampleTitle);
+
+          const codeBlock = document.createElement('pre');
+          codeBlock.innerHTML = `<code class="language-bash">${example.code}</code>`;
+          exampleDiv.appendChild(codeBlock);
+
+          examplesDiv.appendChild(exampleDiv);
+        });
+
+        subsection.appendChild(examplesDiv);
+      }
+
+      // Cases
+      if (sectionData.cases) {
+        const casesDiv = document.createElement('div');
+        casesDiv.className = 'use-cases';
+
+        const casesTitle = document.createElement('h4');
+        casesTitle.textContent = 'Use Cases';
+        casesDiv.appendChild(casesTitle);
+
+        const casesList = document.createElement('ul');
+        sectionData.cases.forEach(caseItem => {
+          const li = document.createElement('li');
+          li.innerHTML = `<strong>${caseItem.title}:</strong> ${caseItem.description}`;
+          casesList.appendChild(li);
+        });
+        casesDiv.appendChild(casesList);
+        subsection.appendChild(casesDiv);
+      }
+
+      // Notes
+      if (sectionData.notes) {
+        const notesDiv = document.createElement('div');
+        notesDiv.className = 'important-notes';
+
+        sectionData.notes.forEach(note => {
+          const noteDiv = document.createElement('div');
+          noteDiv.className = 'note';
+
+          const noteTitle = document.createElement('h4');
+          noteTitle.textContent = note.title;
+          noteDiv.appendChild(noteTitle);
+
+          if (note.items) {
+            const itemsList = document.createElement('ul');
+            note.items.forEach(item => {
+              const li = document.createElement('li');
+              li.textContent = item;
+              itemsList.appendChild(li);
+            });
+            noteDiv.appendChild(itemsList);
+          }
+
+          notesDiv.appendChild(noteDiv);
+        });
+
+        subsection.appendChild(notesDiv);
+      }
+
+      // Practices
+      if (sectionData.practices) {
+        const practicesDiv = document.createElement('div');
+        practicesDiv.className = 'best-practices';
+
+        const practicesTitle = document.createElement('h4');
+        practicesTitle.textContent = 'Best Practices';
+        practicesDiv.appendChild(practicesTitle);
+
+        sectionData.practices.forEach(practice => {
+          const practiceDiv = document.createElement('div');
+          practiceDiv.className = 'practice';
+
+          const practiceTitle = document.createElement('h5');
+          practiceTitle.textContent = practice.title;
+          practiceDiv.appendChild(practiceTitle);
+
+          if (practice.items) {
+            const itemsList = document.createElement('ul');
+            practice.items.forEach(item => {
+              const li = document.createElement('li');
+              li.textContent = item;
+              itemsList.appendChild(li);
+            });
+            practiceDiv.appendChild(itemsList);
+          }
+
+          practicesDiv.appendChild(practiceDiv);
+        });
+
+        subsection.appendChild(practicesDiv);
+      }
+
+      section.appendChild(subsection);
+    });
+
+    return section;
   }
 }
 

@@ -1,6 +1,39 @@
 export const archiveServiceData = {
   name: "Archive Service",
-  description: "Archive Service menyediakan API untuk mengelola hasil analisis assessment dan job tracking. API ini diakses melalui API Gateway pada port 3000 dengan prefix /api/archive/.",
+  description: "Archive Service menyediakan API untuk mengelola hasil analisis assessment dan job tracking. API ini diakses melalui API Gateway pada port 3000 dengan prefix /api/archive/. Fitur utama termasuk manajemen hasil analisis, tracking job processing, dan sharing hasil analisis secara publik.",
+  features: [
+    "Manajemen hasil analisis assessment",
+    "Tracking status job processing",
+    "Public sharing hasil analisis",
+    "Access control berbasis ownership",
+    "Pagination dan filtering",
+    "Real-time job monitoring"
+  ],
+  useCases: [
+    "Menyimpan dan mengelola hasil assessment user",
+    "Tracking progress analisis AI",
+    "Sharing hasil assessment ke HR/recruiter",
+    "Portfolio online untuk kandidat",
+    "Konsultasi karir dengan mentor",
+    "Studi penelitian dan analisis data"
+  ],
+  sharingFeature: {
+    title: "Public Result Sharing",
+    description: "Fitur untuk membagikan hasil analisis assessment secara publik tanpa memerlukan autentikasi.",
+    benefits: [
+      "Mudah berbagi hasil assessment ke pihak ketiga",
+      "Portfolio online untuk pencari kerja",
+      "Konsultasi karir yang lebih efektif",
+      "Kolaborasi dalam penelitian",
+      "Transparansi dalam proses rekrutmen"
+    ],
+    security: [
+      "Hanya pemilik yang dapat mengubah status public/private",
+      "Hasil private tetap terlindungi",
+      "Audit trail untuk setiap perubahan",
+      "Access control berbasis ownership"
+    ]
+  },
   baseUrl: "http://localhost:3000/api/archive",
   version: "1.0.0",
   port: "3002",
@@ -250,8 +283,8 @@ export const archiveServiceData = {
       method: "GET",
       path: "/api/archive/results/:id",
       title: "Get Specific Result",
-      description: "Mendapatkan detail hasil analisis berdasarkan ID.",
-      authentication: "Bearer Token Required",
+      description: "Mendapatkan detail hasil analisis berdasarkan ID. Mendukung akses public untuk hasil yang dibagikan.",
+      authentication: "Optional (Required for private results, not required for public results)",
       rateLimit: "5000 requests per 15 minutes",
       parameters: [
         {
@@ -261,6 +294,15 @@ export const archiveServiceData = {
           description: "ID hasil analisis"
         }
       ],
+      // Field Descriptions:
+      // - assessment_data: Object - Data assessment lengkap (RIASEC, OCEAN, VIA-IS)
+      // - persona_profile: Object - Hasil analisis dan profil persona
+      // - status: String - Status hasil analisis ('completed', 'processing', 'failed')
+      // - error_message: String|null - Pesan error jika status 'failed'
+      // - assessment_name: String - Nama assessment
+      // - is_public: Boolean - Status public hasil analisis (true = dapat diakses publik)
+      // - created_at: String - Timestamp pembuatan
+      // - updated_at: String - Timestamp update terakhir
       response: {
         success: true,
         data: {
@@ -457,12 +499,16 @@ export const archiveServiceData = {
           status: "completed",
           error_message: null,
           assessment_name: "AI-Driven Talent Mapping",
+          is_public: false,
           created_at: "timestamp",
           updated_at: "timestamp"
         }
       },
       example: `curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# For public results (no authentication required):
+curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
     },
     {
       method: "PUT",
@@ -496,6 +542,37 @@ export const archiveServiceData = {
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"status": "completed", "assessment_data": {...}, "persona_profile": {...}}'`
+    },
+    {
+      method: "PATCH",
+      path: "/api/archive/results/:id/public",
+      title: "Toggle Public Status",
+      description: "Mengubah status public/private dari hasil analisis untuk memungkinkan sharing.",
+      authentication: "Bearer Token Required",
+      rateLimit: "5000 requests per 15 minutes",
+      parameters: [
+        {
+          name: "id",
+          type: "UUID",
+          required: true,
+          description: "ID hasil analisis"
+        }
+      ],
+      requestBody: {
+        is_public: "Boolean - Status public hasil analisis (true = public, false = private)"
+      },
+      response: {
+        success: true,
+        message: "Analysis result made public/private successfully",
+        data: {
+          id: "uuid",
+          is_public: true
+        }
+      },
+      example: `curl -X PATCH http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000/public \\
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{"is_public": true}'`
     },
     {
       method: "GET",

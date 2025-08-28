@@ -569,8 +569,15 @@ const getResultById = async (resultId, userId = null, isInternalService = false)
     }
     
     // Check access permissions (skip for internal services)
-    if (!isInternalService && userId && result.user_id !== userId) {
-      throw new ForbiddenError('You do not have access to this analysis result');
+    // NOTE: All results are now always public - removed private access control
+    if (!isInternalService) {
+      // Always allow access for all users and non-users (results are always public)
+      logger.info('Access granted to public result', {
+        resultId,
+        requestingUserId: userId,
+        ownerUserId: result.user_id,
+        isNonUser: !userId
+      });
     }
     
     logger.info('Analysis result fetched successfully', {
@@ -681,6 +688,54 @@ const deleteResult = async (resultId, userId) => {
 };
 
 /**
+ * Toggle public status of an analysis result
+ * DISABLED: All results are now always public
+ * @param {String} resultId - Result ID
+ * @param {String} userId - User ID (must be the owner)
+ * @param {Boolean} isPublic - New public status
+ * @returns {Promise<Object>} - Updated result
+ */
+// const togglePublicStatus = async (resultId, userId, isPublic) => {
+//   try {
+//     logger.info('Toggling public status of analysis result', {
+//       resultId,
+//       userId,
+//       isPublic
+//     });
+
+//     const result = await AnalysisResult.findByPk(resultId);
+
+//     if (!result) {
+//       throw new NotFoundError('Analysis result not found');
+//     }
+
+//     // Check access permissions - only owner can change public status
+//     if (result.user_id !== userId) {
+//       throw new ForbiddenError('You do not have access to modify this analysis result');
+//     }
+
+//     // Update the public status
+//     await result.update({ is_public: isPublic });
+
+//     logger.info('Public status updated successfully', {
+//       resultId,
+//       userId,
+//       isPublic
+//     });
+
+//     return result;
+//   } catch (error) {
+//     logger.error('Failed to toggle public status', {
+//       error: error.message,
+//       resultId,
+//       userId,
+//       isPublic
+//     });
+//     throw error;
+//   }
+// };
+
+/**
  * Get batch processing statistics
  * @returns {Object} - Batch processing stats
  */
@@ -738,6 +793,7 @@ module.exports = {
   getResultById,
   updateResult,
   deleteResult,
+  // togglePublicStatus, // DISABLED: All results are now always public
   getBatchStats,
   forceBatchProcess,
   clearBatchQueue

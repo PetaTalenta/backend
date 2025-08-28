@@ -16,7 +16,8 @@ const {
   uuidParamSchema,
   jobIdParamSchema,
   updateAnalysisJobStatusSchema,
-  createAnalysisJobSchema
+  createAnalysisJobSchema,
+  togglePublicStatusSchema
 } = require('../utils/validation');
 
 const router = express.Router();
@@ -48,14 +49,6 @@ router.get('/',
  * Get specific analysis result by ID
  */
 router.get('/:id',
-  (req, res, next) => {
-    // Allow both authenticated users and internal services
-    if (req.isInternalService) {
-      return next();
-    }
-    // For user requests, require authentication
-    authenticateToken(req, res, next);
-  },
   validateParams(uuidParamSchema),
   resultsController.getResultById
 );
@@ -106,6 +99,17 @@ router.delete('/:id',
   validateParams(uuidParamSchema),
   resultsController.deleteResult
 );
+
+/**
+ * PATCH /archive/results/:id/public
+ * Toggle public status of analysis result (DISABLED - all results are now always public)
+ */
+// router.patch('/:id/public',
+//   authenticateToken,
+//   validateParams(uuidParamSchema),
+//   validateBody(togglePublicStatusSchema),
+//   resultsController.togglePublicStatus
+// );
 
 /**
  * GET /archive/batch/stats

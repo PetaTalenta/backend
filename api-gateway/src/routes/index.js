@@ -79,10 +79,10 @@ router.post('/admin/register', verifyToken, verifyAdmin, adminLimiter, authServi
 
 // Analysis Results endpoints - specific routes first
 router.post('/archive/results/batch', verifyInternalService, archiveServiceProxy);
-router.get('/archive/results/:id', verifyToken, archiveLimiter, archiveServiceProxy);
+router.get('/archive/results/:id', archiveLimiter, archiveServiceProxy); // Made public - no auth required
 router.put('/archive/results/:id', verifyToken, archiveLimiter, archiveServiceProxy); // Can be user or service
 router.delete('/archive/results/:id', verifyToken, archiveLimiter, archiveServiceProxy);
-router.get('/archive/results', verifyToken, archiveLimiter, archiveServiceProxy);
+router.get('/archive/results', verifyToken, archiveLimiter, archiveServiceProxy); // Still requires auth (user-specific)
 router.post('/archive/results', verifyInternalService, archiveServiceProxy);
 
 // Analysis Jobs endpoints - specific routes first

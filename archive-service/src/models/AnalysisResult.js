@@ -66,6 +66,12 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
     validate: {
       isIn: [['AI-Driven Talent Mapping', 'AI-Based IQ Test', 'Custom Assessment']]
     }
+  },
+  is_public: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'is_public'
   }
 }, {
   tableName: 'analysis_results',

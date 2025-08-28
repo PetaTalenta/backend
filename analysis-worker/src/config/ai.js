@@ -8,7 +8,7 @@ const logger = require('../utils/logger');
 // AI configuration
 const config = {
   apiKey: process.env.GOOGLE_AI_API_KEY,
-  model: process.env.GOOGLE_AI_MODEL || 'gemini-2.5-flash',
+  model: process.env.GOOGLE_AI_MODEL || 'gemini-2.5-pro',
   temperature: parseFloat(process.env.AI_TEMPERATURE || '0.5'),
   useMockModel: process.env.USE_MOCK_MODEL === 'true'
   // Tidak menggunakan maxTokens agar output tidak dibatasi

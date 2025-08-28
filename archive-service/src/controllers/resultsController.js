@@ -228,6 +228,45 @@ const deleteResult = async (req, res, next) => {
 };
 
 /**
+ * Toggle public status of an analysis result
+ * DISABLED: All results are now always public
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+// const togglePublicStatus = async (req, res, next) => {
+//   try {
+//     const resultId = req.params.id;
+//     const userId = req.user.id;
+//     const { is_public } = req.body;
+
+//     if (typeof is_public !== 'boolean') {
+//       return res.status(400).json({
+//         success: false,
+//         error: {
+//           code: 'INVALID_PUBLIC_STATUS',
+//           message: 'is_public must be a boolean value',
+//           timestamp: new Date().toISOString()
+//         }
+//       });
+//     }
+
+//     const result = await resultsService.togglePublicStatus(resultId, userId, is_public);
+
+//     res.json({
+//       success: true,
+//       message: `Analysis result ${is_public ? 'made public' : 'made private'} successfully`,
+//       data: {
+//         id: result.id,
+//         is_public: result.is_public
+//       }
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+/**
  * Get batch processing statistics
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -305,6 +344,7 @@ module.exports = {
   createResultsBatch,
   updateResult,
   deleteResult,
+  // togglePublicStatus, // DISABLED: All results are now always public
   getBatchStats,
   forceBatchProcess,
   clearBatchQueue
