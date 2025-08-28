@@ -28,6 +28,11 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
     allowNull: true, // Allow null for failed analyses
     field: 'persona_profile'
   },
+  raw_responses: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    field: 'raw_responses'
+  },
   status: {
     type: DataTypes.STRING(50),
     allowNull: false,

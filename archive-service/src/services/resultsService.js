@@ -198,8 +198,22 @@ class BatchProcessor {
     });
 
     try {
+      // Normalize each item before bulk insert (extract rawResponses)
+      const normalizedBatch = batch.map(item => {
+        const d = { ...item.data };
+        const nestedRaw = d?.assessment_data?.rawResponses;
+        if (nestedRaw && !d.raw_responses) {
+          d.raw_responses = nestedRaw;
+          // Optional: remove duplication from assessment_data
+          // const ad = { ...d.assessment_data };
+          // delete ad.rawResponses;
+          // d.assessment_data = ad;
+        }
+        return d;
+      });
+
       // Process batch using bulk insert
-      const results = await this.bulkCreateResults(batch.map(item => item.data));
+      const results = await this.bulkCreateResults(normalizedBatch);
 
       // Resolve all promises with their respective results
       batch.forEach((item, index) => {
@@ -258,7 +272,21 @@ class BatchProcessor {
 
       const allResults = [];
       for (const chunk of chunks) {
-        const results = await AnalysisResult.bulkCreate(chunk, {
+        // Ensure normalization also applied for direct bulkCreate calls (defensive)
+        const normalizedChunk = chunk.map(d => {
+          const copy = { ...d };
+          const nestedRaw = copy?.assessment_data?.rawResponses;
+          if (nestedRaw && !copy.raw_responses) {
+            copy.raw_responses = nestedRaw;
+            // Optional: remove from assessment_data
+            // const ad = { ...copy.assessment_data };
+            // delete ad.rawResponses;
+            // copy.assessment_data = ad;
+          }
+          return copy;
+        });
+
+        const results = await AnalysisResult.bulkCreate(normalizedChunk, {
           transaction,
           returning: true,
           validate: true,
@@ -390,28 +418,39 @@ const createResult = async (data, options = {}) => {
   const { useBatching = true } = options;
 
   try {
+    // Normalize: extract rawResponses from assessment_data into raw_responses
+    const normalized = { ...data };
+    const nestedRaw = normalized?.assessment_data?.rawResponses;
+    if (nestedRaw && !normalized.raw_responses) {
+      normalized.raw_responses = nestedRaw;
+      // Optional: remove duplication in assessment_data
+      // const ad = { ...normalized.assessment_data };
+      // delete ad.rawResponses;
+      // normalized.assessment_data = ad;
+    }
+
     // Business logic validation removed for analysis-worker requests
 
     logger.info('Creating new analysis result', {
-      userId: data.user_id,
-      status: data.status,
-      dataKeys: Object.keys(data),
-      assessmentDataType: typeof data.assessment_data,
-      personaProfileType: typeof data.persona_profile,
+      userId: normalized.user_id,
+      status: normalized.status,
+      dataKeys: Object.keys(normalized),
+      assessmentDataType: typeof normalized.assessment_data,
+      personaProfileType: typeof normalized.persona_profile,
       useBatching
     });
 
     // Use batch processing for better performance under high load
     if (useBatching && process.env.NODE_ENV !== 'test') {
       logger.debug('Using batch processing for result creation', {
-        userId: data.user_id,
+        userId: normalized.user_id,
         queueSize: batchProcessor.queue.length
       });
 
-      const result = await batchProcessor.addToBatch(data);
+      const result = await batchProcessor.addToBatch(normalized);
 
       logger.info('Analysis result queued for batch processing', {
-        userId: data.user_id,
+        userId: normalized.user_id,
         resultId: result?.id
       });
 
@@ -420,10 +459,10 @@ const createResult = async (data, options = {}) => {
 
     // Fallback to individual processing
     logger.debug('Using individual processing for result creation', {
-      userId: data.user_id
+      userId: normalized.user_id
     });
 
-    const result = await batchProcessor.createSingleResult(data);
+    const result = await batchProcessor.createSingleResult(normalized);
 
     logger.info('Analysis result created individually', {
       id: result.id,

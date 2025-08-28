@@ -1,5 +1,24 @@
 const Joi = require('joi');
 
+// Raw responses schemas
+const rawItem = Joi.object({
+  questionId: Joi.string().pattern(/^[A-Z0-9\-_.:]+$/).required()
+    .messages({ 'string.pattern.base': 'questionId format invalid' }),
+  value: Joi.number().min(0).max(100).required() // fleksibel: skala 0-100 atau 1-7 tergantung instrumen
+    .messages({
+      'number.base': 'Answer value must be a number',
+      'any.required': 'Answer value is required'
+    }),
+  weight: Joi.number().optional(),
+  meta: Joi.object().unknown(true).optional()
+});
+
+const rawResponsesSchema = Joi.object({
+  riasec: Joi.array().items(rawItem).optional(),
+  ocean: Joi.array().items(rawItem).optional(),
+  viaIs: Joi.array().items(rawItem).optional()
+}).optional();
+
 // RIASEC Schema (6 dimensions)
 const riasecSchema = Joi.object({
   realistic: Joi.number().integer().min(0).max(100).required()
@@ -184,7 +203,9 @@ const assessmentSchema = Joi.object({
     }),
   industryScore: industryScoreSchema.optional().messages({
     'object.base': 'Industry score data must be an object'
-  })
+  }),
+  rawResponses: rawResponsesSchema,
+  rawSchemaVersion: Joi.string().default('v1')
 }).messages({
   'object.base': 'Assessment data must be an object',
   'any.required': 'All assessment components are required'

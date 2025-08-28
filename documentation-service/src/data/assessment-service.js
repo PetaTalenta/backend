@@ -9,7 +9,7 @@ export const assessmentServiceData = {
       method: "POST",
       path: "/api/assessment/submit",
       title: "Submit Assessment",
-      description: "Submit assessment data for AI analysis. Assessment consists of RIASEC (6 dimensions), OCEAN (5 dimensions), and VIA-IS (24 character strengths).",
+      description: "Submit assessment data for AI analysis. Assessment consists of RIASEC (6 dimensions), OCEAN (5 dimensions), VIA-IS (24 character strengths), and optionally rawResponses (item-level answers). rawResponses will be stored as raw_responses (JSONB) in archive.analysis_results.",
       authentication: "Bearer Token Required",
       rateLimit: "1000 requests per 1 hour",
       requestBody: {
@@ -80,7 +80,13 @@ export const assessmentServiceData = {
           kuliner: 69,
           perdagangan: 68,
           telekomunikasi: 72
-        }
+        },
+        rawResponses: {
+          riasec: [{ questionId: "RIASEC-R-01", value: 4 }],
+          ocean: [{ questionId: "O-01", value: 5 }],
+          viaIs: [{ questionId: "VIA-01", value: 4 }]
+        },
+        rawSchemaVersion: "v1"
       },
       parameters: [
         {
@@ -112,6 +118,18 @@ export const assessmentServiceData = {
           type: "object",
           required: false,
           description: "Industry interest scores - optional field with 24 industry categories, scores between 0-100"
+        },
+        {
+          name: "rawResponses",
+          type: "object",
+          required: false,
+          description: "Optional item-level responses. Shape: { riasec: [{questionId, value, ...}], ocean: [...], viaIs: [...] }. Will be stored as raw_responses (JSONB) in archive.analysis_results"
+        },
+        {
+          name: "rawSchemaVersion",
+          type: "string",
+          required: false,
+          description: "Schema version for rawResponses (default: 'v1')"
         }
       ],
       response: {
@@ -152,6 +170,12 @@ export const assessmentServiceData = {
       "curiosity": 85,
       "judgment": 75
     },
+    "rawResponses": {
+      "riasec": [{ "questionId": "RIASEC-R-01", "value": 4 }],
+      "ocean": [{ "questionId": "O-01", "value": 5 }],
+      "viaIs": [{ "questionId": "VIA-01", "value": 4 }]
+    },
+    "rawSchemaVersion": "v1",
     "industryScore": {
       "teknologi": 70,
       "kesehatan": 70,
