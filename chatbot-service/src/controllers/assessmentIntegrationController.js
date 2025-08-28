@@ -1,4 +1,4 @@
-const { Conversation, Message } = require('../models');
+const { Conversation } = require('../models');
 const ContextService = require('../services/contextService');
 const AssessmentEventHandler = require('../services/assessmentEventHandler');
 const archiveService = require('../services/archiveService');
@@ -262,103 +262,6 @@ class AssessmentIntegrationController {
     }
   }
 
-  /**
-   * Auto-initialize assessment conversation
-   * POST /api/chatbot/conversations/auto-initialize
-   */
-  async autoInitialize(req, res) {
-    try {
-      const userId = req.user.id;
-
-      logger.info('Auto-initializing assessment conversation', { userId });
-
-      // Get latest assessment for user
-      const assessmentStatus = await this.getLatestAssessmentStatus(userId);
-      
-      if (!assessmentStatus.has_assessment) {
-        return res.status(404).json({
-          error: 'No assessment found for user',
-          code: 'NO_ASSESSMENT_FOUND'
-        });
-      }
-
-      // Check if conversation already exists
-      const existingConversation = await this.findAssessmentConversation(
-        userId, 
-        assessmentStatus.assessment_id
-      );
-
-      if (existingConversation) {
-        const suggestions = await this.generateSuggestionsForConversation(existingConversation);
-
-        return res.json({
-          success: true,
-          data: {
-            conversation: {
-              id: existingConversation.id,
-              title: existingConversation.title,
-              context_type: existingConversation.context_type,
-              status: existingConversation.status,
-              created_at: existingConversation.created_at
-            },
-            welcome_message: null, // No new welcome message for existing conversation
-            suggestions
-          },
-          message: 'Assessment conversation already exists'
-        });
-      }
-
-      // Create new conversation
-      const assessmentData = await this.validateAssessmentAccess(userId, assessmentStatus.assessment_id);
-
-      if (!assessmentData) {
-        return res.status(404).json({
-          error: 'Assessment data not accessible',
-          code: 'ASSESSMENT_DATA_ERROR'
-        });
-      }
-
-      const result = await this.assessmentEventHandler.createAssessmentConversation(
-        userId,
-        assessmentStatus.assessment_id,
-        assessmentData
-      );
-
-      // Generate suggestions for the new conversation
-      const suggestions = await this.generateSuggestionsForConversation(result.conversation);
-
-      res.status(201).json({
-        success: true,
-        data: {
-          conversation: {
-            id: result.conversation.id,
-            title: result.conversation.title,
-            context_type: result.conversation.context_type,
-            status: result.conversation.status,
-            created_at: result.conversation.created_at
-          },
-          welcome_message: result.welcomeMessage ? {
-            id: result.welcomeMessage.id,
-            content: result.welcomeMessage.content,
-            sender_type: result.welcomeMessage.sender_type,
-            created_at: result.welcomeMessage.created_at
-          } : null,
-          suggestions
-        }
-      });
-
-    } catch (error) {
-      logger.error('Error auto-initializing conversation', {
-        userId: req.user?.id,
-        error: error.message
-      });
-
-      res.status(500).json({ 
-        error: 'Failed to auto-initialize conversation',
-        code: 'AUTO_INIT_ERROR'
-      });
-    }
-  }
 
   /**
    * Get conversation suggestions for assessment conversation

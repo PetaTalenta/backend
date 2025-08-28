@@ -153,10 +153,6 @@ class APIClient {
     return response.data;
   }
 
-  async autoInitializeChatbot() {
-    const response = await this.client.post('/api/chatbot/auto-initialize');
-    return response.data;
-  }
 
 
   // Convenience helpers

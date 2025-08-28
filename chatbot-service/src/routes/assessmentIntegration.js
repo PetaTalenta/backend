@@ -102,29 +102,4 @@ router.get('/conversations/:conversationId/suggestions',
   }
 );
 
-/**
- * Auto-initialize assessment conversation
- * POST /auto-initialize
- */
-router.post('/auto-initialize',
-  authenticateToken,
-  setUserContext,
-  async (req, res) => {
-    try {
-      await assessmentController.autoInitialize(req, res);
-    } catch (error) {
-      logger.error('Route error: autoInitialize', {
-        error: error.message,
-        userId: req.user?.id
-      });
-      res.status(500).json({
-        error: 'Internal server error',
-        code: 'INTERNAL_ERROR'
-      });
-    }
-  }
-);
-
-
-
 module.exports = router;

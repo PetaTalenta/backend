@@ -188,7 +188,6 @@ router.get('/chatbot/health/metrics', chatbotServiceProxy);
 router.get('/chatbot/assessment-ready/:userId', verifyToken, chatLimiter, chatbotServiceProxy);
 router.post('/chatbot/assessment/from-assessment', verifyToken, chatLimiter, chatbotServiceProxy);
 router.get('/chatbot/conversations/:conversationId/suggestions', verifyToken, chatLimiter, chatbotServiceProxy);
-router.post('/chatbot/auto-initialize', verifyToken, chatLimiter, chatbotServiceProxy);
 
 // Conversation endpoints (protected) - must come after specific routes
 router.use('/chatbot/conversations', verifyToken, chatLimiter, chatbotServiceProxy);
