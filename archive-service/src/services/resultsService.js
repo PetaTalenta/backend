@@ -9,59 +9,50 @@ const logger = require('../utils/logger');
 const batchMetrics = require('../middleware/batchMetrics');
 
 /**
- * Validate business logic for analysis result data
- * @param {Object} data - Analysis result data
- * @throws {Error} - If validation fails
+ * NOTE: Creation-time heavy business validation was deprecated (worker assumed trusted).
+ * We keep only normalization & sanitization here; update transitions still validated.
  */
-const validateBusinessLogic = async (data) => {
-  // 1. Validate user existence (only in production)
-  if (process.env.NODE_ENV === 'production') {
-    try {
-      const userExists = await AnalysisResult.sequelize.query(
-        'SELECT 1 FROM auth.users WHERE id = :userId LIMIT 1',
-        {
-          replacements: { userId: data.user_id },
-          type: AnalysisResult.sequelize.QueryTypes.SELECT
-        }
-      );
 
-      if (!userExists.length) {
-        throw new Error(`User with ID ${data.user_id} does not exist`);
-      }
-    } catch (error) {
-      logger.error('User validation failed', {
-        userId: data.user_id,
-        error: error.message
-      });
-      throw new Error('Invalid user ID provided');
+/**
+ * Normalize & sanitize result payload.
+ * - Flattens assessment_data.rawResponses → raw_responses
+ * - Removes sensitive keys from assessment_data
+ * Idempotent: safe to call multiple times.
+ * @param {Object} data
+ * @returns {Object}
+ */
+function normalizeResultPayload(data = {}) {
+  const clone = { ...data };
+  if (clone.assessment_data && typeof clone.assessment_data === 'object') {
+    const sanitized = { ...clone.assessment_data };
+    delete sanitized.password;
+    delete sanitized.token;
+    delete sanitized.secret;
+    if (sanitized.rawResponses && !clone.raw_responses) {
+      clone.raw_responses = sanitized.rawResponses;
     }
+    clone.assessment_data = sanitized;
   }
+  return clone;
+}
 
-  // 2. Data consistency validation removed for analysis-worker requests
-  // Trust that analysis-worker sends consistent data
-
-  // 3. Sanitize assessment data
-  if (data.assessment_data && typeof data.assessment_data === 'object') {
-    // Remove any potentially sensitive fields
-    const sanitizedData = { ...data.assessment_data };
-    delete sanitizedData.password;
-    delete sanitizedData.token;
-    delete sanitizedData.secret;
-    data.assessment_data = sanitizedData;
-  }
-
-  // 4. Persona profile validation removed for analysis-worker requests
-  // Trust that analysis-worker sends valid data
-
-
-
-  logger.debug('Business logic validation passed', {
-    userId: data.user_id,
-    status: data.status,
-    hasPersonaProfile: !!data.persona_profile,
-    hasAssessmentData: !!data.assessment_data
+/** Dev helper to create user automatically in development when FK missing */
+async function ensureDevUser(userId, sequelize) {
+  await sequelize.query(`
+    INSERT INTO auth.users (id, email, password_hash, token_balance)
+    VALUES (:userId, :email, :passwordHash, :tokenBalance)
+    ON CONFLICT (id) DO NOTHING
+  `, {
+    replacements: {
+      userId,
+      email: `dev-user-${userId}@example.com`,
+      passwordHash: '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.PZvO.G',
+      tokenBalance: 100
+    }
   });
-};
+}
+
+// Deprecated: validateBusinessLogic removed (worker provides validated data)
 
 /**
  * Validate business logic for update operations
@@ -90,12 +81,19 @@ const validateUpdateBusinessLogic = async (updateData, existingResult) => {
   }
 
   // 3. Validate data consistency for updates
-  if (updateData.status === 'completed' && updateData.persona_profile === null) {
-    throw new Error('Cannot mark as completed without persona_profile');
+  if (updateData.status === 'completed') {
+    // persona_profile must exist either after update or currently stored
+    const personaAfter = updateData.persona_profile !== undefined ? updateData.persona_profile : existingResult.persona_profile;
+    if (!personaAfter) {
+      throw new Error('Cannot mark as completed without persona_profile');
+    }
   }
 
-  if (updateData.status === 'failed' && updateData.persona_profile && !updateData.error_message) {
-    throw new Error('Failed status requires error_message');
+  if (updateData.status === 'failed') {
+    const personaPresent = !!(updateData.persona_profile || existingResult.persona_profile);
+    if (personaPresent && !updateData.error_message) {
+      throw new Error('Failed status requires error_message when persona_profile exists');
+    }
   }
 
   // 4. Validate persona profile updates
@@ -163,6 +161,10 @@ class BatchProcessor {
 
       // Process immediately if batch is full
       if (this.queue.length >= BATCH_CONFIG.MAX_BATCH_SIZE) {
+        if (this.batchTimer) {
+          clearTimeout(this.batchTimer);
+          this.batchTimer = null;
+        }
         this.processBatch();
       } else if (!this.batchTimer) {
         // Set timer for batch processing
@@ -198,26 +200,20 @@ class BatchProcessor {
     });
 
     try {
-      // Normalize each item before bulk insert (extract rawResponses)
-      const normalizedBatch = batch.map(item => {
-        const d = { ...item.data };
-        const nestedRaw = d?.assessment_data?.rawResponses;
-        if (nestedRaw && !d.raw_responses) {
-          d.raw_responses = nestedRaw;
-          // Optional: remove duplication from assessment_data
-          // const ad = { ...d.assessment_data };
-          // delete ad.rawResponses;
-          // d.assessment_data = ad;
-        }
-        return d;
-      });
+  // Normalize each item before bulk insert (sanitize + flatten)
+  const normalizedBatch = batch.map(item => normalizeResultPayload(item.data));
 
       // Process batch using bulk insert
       const results = await this.bulkCreateResults(normalizedBatch);
 
-      // Resolve all promises with their respective results
+      // Resolve all promises (reject if null/unexpected)
       batch.forEach((item, index) => {
-        item.resolve(results[index]);
+        const res = results[index];
+        if (res) {
+          item.resolve(res);
+        } else {
+          item.reject(new Error('Result creation failed for item (null result)'));
+        }
       });
 
       // Record successful batch completion
@@ -263,8 +259,8 @@ class BatchProcessor {
         count: dataArray.length
       });
 
-      // BARU: Chunk large batches untuk memory efficiency
-      const chunkSize = 50;
+  // Chunk large batches untuk memory efficiency (cap 50 or batch size)
+  const chunkSize = Math.min(50, BATCH_CONFIG.MAX_BATCH_SIZE);
       const chunks = [];
       for (let i = 0; i < dataArray.length; i += chunkSize) {
         chunks.push(dataArray.slice(i, i + chunkSize));
@@ -272,21 +268,10 @@ class BatchProcessor {
 
       const allResults = [];
       for (const chunk of chunks) {
-        // Ensure normalization also applied for direct bulkCreate calls (defensive)
-        const normalizedChunk = chunk.map(d => {
-          const copy = { ...d };
-          const nestedRaw = copy?.assessment_data?.rawResponses;
-          if (nestedRaw && !copy.raw_responses) {
-            copy.raw_responses = nestedRaw;
-            // Optional: remove from assessment_data
-            // const ad = { ...copy.assessment_data };
-            // delete ad.rawResponses;
-            // copy.assessment_data = ad;
-          }
-          return copy;
-        });
+  // Normalize defensively (idempotent helper)
+  const normalizedChunk = chunk.map(d => normalizeResultPayload(d));
 
-        const results = await AnalysisResult.bulkCreate(normalizedChunk, {
+  const results = await AnalysisResult.bulkCreate(normalizedChunk, {
           transaction,
           returning: true,
           validate: true,
@@ -318,8 +303,8 @@ class BatchProcessor {
         count: dataArray.length
       });
 
-      // If bulk insert fails, try individual inserts for better error handling
-      return await this.fallbackIndividualInserts(dataArray);
+  // If bulk insert fails, try individual inserts for better error clarity (may throw Aggregate)
+  return await this.fallbackIndividualInserts(dataArray);
     }
   }
 
@@ -328,8 +313,8 @@ class BatchProcessor {
       count: dataArray.length
     });
 
-    const results = [];
-    const errors = [];
+  const results = [];
+  const errors = [];
 
     for (let i = 0; i < dataArray.length; i++) {
       try {
@@ -342,8 +327,7 @@ class BatchProcessor {
           index: i
         });
         errors.push({ index: i, error: error.message });
-        // Still add a placeholder to maintain array indices
-        results.push(null);
+        results.push(null); // maintain positional alignment
       }
     }
 
@@ -354,6 +338,10 @@ class BatchProcessor {
         errorCount: errors.length,
         errors: errors
       });
+      const aggregate = new Error('Partial failure in individual inserts');
+      aggregate.partial = true;
+      aggregate.errors = errors;
+      throw aggregate;
     }
 
     return results;
@@ -376,18 +364,7 @@ class BatchProcessor {
 
         try {
           // Create user in auth.users table
-          await AnalysisResult.sequelize.query(`
-            INSERT INTO auth.users (id, email, password_hash, token_balance)
-            VALUES (:userId, :email, :passwordHash, :tokenBalance)
-            ON CONFLICT (id) DO NOTHING
-          `, {
-            replacements: {
-              userId: data.user_id,
-              email: `dev-user-${data.user_id}@example.com`,
-              passwordHash: '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.PZvO.G',
-              tokenBalance: 100
-            }
-          });
+          await ensureDevUser(data.user_id, AnalysisResult.sequelize);
 
           // Retry creating the analysis result
           const result = await AnalysisResult.create(data);
@@ -418,18 +395,8 @@ const createResult = async (data, options = {}) => {
   const { useBatching = true } = options;
 
   try {
-    // Normalize: extract rawResponses from assessment_data into raw_responses
-    const normalized = { ...data };
-    const nestedRaw = normalized?.assessment_data?.rawResponses;
-    if (nestedRaw && !normalized.raw_responses) {
-      normalized.raw_responses = nestedRaw;
-      // Optional: remove duplication in assessment_data
-      // const ad = { ...normalized.assessment_data };
-      // delete ad.rawResponses;
-      // normalized.assessment_data = ad;
-    }
-
-    // Business logic validation removed for analysis-worker requests
+  // Normalize & sanitize
+  const normalized = normalizeResultPayload(data);
 
     logger.info('Creating new analysis result', {
       userId: normalized.user_id,
@@ -499,7 +466,8 @@ const createResultsBatch = async (dataArray) => {
       userIds: dataArray.map(d => d.user_id)
     });
 
-    const results = await batchProcessor.bulkCreateResults(dataArray);
+    const normalized = dataArray.map(d => normalizeResultPayload(d));
+    const results = await batchProcessor.bulkCreateResults(normalized);
 
     logger.info('Batch analysis results created successfully', {
       count: results.length,

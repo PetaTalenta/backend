@@ -184,6 +184,50 @@ export const assessmentServiceData = {
   }'`
     },
     {
+      method: "POST",
+      path: "/api/assessment/retry",
+      title: "Retry Assessment",
+      description: "Re-run AI analysis using existing assessment_data from a previous result. Creates a new jobId and consumes tokens like a fresh submission.",
+      authentication: "Bearer Token Required",
+      rateLimit: "Follow general gateway limit",
+      requestBody: {
+        resultId: "550e8400-e29b-41d4-a716-446655440010"
+      },
+      parameters: [
+        {
+          name: "resultId",
+          type: "string",
+          required: true,
+          description: "UUID of previous analysis result owned by the user"
+        }
+      ],
+      notes: [
+        "Result must belong to authenticated user",
+        "Result must contain non-empty assessment_data",
+        "New job stored in Archive Service; original result remains unchanged",
+        "Token deducted (ANALYSIS_TOKEN_COST). Refunded automatically if archive job creation fails"
+      ],
+      response: {
+        success: true,
+        message: "Assessment retry queued successfully",
+        data: {
+          jobId: "550e8400-e29b-41d4-a716-446655440099",
+          originalResultId: "550e8400-e29b-41d4-a716-446655440010",
+          status: "queued",
+          estimatedProcessingTime: "2-5 minutes",
+          queuePosition: 2,
+          tokenCost: 1,
+          remainingTokens: 8
+        }
+      },
+      example: `curl -X POST https://api.chhrone.web.id/api/assessment/retry \\
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "resultId": "550e8400-e29b-41d4-a716-446655440010"
+  }'`
+    },
+    {
       method: "GET",
       path: "/api/assessment/status/:jobId",
       title: "Get Job Status",

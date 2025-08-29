@@ -1,0 +1,177 @@
+{
+  "testName": "single-user-test-2025-08-28T18-51-33",
+  "startTime": "2025-08-28T18:51:33.223Z",
+  "endTime": "2025-08-28T18:52:11.460Z",
+  "duration": 38237,
+  "results": {
+    "passed": 10,
+    "failed": 0,
+    "skipped": 1,
+    "total": 11
+  },
+  "successRate": 90.91,
+  "errors": [],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Single User E2E Test",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:33.224Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Generate Test Data",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:33.225Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test data generated",
+      "data": {
+        "email": "testuser17564070932258w37fn@example.com",
+        "username": "testuser8w37fn"
+      },
+      "timestamp": "2025-08-28T18:51:33.236Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Register User",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:33.239Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User registered successfully",
+      "data": {
+        "userId": "8274e6b0-833e-46e0-acab-af5808c6a862",
+        "email": "testuser17564070932258w37fn@example.com"
+      },
+      "timestamp": "2025-08-28T18:51:34.978Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Login User",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:34.981Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "User logged in successfully",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:36.739Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Connect WebSocket",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:36.739Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connected and authenticated",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:39.212Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Update Profile",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:39.213Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile updated successfully",
+      "data": {
+        "username": "updated23el7y"
+      },
+      "timestamp": "2025-08-28T18:51:40.795Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Submit Assessment",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:40.796Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment submitted successfully",
+      "data": {
+        "jobId": "04253f46-84ac-4f1c-9413-f2b2b125ccfd",
+        "status": "queued"
+      },
+      "timestamp": "2025-08-28T18:51:42.197Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Wait for WebSocket Notification",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:42.204Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for assessment completion notification...",
+      "data": null,
+      "timestamp": "2025-08-28T18:51:42.204Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment completion notification received",
+      "data": {
+        "jobId": "04253f46-84ac-4f1c-9413-f2b2b125ccfd",
+        "resultId": "49f1f2d1-bd9f-4fd8-aa3c-186ced2de9bb"
+      },
+      "timestamp": "2025-08-28T18:52:02.646Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 8: Get Profile Persona",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:02.649Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch processing to complete...",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:02.650Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Profile persona retrieved successfully",
+      "data": {
+        "archetype": "The Balanced Professional",
+        "careerCount": 4
+      },
+      "timestamp": "2025-08-28T18:52:10.017Z"
+    },
+    {
+      "level": "SKIPPED",
+      "message": "Chatbot step",
+      "reason": "SKIP_CHATBOT is true",
+      "timestamp": "2025-08-28T18:52:10.019Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 10: Cleanup Test Account",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:10.024Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test account cleaned up successfully",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:11.458Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Single User E2E Test completed successfully",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:11.458Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Disconnected from services",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:11.460Z"
+    }
+  ]
+}

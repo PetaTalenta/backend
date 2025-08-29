@@ -1,0 +1,91 @@
+{
+  "testName": "chatbot-test-2025-08-28T18-52-53",
+  "startTime": "2025-08-28T18:52:53.792Z",
+  "endTime": "2025-08-28T18:53:20.787Z",
+  "duration": 26995,
+  "results": {
+    "passed": 2,
+    "failed": 2,
+    "skipped": 0,
+    "total": 4
+  },
+  "successRate": 50,
+  "errors": [
+    {
+      "level": "ERROR",
+      "message": "Conversation creation test failed",
+      "error": {
+        "message": "Basic conversation creation failed",
+        "stack": "Error: Basic conversation creation failed\n    at ChatbotTest.testConversationCreation (/home/rayin/Desktop/atma-backend/testing/chatbot-test.js:89:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async ChatbotTest.run (/home/rayin/Desktop/atma-backend/testing/chatbot-test.js:26:7)\n    at async TestRunner.runSingleTest (/home/rayin/Desktop/atma-backend/testing/test-runner.js:94:7)\n    at async TestRunner.run (/home/rayin/Desktop/atma-backend/testing/test-runner.js:41:11)\n    at async TestRunner.runWithConfig (/home/rayin/Desktop/atma-backend/testing/test-runner.js:206:12)"
+      },
+      "timestamp": "2025-08-28T18:53:18.012Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Chatbot E2E Test failed",
+      "error": {
+        "message": "Basic conversation creation failed",
+        "stack": "Error: Basic conversation creation failed\n    at ChatbotTest.testConversationCreation (/home/rayin/Desktop/atma-backend/testing/chatbot-test.js:89:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async ChatbotTest.run (/home/rayin/Desktop/atma-backend/testing/chatbot-test.js:26:7)\n    at async TestRunner.runSingleTest (/home/rayin/Desktop/atma-backend/testing/test-runner.js:94:7)\n    at async TestRunner.run (/home/rayin/Desktop/atma-backend/testing/test-runner.js:41:11)\n    at async TestRunner.runWithConfig (/home/rayin/Desktop/atma-backend/testing/test-runner.js:206:12)"
+      },
+      "timestamp": "2025-08-28T18:53:18.012Z"
+    }
+  ],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Chatbot-focused E2E Test",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:53.792Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Setup Test Environment",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:53.793Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test environment setup completed",
+      "data": {
+        "resultId": "d3e96f13-5be3-4ed1-9150-2076afe14288"
+      },
+      "timestamp": "2025-08-28T18:53:17.708Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Test Conversation Creation",
+      "data": null,
+      "timestamp": "2025-08-28T18:53:17.708Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Conversation creation test failed",
+      "error": {
+        "message": "Basic conversation creation failed",
+        "stack": "Error: Basic conversation creation failed\n    at ChatbotTest.testConversationCreation (/home/rayin/Desktop/atma-backend/testing/chatbot-test.js:89:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async ChatbotTest.run (/home/rayin/Desktop/atma-backend/testing/chatbot-test.js:26:7)\n    at async TestRunner.runSingleTest (/home/rayin/Desktop/atma-backend/testing/test-runner.js:94:7)\n    at async TestRunner.run (/home/rayin/Desktop/atma-backend/testing/test-runner.js:41:11)\n    at async TestRunner.runWithConfig (/home/rayin/Desktop/atma-backend/testing/test-runner.js:206:12)"
+      },
+      "timestamp": "2025-08-28T18:53:18.012Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "Chatbot E2E Test failed",
+      "error": {
+        "message": "Basic conversation creation failed",
+        "stack": "Error: Basic conversation creation failed\n    at ChatbotTest.testConversationCreation (/home/rayin/Desktop/atma-backend/testing/chatbot-test.js:89:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async ChatbotTest.run (/home/rayin/Desktop/atma-backend/testing/chatbot-test.js:26:7)\n    at async TestRunner.runSingleTest (/home/rayin/Desktop/atma-backend/testing/test-runner.js:94:7)\n    at async TestRunner.run (/home/rayin/Desktop/atma-backend/testing/test-runner.js:41:11)\n    at async TestRunner.runWithConfig (/home/rayin/Desktop/atma-backend/testing/test-runner.js:206:12)"
+      },
+      "timestamp": "2025-08-28T18:53:18.012Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Cleanup",
+      "data": null,
+      "timestamp": "2025-08-28T18:53:18.012Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test account cleaned up",
+      "data": null,
+      "timestamp": "2025-08-28T18:53:20.787Z"
+    }
+  ]
+}

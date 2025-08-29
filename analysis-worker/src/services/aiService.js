@@ -10,10 +10,18 @@ const mockAiService = require("./mockAiService");
 const TokenCounterService = require("./tokenCounterService");
 const UsageTracker = require("./usageTracker");
 const { createError, ERROR_TYPES } = require("../utils/errorHandler");
+const AdvancedRateLimiter = require("../utils/advancedRateLimiter");
 
 // Initialize token counting services
 const tokenCounter = new TokenCounterService();
 const usageTracker = new UsageTracker();
+
+// Initialize advanced rate limiter for testing scenarios
+const rateLimiter = new AdvancedRateLimiter({
+  requestsPerMinute: parseInt(process.env.AI_RATE_LIMIT_RPM || '15'), // Updated: 15 RPM for AI calls
+  maxRetries: parseInt(process.env.AI_MAX_RETRIES || '5'),
+  baseDelay: parseInt(process.env.AI_RETRY_BASE_DELAY || '2000') // 2 seconds base delay
+});
 
 /**
  * Initialize AI service
@@ -357,17 +365,21 @@ const responseSchema = {
 };
 
 
-    // Generate content with structured output
-    const response = await client.models.generateContent({
-      model: ai.config.model,
-      contents: prompt,
-      config: {
-        systemInstruction: "Anda adalah seorang Psikolog Pakar Analisis Karir dan Kepribadian. Keahlian utama Anda adalah mensintesis data dari berbagai asesmen psikometrik (RIASEC, OCEAN, VIA-IS) menjadi sebuah laporan persona yang koheren, mendalam, dan sangat actionable. Gaya komunikasi Anda bersifat klinis, objektif, dan langsung pada inti persoalan (no sugarcoating) untuk memberikan pemahaman yang jujur dan jernih kepada audiens (mahasiswa/pelajar).",
-        responseMimeType: "application/json",
-        responseSchema: responseSchema,
-        temperature: ai.config.temperature,
-      },
-    });
+    // Generate content with structured output and rate limiting
+    const response = await rateLimiter.executeWithRateLimit(async () => {
+      logger.debug('Making AI API call with rate limiting', { jobId });
+
+      return await client.models.generateContent({
+        model: ai.config.model,
+        contents: prompt,
+        config: {
+          systemInstruction: "Anda adalah seorang Psikolog Pakar Analisis Karir dan Kepribadian. Keahlian utama Anda adalah mensintesis data dari berbagai asesmen psikometrik (RIASEC, OCEAN, VIA-IS) menjadi sebuah laporan persona yang koheren, mendalam, dan sangat actionable. Gaya komunikasi Anda bersifat klinis, objektif, dan langsung pada inti persoalan (no sugarcoating) untuk memberikan pemahaman yang jujur dan jernih kepada audiens (mahasiswa/pelajar).",
+          responseMimeType: "application/json",
+          responseSchema: responseSchema,
+          temperature: ai.config.temperature,
+        },
+      });
+    }, jobId);
 
     // Extract usage metadata from API response
     try {

@@ -1,0 +1,1072 @@
+{
+  "testName": "assessment-stress-test-2025-08-28T19-06-13",
+  "startTime": "2025-08-28T19:06:13.300Z",
+  "endTime": "2025-08-28T19:27:05.431Z",
+  "duration": 1252131,
+  "results": {
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "total": 14
+  },
+  "successRate": 100,
+  "errors": [],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Assessment Stress Test: 50 assessments in 5 batches",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:13.302Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Login with test account",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:13.308Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Successfully logged in with test account",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:13.939Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Generate assessment data",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:13.942Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Generated 50 assessment data sets",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:13.982Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Run assessment batches",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:13.983Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting batch 1/5 (10 assessments)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:13.983Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 9: Assessment 9 submitted (Job ID: b6a732f2-a4fb-494f-921d-ff58015ca804)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:14.332Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Assessment 2 submitted (Job ID: b90eac1c-bb00-4995-b19d-c8528e298faf)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:14.343Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 7: Assessment 7 submitted (Job ID: a48319df-e7cc-4a1c-bcfb-1a6c5bcb3263)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:14.396Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 4: Assessment 4 submitted (Job ID: e40c623b-7b41-4d45-8e98-057ff9ac6a5b)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:14.398Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 8: Assessment 8 submitted (Job ID: 0e22a07b-da7b-49a1-9a2c-aba2935e0844)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:14.411Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 10: Assessment 10 submitted (Job ID: 56f51848-c91c-48d6-95d1-07e7c33473b6)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:15.163Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 5: Assessment 5 submitted (Job ID: de21cbde-7307-4a1f-8caa-060683b24b74)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:15.212Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 6: Assessment 6 submitted (Job ID: f15ba570-063d-4b1d-95b0-694e51fe0c5c)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:15.477Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 3: Assessment 3 submitted (Job ID: 9f4df72c-5d5f-4d5c-b71a-c0d873a5bfb7)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:15.525Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Assessment 1 submitted (Job ID: ffe98bd7-41dc-4e2a-a4eb-6e66a495d412)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:15.530Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 1: 10 assessments submitted",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:15.530Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch 1 assessments to complete...",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:15.530Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 7: Assessment 7 completed in 21265ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:35.251Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 9: Assessment 9 completed in 21793ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:35.781Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 8: Assessment 8 completed in 22097ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:36.084Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 6: Assessment 6 completed in 22357ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:36.343Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Assessment 2 completed in 22523ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:36.508Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Assessment 1 completed in 23118ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:37.102Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 5: Assessment 5 completed in 23123ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:37.109Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 3: Assessment 3 completed in 23575ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:37.560Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 10: Assessment 10 completed in 23907ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:37.896Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 4: Assessment 4 completed in 24264ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:38.249Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Batch 1 completion: 10 successful, 0 failed",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:38.249Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 1 completed in 24266ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:38.250Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting 2 seconds before next batch...",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:38.250Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting batch 2/5 (10 assessments)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:40.252Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 11: Assessment 11 submitted (Job ID: 571f9450-f21a-40c9-9b8d-08b4ffd195e1)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:40.759Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 12: Assessment 12 submitted (Job ID: 80d90fe6-9795-4b64-878b-b48be02fc4c9)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:40.810Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 16: Assessment 16 submitted (Job ID: 0453524a-05cd-4ef2-acaa-dcc561245a15)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:40.889Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 15: Assessment 15 submitted (Job ID: 338cdd76-d6b2-44da-b0de-c42dc1b396bd)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:41.078Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 17: Assessment 17 submitted (Job ID: 68e78f80-ab0a-4c0e-96b5-fb3dab54b399)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:41.152Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 13: Assessment 13 submitted (Job ID: f226908f-c251-4a84-9125-e411f40c98a5)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:41.334Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 20: Assessment 20 submitted (Job ID: 82ee0edb-1152-42fc-9ed8-e5567898a6d6)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:41.470Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 19: Assessment 19 submitted (Job ID: ac71f2c6-19c9-46fb-a68d-3a46a635c5b2)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:41.883Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 18: Assessment 18 submitted (Job ID: dd0e5095-2bf0-47e8-8188-70198b8756a7)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:42.255Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 14: Assessment 14 submitted (Job ID: d011510a-f7d6-4fc6-9b65-6d29941f5670)",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:42.314Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 2: 10 assessments submitted",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:42.314Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch 2 assessments to complete...",
+      "data": null,
+      "timestamp": "2025-08-28T19:06:42.314Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 17: Assessment 17 completed in 21775ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:07:02.033Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 11: Assessment 11 completed in 21974ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:07:02.226Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 15: Assessment 15 completed in 22152ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:07:02.409Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 12: Assessment 12 completed in 22975ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:07:03.228Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 16: Assessment 16 completed in 24003ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:07:04.261Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 14: Assessment 14 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:42.320Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 14: Assessment 14 failed: Assessment 14 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:42.326Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 19: Assessment 19 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:42.457Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 19: Assessment 19 failed: Assessment 19 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:42.458Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 20: Assessment 20 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:43.767Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 20: Assessment 20 failed: Assessment 20 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:43.768Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 13: Assessment 13 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:44.423Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 13: Assessment 13 failed: Assessment 13 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:44.423Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 18: Assessment 18 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:45.361Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 18: Assessment 18 failed: Assessment 18 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:45.362Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Batch 2 completion: 5 successful, 5 failed",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:45.364Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 2 completed in 305112ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:45.365Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting 2 seconds before next batch...",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:45.367Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting batch 3/5 (10 assessments)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:47.369Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 21: Assessment 21 submitted (Job ID: a2ca6d15-55f2-485b-8dca-eef4be2c7ea2)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:48.575Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 29: Assessment 29 submitted (Job ID: 375683a5-1cf0-41e9-a997-1db0a76f9eb4)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:48.935Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 28: Assessment 28 submitted (Job ID: c1b683f2-d55c-46c6-a78b-bbf03f81afd3)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:48.937Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 25: Assessment 25 submitted (Job ID: 5a6db028-5d86-4009-8474-882b2b2c21af)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:48.939Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 30: Assessment 30 submitted (Job ID: 4ef987e3-58a6-458c-ab36-553d9ccaee38)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:48.942Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 26: Assessment 26 submitted (Job ID: 87464623-ff44-4ebb-9988-fc0740b4f90e)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:48.969Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 27: Assessment 27 submitted (Job ID: dcc29a60-6d78-42c3-886b-f2d1b03bb9f8)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:50.006Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 24: Assessment 24 submitted (Job ID: 662a7439-7acb-4dba-aef0-4b152155bc36)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:50.174Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 22: Assessment 22 submitted (Job ID: eb4afcec-8999-4c25-a070-6454205973b6)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:50.179Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 23: Assessment 23 submitted (Job ID: 91c59473-50d6-4550-990f-eaa2e8f7763e)",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:50.423Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 3: 10 assessments submitted",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:50.423Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch 3 assessments to complete...",
+      "data": null,
+      "timestamp": "2025-08-28T19:11:50.423Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 27: Assessment 27 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:50.599Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 27: Assessment 27 failed: Assessment 27 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:50.602Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 28: Assessment 28 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:50.649Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 28: Assessment 28 failed: Assessment 28 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:50.649Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 25: Assessment 25 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:51.145Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 25: Assessment 25 failed: Assessment 25 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:51.145Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 22: Assessment 22 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:51.292Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 22: Assessment 22 failed: Assessment 22 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:51.292Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 29: Assessment 29 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:51.778Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 29: Assessment 29 failed: Assessment 29 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:51.779Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 24: Assessment 24 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:52.204Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 24: Assessment 24 failed: Assessment 24 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:52.205Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 21: Assessment 21 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:52.206Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 21: Assessment 21 failed: Assessment 21 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:52.206Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 23: Assessment 23 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:52.493Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 23: Assessment 23 failed: Assessment 23 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:52.494Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 30: Assessment 30 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:52.718Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 30: Assessment 30 failed: Assessment 30 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:52.718Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 26: Assessment 26 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:53.194Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 26: Assessment 26 failed: Assessment 26 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:53.195Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Batch 3 completion: 0 successful, 10 failed",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:53.195Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 3 completed in 305825ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:53.196Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting 2 seconds before next batch...",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:53.196Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting batch 4/5 (10 assessments)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:55.198Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 33: Assessment 33 submitted (Job ID: 5df78b57-491c-4546-aae6-df3668c6d607)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:55.625Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 39: Assessment 39 submitted (Job ID: dfc065f4-01f7-4d7c-84de-ee33ad86f8a6)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:55.632Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 35: Assessment 35 submitted (Job ID: f321721b-be66-47f5-ba8a-771159c63dcd)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:55.678Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 34: Assessment 34 submitted (Job ID: a883a418-38e3-47dc-8494-f32103bfe451)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:55.725Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 31: Assessment 31 submitted (Job ID: f6549189-e9d3-4a31-bc18-7ac62d6df4d0)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:55.744Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 38: Assessment 38 submitted (Job ID: 0fe404fd-1620-4e09-a7ba-cd61b9366a67)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:55.750Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 40: Assessment 40 submitted (Job ID: cd947a43-be71-47ad-9629-0d6fa69d029c)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:56.077Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 37: Assessment 37 submitted (Job ID: 3d4acd10-9c0e-47be-9d48-fbaf1f01c12c)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:56.780Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 32: Assessment 32 submitted (Job ID: d5380a52-0a9e-40ab-9c2f-15cad812965b)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:56.803Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 36: Assessment 36 submitted (Job ID: d5130669-27f0-4f80-b857-4385982b9066)",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:56.829Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 4: 10 assessments submitted",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:56.829Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch 4 assessments to complete...",
+      "data": null,
+      "timestamp": "2025-08-28T19:16:56.829Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 31: Assessment 31 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:56.933Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 31: Assessment 31 failed: Assessment 31 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:56.934Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 39: Assessment 39 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:57.018Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 39: Assessment 39 failed: Assessment 39 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:57.019Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 33: Assessment 33 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:57.354Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 33: Assessment 33 failed: Assessment 33 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:57.355Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 32: Assessment 32 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:57.546Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 32: Assessment 32 failed: Assessment 32 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:57.546Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 40: Assessment 40 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:57.940Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 40: Assessment 40 failed: Assessment 40 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:57.940Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 36: Assessment 36 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:58.018Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 36: Assessment 36 failed: Assessment 36 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:58.019Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 35: Assessment 35 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:58.099Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 35: Assessment 35 failed: Assessment 35 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:58.099Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 37: Assessment 37 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:58.379Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 37: Assessment 37 failed: Assessment 37 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:58.380Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 34: Assessment 34 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:58.501Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 34: Assessment 34 failed: Assessment 34 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:58.501Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 38: Assessment 38 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:59.444Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 38: Assessment 38 failed: Assessment 38 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:59.445Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Batch 4 completion: 0 successful, 10 failed",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:59.445Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 4 completed in 304246ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:59.445Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting 2 seconds before next batch...",
+      "data": null,
+      "timestamp": "2025-08-28T19:21:59.445Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting batch 5/5 (10 assessments)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:01.447Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 44: Assessment 44 submitted (Job ID: 9dad862e-ddb8-4a48-a557-0d2c0333c041)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:01.942Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 41: Assessment 41 submitted (Job ID: c1bbd17e-84e5-404a-8d71-6a34ccfca41c)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:01.988Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 45: Assessment 45 submitted (Job ID: dde45d23-67de-4406-a7c7-9e9e13cf301d)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.055Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 49: Assessment 49 submitted (Job ID: 12d8ce58-14e7-4198-85bf-f9f8091e9ea5)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.090Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 47: Assessment 47 submitted (Job ID: 27c05255-afa1-4deb-ad92-4b9933f9e79a)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.093Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 46: Assessment 46 submitted (Job ID: 1ad8a5ce-4c32-4db8-9f8b-b4bce7a40221)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.108Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 50: Assessment 50 submitted (Job ID: ef11862e-8eb0-412c-850c-e6609171478f)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.681Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 42: Assessment 42 submitted (Job ID: 68c0c80e-8d09-43ba-b6e9-c9ab7bd9e63d)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.686Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 43: Assessment 43 submitted (Job ID: 49249023-eeda-4f9e-928f-851aced46f7e)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.955Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 48: Assessment 48 submitted (Job ID: 71a9c99d-008f-4612-bdc9-4e50bfda8604)",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.998Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 5: 10 assessments submitted",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.998Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch 5 assessments to complete...",
+      "data": null,
+      "timestamp": "2025-08-28T19:22:02.998Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 42: Assessment 42 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.011Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 42: Assessment 42 failed: Assessment 42 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.013Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 48: Assessment 48 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.302Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 48: Assessment 48 failed: Assessment 48 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.302Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 44: Assessment 44 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.455Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 44: Assessment 44 failed: Assessment 44 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.455Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 41: Assessment 41 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.558Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 41: Assessment 41 failed: Assessment 41 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.559Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 45: Assessment 45 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.629Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 45: Assessment 45 failed: Assessment 45 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.629Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 47: Assessment 47 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.985Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 47: Assessment 47 failed: Assessment 47 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:03.986Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 46: Assessment 46 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:04.145Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 46: Assessment 46 failed: Assessment 46 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:04.145Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 50: Assessment 50 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:04.283Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 50: Assessment 50 failed: Assessment 50 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:04.284Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 49: Assessment 49 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:04.289Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 49: Assessment 49 failed: Assessment 49 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:04.290Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 43: Assessment 43 timed out",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:05.418Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 43: Assessment 43 failed: Assessment 43 timed out after 300000ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:05.419Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Batch 5 completion: 0 successful, 10 failed",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:05.419Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 5 completed in 303972ms",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:05.420Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Generate assessment report",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:05.421Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment Stress Test Report",
+      "data": {
+        "totalAssessments": 50,
+        "batches": 5,
+        "batchSize": 10,
+        "results": {
+          "completed": 15,
+          "failed": 35,
+          "timeout": 0,
+          "successRate": 30
+        },
+        "performance": {
+          "averageCompletionTime": 22727,
+          "minCompletionTime": 21265,
+          "maxCompletionTime": 24264
+        },
+        "account": {
+          "email": "kasykoi@gmail.com"
+        }
+      },
+      "timestamp": "2025-08-28T19:27:05.423Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment Stress Test completed successfully",
+      "data": null,
+      "timestamp": "2025-08-28T19:27:05.426Z"
+    }
+  ]
+}

@@ -398,6 +398,11 @@ services:
       ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      # AI Rate Limiting Configuration
+      AI_RATE_LIMIT_RPM: 15
+      AI_MAX_RETRIES: 5
+      AI_RETRY_BASE_DELAY: 2000
+      AI_MAX_RETRY_DELAY: 30000
       WORKER_CONCURRENCY: 10
       MAX_RETRIES: 3
       RETRY_DELAY: 5000
@@ -429,7 +434,7 @@ services:
     volumes:
       - ./analysis-worker/logs:/app/logs
     deploy:
-      replicas: 3
+      replicas: 10
 
 
   # Admin Service

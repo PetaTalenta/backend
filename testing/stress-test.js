@@ -10,7 +10,7 @@ class StressTest {
     this.dataGenerator = new TestDataGenerator();
     this.users = [];
     this.stressUsers = parseInt(process.env.STRESS_TEST_USERS) || 5;
-    this.concurrentLimit = (process.env.NO_BATCH === 'true') ? this.stressUsers : (parseInt(process.env.CONCURRENT_LIMIT) || 3); // Allow full concurrency when NO_BATCH=true
+    this.concurrentLimit = (process.env.NO_BATCH === 'true') ? this.stressUsers : (parseInt(process.env.CONCURRENT_LIMIT) || 5); // Allow full concurrency when NO_BATCH=true
   }
 
   async run() {

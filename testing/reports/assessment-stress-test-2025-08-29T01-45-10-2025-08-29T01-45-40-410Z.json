@@ -1,0 +1,394 @@
+{
+  "testName": "assessment-stress-test-2025-08-29T01-45-10",
+  "startTime": "2025-08-29T01:45:10.305Z",
+  "endTime": "2025-08-29T01:45:40.408Z",
+  "duration": 30103,
+  "results": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "total": 6
+  },
+  "successRate": 100,
+  "errors": [],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting Assessment Stress Test: 15 assessments in 1 batches (batchSize=15, batchDelay=0s, pollInterval=5000ms)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:10.307Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Login with test account",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:10.310Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Successfully logged in with test account",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:11.818Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Generate assessment data",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:11.819Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Generated 15 assessment data sets",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:11.836Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Run assessment batches",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:11.837Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting batch 1/1 (15 assessments)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:11.837Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 11: Assessment 11 submitted (Job ID: c7231ed9-b804-4325-b6ab-1179c4390d8c)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:12.567Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Assessment 1 submitted (Job ID: 8caeb203-c0fd-4c5a-bdba-ec6a2aa88120)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:12.636Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 3: Assessment 3 submitted (Job ID: a98d9c42-b444-4a1c-8fe9-cd08e0894f68)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:12.692Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 5: Assessment 5 submitted (Job ID: 34d7fe86-95e6-4def-b8eb-2f629f944b9d)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:12.762Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 10: Assessment 10 submitted (Job ID: 3aeaa8ee-f3f4-4b5d-963f-7ee56915a441)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:12.837Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 12: Assessment 12 submitted (Job ID: 351fb51b-5d76-4bae-a170-31eb7989df66)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:13.006Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 8: Assessment 8 submitted (Job ID: 40cf2cad-b00c-4a14-8d0b-13e2a046e302)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:13.149Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 15: Assessment 15 submitted (Job ID: da9a023c-908e-4dbd-b030-58ab3f882804)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:13.321Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 13: Assessment 13 submitted (Job ID: 7d84ef4e-e96a-431c-9667-5508b5bdedac)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:13.395Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 4: Assessment 4 submitted (Job ID: 906ee8ad-ea9e-4aca-bad6-c01ee860bdbc)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:13.650Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 6: Assessment 6 submitted (Job ID: 5870a974-b42f-4c8d-bf37-c0f3df331966)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.057Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 9: Assessment 9 submitted (Job ID: fc5dfb7d-0c1f-4e8f-895a-210fd5bd35f0)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.095Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Assessment 2 submitted (Job ID: 4fffd593-0f93-4ffd-9167-9ca00fe5eac9)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.146Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 14: Assessment 14 submitted (Job ID: d174d8b4-ba9b-4759-ad42-18caefaea98d)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.179Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 7: Assessment 7 submitted (Job ID: 3ae4b07b-510c-41dd-a3f5-27773a2315e7)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.186Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 1: 15 assessments submitted",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.187Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Waiting for batch 1 assessments to complete...",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.188Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Assessment 2 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.449Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 5: Assessment 5 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.481Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 7: Assessment 7 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.506Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 4: Assessment 4 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.525Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 10: Assessment 10 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.526Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 14: Assessment 14 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.531Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 9: Assessment 9 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:14.533Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 3: Assessment 3 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:15.295Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 12: Assessment 12 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:15.365Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Assessment 1 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:15.366Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 11: Assessment 11 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:15.368Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 13: Assessment 13 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:15.369Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 8: Assessment 8 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:15.412Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 6: Assessment 6 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:15.540Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 15: Assessment 15 status: processing",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:15.621Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 3: Assessment 3 completed in 21656ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:33.495Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 14: Assessment 14 completed in 23560ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:35.403Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 1: Assessment 1 completed in 24411ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:36.248Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 7: Assessment 7 completed in 24558ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:36.398Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 10: Assessment 10 completed in 24748ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:36.589Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 4: Assessment 4 completed in 24834ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:36.673Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 13: Assessment 13 completed in 25010ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:36.853Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 5: Assessment 5 completed in 25461ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:37.301Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 2: Assessment 2 completed in 25746ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:37.584Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 12: Assessment 12 completed in 25782ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:37.624Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 6: Assessment 6 completed in 25784ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:37.624Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 15: Assessment 15 completed in 26688ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:38.531Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 11: Assessment 11 completed in 26943ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:38.785Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 9: Assessment 9 completed in 27745ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:39.586Z"
+    },
+    {
+      "level": "INFO",
+      "message": "User 8: Assessment 8 completed in 28563ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:40.404Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Batch 1 completion: 15 successful, 0 failed",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:40.405Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Batch 1 completed in 28568ms",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:40.405Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Batch 1 verification: 15/15 completed (100%)",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:40.406Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Generate assessment report",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:40.406Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment Stress Test Report",
+      "data": {
+        "totalAssessments": 15,
+        "batches": 1,
+        "batchSize": 15,
+        "results": {
+          "completed": 15,
+          "failed": 0,
+          "timeout": 0,
+          "successRate": 100
+        },
+        "performance": {
+          "averageCompletionTime": 25433,
+          "minCompletionTime": 21656,
+          "maxCompletionTime": 28563
+        },
+        "account": {
+          "email": "kasykoi@gmail.com"
+        }
+      },
+      "timestamp": "2025-08-29T01:45:40.407Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Assessment Stress Test completed successfully",
+      "data": null,
+      "timestamp": "2025-08-29T01:45:40.407Z"
+    }
+  ]
+}

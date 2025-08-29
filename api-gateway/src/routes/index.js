@@ -170,6 +170,9 @@ router.get('/assessment/health/queue', assessmentServiceProxy);
 // Assessment submission (protected + rate limited)
 router.use('/assessment/submit', verifyToken, assessmentLimiter, assessmentServiceProxy);
 
+// Assessment retry (protected + rate limited) - forward to assessment service
+router.use('/assessment/retry', verifyToken, assessmentLimiter, assessmentServiceProxy);
+
 // Assessment status check (protected)
 router.use('/assessment/status', verifyToken, assessmentServiceProxy);
 

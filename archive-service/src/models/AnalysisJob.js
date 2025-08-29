@@ -58,6 +58,12 @@ const AnalysisJob = sequelize.define('AnalysisJob', {
     defaultValue: 0,
     field: 'priority'
   },
+  assessment_data: {
+    // Added via migration add-assessment-data-column-to-jobs.sql
+    type: DataTypes.JSONB,
+    allowNull: true,
+    field: 'assessment_data'
+  },
   retry_count: {
     type: DataTypes.INTEGER,
     allowNull: false,

@@ -3,7 +3,7 @@
  */
 
 const aiService = require('../services/aiService');
-const { saveAnalysisResult, updateAnalysisJobStatus, checkHealth } = require('../services/archiveService');
+const { saveAnalysisResult, saveFailedAnalysisResult, updateAnalysisJobStatus, checkHealth } = require('../services/archiveService');
 const { jobDeduplicationService, tokenRefundService } = require('../services/jobDeduplicationService');
 const { auditLogger, AUDIT_EVENTS, RISK_LEVELS } = require('../services/auditLogger');
 const notificationService = require('../services/notificationService'); // Keep for backward compatibility
@@ -405,17 +405,52 @@ const processAssessmentOptimized = async (jobData) => {
       jobHash: deduplicationResult?.jobHash
     });
 
-    // Save failed result (async)
-    try {
-      updateAnalysisJobStatus(jobId, 'failed', {
-        error_message: error?.message,
-        error_code: error?.code
-      });
-    } catch (statusError) {
-      logger.error('Failed to update job status to failed', {
-        jobId,
-        statusError: statusError.message
-      });
+    // For rate limit exceeded errors, also persist a failed AnalysisResult so user can see it
+    if (error?.code === ERROR_TYPES.RATE_LIMIT_ERROR.code) {
+      try {
+        const failedResult = await saveFailedAnalysisResult(
+          userId,
+          assessmentData,
+          error.message,
+          jobId,
+          assessmentName
+        );
+
+        // Update job status linking the failed result
+        updateAnalysisJobStatus(jobId, 'failed', {
+          error_message: error.message,
+          result_id: failedResult.id
+        });
+      } catch (failedSaveErr) {
+        logger.error('Failed to persist failed analysis result for rate limit error', {
+          jobId,
+          userId,
+            error: failedSaveErr.message
+        });
+        // Fallback: at least mark job failed without result linkage
+        try {
+          updateAnalysisJobStatus(jobId, 'failed', {
+            error_message: error.message
+          });
+        } catch (statusError) {
+          logger.error('Failed to update job status to failed (fallback)', {
+            jobId,
+            statusError: statusError.message
+          });
+        }
+      }
+    } else {
+      // Generic failure path (no dedicated failed result creation here)
+      try {
+        updateAnalysisJobStatus(jobId, 'failed', {
+          error_message: error?.message
+        });
+      } catch (statusError) {
+        logger.error('Failed to update job status to failed', {
+          jobId,
+          statusError: statusError.message
+        });
+      }
     }
 
     // Publish analysis failed event (async, non-blocking)

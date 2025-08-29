@@ -1,0 +1,152 @@
+{
+  "testName": "websocket-test-2025-08-28T18-52-11",
+  "startTime": "2025-08-28T18:52:11.478Z",
+  "endTime": "2025-08-28T18:52:53.790Z",
+  "duration": 42312,
+  "results": {
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0,
+    "total": 13
+  },
+  "successRate": 100,
+  "errors": [],
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "Starting WebSocket-focused E2E Test",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:11.481Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 1: Setup Test Environment",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:11.490Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test environment setup completed",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:11.913Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 2: Test WebSocket Connection",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:11.913Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connection established",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:12.107Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket connection with custom options successful",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:12.313Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 3: Test WebSocket Authentication",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:12.313Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket authentication successful",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:12.361Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Invalid token properly rejected",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:12.742Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 4: Test Notification Flow",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:15.242Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Assessment submitted, waiting for notifications...",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:15.501Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Analysis-started notification received correctly",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:15.852Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Analysis-complete notification received correctly",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:36.231Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Notification flow completed",
+      "data": {
+        "totalNotifications": 2,
+        "startedNotifications": 1,
+        "completeNotifications": 1
+      },
+      "timestamp": "2025-08-28T18:52:36.232Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 5: Test WebSocket Reconnection",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:36.235Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket reconnection successful",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:39.711Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 6: Test Error Handling",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:39.712Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Authentication timeout handled correctly",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:50.937Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Invalid URL connection properly rejected",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:50.985Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "WebSocket E2E Test completed successfully",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:53.449Z"
+    },
+    {
+      "level": "INFO",
+      "message": "Starting: Step 7: Cleanup",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:53.450Z"
+    },
+    {
+      "level": "SUCCESS",
+      "message": "Test account cleaned up",
+      "data": null,
+      "timestamp": "2025-08-28T18:52:53.790Z"
+    }
+  ]
+}

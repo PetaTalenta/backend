@@ -259,6 +259,115 @@ router.post('/submit',
     next(error);
   }
 });
+
+/**
+ * @route POST /assessment/retry
+ * @description Retry an assessment analysis using an existing result's assessment_data
+ * @access Private
+ * Body: { resultId: UUID }
+ */
+router.post('/retry',
+  authenticateToken,
+  requireTokenBalance(1),
+  async (req, res, next) => {
+    try {
+      // Allow retry by resultId OR jobId (mutually exclusive)
+      const schema = Joi.object({
+        resultId: Joi.string().uuid().optional(),
+        jobId: Joi.string().trim().optional()
+      }).xor('resultId', 'jobId')
+        .messages({ 'object.missing': 'Either resultId or jobId is required', 'object.xor': 'Provide only one of resultId or jobId' });
+
+      const { error, value } = schema.validate(req.body);
+      if (error) {
+        return sendError(res, 'VALIDATION_ERROR', 'Invalid request body', error.details.reduce((acc, d) => { acc[d.path.join('.')] = d.message; return acc; }, {}), 400);
+      }
+
+      const { resultId, jobId: sourceJobId } = value;
+      const { id: userId, email: userEmail } = req.user;
+
+      logger.info('Assessment retry requested', { userId, resultId, sourceJobId, mode: resultId ? 'result' : 'job' });
+
+      let assessmentData, assessmentName, originalResultId = null;
+
+      if (resultId) {
+        // Fetch existing analysis result
+        const existingResult = await archiveService.getAnalysisResult(resultId);
+        if (!existingResult) {
+          return sendNotFound(res, 'Result not found');
+        }
+        if (existingResult.user_id !== userId) {
+          return sendError(res, 'FORBIDDEN', 'Access denied to this result', {}, 403);
+        }
+        assessmentData = existingResult.assessment_data;
+        assessmentName = existingResult.assessment_name || 'AI-Driven Talent Mapping';
+        originalResultId = resultId;
+      } else {
+        // Retry using jobId route (job_id, not DB primary key)
+        let existingJob;
+        try {
+          existingJob = await archiveService.getJobStatus(sourceJobId);
+        } catch (archiveErr) {
+          logger.warn('Failed to fetch job for retry', { sourceJobId, error: archiveErr.message });
+          existingJob = null;
+        }
+        if (!existingJob) {
+          return sendNotFound(res, 'Job not found');
+        }
+        if (existingJob.user_id !== userId) {
+          return sendError(res, 'FORBIDDEN', 'Access denied to this job', {}, 403);
+        }
+        assessmentData = existingJob.assessment_data;
+        assessmentName = existingJob.assessment_name || 'AI-Driven Talent Mapping';
+      }
+
+      if (!assessmentData || Object.keys(assessmentData).length === 0) {
+        return sendError(res, 'NO_ASSESSMENT_DATA', 'Source does not contain assessment data to retry', {}, 400);
+      }
+
+      const tokenCost = parseInt(process.env.ANALYSIS_TOKEN_COST || '1');
+      try {
+        const updatedUser = await authService.deductTokens(userId, req.token, tokenCost);
+        req.user.tokenBalance = updatedUser.token_balance;
+      } catch (deductErr) {
+        if (deductErr instanceof AppError && deductErr.code === 'INSUFFICIENT_TOKENS') {
+          return sendError(res, 'INSUFFICIENT_TOKENS', deductErr.message, deductErr.details, 402);
+        }
+        throw deductErr;
+      }
+
+      const newJobId = uuidv4();
+      try {
+        await archiveService.createJob(newJobId, userId, assessmentData, assessmentName);
+      } catch (archiveErr) {
+        logger.error('Failed to create retry job in Archive Service, refunding tokens', { newJobId, userId, source: resultId || sourceJobId, error: archiveErr.message });
+        try {
+          await authService.refundTokens(userId, req.token, tokenCost);
+        } catch (refundErr) {
+          logger.error('Failed to refund tokens after Archive Service retry job error', { userId, tokenCost, error: refundErr.message });
+        }
+        throw new AppError('ARCHIVE_SERVICE_ERROR', 'Failed to create retry job in archive service', 503);
+      }
+
+      jobTracker.createJob(newJobId, userId, userEmail, assessmentData, assessmentName);
+      await queueService.publishAssessmentJob(assessmentData, userId, userEmail, newJobId, assessmentName);
+      const queueStats = await queueService.getQueueStats();
+
+      return sendSuccess(res, 'Assessment retry queued successfully', {
+        jobId: newJobId,
+        originalResultId,
+        sourceJobId: resultId ? null : sourceJobId,
+        status: jobTracker.JOB_STATUS.QUEUED,
+        estimatedProcessingTime: '2-5 minutes',
+        queuePosition: queueStats.messageCount,
+        tokenCost,
+        remainingTokens: req.user.tokenBalance
+      }, 202);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 /**
  * @route GET /assessment/status/:jobId
  * @description Get assessment job status
