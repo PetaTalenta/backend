@@ -1,0 +1,141 @@
+version: '3.8'
+
+# File ini khusus untuk development: bind mount source code sehingga perubahan langsung tercermin
+# Jalankan dengan: docker compose up --build (compose otomatis memuat override)
+# atau eksplisit: docker compose -f docker-compose.yml -f docker-compose.override.yml up --build
+
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - ./api-gateway:/app
+      - /app/node_modules
+      - ./api-gateway/logs:/app/logs
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - ./auth-service:/app
+      - /app/node_modules
+      - ./auth-service/logs:/app/logs
+
+  assessment-service:
+    build:
+      context: ./assessment-service
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - ./assessment-service:/app
+      - /app/node_modules
+      - ./assessment-service/logs:/app/logs
+
+  archive-service:
+    build:
+      context: ./archive-service
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - ./archive-service:/app
+      - /app/node_modules
+      - ./archive-service/logs:/app/logs
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - ./notification-service:/app
+      - /app/node_modules
+      - ./notification-service/logs:/app/logs
+
+  chatbot-service:
+    build:
+      context: ./chatbot-service
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - ./chatbot-service:/app
+      - /app/node_modules
+      - ./chatbot-service/logs:/app/logs
+
+  analysis-worker:
+    build:
+      context: ./analysis-worker
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - ./analysis-worker:/app
+      - /app/node_modules
+      - ./analysis-worker/logs:/app/logs
+
+  admin-service:
+    build:
+      context: ./admin-service
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - ./admin-service:/app
+      - /app/node_modules
+
+  documentation-service:
+    build:
+      context: ./documentation-service
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    user: root
+    environment:
+      NODE_ENV: development
+    command: npm run dev -- --host 0.0.0.0 --port 80
+    ports:
+      - "8080:80"
+    volumes:
+      - ./documentation-service:/app
+      - /app/node_modules
+    # Dev mode uses Vite directly on port 80 so Cloudflare (expecting port 80) works
+    # Nginx stage tidak dipakai di dev; kita pakai container Node builder saja
+    # Healthcheck opsional bisa ditambahkan kalau perlu
+
+# Catatan:
+# 1. /app/node_modules adalah anonymous volume agar tidak tertimpa host (performance & isolasi)
+# 2. Production tetap gunakan docker-compose.yml saja (tanpa override) sehingga devDependencies tidak terinstall.

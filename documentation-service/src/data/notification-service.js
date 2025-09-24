@@ -1,8 +1,8 @@
 export const notificationServiceData = {
   name: "Notification Service",
   description: "Real-time notification system for ATMA using WebSocket (Socket.IO). Provides instant notifications for analysis status updates including started, completed, and failed events.",
-  baseUrl: "https://api.chhrone.web.id/api/notifications",
-  websocketUrl: "https://api.chhrone.web.id",
+  baseUrl: "api.futureguide.id",
+  websocketUrl: "api.futureguide.id",
   version: "1.0.0",
   protocol: "Socket.IO v4.7.2",
   authentication: "JWT Token Required",
@@ -28,7 +28,7 @@ npm install socket.io-client
 // Basic connection setup
 import { io } from 'socket.io-client';
 
-const socket = io('https://api.chhrone.web.id', {
+const socket = io('api.futureguide.id', {
   autoConnect: false,
   transports: ['websocket', 'polling']
 });
@@ -168,7 +168,7 @@ socket.on('auth_error', (error) => {
         },
         timestamp: "2024-01-01T12:00:00.000Z"
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/notifications/health`
+      example: `curl -X GET api.futureguide.id/api/notifications/health`
     },
     {
       method: "POST",
@@ -216,7 +216,7 @@ socket.on('auth_error', (error) => {
         },
         message: "Notification sent successfully"
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/notifications/send \\
+      example: `curl -X POST api.futureguide.id/api/notifications/send \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer INTERNAL_SERVICE_TOKEN" \\
   -d '{
@@ -247,7 +247,7 @@ export const useNotifications = (token) => {
   useEffect(() => {
     if (!token) return;
 
-    const newSocket = io('https://api.chhrone.web.id', {
+    const newSocket = io('api.futureguide.id', {
       autoConnect: false,
       transports: ['websocket', 'polling']
     });
@@ -317,7 +317,7 @@ export function useNotifications(token) {
   const connect = () => {
     if (!token.value) return;
 
-    socket.value = io('https://api.chhrone.web.id', {
+    socket.value = io('api.futureguide.id', {
       autoConnect: false,
       transports: ['websocket', 'polling']
     });
@@ -413,7 +413,7 @@ export function useNotifications(token) {
       }
     ],
     debugSteps: [
-      "Check service status: GET https://api.chhrone.web.id/api/notifications/health",
+      "Check service status: GET api.futureguide.id/api/notifications/health",
       "Enable debug mode: localStorage.debug = 'socket.io-client:socket'",
       "Monitor network tab for WebSocket connections",
       "Verify JWT token payload and expiry",

@@ -43,7 +43,7 @@ Interactive documentation service for the AI-Driven Talent Mapping Assessment (A
 - **Styling**: Custom CSS with modern design principles
 - **Syntax Highlighting**: PrismJS
 - **Build Tool**: Vite for fast development and optimized builds
-- **Base URL**: `https://api.chhrone.web.id`
+- **Base URL**: `api.futureguide.id`
 
 ## 🚀 Getting Started
 
@@ -135,7 +135,7 @@ documentation-service/
 ## 🔧 Configuration
 
 ### Base URL Configuration
-The base URL is configured to `https://api.chhrone.web.id` and can be updated in the service data files if needed.
+The base URL is configured to `api.futureguide.id` and can be updated in the service data files if needed.
 
 ### Rate Limiting Information
 Each service has different rate limits:

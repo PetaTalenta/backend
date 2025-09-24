@@ -1,7 +1,7 @@
 export const globalEndpointsData = {
   name: "Global Endpoints",
   description: "Global API endpoints yang tersedia di root level API Gateway untuk health checks, monitoring, dan informasi sistem umum.",
-  baseUrl: "https://api.chhrone.web.id",
+  baseUrl: "api.futureguide.id",
   version: "1.0.0",
   port: "3000",
   endpoints: [
@@ -28,7 +28,7 @@ export const globalEndpointsData = {
           chatbot: "healthy"
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/health`
+      example: `curl -X GET api.futureguide.id/health`
     },
     {
       method: "GET",
@@ -83,7 +83,7 @@ export const globalEndpointsData = {
           unhealthy: 0
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/health/detailed`
+      example: `curl -X GET api.futureguide.id/health/detailed`
     },
     {
       method: "GET",
@@ -110,7 +110,7 @@ export const globalEndpointsData = {
           }
         ]
       },
-      example: `curl -X GET https://api.chhrone.web.id/health/ready`
+      example: `curl -X GET api.futureguide.id/health/ready`
     },
     {
       method: "GET",
@@ -124,7 +124,7 @@ export const globalEndpointsData = {
         timestamp: "2024-01-01T00:00:00.000Z",
         uptime: 3600.5
       },
-      example: `curl -X GET https://api.chhrone.web.id/health/live`
+      example: `curl -X GET api.futureguide.id/health/live`
     },
     {
       method: "GET",
@@ -152,7 +152,7 @@ export const globalEndpointsData = {
           live: "/health/live"
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/`
+      example: `curl -X GET api.futureguide.id/`
     }
   ],
   notes: [

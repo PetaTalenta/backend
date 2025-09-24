@@ -34,7 +34,7 @@ export const archiveServiceData = {
       "Access control berbasis ownership"
     ]
   },
-  baseUrl: "http://localhost:3000/api/archive",
+  baseUrl: "api.futureguide.id",
   version: "1.0.0",
   port: "3002",
   internalPort: "3002",
@@ -276,7 +276,7 @@ export const archiveServiceData = {
           }
         }
       },
-      example: `curl -X GET "http://localhost:3000/api/archive/results?page=1&limit=10&sort=created_at&order=DESC" \\
+      example: `curl -X GET "api.futureguide.id/api/archive/results?page=1&limit=10&sort=created_at&order=DESC" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -504,11 +504,11 @@ export const archiveServiceData = {
           updated_at: "timestamp"
         }
       },
-      example: `curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
 # For public results (no authentication required):
-curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
+curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
     },
     {
       method: "PUT",
@@ -538,7 +538,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           updated_at: "timestamp"
         }
       },
-      example: `curl -X PUT http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X PUT api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"status": "completed", "assessment_data": {...}, "persona_profile": {...}}'`
@@ -569,7 +569,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           is_public: true
         }
       },
-      example: `curl -X PATCH http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000/public \\
+      example: `curl -X PATCH api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000/public \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"is_public": true}'`
@@ -667,7 +667,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           }
         }
       },
-      example: `curl -X GET "http://localhost:3000/api/archive/jobs?status=completed&page=1&limit=10" \\
+      example: `curl -X GET "api.futureguide.id/api/archive/jobs?status=completed&page=1&limit=10" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -706,7 +706,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           archetype: "The Analytical Innovator"
         }
       },
-      example: `curl -X GET http://localhost:3000/api/archive/jobs/job_12345abcdef \\
+      example: `curl -X GET api.futureguide.id/api/archive/jobs/job_12345abcdef \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -728,7 +728,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           success_rate: 0.94
         }
       },
-      example: `curl -X GET http://localhost:3000/api/archive/results/jobs/stats \\
+      example: `curl -X GET api.futureguide.id/api/archive/results/jobs/stats \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -754,7 +754,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           deleted_at: "timestamp"
         }
       },
-      example: `curl -X DELETE http://localhost:3000/api/archive/jobs/job_12345abcdef \\
+      example: `curl -X DELETE api.futureguide.id/api/archive/jobs/job_12345abcdef \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -793,7 +793,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           ]
         }
       },
-      example: `curl -X GET http://localhost:3000/api/archive/stats \\
+      example: `curl -X GET api.futureguide.id/api/archive/stats \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -830,7 +830,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           }
         }
       },
-      example: `curl -X GET http://localhost:3000/api/archive/stats/overview \\
+      example: `curl -X GET api.futureguide.id/api/archive/stats/overview \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -856,7 +856,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           deleted_at: "2024-01-15T10:30:00.000Z"
         }
       },
-      example: `curl -X DELETE http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X DELETE api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -891,7 +891,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
         message: "Unified statistics retrieved successfully",
         data: "Varies based on parameters"
       },
-      example: `curl -X GET "http://localhost:3000/api/archive/v1/stats?type=user&scope=overview&timeRange=30 days" \\
+      example: `curl -X GET "api.futureguide.id/api/archive/v1/stats?type=user&scope=overview&timeRange=30 days" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -938,7 +938,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
         message: "Data retrieved successfully",
         data: "Varies based on type parameter"
       },
-      example: `curl -X GET "http://localhost:3000/api/archive/v1/data/results?page=1&limit=10" \\
+      example: `curl -X GET "api.futureguide.id/api/archive/v1/data/results?page=1&limit=10" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -987,7 +987,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
           message: "Insufficient admin privileges"
         }
       ],
-      example: `curl -X DELETE http://localhost:3000/api/archive/admin/users/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X DELETE api.futureguide.id/api/archive/admin/users/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
     },
     {
@@ -1004,7 +1004,7 @@ curl -X GET http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-44
         version: "1.0.0",
         service: "archive-service"
       },
-      example: `curl -X GET http://localhost:3000/api/archive/health`
+      example: `curl -X GET api.futureguide.id/api/archive/health`
     }
   ],
   errorResponses: {

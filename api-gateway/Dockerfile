@@ -11,11 +11,17 @@ RUN apk add --no-cache dumb-init
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
+ARG INCLUDE_DEV_DEPS=false
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies (prod only by default, include dev when requested)
+RUN if [ "$INCLUDE_DEV_DEPS" = "true" ]; then \
+      npm ci && npm cache clean --force; \
+    else \
+      npm ci --only=production && npm cache clean --force; \
+    fi
 
 # Copy source code
 COPY . .

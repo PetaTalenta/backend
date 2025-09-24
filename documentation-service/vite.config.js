@@ -8,9 +8,10 @@ export default defineConfig({
     sourcemap: true
   },
   server: {
-    port: 3007,
+    port: 80, // run on port 80 inside container to match Cloudflare ingress
     host: true,
-    open: true
+    open: false,
+    allowedHosts: ['docs.futureguide.id', 'localhost', '127.0.0.1']
   },
   preview: {
     port: 4173,

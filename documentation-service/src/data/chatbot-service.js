@@ -1,7 +1,7 @@
 export const chatbotServiceData = {
   name: "Chatbot Service",
   description: "AI-powered conversational service for career guidance, assessment interpretation, and personalized recommendations. Provides intelligent chat interactions based on user assessment data.",
-  baseUrl: "https://api.chhrone.web.id/api/chatbot",
+  baseUrl: "api.futureguide.id",
   version: "1.0.0",
   port: "3004",
   endpoints: [
@@ -30,7 +30,7 @@ export const chatbotServiceData = {
           }
         }
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/chatbot/conversations \\
+      example: `curl -X POST api.futureguide.id/api/chatbot/conversations \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -68,7 +68,7 @@ export const chatbotServiceData = {
           }
         }
       },
-      example: `curl -X GET "https://api.chhrone.web.id/api/chatbot/conversations?page=1&limit=10&status=active" \\
+      example: `curl -X GET "api.futureguide.id/api/chatbot/conversations?page=1&limit=10&status=active" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
       // Example with filters: "&include_archived=false&context_type=assessment"
     },
@@ -95,7 +95,7 @@ export const chatbotServiceData = {
           }
         }
       },
-      example: `curl -X GET "https://api.chhrone.web.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000?include_messages=true&message_limit=50" \\
+      example: `curl -X GET "api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000?include_messages=true&message_limit=50" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
 
     },
@@ -123,7 +123,7 @@ export const chatbotServiceData = {
           processing_time: 1200
         }
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages \\
+      example: `curl -X POST api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -149,7 +149,7 @@ export const chatbotServiceData = {
           usage: { model: "...", prompt_tokens: 0, completion_tokens: 0, total_tokens: 0, cost: 0 }
         }
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/chatbot/conversations/CONV_ID/messages/MESSAGE_ID/regenerate \\
+      example: `curl -X POST api.futureguide.id/api/chatbot/conversations/CONV_ID/messages/MESSAGE_ID/regenerate \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -178,7 +178,7 @@ export const chatbotServiceData = {
           }
         }
       },
-      example: `curl -X PUT https://api.chhrone.web.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X PUT api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -205,7 +205,7 @@ export const chatbotServiceData = {
           deletedAt: "2024-01-01T11:00:00Z"
         }
       },
-      example: `curl -X DELETE https://api.chhrone.web.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X DELETE api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -238,7 +238,7 @@ export const chatbotServiceData = {
           }
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/chatbot/assessment/conversations/550e8400-e29b-41d4-a716-446655440000/suggestions \\
+      example: `curl -X GET api.futureguide.id/api/chatbot/assessment/conversations/550e8400-e29b-41d4-a716-446655440000/suggestions \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -303,7 +303,7 @@ export const chatbotServiceData = {
         },
         message: "Assessment-based conversation created successfully"
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/chatbot/assessment/from-assessment \\
+      example: `curl -X POST api.futureguide.id/api/chatbot/assessment/from-assessment \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -382,7 +382,7 @@ export const chatbotServiceData = {
         },
         message: "Messages retrieved successfully"
       },
-      example: `curl -X GET "https://api.chhrone.web.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages?page=1&limit=50" \\
+      example: `curl -X GET "api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages?page=1&limit=50" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -398,7 +398,7 @@ export const chatbotServiceData = {
         service: "chatbot-service",
         version: "1.0.0"
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/chatbot/health`
+      example: `curl -X GET api.futureguide.id/api/chatbot/health`
     },
     {
       method: "GET",

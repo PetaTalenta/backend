@@ -1,7 +1,7 @@
 export const assessmentServiceData = {
   name: "Assessment Service",
   description: "AI-driven talent mapping assessment service. Submit and monitor personality assessments using RIASEC, OCEAN, and VIA-IS frameworks for comprehensive career guidance.",
-  baseUrl: "https://api.chhrone.web.id/api/assessment",
+  baseUrl: "api.futureguide.id",
   version: "1.0.0",
   port: "3003",
   endpoints: [
@@ -82,9 +82,9 @@ export const assessmentServiceData = {
           telekomunikasi: 24
         },
         rawResponses: {
-          riasec: [{ questionId: "RIASEC-R-01", value: 4 }],
-          ocean: [{ questionId: "O-01", value: 5 }],
-          viaIs: [{ questionId: "VIA-01", value: 4 }]
+          riasec: [{ questionId: "Riasec-R-01", value: 4 }],
+          ocean: [{ questionId: "Ocean-O-01", value: 5 }],
+          viaIs: [{ questionId: "VIA-Judgement-01", value: 4 }]
         },
         rawSchemaVersion: "v1"
       },
@@ -144,7 +144,7 @@ export const assessmentServiceData = {
           remainingTokens: 9
         }
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/assessment/submit \\
+      example: `curl -X POST https://api.futureguide.id/api/assessment/submit \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -H "X-Idempotency-Key: YOUR_UNIQUE_KEY" \\
@@ -171,9 +171,9 @@ export const assessmentServiceData = {
       "judgment": 75
     },
     "rawResponses": {
-      "riasec": [{ "questionId": "RIASEC-R-01", "value": 4 }],
-      "ocean": [{ "questionId": "O-01", "value": 5 }],
-      "viaIs": [{ "questionId": "VIA-01", "value": 4 }]
+      "riasec": [{ "questionId": "Riasec-R-01", "value": 4 }],
+      "ocean": [{ "questionId": "Ocean-O-01", "value": 5 }],
+      "viaIs": [{ "questionId": "VIA-Judgement-01", "value": 4 }]
     },
     "rawSchemaVersion": "v1",
     "industryScore": {
@@ -220,7 +220,7 @@ export const assessmentServiceData = {
           remainingTokens: 8
         }
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/assessment/retry \\
+      example: `curl -X POST https://api.futureguide.id/api/assessment/retry \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -260,7 +260,7 @@ export const assessmentServiceData = {
           error: null
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/assessment/status/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X GET https://api.futureguide.id/api/assessment/status/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -287,7 +287,7 @@ export const assessmentServiceData = {
           }
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/assessment/queue/status \\
+      example: `curl -X GET https://api.futureguide.id/api/assessment/queue/status \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -325,7 +325,7 @@ export const assessmentServiceData = {
           failed: 43
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/assessment/health`
+      example: `curl -X GET https://api.futureguide.id/api/assessment/health`
     },
     {
       method: "GET",
@@ -338,7 +338,7 @@ export const assessmentServiceData = {
         status: "alive",
         timestamp: "2024-01-01T00:00:00.000Z"
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/assessment/health/live`
+      example: `curl -X GET https://api.futureguide.id/api/assessment/health/live`
     },
     {
       method: "GET",
@@ -351,7 +351,7 @@ export const assessmentServiceData = {
         status: "ready",
         timestamp: "2024-01-01T00:00:00.000Z"
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/assessment/health/ready`
+      example: `curl -X GET https://api.futureguide.id/api/assessment/health/ready`
     },
     {
       method: "GET",
@@ -369,7 +369,7 @@ export const assessmentServiceData = {
           consumerCount: 2
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/assessment/health/queue`
+      example: `curl -X GET https://api.futureguide.id/api/assessment/health/queue`
     },
     {
       method: "GET",
@@ -388,7 +388,7 @@ export const assessmentServiceData = {
           lastCleanup: "2024-01-01T09:00:00Z"
         }
       },
-      example: `curl -X GET https://api.chhrone.web.id/api/assessment/idempotency/health \\
+      example: `curl -X GET https://api.futureguide.id/api/assessment/idempotency/health \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -406,7 +406,7 @@ export const assessmentServiceData = {
           remainingEntries: 125
         }
       },
-      example: `curl -X POST https://api.chhrone.web.id/api/assessment/idempotency/cleanup \\
+      example: `curl -X POST https://api.futureguide.id/api/assessment/idempotency/cleanup \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     }
   ]

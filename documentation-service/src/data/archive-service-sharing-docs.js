@@ -96,19 +96,19 @@ export const archiveServiceSharingDocs = {
       examples: [
         {
           title: "Membuat Hasil Public",
-          code: `curl -X PATCH http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000/public \\
+          code: `curl -X PATCH api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000/public \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"is_public": true}'`
         },
         {
           title: "Mengakses Hasil Public",
-          code: `curl http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
+          code: `curl api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
         },
         {
           title: "Mengakses Hasil Private",
           code: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
-  http://localhost:3000/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
+  api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
         }
       ]
     },

@@ -1,10 +1,15 @@
-# ATMA Admin Service Dockerfile
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
+ARG INCLUDE_DEV_DEPS=false
+
 COPY package*.json ./
-RUN npm install --only=production && npm cache clean --force
+RUN if [ "$INCLUDE_DEV_DEPS" = "true" ]; then \
+			npm install && npm cache clean --force; \
+		else \
+			npm install --only=production && npm cache clean --force; \
+		fi
 
 COPY src ./src
 
