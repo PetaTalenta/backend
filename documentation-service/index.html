@@ -221,7 +221,7 @@
                                 <h4>Register Account</h4>
                                 <p>Create a new user account using the Auth Service registration endpoint.</p>
                                 <div class="code-block">
-                                    <pre><code class="language-bash">curl -X POST api.futureguide.id/api/auth/register \
+                                    <pre><code class="language-bash">curl -X POST https://api.chhrone.web.id/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -237,7 +237,7 @@
                                 <h4>Obtain JWT Token</h4>
                                 <p>Login to get your authentication token.</p>
                                 <div class="code-block">
-                                    <pre><code class="language-bash">curl -X POST api.futureguide.id/api/auth/login \
+                                    <pre><code class="language-bash">curl -X POST https://api.chhrone.web.id/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -253,7 +253,7 @@
                                 <h4>Submit Assessment</h4>
                                 <p>Submit your first assessment for AI analysis.</p>
                                 <div class="code-block">
-                                    <pre><code class="language-bash">curl -X POST api.futureguide.id/api/assessment/submit \
+                                    <pre><code class="language-bash">curl -X POST https://api.chhrone.web.id/api/assessment/submit \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d @assessment_data.json</code></pre>
@@ -267,7 +267,7 @@
                                 <h4>Get Results</h4>
                                 <p>Retrieve your assessment results from the Archive Service.</p>
                                 <div class="code-block">
-                                    <pre><code class="language-bash">curl -X GET api.futureguide.id/api/archive/results \
+                                    <pre><code class="language-bash">curl -X GET https://api.chhrone.web.id/api/archive/results \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"</code></pre>
                                 </div>
                             </div>
@@ -293,7 +293,7 @@
                                     <h4>Complete Assessment Flow</h4>
                                     <pre><code class="language-javascript">// ATMA API Client Example
 class ATMAClient {
-  constructor(baseURL = 'api.futureguide.id') {
+  constructor(baseURL = 'https://api.chhrone.web.id') {
     this.baseURL = baseURL;
     this.token = null;
   }
@@ -349,7 +349,7 @@ console.log('Assessment submitted:', result);</code></pre>
 import json
 
 class ATMAClient:
-    def __init__(self, base_url='api.futureguide.id'):
+    def __init__(self, base_url='https://api.chhrone.web.id'):
         self.base_url = base_url
         self.token = None
     
@@ -399,7 +399,7 @@ print('Assessment submitted:', result)</code></pre>
                                 <div class="code-block">
                                     <h4>cURL Examples</h4>
                                     <pre><code class="language-bash"># Login and get token
-curl -X POST api.futureguide.id/api/auth/login \
+curl -X POST https://api.chhrone.web.id/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -407,7 +407,7 @@ curl -X POST api.futureguide.id/api/auth/login \
   }'
 
 # Submit assessment
-curl -X POST api.futureguide.id/api/assessment/submit \
+curl -X POST https://api.chhrone.web.id/api/assessment/submit \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -435,11 +435,11 @@ curl -X POST api.futureguide.id/api/assessment/submit \
   }'
 
 # Get assessment results
-curl -X GET api.futureguide.id/api/archive/results \
+curl -X GET https://api.chhrone.web.id/api/archive/results \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
 # Start chatbot conversation
-curl -X POST api.futureguide.id/api/chatbot/conversations \
+curl -X POST https://api.chhrone.web.id/api/chatbot/conversations \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

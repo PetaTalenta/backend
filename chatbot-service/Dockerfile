@@ -26,8 +26,10 @@ RUN if [ "$INCLUDE_DEV_DEPS" = "true" ]; then \
 # Copy source code
 COPY . .
 
-# Create logs directory
-RUN mkdir -p logs && chown -R nodejs:nodejs /app
+# Create logs directory and fix permissions for node_modules
+RUN mkdir -p logs && \
+    chown -R nodejs:nodejs /app && \
+    chmod -R 755 /app/node_modules/.bin
 
 # Switch to non-root user
 USER nodejs

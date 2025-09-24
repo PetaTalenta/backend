@@ -1,188 +1,619 @@
-# ATMA Chatbot Service
-
-Core conversation management service for the ATMA (AI-Driven Talent Mapping Assessment) platform.
+# ATMA Chatbot Service API Documentation
 
 ## Overview
 
-The Chatbot Service provides foundational conversation management capabilities including:
+The ATMA Chatbot Service is an AI-powered conversational service that provides intelligent chat interactions for career guidance, assessment interpretation, and personalized recommendations. It integrates with OpenRouter API to deliver contextual responses based on user assessment data.
 
-- **Conversation Management**: Create, read, update, and delete conversations
-- **Message Storage**: Store and retrieve conversation messages
-- **Usage Tracking**: Track token usage and costs for AI interactions
-- **User Isolation**: Row-level security ensures users can only access their own data
-- **Rate Limiting**: Protect against abuse with configurable rate limits
+## Service Information
+
+- **Service Name**: ATMA Chatbot Service
+- **Version**: 1.0.0
+- **Default Port**: 3006
+- **Base URL**: `http://localhost:3006` (development)
+- **Authentication**: Bearer Token (JWT) required for all endpoints except health checks
 
 ## Features
 
-### Core Functionality
-- ✅ Conversation CRUD operations
-- ✅ Message management within conversations
-- ✅ Usage tracking for AI model interactions
-- ✅ JWT authentication integration
-- ✅ Row-level security (RLS) for data isolation
+- ✅ AI-powered conversations with context awareness
+- ✅ Assessment integration for personalized career guidance
+- ✅ Message history and conversation management
+- ✅ Usage analytics and metrics
+- ✅ Rate limiting and security middleware
+- ✅ Health monitoring and metrics endpoints
 
-### Security & Performance
-- ✅ JWT token validation
-- ✅ Rate limiting (conversations per day, messages per minute)
-- ✅ Input validation with Joi schemas
-- ✅ CORS configuration
-- ✅ Request/response logging
-- ✅ Health monitoring and metrics
+## Authentication
 
-### Database Schema
-- **Conversations**: Store conversation metadata and context
-- **Messages**: Store individual messages with threading support
-- **Usage Tracking**: Track AI model usage, tokens, and costs
+All API endpoints (except health checks) require authentication using JWT Bearer tokens:
+
+```bash
+Authorization: Bearer YOUR_JWT_TOKEN
+```
+
+## Rate Limiting
+
+- **Global API Limit**: 200 requests per 15 minutes
+- **Conversation Creation**: 100 conversations per day per user
+- **Free Model Usage**: 50 requests per hour per user
 
 ## API Endpoints
 
-### Conversations
-- `POST /conversations` - Create new conversation
-- `GET /conversations` - List user conversations (with pagination)
-- `GET /conversations/:id` - Get specific conversation
-- `PUT /conversations/:id` - Update conversation
-- `DELETE /conversations/:id` - Soft delete conversation
-- `GET /conversations/:conversationId/messages` - Get conversation messages
+### Root Endpoint
 
-### Messages
-- `POST /conversations/:conversationId/messages` - Send a new message and get AI response
-- `POST /conversations/:conversationId/messages/:messageId/regenerate` - Regenerate AI response for a specific message
+#### GET /
+Get service information and health status.
 
-### Usage Analytics
-- `GET /usage/stats` - Get usage statistics for authenticated user
-- `GET /usage/summary` - Get usage summary for dashboard
-- `GET /usage/system` - Get system-wide usage statistics (admin only)
-- `GET /conversations/:conversationId/usage` - Get usage statistics for a specific conversation
+**Response:**
+```json
+{
+  "success": true,
+  "message": "ATMA Chatbot Service is running",
+  "version": "1.0.0",
+  "timestamp": "2024-01-01T10:00:00.000Z",
+  "service": "chatbot-service"
+}
+```
 
-### Health & Monitoring
-- `GET /health` - Service health check
-- `GET /health/ready` - Readiness probe
-- `GET /health/live` - Liveness probe
-- `GET /health/metrics` - Service metrics
+---
 
-## Environment Configuration
+## Conversation Management
 
-Lihat file contoh lengkap di `<repo-root>/chatbot-service/.env.example` untuk daftar variabel yang didukung. Beberapa yang penting:
+### Create Conversation
 
-```env
-# Server
+#### POST /conversations
+Create a new conversation for the authenticated user.
+
+**Request Body:**
+```json
+{
+  "title": "Career Guidance Session",
+  "context_type": "assessment",
+  "context_data": {
+    "assessment_id": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "metadata": {
+    "source": "web_app"
+  }
+}
+```
+
+**Parameters:**
+- `title` (string, optional): Conversation title (max 255 characters)
+- `context_type` (string, optional): One of `general`, `assessment`, `career_guidance`
+- `context_data` (object, optional): Additional context information
+- `metadata` (object, optional): Custom metadata
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Conversation created successfully",
+  "data": {
+    "conversation": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "title": "Career Guidance Session",
+      "context_type": "assessment",
+      "status": "active",
+      "created_at": "2024-01-01T10:00:00.000Z",
+      "updated_at": "2024-01-01T10:00:00.000Z"
+    }
+  }
+}
+```
+
+### Get Conversations
+
+#### GET /conversations
+Retrieve conversations for the authenticated user with pagination.
+
+**Query Parameters:**
+- `page` (integer, optional): Page number (default: 1)
+- `limit` (integer, optional): Items per page (1-100, default: 20)
+- `include_archived` (string, optional): Include archived conversations (`true`/`false`, default: `false`)
+- `context_type` (string, optional): Filter by context type
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "conversations": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "title": "Career Guidance Session",
+        "context_type": "assessment",
+        "status": "active",
+        "message_count": 12,
+        "last_message_at": "2024-01-01T10:30:00.000Z",
+        "created_at": "2024-01-01T10:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 3,
+      "total_items": 25,
+      "items_per_page": 20,
+      "has_next": true,
+      "has_prev": false
+    }
+  }
+}
+```
+
+### Get Single Conversation
+
+#### GET /conversations/:id
+Retrieve a specific conversation by ID.
+
+**Query Parameters:**
+- `include_messages` (string, optional): Include messages (`true`/`false`, default: `false`)
+- `message_limit` (integer, optional): Limit messages returned (1-200, default: 50)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "conversation": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "title": "Career Guidance Session",
+      "context_type": "assessment",
+      "status": "active",
+      "context_data": {},
+      "metadata": {},
+      "created_at": "2024-01-01T10:00:00.000Z",
+      "updated_at": "2024-01-01T10:00:00.000Z",
+      "messages": []
+    }
+  }
+}
+```
+
+### Update Conversation
+
+#### PUT /conversations/:id
+Update conversation details.
+
+**Request Body:**
+```json
+{
+  "title": "Updated Career Session",
+  "status": "archived",
+  "metadata": {
+    "updated_reason": "session_completed"
+  }
+}
+```
+
+**Parameters:**
+- `title` (string, optional): New title (max 255 characters)
+- `context_data` (object, optional): Updated context data
+- `metadata` (object, optional): Updated metadata
+- `status` (string, optional): `active` or `archived`
+
+### Delete Conversation
+
+#### DELETE /conversations/:id
+Delete a conversation and all its messages.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Conversation deleted successfully"
+}
+```
+
+---
+
+## Message Management
+
+### Send Message
+
+#### POST /conversations/:conversationId/messages
+Send a message and receive AI response.
+
+**Request Body:**
+```json
+{
+  "content": "What career paths would be best suited for my personality type?",
+  "content_type": "text",
+  "parent_message_id": "550e8400-e29b-41d4-a716-446655440001"
+}
+```
+
+**Parameters:**
+- `content` (string, required): Message content (max 10,000 characters)
+- `content_type` (string, optional): `text`, `image`, or `file` (default: `text`)
+- `parent_message_id` (string, optional): UUID of parent message for threading
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user_message": {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "content": "What career paths would be best suited for my personality type?",
+      "sender_type": "user",
+      "content_type": "text",
+      "created_at": "2024-01-01T10:15:00.000Z"
+    },
+    "assistant_message": {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "content": "Based on your assessment results, I can see you have strong interests in...",
+      "sender_type": "assistant",
+      "content_type": "text",
+      "created_at": "2024-01-01T10:15:02.000Z"
+    },
+    "usage": {
+      "model": "openai/gpt-3.5-turbo",
+      "prompt_tokens": 150,
+      "completion_tokens": 200,
+      "total_tokens": 350,
+      "cost": 0.0007
+    },
+    "processing_time": 1200
+  }
+}
+```
+
+### Get Messages
+
+#### GET /conversations/:conversationId/messages
+Retrieve messages for a conversation.
+
+**Query Parameters:**
+- `page` (integer, optional): Page number (default: 1)
+- `limit` (integer, optional): Messages per page (1-100, default: 50)
+- `include_usage` (string, optional): Include usage stats (`true`/`false`, default: `false`)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "messages": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440002",
+        "content": "Hello! How can I help you today?",
+        "sender_type": "assistant",
+        "content_type": "text",
+        "parent_message_id": null,
+        "created_at": "2024-01-01T10:00:00.000Z",
+        "usage": {
+          "model": "openai/gpt-3.5-turbo",
+          "total_tokens": 25
+        }
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 2,
+      "total_items": 15,
+      "items_per_page": 50,
+      "has_next": true,
+      "has_prev": false
+    }
+  }
+}
+```
+
+### Regenerate Response
+
+#### POST /conversations/:conversationId/messages/:messageId/regenerate
+Regenerate AI response for a specific message.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": {
+      "id": "550e8400-e29b-41d4-a716-446655440004",
+      "content": "Let me provide you with an alternative perspective...",
+      "sender_type": "assistant",
+      "content_type": "text",
+      "created_at": "2024-01-01T10:20:00.000Z"
+    },
+    "usage": {
+      "model": "openai/gpt-3.5-turbo",
+      "prompt_tokens": 150,
+      "completion_tokens": 180,
+      "total_tokens": 330,
+      "cost": 0.0006
+    },
+    "processing_time": 1100
+  }
+}
+```
+
+---
+
+## Usage Analytics
+
+### Get User Usage Statistics
+
+#### GET /usage/stats
+Get usage statistics for the authenticated user.
+
+**Query Parameters:**
+- `start_date` (string, optional): ISO date string
+- `end_date` (string, optional): ISO date string  
+- `group_by` (string, optional): `day`, `week`, or `month` (default: `day`)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "usage_stats": [
+      {
+        "date": "2024-01-01",
+        "conversations": 5,
+        "messages": 25,
+        "tokens_used": 1500,
+        "cost": 0.025
+      }
+    ],
+    "summary": {
+      "total_conversations": 15,
+      "total_messages": 75,
+      "total_tokens": 4500,
+      "total_cost": 0.075
+    }
+  }
+}
+```
+
+### Get Usage Summary
+
+#### GET /usage/summary
+Get usage summary for dashboard display.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "today": {
+      "conversations": 3,
+      "messages": 12,
+      "tokens": 800
+    },
+    "this_month": {
+      "conversations": 25,
+      "messages": 150,
+      "tokens": 12000
+    },
+    "limits": {
+      "daily_conversations": 100,
+      "hourly_messages": 50
+    }
+  }
+}
+```
+
+### Get System Usage Statistics (Admin)
+
+#### GET /usage/system
+Get system-wide usage statistics (admin only).
+
+**Query Parameters:**
+- `start_date` (string, optional): ISO date string
+- `end_date` (string, optional): ISO date string
+
+---
+
+## Assessment Integration
+
+### Create Conversation from Assessment
+
+#### POST /assessment/from-assessment
+Create a conversation based on assessment results.
+
+**Request Body:**
+```json
+{
+  "assessment_id": "550e8400-e29b-41d4-a716-446655440000",
+  "title": "Career Guidance Based on Assessment",
+  "auto_start_message": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "conversationId": "550e8400-e29b-41d4-a716-446655440001",
+    "messages": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440002",
+        "content": "Hello! I've analyzed your assessment results...",
+        "sender": "ai",
+        "timestamp": "2024-01-01T10:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+### Check Assessment Readiness
+
+#### GET /assessment/assessment-ready/:userId
+Check if assessment data is ready for conversation creation.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "ready": true,
+    "assessment_id": "550e8400-e29b-41d4-a716-446655440000",
+    "completion_date": "2024-01-01T09:00:00Z"
+  }
+}
+```
+
+### Get Conversation Suggestions
+
+#### GET /assessment/conversations/:conversationId/suggestions
+Get AI-generated suggestions for conversation continuation.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "suggestions": [
+      "Tell me more about software engineering roles",
+      "What skills should I develop for data science?",
+      "How do I transition into a tech career?"
+    ]
+  }
+}
+```
+
+---
+
+## Health & Monitoring
+
+### Health Check
+
+#### GET /health
+Comprehensive health check with service dependencies.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T10:00:00.000Z",
+  "uptime": 3600,
+  "version": "1.0.0",
+  "environment": "production",
+  "service": "chatbot-service",
+  "services": {
+    "database": {
+      "status": "healthy",
+      "connected": true,
+      "pool": {
+        "total": 10,
+        "available": 8,
+        "using": 2
+      }
+    }
+  },
+  "system": {
+    "memory": {
+      "rss": 45678592,
+      "heapTotal": 20971520,
+      "heapUsed": 15728640
+    },
+    "platform": "linux",
+    "nodeVersion": "v18.17.0"
+  },
+  "responseTime": "25ms"
+}
+```
+
+### Readiness Probe
+
+#### GET /health/ready
+Kubernetes readiness probe endpoint.
+
+### Liveness Probe
+
+#### GET /health/live
+Kubernetes liveness probe endpoint.
+
+### Metrics
+
+#### GET /health/metrics
+Get service metrics and performance data.
+
+---
+
+## Error Handling
+
+All endpoints return consistent error responses:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": ["Content is required"]
+  }
+}
+```
+
+### Common Error Codes
+
+- `VALIDATION_ERROR` (400): Request validation failed
+- `UNAUTHORIZED` (401): Authentication required
+- `FORBIDDEN` (403): Insufficient permissions
+- `NOT_FOUND` (404): Resource not found
+- `RATE_LIMIT_EXCEEDED` (429): Rate limit exceeded
+- `INTERNAL_ERROR` (500): Server error
+
+## Environment Variables
+
+Key environment variables for configuration:
+
+```bash
+# Server Configuration
 PORT=3006
-NODE_ENV=development
-ALLOWED_ORIGINS=*
+NODE_ENV=production
 
 # Database
-DB_HOST=postgres
-DB_PORT=5432
-DB_NAME=atma_db
-DB_USER=atma_user
-DB_PASSWORD=atma_password
-DB_SCHEMA=chat
+DATABASE_URL=postgresql://user:pass@localhost:5432/atma_chatbot
+
+# OpenRouter API
+OPENROUTER_API_KEY=your_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 
 # Security
 JWT_SECRET=your_jwt_secret
-INTERNAL_SERVICE_KEY=your_internal_key
-
-# OpenRouter (wajib untuk fitur AI)
-OPENROUTER_API_KEY=your_openrouter_api_key
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-DEFAULT_MODEL=qwen/qwen-2.5-coder-32b-instruct:free
-FALLBACK_MODEL=meta-llama/llama-3.2-3b-instruct:free
-EMERGENCY_FALLBACK_MODEL=openai/gpt-4o-mini
-USE_FREE_MODELS_ONLY=true
+ALLOWED_ORIGINS=http://localhost:3000,https://app.futureguide.id
 
 # Rate Limiting
-RATE_LIMIT_CONVERSATIONS_PER_DAY=100
-FREE_MODEL_RATE_LIMIT_PER_MINUTE=20
-MAX_MESSAGE_LENGTH=4000
-
-# Logging
-LOG_LEVEL=info
+MAX_MESSAGE_LENGTH=10000
+ENABLE_ASSESSMENT_INTEGRATION=true
 ```
 
-## Development
+## Getting Started
 
-### Prerequisites
-- Node.js 22+
-- PostgreSQL with chat schema
-- Auth service running (for JWT validation)
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-### Setup
-1. Install dependencies: `npm install`
-2. Run database migration: See `migrations/README.md`
-3. Copy environment: `cp .env.example .env`
-4. Start development: `npm run dev`
+2. **Set Environment Variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
 
-### Testing
-- Run tests: `npm test`
-- Run with coverage: `npm run test:coverage`
-- Watch mode: `npm run test:watch`
+3. **Run Database Migrations**
+   ```bash
+   npm run migrate
+   ```
 
-### Docker
-```bash
-# Build image
-docker build -t atma-chatbot-service .
+4. **Start the Service**
+   ```bash
+   # Development
+   npm run dev
+   
+   # Production
+   npm start
+   ```
 
-# Run container
-docker run -p 3006:3006 atma-chatbot-service
-```
+5. **Run Tests**
+   ```bash
+   npm test
+   ```
 
-## Database Migration
+## Support
 
-Skrip migrasi berada di folder root repo: `<repo-root>/migrations/`.
-
-Before running the service, execute the database migration (jalankan dari root repo):
-
-```sql
--- Run the migration script
-psql -h localhost -U atma_user -d atma_db -f migrations/001_create_chat_schema.sql
-```
-
-Untuk petunjuk lengkap, lihat `<repo-root>/migrations/README.md`.
-
-## Integration
-
-### API Gateway
-The service is integrated with the API gateway at `/api/chatbot/*` routes.
-
-### Authentication
-All endpoints (except health checks) require JWT authentication via the `Authorization: Bearer <token>` header.
-
-### Rate Limiting
-- **Conversations**: 100 per day per user
-- **Messages (free models)**: 20 per minute per user
-- **General API**: 200 requests per 15 minutes per user
-
-Catatan: nilai di atas mencerminkan konfigurasi default di middleware saat ini. Sesuaikan melalui variabel lingkungan bila diperlukan.
-
-## Architecture
-
-### Security Model
-- JWT token validation for all protected endpoints
-- Row-level security (RLS) ensures data isolation
-- Rate limiting prevents abuse
-- Input validation with comprehensive schemas
-
-### Database Design
-- UUID primary keys for scalability
-- JSONB columns for flexible metadata storage
-- Proper foreign key constraints and cascading deletes
-- Optimized indexes for common query patterns
-
-### Monitoring
-- Comprehensive health checks
-- Request/response metrics collection
-- Performance monitoring with slow request detection
-- Structured logging with request correlation
-
-## Future Enhancements (Phase 2+)
-
-This service provides the foundation for:
-- AI model integration (OpenRouter)
-- Real-time messaging capabilities
-- Advanced conversation analytics
-- Multi-modal content support
-- Conversation export/import
-
-## License
-
-MIT License - See LICENSE file for details.
+For questions or issues, please contact the ATMA development team or create an issue in the project repository.

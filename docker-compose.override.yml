@@ -111,6 +111,7 @@ services:
         INCLUDE_DEV_DEPS: "true"
     environment:
       NODE_ENV: development
+    container_name: atma-admin-service
     command: npm run dev
     volumes:
       - ./admin-service:/app
@@ -126,6 +127,7 @@ services:
     user: root
     environment:
       NODE_ENV: development
+    container_name: atma-documentation-service
     command: npm run dev -- --host 0.0.0.0 --port 80
     ports:
       - "8080:80"
