@@ -276,7 +276,7 @@ export const archiveServiceData = {
           }
         }
       },
-      example: `curl -X GET "api.futureguide.id/api/archive/results?page=1&limit=10&sort=created_at&order=DESC" \\
+      example: `curl -X GET "https://api.futureguide.id/api/archive/results?page=1&limit=10&sort=created_at&order=DESC" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -301,6 +301,7 @@ export const archiveServiceData = {
       // - error_message: String|null - Pesan error jika status 'failed'
       // - assessment_name: String - Nama assessment
       // - is_public: Boolean - Status public hasil analisis (true = dapat diakses publik)
+      // - chatbot_id: UUID|null - ID conversation chatbot yang terkait dengan hasil analisis
       // - created_at: String - Timestamp pembuatan
       // - updated_at: String - Timestamp update terakhir
       response: {
@@ -500,21 +501,22 @@ export const archiveServiceData = {
           error_message: null,
           assessment_name: "AI-Driven Talent Mapping",
           is_public: false,
+          chatbot_id: "uuid (optional) - ID conversation chatbot yang terkait dengan hasil analisis ini",
           created_at: "timestamp",
           updated_at: "timestamp"
         }
       },
-      example: `curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X GET https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
 # For public results (no authentication required):
-curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
+curl -X GET https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000`
     },
     {
       method: "PUT",
       path: "/api/archive/results/:id",
       title: "Update Result",
-      description: "Memperbarui hasil analisis (hanya pemilik atau admin).",
+      description: "Memperbarui hasil analisis (hanya pemilik atau admin). Dapat mengaitkan hasil analisis dengan conversation chatbot menggunakan chatbot_id.",
       authentication: "Bearer Token Required",
       rateLimit: "5000 requests per 15 minutes",
       parameters: [
@@ -528,7 +530,8 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
       requestBody: {
         assessment_data: "Object - Data assessment yang diperbarui",
         persona_profile: "Object - Profil persona yang diperbarui",
-        status: "String - Status hasil analisis"
+        status: "String - Status hasil analisis",
+        chatbot_id: "UUID (optional) - ID conversation chatbot untuk mengaitkan dengan hasil analisis"
       },
       response: {
         success: true,
@@ -538,10 +541,10 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           updated_at: "timestamp"
         }
       },
-      example: `curl -X PUT api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X PUT https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
-  -d '{"status": "completed", "assessment_data": {...}, "persona_profile": {...}}'`
+  -d '{"status": "completed", "chatbot_id": "a9d070c8-177d-473a-9156-7dab4ea43e5c", "assessment_data": {...}, "persona_profile": {...}}'`
     },
     {
       method: "PATCH",
@@ -569,7 +572,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           is_public: true
         }
       },
-      example: `curl -X PATCH api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000/public \\
+      example: `curl -X PATCH https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000/public \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"is_public": true}'`
@@ -667,7 +670,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           }
         }
       },
-      example: `curl -X GET "api.futureguide.id/api/archive/jobs?status=completed&page=1&limit=10" \\
+      example: `curl -X GET "https://api.futureguide.id/api/archive/jobs?status=completed&page=1&limit=10" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -706,7 +709,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           archetype: "The Analytical Innovator"
         }
       },
-      example: `curl -X GET api.futureguide.id/api/archive/jobs/job_12345abcdef \\
+      example: `curl -X GET https://api.futureguide.id/api/archive/jobs/job_12345abcdef \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -728,7 +731,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           success_rate: 0.94
         }
       },
-      example: `curl -X GET api.futureguide.id/api/archive/results/jobs/stats \\
+      example: `curl -X GET https://api.futureguide.id/api/archive/results/jobs/stats \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -754,7 +757,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           deleted_at: "timestamp"
         }
       },
-      example: `curl -X DELETE api.futureguide.id/api/archive/jobs/job_12345abcdef \\
+      example: `curl -X DELETE https://api.futureguide.id/api/archive/jobs/job_12345abcdef \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -793,7 +796,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           ]
         }
       },
-      example: `curl -X GET api.futureguide.id/api/archive/stats \\
+      example: `curl -X GET https://api.futureguide.id/api/archive/stats \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -830,7 +833,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           }
         }
       },
-      example: `curl -X GET api.futureguide.id/api/archive/stats/overview \\
+      example: `curl -X GET https://api.futureguide.id/api/archive/stats/overview \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -856,7 +859,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           deleted_at: "2024-01-15T10:30:00.000Z"
         }
       },
-      example: `curl -X DELETE api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X DELETE https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -891,7 +894,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
         message: "Unified statistics retrieved successfully",
         data: "Varies based on parameters"
       },
-      example: `curl -X GET "api.futureguide.id/api/archive/v1/stats?type=user&scope=overview&timeRange=30 days" \\
+      example: `curl -X GET "https://api.futureguide.id/api/archive/v1/stats?type=user&scope=overview&timeRange=30 days" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -938,7 +941,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
         message: "Data retrieved successfully",
         data: "Varies based on type parameter"
       },
-      example: `curl -X GET "api.futureguide.id/api/archive/v1/data/results?page=1&limit=10" \\
+      example: `curl -X GET "https://api.futureguide.id/api/archive/v1/data/results?page=1&limit=10" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -987,7 +990,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
           message: "Insufficient admin privileges"
         }
       ],
-      example: `curl -X DELETE api.futureguide.id/api/archive/admin/users/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X DELETE https://api.futureguide.id/api/archive/admin/users/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
     },
     {
@@ -1004,7 +1007,7 @@ curl -X GET api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-44665
         version: "1.0.0",
         service: "archive-service"
       },
-      example: `curl -X GET api.futureguide.id/api/archive/health`
+      example: `curl -X GET https://api.futureguide.id/api/archive/health`
     }
   ],
   errorResponses: {

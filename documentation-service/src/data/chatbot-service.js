@@ -9,11 +9,12 @@ export const chatbotServiceData = {
       method: "POST",
       path: "/api/chatbot/conversations",
       title: "Create Conversation",
-      description: "Create a new conversation for the authenticated user with optional profile persona data for personalized AI guidance.",
+      description: "Create a new conversation for the authenticated user with optional profile persona data for personalized AI guidance. Dapat mengaitkan conversation dengan hasil analisis menggunakan resultsId.",
       authentication: "Bearer Token Required",
       rateLimit: "Global: 200 requests/15 minutes; Create limit: 100 conversations/day per user",
       requestBody: {
         title: "New Conversation (optional)",
+        resultsId: "UUID (optional) - ID hasil analisis untuk mengaitkan conversation dengan analysis result",
         profilePersona: {
           "name": "string (optional)",
           "age": "number (optional)",
@@ -58,6 +59,7 @@ export const chatbotServiceData = {
   -H "Content-Type: application/json" \\
   -d '{
     "title": "Career Guidance Session",
+    "resultsId": "550e8400-e29b-41d4-a716-446655440000",
     "profilePersona": {
       "name": "Sarah Johnson",
       "age": 26,
