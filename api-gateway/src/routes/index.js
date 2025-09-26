@@ -187,10 +187,7 @@ router.get('/chatbot/health/ready', chatbotServiceProxy);
 router.get('/chatbot/health/live', chatbotServiceProxy);
 router.get('/chatbot/health/metrics', chatbotServiceProxy);
 
-// Phase 3: Assessment Integration endpoints (protected)
-router.get('/chatbot/assessment-ready/:userId', verifyToken, chatLimiter, chatbotServiceProxy);
-router.post('/chatbot/assessment/from-assessment', verifyToken, chatLimiter, chatbotServiceProxy);
-router.get('/chatbot/conversations/:conversationId/suggestions', verifyToken, chatLimiter, chatbotServiceProxy);
+// Assessment Integration endpoints removed - no longer available in chatbot service
 
 // Conversation endpoints (protected) - must come after specific routes
 router.use('/chatbot/conversations', verifyToken, chatLimiter, chatbotServiceProxy);

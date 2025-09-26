@@ -2,6 +2,7 @@ const { Conversation, Message, UsageTracking } = require('../models');
 const OpenRouterService = require('../services/openrouterService');
 const ContextService = require('../services/contextService');
 const logger = require('../utils/logger');
+const { SYSTEM_PROMPTS, PROHIBITED_PATTERNS } = require('../config/systemPrompts');
 
 // Initialize services
 const openrouterService = new OpenRouterService();
@@ -52,6 +53,57 @@ class MessageController {
         });
       }
 
+      // Log potential security threats for monitoring
+      const promptInjectionPatterns = [
+        /lupakan.*instruksi/i,
+        /abaikan.*instruksi/i,
+        /ignore.*instruction/i,
+        /berperan.*sebagai/i,
+        /resep.*masak/i,
+        /sekarang.*kamu.*adalah/i
+      ];
+
+      const dataAccessPatterns = [
+        /kirim.*data/i,
+        /export.*data/i,
+        /download.*data/i,
+        /akses.*database/i,
+        /tampilkan.*semua.*data/i
+      ];
+
+      const suspiciousPatterns = promptInjectionPatterns.filter(pattern => 
+        pattern.test(content)
+      );
+
+      const dataAccessAttempts = dataAccessPatterns.filter(pattern => 
+        pattern.test(content)
+      );
+
+      // Log data access attempts with high priority
+      if (dataAccessAttempts.length > 0) {
+        logger.error('DATA ACCESS ATTEMPT DETECTED - SECURITY ALERT', {
+          conversationId,
+          userId,
+          dataAccessPatterns: dataAccessAttempts.map(p => p.source),
+          contentLength: content.length,
+          ip: req.ip,
+          severity: 'HIGH',
+          alert: 'IMMEDIATE_ATTENTION_REQUIRED'
+        });
+      }
+
+      // Log other suspicious patterns
+      if (suspiciousPatterns.length > 0) {
+        logger.warn('Suspicious user input detected', {
+          conversationId,
+          userId,
+          suspiciousPatterns: suspiciousPatterns.map(p => p.source),
+          contentLength: content.length,
+          ip: req.ip,
+          severity: 'MEDIUM'
+        });
+      }
+
       // Save user message
       const userMessage = await Message.create({
         conversation_id: conversationId,
@@ -74,24 +126,28 @@ class MessageController {
       const startTime = Date.now();
       const aiResponse = await openrouterService.generateResponse(
         conversationHistory,
-        { 
+        {
           userId: userId,
           conversationId: conversationId
         }
       );
 
-      // Save assistant message
+      // Validate response to ensure it doesn't deviate from role
+      const validatedResponse = this.validateGuiderResponse(aiResponse.content, content);
+
+      // Save assistant message with validated content
       const assistantMessage = await Message.create({
         conversation_id: conversationId,
         sender_type: 'assistant',
-        content: aiResponse.content,
+        content: validatedResponse,
         content_type: 'text',
         parent_message_id: userMessage.id,
         metadata: {
           model: aiResponse.model,
           finish_reason: aiResponse.finishReason,
           native_finish_reason: aiResponse.nativeFinishReason,
-          processing_time: aiResponse.processingTime
+          processing_time: aiResponse.processingTime,
+          content_validated: validatedResponse !== aiResponse.content
         }
       });
 
@@ -383,6 +439,87 @@ class MessageController {
     // Simple title generation - take first 50 characters
     const title = content.trim().substring(0, 50);
     return title.length < content.trim().length ? `${title}...` : title;
+  }
+
+  /**
+   * Validate Guider response to ensure it doesn't deviate from role
+   * @param {string} response - AI response content
+   * @param {string} userInput - Original user input to check for prompt injection
+   * @returns {string} Validated or corrected response
+   */
+  validateGuiderResponse(response, userInput = '') {
+    // Check if user input contains prompt injection attempts
+    const promptInjectionPatterns = [
+      /lupakan.*instruksi/i,
+      /abaikan.*instruksi/i,
+      /ignore.*instruction/i,
+      /forget.*instruction/i,
+      /berperan.*sebagai/i,
+      /act.*as/i,
+      /pretend.*to.*be/i,
+      /resep.*masak/i,
+      /cooking.*recipe/i,
+      /sekarang.*kamu.*adalah/i
+    ];
+
+    // Check if user input contains data access requests
+    const dataAccessPatterns = [
+      /kirim.*data/i,
+      /send.*data/i,
+      /berikan.*data/i,
+      /export.*data/i,
+      /download.*data/i,
+      /akses.*database/i,
+      /lihat.*database/i,
+      /tampilkan.*semua.*data/i,
+      /bagikan.*informasi/i,
+      /transfer.*data/i
+    ];
+
+    const hasPromptInjection = promptInjectionPatterns.some(pattern => 
+      pattern.test(userInput)
+    );
+
+    const hasDataAccessRequest = dataAccessPatterns.some(pattern => 
+      pattern.test(userInput)
+    );
+
+    // Priority: Data access requests are more critical than general prompt injection
+    if (hasDataAccessRequest) {
+      logger.warn('Data access request detected - SECURITY ALERT', {
+        userInputLength: userInput.length,
+        detectedPatterns: dataAccessPatterns.filter(pattern => pattern.test(userInput)).map(p => p.source),
+        severity: 'HIGH'
+      });
+
+      return SYSTEM_PROMPTS.DATA_ACCESS_DENIAL_RESPONSE;
+    }
+
+    if (hasPromptInjection) {
+      logger.warn('Prompt injection attempt detected', {
+        userInputLength: userInput.length,
+        detectedPatterns: promptInjectionPatterns.filter(pattern => pattern.test(userInput)).map(p => p.source),
+        severity: 'MEDIUM'
+      });
+
+      return SYSTEM_PROMPTS.PROMPT_INJECTION_RESPONSE;
+    }
+
+    // Check if response contains prohibited patterns (role deviation)
+    const hasProhibitedContent = PROHIBITED_PATTERNS.some(pattern => 
+      pattern.test(response)
+    );
+
+    if (hasProhibitedContent) {
+      logger.warn('Response contained prohibited patterns, providing corrected response', {
+        originalLength: response.length,
+        prohibitedPatternsFound: PROHIBITED_PATTERNS.filter(pattern => pattern.test(response)).length
+      });
+
+      return SYSTEM_PROMPTS.FALLBACK_RESPONSE;
+    }
+
+    return response;
   }
 }
 

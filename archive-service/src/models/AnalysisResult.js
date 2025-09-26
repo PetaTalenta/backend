@@ -72,6 +72,14 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
     allowNull: false,
     defaultValue: false,
     field: 'is_public'
+  },
+  chatbot_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'chatbot_id',
+    validate: {
+      isUUID: 4
+    }
   }
 }, {
   tableName: 'analysis_results',
@@ -100,6 +108,15 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
     {
       name: 'idx_analysis_results_assessment_name',
       fields: ['assessment_name']
+    },
+    {
+      name: 'idx_analysis_results_chatbot_id',
+      fields: ['chatbot_id'],
+      where: {
+        chatbot_id: {
+          [require('sequelize').Op.ne]: null
+        }
+      }
     }
   ]
 });
@@ -198,6 +215,8 @@ AnalysisResult.findByUserWithPagination = async function(userId, options = {}) {
     }
   };
 
+};
+
 /**
  * Find results by user ID with cursor-based pagination
  * Phase 2.1: Cursor-based pagination for 70-90% faster performance
@@ -232,7 +251,6 @@ AnalysisResult.findByUserWithCursor = async function(userId, options = {}) {
     orderBy,
     orderDirection
   });
-};
 };
 
 /**

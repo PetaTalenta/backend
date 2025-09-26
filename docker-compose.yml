@@ -491,7 +491,8 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: atma-cloudflared
-    command: tunnel --config /etc/cloudflared/config.yml run
+    # Force HTTP/2 (TCP 443) to avoid QUIC/UDP issues seen in logs
+    command: tunnel --config /etc/cloudflared/config.yml run --protocol http2
     volumes:
       - ./cloudflare-tunnel-config.yml:/etc/cloudflared/config.yml
       - /etc/cloudflared/cert.pem:/etc/cloudflared/cert.pem
@@ -503,8 +504,9 @@ services:
     depends_on:
       - api-gateway
       - documentation-service
+    # Use a shell-less healthcheck since the image is distroless (no /bin/sh, wget, curl)
     healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:20241/metrics || exit 1"]
+      test: ["CMD", "cloudflared", "version"]
       interval: 30s
       timeout: 10s
       retries: 3

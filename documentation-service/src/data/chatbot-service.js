@@ -1,6 +1,6 @@
 export const chatbotServiceData = {
   name: "Chatbot Service",
-  description: "AI-powered conversational service for career guidance, assessment interpretation, and personalized recommendations. Provides intelligent chat interactions based on user assessment data.",
+  description: "AI-powered conversational service for career guidance and personalized recommendations. Provides intelligent chat interactions based on user profile persona data.",
   baseUrl: "api.futureguide.id",
   version: "1.0.0",
   port: "3004",
@@ -9,13 +9,22 @@ export const chatbotServiceData = {
       method: "POST",
       path: "/api/chatbot/conversations",
       title: "Create Conversation",
-      description: "Create a new conversation for the authenticated user.",
+      description: "Create a new conversation for the authenticated user with optional profile persona data for personalized AI guidance.",
       authentication: "Bearer Token Required",
       rateLimit: "Global: 200 requests/15 minutes; Create limit: 100 conversations/day per user",
       requestBody: {
         title: "New Conversation (optional)",
-        context_type: "general | assessment | career_guidance",
-        context_data: {"any": "object (optional)"},
+        profilePersona: {
+          "name": "string (optional)",
+          "age": "number (optional)",
+          "education": "string (optional)",
+          "personality": "string (optional)",
+          "interests": "array (optional)",
+          "strengths": "array (optional)",
+          "careerGoals": "string (optional)",
+          "workStyle": "string (optional)",
+          "values": "array (optional)"
+        },
         metadata: {"any": "object (optional)"}
       },
       response: {
@@ -24,19 +33,42 @@ export const chatbotServiceData = {
         data: {
           conversation: {
             id: "550e8400-e29b-41d4-a716-446655440000",
-            title: "New Conversation",
-            context_type: "general",
+            title: "Career Guidance Session",
+            context_type: "career_guidance",
             status: "active"
-          }
+          },
+          initial_messages: [
+            {
+              id: "msg-user-001",
+              sender_type: "user",
+              content: "Halo! Berdasarkan profile persona saya, bisakah Anda memperkenalkan diri dan memberikan gambaran singkat tentang bagaimana Anda bisa membantu saya dalam pengembangan karir?",
+              content_type: "text"
+            },
+            {
+              id: "msg-assistant-001",
+              sender_type: "assistant",
+              content: "Halo! Saya adalah Guider, asisten AI yang akan membantu Anda dalam pengembangan karir berdasarkan profil persona yang Anda berikan...",
+              content_type: "text"
+            }
+          ]
         }
       },
-      example: `curl -X POST api.futureguide.id/api/chatbot/conversations \\
+      example: `curl -X POST https://api.futureguide.id/api/chatbot/conversations \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
     "title": "Career Guidance Session",
-    "context_type": "assessment",
-    "context_data": {"source": "assessment"}
+    "profilePersona": {
+      "name": "Sarah Johnson",
+      "age": 26,
+      "education": "Bachelor in Computer Science",
+      "personality": "Creative, analytical, and collaborative",
+      "interests": ["Web Development", "UI/UX Design"],
+      "strengths": ["Problem-solving", "Communication"],
+      "careerGoals": "Become a Full-Stack Developer",
+      "workStyle": "Collaborative environment",
+      "values": ["Innovation", "Growth", "Work-life balance"]
+    }
   }'`
     },
     {
@@ -50,13 +82,13 @@ export const chatbotServiceData = {
         { name: "page", type: "integer", required: false, description: "Default: 1" },
         { name: "limit", type: "integer", required: false, description: "Default: 20, max: 100" },
         { name: "include_archived", type: "string", required: false, description: "'true' or 'false' (default 'false')" },
-        { name: "context_type", type: "string", required: false, description: "Filter by 'general' | 'assessment' | 'career_guidance'" }
+        { name: "context_type", type: "string", required: false, description: "Filter by 'general' | 'career_guidance'" }
       ],
       response: {
         success: true,
         data: {
           conversations: [
-            { id: "550e8400-e29b-41d4-a716-446655440000", title: "Career Guidance Session", context_type: "assessment", status: "active" }
+            { id: "550e8400-e29b-41d4-a716-446655440000", title: "Career Guidance Session", context_type: "career_guidance", status: "active" }
           ],
           pagination: {
             current_page: 1,
@@ -68,9 +100,9 @@ export const chatbotServiceData = {
           }
         }
       },
-      example: `curl -X GET "api.futureguide.id/api/chatbot/conversations?page=1&limit=10&status=active" \\
+      example: `curl -X GET "https://api.futureguide.id/api/chatbot/conversations?page=1&limit=10&status=active" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
-      // Example with filters: "&include_archived=false&context_type=assessment"
+      // Example with filters: "&include_archived=false&context_type=career_guidance"
     },
     {
       method: "GET",
@@ -90,12 +122,12 @@ export const chatbotServiceData = {
           conversation: {
             id: "550e8400-e29b-41d4-a716-446655440000",
             title: "Career Guidance Session",
-            context_type: "assessment",
+            context_type: "career_guidance",
             status: "active"
           }
         }
       },
-      example: `curl -X GET "api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000?include_messages=true&message_limit=50" \\
+      example: `curl -X GET "https://api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000?include_messages=true&message_limit=50" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
 
     },
@@ -123,7 +155,7 @@ export const chatbotServiceData = {
           processing_time: 1200
         }
       },
-      example: `curl -X POST api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages \\
+      example: `curl -X POST https://api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -149,7 +181,7 @@ export const chatbotServiceData = {
           usage: { model: "...", prompt_tokens: 0, completion_tokens: 0, total_tokens: 0, cost: 0 }
         }
       },
-      example: `curl -X POST api.futureguide.id/api/chatbot/conversations/CONV_ID/messages/MESSAGE_ID/regenerate \\
+      example: `curl -X POST https://api.futureguide.id/api/chatbot/conversations/CONV_ID/messages/MESSAGE_ID/regenerate \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -173,12 +205,12 @@ export const chatbotServiceData = {
           conversation: {
             id: "550e8400-e29b-41d4-a716-446655440000",
             title: "Updated Career Discussion",
-            context_type: "assessment",
+            context_type: "career_guidance",
             status: "archived"
           }
         }
       },
-      example: `curl -X PUT api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X PUT https://api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -205,112 +237,8 @@ export const chatbotServiceData = {
           deletedAt: "2024-01-01T11:00:00Z"
         }
       },
-      example: `curl -X DELETE api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000 \\
+      example: `curl -X DELETE https://api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000 \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
-    },
-    {
-      method: "GET",
-      path: "/api/chatbot/assessment/conversations/:conversationId/suggestions",
-      title: "Get Conversation Suggestions",
-      description: "Get AI-generated suggestions for a specific conversation (assessment context only).",
-      authentication: "Bearer Token Required",
-      rateLimit: "200 requests per 15 minutes",
-      parameters: [
-        {
-          name: "conversationId",
-          type: "string",
-          required: true,
-          description: "UUID of the conversation"
-        }
-      ],
-      response: {
-        success: true,
-        data: {
-          suggestions: [
-            "What career paths align with my personality type?",
-            "How can I develop my identified strengths?",
-            "What skills should I focus on improving?"
-          ],
-          context: {
-            assessment_based: true,
-            conversation_stage: "initial",
-            user_archetype: "The Innovator"
-          }
-        }
-      },
-      example: `curl -X GET api.futureguide.id/api/chatbot/assessment/conversations/550e8400-e29b-41d4-a716-446655440000/suggestions \\
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
-    },
-    {
-      method: "POST",
-      path: "/api/chatbot/assessment/from-assessment",
-      title: "Create Conversation from Assessment",
-      description: "Create a new conversation session based on user's assessment results with personalized context and suggestions.",
-      authentication: "Bearer Token Required",
-      rateLimit: "200 requests per 15 minutes",
-      requestBody: {
-        assessment_id: "550e8400-e29b-41d4-a716-446655440000",
-        conversation_type: "career_guidance",
-        include_suggestions: true
-      },
-      parameters: [
-        {
-          name: "assessment_id",
-          type: "string",
-          required: true,
-          description: "UUID of the assessment result to base conversation on"
-        },
-        {
-          name: "conversation_type",
-          type: "string",
-          required: false,
-          description: "Type of conversation: 'career_guidance', 'skill_development', 'personality_insights' (default: 'career_guidance')"
-        },
-        {
-          name: "include_suggestions",
-          type: "boolean",
-          required: false,
-          description: "Include AI-generated conversation starters (default: true)"
-        }
-      ],
-      response: {
-        success: true,
-        data: {
-          conversationId: "550e8400-e29b-41d4-a716-446655440000",
-          title: "Career Guidance Based on Your Assessment",
-          context: "assessment",
-          assessmentId: "550e8400-e29b-41d4-a716-446655440000",
-          createdAt: "2024-01-01T10:00:00Z",
-          status: "active",
-          personalizedWelcome: {
-            messageId: "550e8400-e29b-41d4-a716-446655440001",
-            content: "Hello! I've reviewed your assessment results showing strong investigative and enterprising traits. I'm here to help you explore career paths that align with your analytical and leadership strengths.",
-            timestamp: "2024-01-01T10:00:00Z",
-            type: "text"
-          },
-          suggestions: [
-            {
-              id: "suggestion_1",
-              title: "Explore Data Science Careers",
-              description: "Discuss how your analytical skills translate to data science opportunities"
-            },
-            {
-              id: "suggestion_2",
-              title: "Leadership Development Path",
-              description: "Learn about developing your natural leadership abilities"
-            }
-          ]
-        },
-        message: "Assessment-based conversation created successfully"
-      },
-      example: `curl -X POST api.futureguide.id/api/chatbot/assessment/from-assessment \\
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "assessment_id": "550e8400-e29b-41d4-a716-446655440000",
-    "conversation_type": "career_guidance",
-    "include_suggestions": true
-  }'`
     },
 
     {
@@ -353,7 +281,7 @@ export const chatbotServiceData = {
           messages: [
             {
               id: "550e8400-e29b-41d4-a716-446655440001",
-              content: "Hello! I'm here to help you understand your assessment results.",
+              content: "Hello! I'm here to help you with your career guidance based on your profile.",
               sender: "ai",
               timestamp: "2024-01-01T10:00:00Z",
               type: "text"
@@ -375,14 +303,14 @@ export const chatbotServiceData = {
           },
           conversationInfo: {
             title: "Career Guidance Session",
-            context: "assessment",
+            context: "career_guidance",
             status: "active",
             createdAt: "2024-01-01T10:00:00Z"
           }
         },
         message: "Messages retrieved successfully"
       },
-      example: `curl -X GET "api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages?page=1&limit=50" \\
+      example: `curl -X GET "https://api.futureguide.id/api/chatbot/conversations/550e8400-e29b-41d4-a716-446655440000/messages?page=1&limit=50" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -398,7 +326,7 @@ export const chatbotServiceData = {
         service: "chatbot-service",
         version: "1.0.0"
       },
-      example: `curl -X GET api.futureguide.id/api/chatbot/health`
+      example: `curl -X GET https://api.futureguide.id/api/chatbot/health`
     },
     {
       method: "GET",
@@ -462,16 +390,6 @@ export const chatbotServiceData = {
       authentication: "Bearer Token Recommended",
       rateLimit: "200 requests per 15 minutes",
       response: { success: true, data: { /* metrics */ } }
-    },
-    {
-      method: "GET",
-      path: "/api/chatbot/assessment/assessment-ready/:userId",
-      title: "Assessment Readiness",
-      description: "Check if a user has assessment ready and conversation exists.",
-      authentication: "Bearer Token Required",
-      rateLimit: "200 requests per 15 minutes",
-      parameters: [ { name: "userId", type: "UUID", required: true } ],
-      response: { success: true, data: { /* readiness */ } }
     }
 
   ]

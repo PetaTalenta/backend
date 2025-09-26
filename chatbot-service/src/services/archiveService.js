@@ -234,6 +234,48 @@ class ArchiveService {
       return null;
     }
   }
+
+  /**
+   * Update analysis result with chatbot_id
+   * @param {string} resultId - Analysis result ID
+   * @param {string} chatbotId - Chatbot conversation ID
+   * @returns {Object|null} Updated result or null
+   */
+  async updateAnalysisResult(resultId, chatbotId) {
+    try {
+      logger.info('Updating analysis result with chatbot_id', {
+        resultId,
+        chatbotId
+      });
+
+      const response = await this.client.put(`/archive/results/${resultId}`, {
+        chatbot_id: chatbotId
+      });
+
+      if (response.data.success) {
+        logger.info('Analysis result updated successfully', {
+          resultId,
+          chatbotId
+        });
+        return response.data.data;
+      }
+
+      logger.warn('Failed to update analysis result', {
+        resultId,
+        chatbotId,
+        success: response.data.success
+      });
+      return null;
+    } catch (error) {
+      logger.error('Failed to update analysis result', {
+        resultId,
+        chatbotId,
+        error: error.message,
+        status: error.response?.status
+      });
+      return null;
+    }
+  }
 }
 
 module.exports = new ArchiveService();

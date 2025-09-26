@@ -39,7 +39,7 @@ const User = sequelize.define('User', {
     defaultValue: 'user',
     field: 'user_type',
     validate: {
-      isIn: [['user', 'admin', 'superadmin', 'moderator']]
+      isIn: [['user']]
     }
   },
   is_active: {
@@ -104,11 +104,7 @@ const User = sequelize.define('User', {
     {
       fields: ['created_at']
     },
-    // Composite index for admin queries
-    {
-      name: 'idx_users_admin_lookup',
-      fields: ['user_type', 'is_active', 'email']
-    }
+
   ]
 });
 
@@ -119,44 +115,7 @@ User.prototype.toJSON = function() {
   return values;
 };
 
-// Check if user is admin
-User.prototype.isAdmin = function() {
-  return ['admin', 'superadmin', 'moderator'].includes(this.user_type);
-};
 
-// Check if user is superadmin
-User.prototype.isSuperAdmin = function() {
-  return this.user_type === 'superadmin';
-};
-
-// Check if user has admin role or higher
-User.prototype.hasAdminRole = function(requiredRole = 'admin') {
-  const roleHierarchy = {
-    'user': 0,
-    'moderator': 1,
-    'admin': 2,
-    'superadmin': 3
-  };
-
-  const userLevel = roleHierarchy[this.user_type] || 0;
-  const requiredLevel = roleHierarchy[requiredRole] || 0;
-
-  return userLevel >= requiredLevel;
-};
-
-// Static methods
-User.findAdmins = function(options = {}) {
-  const { role, isActive = true, ...otherOptions } = options;
-  const where = {
-    user_type: role ? role : ['admin', 'superadmin', 'moderator'],
-    is_active: isActive
-  };
-
-  return this.findAll({
-    where,
-    ...otherOptions
-  });
-};
 
 User.findByUsernameOrEmail = function(identifier, options = {}) {
   const { Op } = require('sequelize');

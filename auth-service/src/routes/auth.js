@@ -71,25 +71,7 @@ router.post('/schools',
   userController.createSchool
 );
 
-router.get('/schools/by-location',
-  authenticateToken,
-  userController.getSchoolsByLocation
-);
 
-router.get('/schools/location-stats',
-  authenticateToken,
-  userController.getLocationStats
-);
-
-router.get('/schools/:schoolId/users',
-  authenticateToken,
-  userController.getUsersBySchool
-);
-
-router.get('/schools/distribution',
-  authenticateToken,
-  userController.getSchoolDistribution
-);
 
 // Internal service routes (internal authentication required)
 router.post('/verify-token', 

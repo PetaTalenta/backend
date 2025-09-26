@@ -123,11 +123,14 @@ const schemas = {
       .messages({
         'string.max': 'Title must be at most 255 characters long'
       }),
-    context_type: Joi.string().valid('general', 'assessment', 'career_guidance').optional()
+    profilePersona: Joi.object().optional()
       .messages({
-        'any.only': 'Context type must be one of: general, assessment, career_guidance'
+        'object.base': 'Profile persona must be a valid object'
       }),
-    context_data: Joi.object().optional(),
+    resultsId: Joi.string().uuid().optional()
+      .messages({
+        'string.guid': 'Results ID must be a valid UUID'
+      }),
     metadata: Joi.object().optional()
   }),
 
@@ -241,43 +244,6 @@ const schemas = {
     end_date: Joi.date().iso().optional()
       .messages({
         'date.format': 'end_date must be a valid ISO date'
-      })
-  }),
-
-  // Phase 3: Assessment Integration Schemas
-
-  // Create conversation from assessment schema
-  createFromAssessment: Joi.object({
-    assessment_id: Joi.string().uuid().required()
-      .messages({
-        'string.guid': 'Assessment ID must be a valid UUID',
-        'any.required': 'Assessment ID is required'
-      }),
-    title: Joi.string().max(255).optional()
-      .messages({
-        'string.max': 'Title must be at most 255 characters long'
-      }),
-    auto_start_message: Joi.boolean().optional().default(true)
-      .messages({
-        'boolean.base': 'auto_start_message must be a boolean'
-      })
-  }),
-
-  // Assessment readiness check params schema
-  assessmentReadyParams: Joi.object({
-    userId: Joi.string().uuid().required()
-      .messages({
-        'string.guid': 'User ID must be a valid UUID',
-        'any.required': 'User ID is required'
-      })
-  }),
-
-  // Conversation suggestions params schema
-  conversationSuggestionsParams: Joi.object({
-    conversationId: Joi.string().uuid().required()
-      .messages({
-        'string.guid': 'Conversation ID must be a valid UUID',
-        'any.required': 'Conversation ID is required'
       })
   })
 };

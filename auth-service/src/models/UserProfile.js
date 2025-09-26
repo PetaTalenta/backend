@@ -203,49 +203,7 @@ UserProfile.getTopSchools = async function(limit = 10) {
   });
 };
 
-UserProfile.findBySchoolId = async function(schoolId, options = {}) {
-  const { limit = 100, offset = 0 } = options;
 
-  return this.findAndCountAll({
-    where: {
-      school_id: schoolId
-    },
-    include: [{
-      model: require('./User'),
-      as: 'user',
-      attributes: ['id', 'email', 'username', 'user_type', 'is_active', 'created_at']
-    }, {
-      model: require('./School'),
-      as: 'school',
-      attributes: ['id', 'name', 'city', 'province']
-    }],
-    limit: parseInt(limit),
-    offset: parseInt(offset),
-    order: [['created_at', 'DESC']]
-  });
-};
-
-UserProfile.getSchoolDistribution = async function() {
-  const { QueryTypes } = require('sequelize');
-  const sequelize = require('../config/database');
-
-  return sequelize.query(`
-    SELECT
-      s.id as school_id,
-      s.name as school_name,
-      s.city,
-      s.province,
-      COUNT(up.user_id) as user_count,
-      ROUND(COUNT(up.user_id) * 100.0 / SUM(COUNT(up.user_id)) OVER (), 2) as percentage
-    FROM public.schools s
-    LEFT JOIN auth.user_profiles up ON s.id = up.school_id
-    GROUP BY s.id, s.name, s.city, s.province
-    HAVING COUNT(up.user_id) > 0
-    ORDER BY user_count DESC
-  `, {
-    type: QueryTypes.SELECT
-  });
-};
 
 // Class methods
 UserProfile.associate = function(models) {

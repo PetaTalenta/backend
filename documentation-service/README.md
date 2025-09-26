@@ -37,6 +37,12 @@ Interactive documentation service for the AI-Driven Talent Mapping Assessment (A
 - Conversation management
 - Intelligent suggestion system
 
+### 🔧 Admin Service (Port 3007)
+- Admin orchestrator and proxy service
+- Centralized admin authentication and management
+- User management and token balance operations
+- Proxies requests to auth-service and archive-service
+
 ## 🛠 Technology Stack
 
 - **Frontend**: Vanilla JavaScript with Vite
@@ -96,7 +102,8 @@ documentation-service/
 │   │   ├── auth-service.js      # Auth service endpoints
 │   │   ├── assessment-service.js # Assessment service endpoints
 │   │   ├── archive-service.js   # Archive service endpoints
-│   │   └── chatbot-service.js   # Chatbot service endpoints
+│   │   ├── chatbot-service.js   # Chatbot service endpoints
+│   │   └── admin-service.js     # Admin service endpoints
 │   ├── styles/
 │   │   ├── main.css            # Main application styles
 │   │   └── prism.css           # Syntax highlighting styles
@@ -173,9 +180,10 @@ This documentation service is part of the ATMA backend ecosystem.
 ## 🔗 Related Services
 
 - **Auth Service**: User authentication and management
-- **Assessment Service**: AI-driven personality assessments  
+- **Assessment Service**: AI-driven personality assessments
 - **Archive Service**: Data storage and retrieval
 - **Chatbot Service**: AI-powered career guidance
+- **Admin Service**: Admin orchestrator and user management
 
 ## 📞 Support
 

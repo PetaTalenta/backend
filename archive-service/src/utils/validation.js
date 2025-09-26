@@ -289,6 +289,10 @@ const updateAnalysisResultSchema = Joi.object({
       'string.max': 'Error message must be at most 2000 characters'
     }),
   assessment_name: assessmentNameSchema.optional(),
+  chatbot_id: uuidSchema.allow(null).optional()
+    .messages({
+      'string.guid': 'chatbot_id must be a valid UUID'
+    }),
   // Explicitly forbid certain fields from being updated
   user_id: Joi.forbidden().messages({
     'any.unknown': 'Cannot update user_id'

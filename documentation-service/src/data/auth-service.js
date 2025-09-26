@@ -58,7 +58,7 @@ export const authServiceData = {
         { code: "EMAIL_EXISTS", status: 400, message: "Email already registered" },
         { code: "USERNAME_EXISTS", status: 400, message: "Username already taken" }
       ],
-      example: `curl -X POST api.futureguide.id/api/auth/register \\
+      example: `curl -X POST https://api.futureguide.id/api/auth/register \\
   -H "Content-Type: application/json" \\
   -d '{
     "username": "johndoe",
@@ -116,7 +116,7 @@ export const authServiceData = {
         { code: "IDENTIFIER_NOT_FOUND", status: 404, message: "Username or email not found" },
         { code: "INVALID_PASSWORD", status: 401, message: "Invalid password" }
       ],
-      example: `# Login with email\ncurl -X POST api.futureguide.id/api/auth/login \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "email": "user@example.com",\n    "password": "myPassword1"\n  }'\n\n# Login with username\ncurl -X POST api.futureguide.id/api/auth/login \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "username": "johndoe",\n    "password": "myPassword1"\n  }'`
+      example: `# Login with email\ncurl -X POST https://api.futureguide.id/api/auth/login \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "email": "user@example.com",\n    "password": "myPassword1"\n  }'\n\n# Login with username\ncurl -X POST https://api.futureguide.id/api/auth/login \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "username": "johndoe",\n    "password": "myPassword1"\n  }'`
     },
     {
       method: "GET",
@@ -157,7 +157,7 @@ export const authServiceData = {
         { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
         { code: "USER_NOT_FOUND", status: 404, message: "User not found" }
       ],
-      example: `curl -X GET api.futureguide.id/api/auth/profile \\
+      example: `curl -X GET https://api.futureguide.id/api/auth/profile \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -232,7 +232,7 @@ export const authServiceData = {
         { code: "EMAIL_EXISTS", status: 409, message: "Email already exists" },
         { code: "USERNAME_EXISTS", status: 409, message: "Username already exists" }
       ],
-      example: `curl -X PUT api.futureguide.id/api/auth/profile \\
+      example: `curl -X PUT https://api.futureguide.id/api/auth/profile \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -277,7 +277,7 @@ export const authServiceData = {
         { code: "USER_NOT_FOUND", status: 404, message: "User not found" },
         { code: "VALIDATION_ERROR", status: 400, message: "New password does not meet requirements or current password is incorrect" }
       ],
-      example: `curl -X POST api.futureguide.id/api/auth/change-password \\
+      example: `curl -X POST https://api.futureguide.id/api/auth/change-password \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -304,7 +304,7 @@ export const authServiceData = {
         { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
         { code: "USER_NOT_FOUND", status: 404, message: "User not found" }
       ],
-      example: `curl -X GET api.futureguide.id/api/auth/token-balance \\
+      example: `curl -X GET https://api.futureguide.id/api/auth/token-balance \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -326,7 +326,7 @@ export const authServiceData = {
         { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
         { code: "USER_NOT_FOUND", status: 404, message: "User not found or already inactive" }
       ],
-      example: `curl -X DELETE api.futureguide.id/api/auth/account \\
+      example: `curl -X DELETE https://api.futureguide.id/api/auth/account \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -343,7 +343,7 @@ export const authServiceData = {
       errorResponses: [
         { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" }
       ],
-      example: `curl -X POST api.futureguide.id/api/auth/logout \\
+      example: `curl -X POST https://api.futureguide.id/api/auth/logout \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
@@ -367,7 +367,7 @@ export const authServiceData = {
         message: "Batch user registration processed successfully",
         data: { total: 2, successful: 2, failed: 0 }
       },
-      example: `curl -X POST api.futureguide.id/api/auth/register/batch \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "users": [\n    { "email": "user1@example.com", "password": "myPassword1" },\n    { "email": "user2@example.com", "password": "anotherPass2" }\n  ]\n}'`
+      example: `curl -X POST https://api.futureguide.id/api/auth/register/batch \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "users": [\n    { "email": "user1@example.com", "password": "myPassword1" },\n    { "email": "user2@example.com", "password": "anotherPass2" }\n  ]\n}'`
     },
     {
       method: "DELETE",
@@ -381,7 +381,7 @@ export const authServiceData = {
         { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid token" },
         { code: "PROFILE_NOT_FOUND", status: 404, message: "Profile not found" }
       ],
-      example: `curl -X DELETE api.futureguide.id/api/auth/profile \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+      example: `curl -X DELETE https://api.futureguide.id/api/auth/profile \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
       method: "GET",
@@ -398,7 +398,7 @@ export const authServiceData = {
         { name: "limit", type: "integer", required: false, description: "Default 20" },
         { name: "useFullText", type: "boolean", required: false, description: "Default false" }
       ],
-      example: `curl -X GET "api.futureguide.id/api/auth/schools?search=SMA&page=1&limit=20" \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
+      example: `curl -X GET "https://api.futureguide.id/api/auth/schools?search=SMA&page=1&limit=20" \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
     },
     {
       method: "POST",
@@ -413,129 +413,7 @@ export const authServiceData = {
         { name: "city", type: "string", required: false },
         { name: "province", type: "string", required: false }
       ],
-      example: `curl -X POST api.futureguide.id/api/auth/schools \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "name": "SMA Negeri 1 Jakarta",\n  "address": "Jl. Sudirman No. 1",\n  "city": "Jakarta",\n  "province": "DKI Jakarta"\n}'`
-    },
-    {
-      method: "GET",
-      path: "/api/auth/schools/by-location",
-      title: "Schools by Location",
-      description: "Get schools filtered by province and optional city.",
-      authentication: "Bearer Token Required",
-      parameters: [
-        { name: "province", type: "string", required: true },
-        { name: "city", type: "string", required: false },
-        { name: "limit", type: "integer", required: false, description: "Default 50" }
-      ],
-      example: `curl -X GET "api.futureguide.id/api/auth/schools/by-location?province=DKI%20Jakarta&limit=50" \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
-    },
-    {
-      method: "GET",
-      path: "/api/auth/schools/location-stats",
-      title: "School Location Stats",
-      description: "Get location statistics for schools.",
-      authentication: "Bearer Token Required"
-    },
-    {
-      method: "GET",
-      path: "/api/auth/schools/distribution",
-      title: "School Distribution",
-      description: "Get distribution of schools across locations.",
-      authentication: "Bearer Token Required"
-    },
-    {
-      method: "GET",
-      path: "/api/auth/schools/:schoolId/users",
-      title: "Users by School",
-      description: "Get users associated with a school with pagination.",
-      authentication: "Bearer Token Required",
-      parameters: [
-        { name: "schoolId", type: "path", required: true },
-        { name: "page", type: "integer", required: false, description: "Default 1" },
-        { name: "limit", type: "integer", required: false, description: "Default 20" }
-      ],
-      example: `curl -X GET "api.futureguide.id/api/auth/schools/1/users?page=1&limit=20" \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN"`
-    },
-    {
-      method: "POST",
-      path: "/api/admin/login",
-      title: "Admin Login",
-      description: "Admin login using username or email and password.",
-      authentication: null,
-      rateLimit: "Auth Limiter (2500/15min)",
-      requestBody: { username: "admin", password: "Admin123!" },
-      errorResponses: [
-        { code: "INVALID_CREDENTIALS", status: 401, message: "Invalid admin credentials" }
-      ],
-      example: `curl -X POST api.futureguide.id/api/admin/login \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "username": "admin",\n  "password": "Admin123!"\n}'`
-    },
-    {
-      method: "GET",
-      path: "/api/admin/profile",
-      title: "Get Admin Profile",
-      description: "Retrieve admin profile details.",
-      authentication: "Admin Bearer Token Required",
-      rateLimit: "Admin Limiter (1000/15min)",
-      errorResponses: [
-        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid admin token" },
-        { code: "ADMIN_NOT_FOUND", status: 404, message: "Admin not found" }
-      ],
-      example: `curl -X GET api.futureguide.id/api/admin/profile \\\n  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
-    },
-    {
-      method: "PUT",
-      path: "/api/admin/profile",
-      title: "Update Admin Profile",
-      description: "Update admin profile details.",
-      authentication: "Admin Bearer Token Required",
-      rateLimit: "Admin Limiter (1000/15min)",
-      requestBody: { username: "newusername", email: "newemail@atma.com", full_name: "Updated Admin Name" },
-      errorResponses: [
-        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid admin token" },
-        { code: "VALIDATION_ERROR", status: 400, message: "Invalid data" },
-        { code: "EMAIL_EXISTS", status: 409, message: "Email already exists" },
-        { code: "USERNAME_EXISTS", status: 409, message: "Username already exists" }
-      ],
-      example: `curl -X PUT api.futureguide.id/api/admin/profile \\\n  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "username": "newusername",\n  "email": "newemail@atma.com",\n  "full_name": "Updated Admin Name"\n}'`
-    },
-    {
-      method: "POST",
-      path: "/api/admin/change-password",
-      title: "Admin Change Password",
-      description: "Change admin password.",
-      authentication: "Admin Bearer Token Required",
-      rateLimit: "Admin Limiter (1000/15min)",
-      requestBody: { currentPassword: "OldAdmin123!", newPassword: "NewAdmin456!" },
-      errorResponses: [
-        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid admin token" },
-        { code: "VALIDATION_ERROR", status: 400, message: "Invalid password or failed validation" }
-      ],
-      example: `curl -X POST api.futureguide.id/api/admin/change-password \\\n  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "currentPassword": "OldAdmin123!",\n  "newPassword": "NewAdmin456!"\n}'`
-    },
-    {
-      method: "POST",
-      path: "/api/admin/logout",
-      title: "Admin Logout",
-      description: "Logout admin.",
-      authentication: "Admin Bearer Token Required",
-      rateLimit: "Admin Limiter (1000/15min)",
-      example: `curl -X POST api.futureguide.id/api/admin/logout \\\n  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
-    },
-    {
-      method: "POST",
-      path: "/api/admin/register",
-      title: "Register Admin (Superadmin Only)",
-      description: "Register a new admin user. Requires superadmin role.",
-      authentication: "Admin Bearer Token (Superadmin)",
-      rateLimit: "Admin Limiter (1000/15min)",
-      requestBody: { username: "newadmin", email: "newadmin@atma.com", password: "NewAdmin123!", full_name: "New Admin", user_type: "admin" },
-      errorResponses: [
-        { code: "UNAUTHORIZED", status: 401, message: "Missing or invalid admin token" },
-        { code: "FORBIDDEN", status: 403, message: "Insufficient permissions (superadmin required)" },
-        { code: "VALIDATION_ERROR", status: 400, message: "Invalid data" },
-        { code: "EMAIL_EXISTS", status: 409, message: "Email already exists" },
-        { code: "USERNAME_EXISTS", status: 409, message: "Username already exists" }
-      ],
-      example: `curl -X POST api.futureguide.id/api/admin/register \\\n  -H "Authorization: Bearer YOUR_SUPERADMIN_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "username": "newadmin",\n  "email": "newadmin@atma.com",\n  "password": "NewAdmin123!",\n  "full_name": "New Admin",\n  "user_type": "admin"\n}'`
+      example: `curl -X POST https://api.futureguide.id/api/auth/schools \\\n  -H "Authorization: Bearer YOUR_JWT_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n  "name": "SMA Negeri 1 Jakarta",\n  "address": "Jl. Sudirman No. 1",\n  "city": "Jakarta",\n  "province": "DKI Jakarta"\n}'`
     }
   ]
 };

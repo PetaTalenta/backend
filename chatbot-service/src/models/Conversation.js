@@ -30,7 +30,7 @@ const Conversation = sequelize.define('Conversation', {
     defaultValue: 'general',
     field: 'context_type',
     validate: {
-      isIn: [['general', 'assessment', 'career_guidance']]
+      isIn: [['general', 'career_guidance']]
     }
   },
   context_data: {

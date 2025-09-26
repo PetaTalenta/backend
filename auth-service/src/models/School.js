@@ -116,36 +116,7 @@ School.searchOptimized = async function(options = {}) {
   });
 };
 
-School.searchByLocation = async function(province, city = null, limit = 50) {
-  const where = { province };
 
-  if (city) {
-    where.city = city;
-  }
-
-  return this.findAll({
-    where,
-    limit: parseInt(limit),
-    order: [['city', 'ASC'], ['name', 'ASC']]
-  });
-};
-
-School.getLocationStats = async function() {
-  const { QueryTypes } = require('sequelize');
-  const sequelize = require('../config/database');
-
-  return sequelize.query(`
-    SELECT
-      province,
-      COUNT(DISTINCT city) as city_count,
-      COUNT(*) as school_count
-    FROM public.schools
-    GROUP BY province
-    ORDER BY school_count DESC
-  `, {
-    type: QueryTypes.SELECT
-  });
-};
 
 // Full-text search menggunakan PostgreSQL
 School.fullTextSearch = async function(searchTerm, limit = 20) {

@@ -10,7 +10,6 @@ const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
 const { collectHttpMetrics } = require('./middleware/metricsMiddleware');
 const authRoutes = require('./routes/auth');
-const adminRoutes = require('./routes/admin');
 const healthRoutes = require('./routes/health');
 
 const app = express();
@@ -55,7 +54,6 @@ if (process.env.ENABLE_PERFORMANCE_MONITORING === 'true') {
 
 // Routes
 app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
 app.use('/health', healthRoutes);
 
 // Root endpoint

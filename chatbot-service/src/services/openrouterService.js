@@ -87,15 +87,18 @@ class OpenRouterService {
    */
   async generateResponse(messages, options = {}) {
     const startTime = Date.now();
-    
+
     try {
       const model = options.model || this.defaultModel;
       const isFreeModel = this.isFreeModel(model);
 
+      // Use messages as-is since profile persona context is handled during conversation creation
+      let processedMessages = [...messages];
+
       // Build request payload according to OpenRouter API spec
       const payload = {
         model: model,
-        messages: messages,
+        messages: processedMessages,
         max_tokens: options.maxTokens || this.maxTokens,
         temperature: options.temperature || this.temperature,
         user: options.userId, // For user tracking and optimization

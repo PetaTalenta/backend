@@ -1,6 +1,7 @@
 const { Conversation, Message, UsageTracking } = require('../models');
 const logger = require('../utils/logger');
 const { v4: uuidv4 } = require('uuid');
+const { SYSTEM_PROMPTS } = require('../config/systemPrompts');
 
 /**
  * Create a new conversation
@@ -10,14 +11,15 @@ const { v4: uuidv4 } = require('uuid');
  */
 const createConversation = async (req, res, next) => {
   try {
-    const { title, context_type, context_data, metadata } = req.body;
+    const { title, profilePersona, resultsId, metadata } = req.body;
     const userId = req.user.id; // From auth middleware
 
+    // Create conversation without storing profilePersona in database
     const conversation = await Conversation.create({
       user_id: userId,
       title: title || 'New Conversation',
-      context_type: context_type || 'general',
-      context_data,
+      context_type: 'career_guidance',
+      context_data: null, // Don't store profilePersona in database
       metadata,
       status: 'active'
     });
@@ -26,14 +28,125 @@ const createConversation = async (req, res, next) => {
       conversationId: conversation.id,
       userId,
       contextType: conversation.context_type,
+      hasProfilePersona: !!profilePersona,
       ip: req.ip
     });
+
+    // If profilePersona is provided, create initial system message with LLM
+    let initialMessage = null;
+    if (profilePersona) {
+      try {
+        const OpenRouterService = require('../services/openrouterService');
+        const openrouterService = new OpenRouterService();
+
+        // Create system message with profile persona context
+        const systemMessages = [
+          {
+            role: 'system',
+            content: SYSTEM_PROMPTS.INITIAL_CONVERSATION
+          },
+          {
+            role: 'system',
+            content: `Profile Persona Pengguna yang Sudah Dianalisis:\n${JSON.stringify(profilePersona, null, 2)}`
+          },
+          {
+            role: 'user',
+            content: 'Halo! Berdasarkan profile persona saya yang sudah dianalisis, bisakah Anda memperkenalkan diri dan memberikan gambaran singkat tentang bagaimana Anda bisa membantu saya dalam pengembangan karir? Tolong jelaskan secara singkat hasil analisis kepribadian saya.'
+          }
+        ];
+
+        // Generate initial response from LLM
+        const aiResponse = await openrouterService.generateResponse(systemMessages, {
+          userId: userId,
+          conversationId: conversation.id
+        });
+
+        // Save the initial user message
+        const { Message } = require('../models');
+        const userMessage = await Message.create({
+          conversation_id: conversation.id,
+          sender_type: 'user',
+          content: 'Halo! Berdasarkan profile persona saya, bisakah Anda memperkenalkan diri dan memberikan gambaran singkat tentang bagaimana Anda bisa membantu saya dalam pengembangan karir?',
+          content_type: 'text'
+        });
+
+        // Save the assistant's response
+        const assistantMessage = await Message.create({
+          conversation_id: conversation.id,
+          sender_type: 'assistant',
+          content: aiResponse.content,
+          content_type: 'text',
+          parent_message_id: userMessage.id,
+          metadata: {
+            model: aiResponse.model,
+            finish_reason: aiResponse.finishReason,
+            processing_time: aiResponse.processingTime
+          }
+        });
+
+        // Track usage
+        const { UsageTracking } = require('../models');
+        await UsageTracking.create({
+          conversation_id: conversation.id,
+          message_id: assistantMessage.id,
+          model_used: aiResponse.model,
+          prompt_tokens: aiResponse.usage.prompt_tokens,
+          completion_tokens: aiResponse.usage.completion_tokens,
+          total_tokens: aiResponse.usage.total_tokens,
+          cost_credits: aiResponse.usage.cost,
+          is_free_model: aiResponse.usage.isFreeModel,
+          processing_time_ms: aiResponse.processingTime
+        });
+
+        initialMessage = {
+          user_message: userMessage,
+          assistant_message: assistantMessage
+        };
+
+        logger.info('Initial conversation with profile persona created', {
+          conversationId: conversation.id,
+          userId,
+          model: aiResponse.model
+        });
+
+      } catch (error) {
+        logger.error('Error creating initial message with profile persona', {
+          conversationId: conversation.id,
+          userId,
+          error: error.message
+        });
+        // Don't fail the conversation creation if initial message fails
+      }
+    }
+
+    // If resultsId is provided, link the conversation to the analysis result
+    if (resultsId) {
+      try {
+        const archiveService = require('../services/archiveService');
+        await archiveService.updateAnalysisResult(resultsId, conversation.id);
+
+        logger.info('Analysis result linked to conversation', {
+          conversationId: conversation.id,
+          resultsId,
+          userId
+        });
+      } catch (error) {
+        logger.error('Failed to link analysis result to conversation', {
+          conversationId: conversation.id,
+          resultsId,
+          userId,
+          error: error.message
+        });
+        // Don't fail the conversation creation if linking fails
+      }
+    }
 
     res.status(201).json({
       success: true,
       message: 'Conversation created successfully',
       data: {
-        conversation
+        conversation,
+        initial_message: initialMessage
       }
     });
   } catch (error) {

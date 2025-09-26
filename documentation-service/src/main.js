@@ -14,6 +14,7 @@ import { archiveServiceData } from './data/archive-service.js';
 import { archiveServiceSharingDocs } from './data/archive-service-sharing-docs.js';
 import { chatbotServiceData } from './data/chatbot-service.js';
 import { notificationServiceData } from './data/notification-service.js';
+import { adminServiceData } from './data/admin-service.js';
 import { globalEndpointsData } from './data/global-endpoints.js';
 
 class DocumentationApp {
@@ -25,7 +26,9 @@ class DocumentationApp {
       'archive-service': archiveServiceData,
       'archive-service-sharing': archiveServiceSharingDocs,
       'chatbot-service': chatbotServiceData,
-      'notification-service': notificationServiceData
+  // Pindahkan admin-service agar muncul setelah chatbot-service
+  'admin-service': adminServiceData,
+  'notification-service': notificationServiceData
     };
 
     this.currentTheme = localStorage.getItem('theme') || 'light';
@@ -132,6 +135,7 @@ class DocumentationApp {
     }
 
     Object.entries(this.services).forEach(([serviceKey, serviceData]) => {
+      console.log(`Loading service: ${serviceKey}`, serviceData ? 'OK' : 'MISSING');
       if (!serviceData) {
         console.error(`Service data is null/undefined for ${serviceKey}`);
         return;

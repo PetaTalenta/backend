@@ -1,9 +1,5 @@
 version: '3.8'
 
-# File ini khusus untuk development: bind mount source code sehingga perubahan langsung tercermin
-# Jalankan dengan: docker compose up --build (compose otomatis memuat override)
-# atau eksplisit: docker compose -f docker-compose.yml -f docker-compose.override.yml up --build
-
 services:
   api-gateway:
     build:
@@ -18,6 +14,14 @@ services:
       - ./api-gateway:/app
       - /app/node_modules
       - ./api-gateway/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./api-gateway
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
   auth-service:
     build:
@@ -32,6 +36,14 @@ services:
       - ./auth-service:/app
       - /app/node_modules
       - ./auth-service/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./auth-service
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
   assessment-service:
     build:
@@ -46,6 +58,14 @@ services:
       - ./assessment-service:/app
       - /app/node_modules
       - ./assessment-service/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./assessment-service
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
   archive-service:
     build:
@@ -60,6 +80,14 @@ services:
       - ./archive-service:/app
       - /app/node_modules
       - ./archive-service/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./archive-service
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
   notification-service:
     build:
@@ -74,6 +102,14 @@ services:
       - ./notification-service:/app
       - /app/node_modules
       - ./notification-service/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./notification-service
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
   chatbot-service:
     build:
@@ -88,6 +124,14 @@ services:
       - ./chatbot-service:/app
       - /app/node_modules
       - ./chatbot-service/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./chatbot-service
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
   analysis-worker:
     build:
@@ -102,6 +146,14 @@ services:
       - ./analysis-worker:/app
       - /app/node_modules
       - ./analysis-worker/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./analysis-worker
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
   admin-service:
     build:
@@ -116,6 +168,15 @@ services:
     volumes:
       - ./admin-service:/app
       - /app/node_modules
+      - ./admin-service/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./admin-service
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
   documentation-service:
     build:
@@ -134,9 +195,14 @@ services:
     volumes:
       - ./documentation-service:/app
       - /app/node_modules
-    # Dev mode uses Vite directly on port 80 so Cloudflare (expecting port 80) works
-    # Nginx stage tidak dipakai di dev; kita pakai container Node builder saja
-    # Healthcheck opsional bisa ditambahkan kalau perlu
+    develop:
+      watch:
+        - action: sync
+          path: ./documentation-service
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
 
 # Catatan:
 # 1. /app/node_modules adalah anonymous volume agar tidak tertimpa host (performance & isolasi)
