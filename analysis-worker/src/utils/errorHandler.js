@@ -95,6 +95,11 @@ const ERROR_TYPES = {
     message: 'Operation timed out',
     isRetryable: true
   },
+  PROCESSING_ERROR: {
+    code: 'PROCESSING_ERROR',
+    message: 'Processing error',
+    isRetryable: false
+  },
   INTERNAL_ERROR: {
     code: 'INTERNAL_ERROR',
     message: 'Internal server error',

@@ -2,7 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const Joi = require('joi');
 const { authenticateToken, requireTokenBalance } = require('../middleware/auth');
-const { validateSchema } = require('../middleware/validation');
+const { validateSchema, validateAndTransformAssessment } = require('../middleware/validation');
 const { idempotencyMiddleware, addIdempotencyHeaders, idempotencyHealthCheck, cleanupExpiredCache } = require('../middleware/idempotency');
 const { assessmentSchema } = require('../schemas/assessment');
 const queueService = require('../services/queueService');
@@ -178,24 +178,26 @@ router.use(authenticateToken);
  */
 router.post('/submit',
   addIdempotencyHeaders,
-  validateSchema(assessmentSchema),
+  validateAndTransformAssessment(assessmentSchema),
   authenticateToken,
   idempotencyMiddleware,
   requireTokenBalance(1),
   async(req, res, next) => {
   try {
     const { id: userId, email: userEmail } = req.user;
-    const { assessmentName, ...assessmentData } = req.body;
+    const { assessment_name, assessment_data, raw_responses } = req.body;
     const tokenCost = parseInt(process.env.ANALYSIS_TOKEN_COST || '1');
 
-    // Set default assessment name if not provided
-    const finalAssessmentName = assessmentName || 'AI-Driven Talent Mapping';
+    // Assessment name is now validated and set by middleware
+    const finalAssessmentName = assessment_name;
 
     logger.info('Assessment submission received', {
       userId,
       userEmail,
       assessmentName: finalAssessmentName,
-      assessmentTypes: Object.keys(assessmentData),
+      assessmentTypes: Object.keys(assessment_data).filter(key => !key.startsWith('_')),
+      isLegacyFormat: req.isLegacyFormat,
+      dataSize: JSON.stringify(assessment_data).length,
       ip: req.ip
     });
 
@@ -215,7 +217,7 @@ router.post('/submit',
 
     // Create job in Archive Service first
     try {
-      await archiveService.createJob(jobId, userId, assessmentData, finalAssessmentName);
+      await archiveService.createJob(jobId, userId, assessment_data, finalAssessmentName);
     } catch (archiveError) {
       logger.error('Failed to create job in Archive Service, refunding tokens', {
         jobId,
@@ -238,10 +240,10 @@ router.post('/submit',
     }
 
     // Create job in local tracker
-    jobTracker.createJob(jobId, userId, userEmail, assessmentData, finalAssessmentName);
+    jobTracker.createJob(jobId, userId, userEmail, assessment_data, finalAssessmentName);
 
-    // Publish job to queue with the same jobId
-    await queueService.publishAssessmentJob(assessmentData, userId, userEmail, jobId, finalAssessmentName);
+    // Publish job to queue with the same jobId - include raw_responses
+    await queueService.publishAssessmentJob(assessment_data, userId, userEmail, jobId, finalAssessmentName, raw_responses);
 
     // Get queue position
     const queueStats = await queueService.getQueueStats();
@@ -299,7 +301,7 @@ router.post('/retry',
         if (existingResult.user_id !== userId) {
           return sendError(res, 'FORBIDDEN', 'Access denied to this result', {}, 403);
         }
-        assessmentData = existingResult.assessment_data;
+        assessmentData = existingResult.test_data; // Updated field name
         assessmentName = existingResult.assessment_name || 'AI-Driven Talent Mapping';
         originalResultId = resultId;
       } else {

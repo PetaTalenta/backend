@@ -18,15 +18,15 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
     allowNull: false,
     field: 'user_id'
   },
-  assessment_data: {
+  test_data: {
     type: DataTypes.JSONB,
     allowNull: true,
-    field: 'assessment_data'
+    field: 'test_data' // Updated field name after database refactoring
   },
-  persona_profile: {
+  test_result: {
     type: DataTypes.JSONB,
     allowNull: true, // Allow null for failed analyses
-    field: 'persona_profile'
+    field: 'test_result' // Updated field name after database refactoring
   },
   raw_responses: {
     type: DataTypes.JSONB,

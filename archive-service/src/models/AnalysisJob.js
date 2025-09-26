@@ -58,12 +58,8 @@ const AnalysisJob = sequelize.define('AnalysisJob', {
     defaultValue: 0,
     field: 'priority'
   },
-  assessment_data: {
-    // Added via migration add-assessment-data-column-to-jobs.sql
-    type: DataTypes.JSONB,
-    allowNull: true,
-    field: 'assessment_data'
-  },
+  // assessment_data field removed during database refactoring
+  // Data is now stored only in analysis_results table
   retry_count: {
     type: DataTypes.INTEGER,
     allowNull: false,

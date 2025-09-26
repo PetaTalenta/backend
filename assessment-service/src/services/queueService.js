@@ -10,21 +10,24 @@ const { AppError } = require('../middleware/errorHandler');
  * @param {String} userEmail - User email
  * @param {String} jobId - Job ID (passed from caller)
  * @param {String} assessmentName - Assessment name
+ * @param {Object} rawResponses - Raw responses data (optional)
  * @returns {Promise<String>} - Job ID
  */
-const publishAssessmentJob = async(assessmentData, userId, userEmail, jobId, assessmentName = 'AI-Driven Talent Mapping') => {
+const publishAssessmentJob = async(assessmentData, userId, userEmail, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null) => {
   try {
     const channel = await rabbitmq.getChannel();
 
-    // Prepare message payload
+    // Prepare message payload with new generic structure
     const message = {
       jobId,
       userId,
       userEmail,
-      assessmentData,
-      assessmentName,
+      assessment_name: assessmentName,
+      assessment_data: assessmentData,
+      raw_responses: rawResponses,
       timestamp: new Date().toISOString(),
-      retryCount: 0
+      retryCount: 0,
+      messageVersion: 'v2' // Version for backward compatibility
     };
 
     // Convert message to buffer

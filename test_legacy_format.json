@@ -1,0 +1,68 @@
+{
+  "assessmentName": "AI-Driven Talent Mapping",
+  "riasec": {
+    "realistic": 4.2,
+    "investigative": 3.8,
+    "artistic": 2.1,
+    "social": 4.5,
+    "enterprising": 3.9,
+    "conventional": 2.7
+  },
+  "ocean": {
+    "openness": 4.1,
+    "conscientiousness": 3.7,
+    "extraversion": 4.3,
+    "agreeableness": 4.0,
+    "neuroticism": 2.2
+  },
+  "viaIs": {
+    "creativity": 4.2,
+    "curiosity": 4.0,
+    "judgment": 3.8,
+    "love_of_learning": 4.1,
+    "perspective": 3.9,
+    "bravery": 3.5,
+    "perseverance": 4.0,
+    "honesty": 4.3,
+    "zest": 3.7,
+    "love": 4.2,
+    "kindness": 4.1,
+    "social_intelligence": 3.9,
+    "teamwork": 4.0,
+    "fairness": 4.2,
+    "leadership": 3.8,
+    "forgiveness": 3.6,
+    "humility": 3.4,
+    "prudence": 3.7,
+    "self_regulation": 3.5,
+    "appreciation_of_beauty": 3.2,
+    "gratitude": 4.0,
+    "hope": 3.9,
+    "humor": 3.6,
+    "spirituality": 3.1
+  },
+  "industryScore": {
+    "technology": 4.1,
+    "healthcare": 3.8,
+    "education": 4.2,
+    "finance": 3.5,
+    "creative": 3.9
+  },
+  "rawResponses": {
+    "riasec": [
+      {"question": "I enjoy working with tools and machinery", "answer": 4},
+      {"question": "I like to solve complex problems", "answer": 4},
+      {"question": "I prefer working with people rather than things", "answer": 5}
+    ],
+    "ocean": [
+      {"question": "I am original, come up with new ideas", "answer": 4},
+      {"question": "I am reserved", "answer": 2},
+      {"question": "I am helpful and unselfish with others", "answer": 4}
+    ],
+    "viaIs": [
+      {"question": "I think of new ways to do things", "answer": 4},
+      {"question": "I ask questions that nobody else does", "answer": 4},
+      {"question": "I think before I act", "answer": 4}
+    ]
+  }
+}

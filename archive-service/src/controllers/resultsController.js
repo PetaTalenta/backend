@@ -49,7 +49,7 @@ const getResults = async (req, res, next) => {
       results.results.map(result => ({
         id: result.id,
         user_id: result.user_id,
-        persona_profile: result.persona_profile,
+        test_result: result.test_result, // Updated field name
         status: result.status,
         assessment_name: result.assessment_name,
         created_at: result.created_at

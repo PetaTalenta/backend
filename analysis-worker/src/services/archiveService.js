@@ -224,10 +224,11 @@ const processBatch = async () => {
       try {
         await saveAnalysisResultDirect(
           item.user_id,
-          item.assessment_data,
-          item.persona_profile,
+          item.test_data,
+          item.test_result,
           item.jobId,
-          item.assessment_name
+          item.assessment_name,
+          item.raw_responses
         );
       } catch (individualError) {
         logger.error('Individual fallback processing failed', {
@@ -240,7 +241,7 @@ const processBatch = async () => {
   }
 };
 
-const addToBatch = (userId, assessmentData, personaProfile, jobId, assessmentName) => {
+const addToBatch = (userId, testData, testResult, jobId, assessmentName, rawResponses = null) => {
   // Generate UUID immediately for proper tracking
   const { v4: uuidv4 } = require('uuid');
   const resultId = uuidv4();
@@ -248,10 +249,11 @@ const addToBatch = (userId, assessmentData, personaProfile, jobId, assessmentNam
   batchQueue.push({
     id: resultId, // Pre-generated UUID
     user_id: userId,
-    assessment_data: assessmentData,
-    persona_profile: personaProfile,
+    test_data: testData, // Updated field name
+    test_result: testResult, // Updated field name
     assessment_name: assessmentName,
-    status: personaProfile ? 'completed' : 'failed',
+    raw_responses: rawResponses,
+    status: testResult ? 'completed' : 'failed',
     jobId // For logging purposes
   });
 
@@ -277,17 +279,18 @@ const addToBatch = (userId, assessmentData, personaProfile, jobId, assessmentNam
 /**
  * Save analysis result to Archive Service (with batching)
  * @param {String} userId - User ID
- * @param {Object} assessmentData - Assessment data
- * @param {Object} personaProfile - Persona profile
+ * @param {Object} testData - Test data (formerly assessmentData)
+ * @param {Object} testResult - Test result (formerly personaProfile)
  * @param {String} jobId - Job ID for logging
  * @param {String} assessmentName - Assessment name
+ * @param {Object} rawResponses - Raw responses data (optional)
  * @param {Boolean} forceDirect - Force direct save (skip batching)
  * @returns {Promise<Object>} - Save result
  */
-const saveAnalysisResult = async (userId, assessmentData, personaProfile, jobId, assessmentName = 'AI-Driven Talent Mapping', forceDirect = false) => {
+const saveAnalysisResult = async (userId, testData, testResult, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null, forceDirect = false) => {
   // Use batching for better performance unless forced direct
   if (!forceDirect && process.env.ENABLE_BATCH_PROCESSING !== 'false') {
-    const resultId = addToBatch(userId, assessmentData, personaProfile, jobId, assessmentName);
+    const resultId = addToBatch(userId, testData, testResult, jobId, assessmentName, rawResponses);
 
     // Return response with proper UUID for batched items
     return {
@@ -300,26 +303,27 @@ const saveAnalysisResult = async (userId, assessmentData, personaProfile, jobId,
   }
 
   // Direct processing
-  return saveAnalysisResultDirect(userId, assessmentData, personaProfile, jobId, assessmentName);
+  return saveAnalysisResultDirect(userId, testData, testResult, jobId, assessmentName, rawResponses);
 };
 
 /**
  * Save analysis result directly (no batching)
  */
-const saveAnalysisResultDirect = async (userId, assessmentData, personaProfile, jobId, assessmentName = 'AI-Driven Talent Mapping') => {
+const saveAnalysisResultDirect = async (userId, testData, testResult, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null) => {
   return withRetry(async () => {
     logger.info('Saving analysis result to Archive Service', {
       jobId,
       userId,
-      profileArchetype: personaProfile?.archetype
+      profileArchetype: testResult?.archetype
     });
 
-    // Prepare request body
+    // Prepare request body with new field names
     const requestBody = {
       user_id: userId,
-      assessment_data: assessmentData,
-      persona_profile: personaProfile,
+      test_data: testData, // Updated field name
+      test_result: testResult, // Updated field name
       assessment_name: assessmentName,
+      raw_responses: rawResponses,
       status: 'completed'
     };
 
@@ -380,13 +384,14 @@ const updateAnalysisResult = async (resultId, status, jobId) => {
 /**
  * Save failed analysis result to Archive Service
  * @param {String} userId - User ID
- * @param {Object} assessmentData - Assessment data
+ * @param {Object} testData - Test data (formerly assessmentData)
  * @param {String} errorMessage - Error message
  * @param {String} jobId - Job ID for logging
  * @param {String} assessmentName - Assessment name
+ * @param {Object} rawResponses - Raw responses data (optional)
  * @returns {Promise<Object>} - Save result
  */
-const saveFailedAnalysisResult = async (userId, assessmentData, errorMessage, jobId, assessmentName = 'AI-Driven Talent Mapping') => {
+const saveFailedAnalysisResult = async (userId, testData, errorMessage, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null) => {
   return withRetry(async () => {
     logger.info('Saving failed analysis result to Archive Service', {
       jobId,
@@ -394,12 +399,13 @@ const saveFailedAnalysisResult = async (userId, assessmentData, errorMessage, jo
       errorMessage
     });
 
-    // Prepare request body with empty persona profile and failed status
+    // Prepare request body with empty test result and failed status
     const requestBody = {
       user_id: userId,
-      assessment_data: assessmentData,
-      persona_profile: null, // Empty result for failed analysis
+      test_data: testData, // Updated field name
+      test_result: null, // Empty result for failed analysis
       assessment_name: assessmentName,
+      raw_responses: rawResponses,
       status: 'failed',
       error_message: errorMessage
     };

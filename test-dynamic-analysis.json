@@ -1,0 +1,60 @@
+{
+  "assessment_name": "AI-Driven Talent Mapping",
+  "assessment_data": {
+    "riasec": {
+      "realistic": 65,
+      "investigative": 85,
+      "artistic": 45,
+      "social": 70,
+      "enterprising": 55,
+      "conventional": 40
+    },
+    "ocean": {
+      "openness": 80,
+      "conscientiousness": 75,
+      "extraversion": 60,
+      "agreeableness": 70,
+      "neuroticism": 35
+    },
+    "viaIs": {
+      "creativity": 85,
+      "curiosity": 90,
+      "judgment": 75,
+      "loveOfLearning": 80,
+      "perspective": 70,
+      "bravery": 65,
+      "perseverance": 75,
+      "honesty": 80,
+      "zest": 60,
+      "love": 70,
+      "kindness": 75,
+      "socialIntelligence": 65,
+      "teamwork": 70,
+      "fairness": 75,
+      "leadership": 60,
+      "forgiveness": 65,
+      "humility": 70,
+      "prudence": 65,
+      "selfRegulation": 70,
+      "appreciationOfBeauty": 55,
+      "gratitude": 75,
+      "hope": 70,
+      "humor": 65,
+      "spirituality": 50
+    },
+    "industryScore": {
+      "technology": 85,
+      "healthcare": 60,
+      "education": 70,
+      "finance": 55,
+      "creative": 65
+    }
+  },
+  "raw_responses": {
+    "riasec_responses": ["A", "B", "C", "A", "B"],
+    "ocean_responses": ["4", "3", "5", "4", "2"],
+    "viaIs_responses": ["strongly_agree", "agree", "neutral", "agree", "strongly_agree"]
+  },
+  "chatbot_id": "test-chatbot-123",
+  "is_public": false
+}

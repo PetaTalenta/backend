@@ -2,7 +2,6 @@
  * Optimized Assessment Processor with Deduplication, Rate Limiting, and Audit Logging
  */
 
-const aiService = require('../services/aiService');
 const { saveAnalysisResult, saveFailedAnalysisResult, updateAnalysisJobStatus, checkHealth } = require('../services/archiveService');
 const { jobDeduplicationService, tokenRefundService } = require('../services/jobDeduplicationService');
 const { auditLogger, AUDIT_EVENTS, RISK_LEVELS } = require('../services/auditLogger');
@@ -10,6 +9,9 @@ const notificationService = require('../services/notificationService'); // Keep 
 const { getEventPublisher } = require('../services/eventPublisher');
 const logger = require('../utils/logger');
 const { withRetry, withTimeout, ERROR_TYPES, createError } = require('../utils/errorHandler');
+
+// Import the new dynamic assessment analyzer
+const assessmentAnalyzer = require('../analyzers/assessmentAnalyzer');
 
 // Rate limiting configuration
 const RATE_LIMITS = {
@@ -146,7 +148,23 @@ const incrementRateLimits = (userId, userIP) => {
  * @returns {Promise<Object>} - Processing result
  */
 const processAssessmentOptimized = async (jobData) => {
-  const { jobId, userId, userEmail, assessmentData, assessmentName = 'AI-Driven Talent Mapping', userIP } = jobData;
+  // Support both legacy and new format
+  const {
+    jobId,
+    userId,
+    userEmail,
+    assessment_data,
+    assessment_name = 'AI-Driven Talent Mapping',
+    raw_responses,
+    userIP,
+    // Legacy format support
+    assessmentData,
+    assessmentName
+  } = jobData;
+
+  // Use new format if available, fallback to legacy
+  const finalAssessmentData = assessment_data || assessmentData;
+  const finalAssessmentName = assessment_name || assessmentName || 'AI-Driven Talent Mapping';
   const processingTimeout = parseInt(process.env.PROCESSING_TIMEOUT || '1800000'); // 30 minutes
   const startTime = Date.now();
   let deduplicationResult = null; // Declare outside try block
@@ -176,7 +194,7 @@ const processAssessmentOptimized = async (jobData) => {
     }
 
     // Step 2: Job deduplication check
-    deduplicationResult = jobDeduplicationService.checkDuplicate(jobId, userId, assessmentData);
+    deduplicationResult = jobDeduplicationService.checkDuplicate(jobId, userId, finalAssessmentData);
     
     if (deduplicationResult.isDuplicate) {
       auditLogger.logJobEvent(AUDIT_EVENTS.JOB_DUPLICATE_DETECTED, jobData, {
@@ -227,7 +245,7 @@ const processAssessmentOptimized = async (jobData) => {
         jobId,
         userId,
         userEmail,
-        assessmentName: jobData.assessmentName || 'AI-Driven Talent Mapping',
+        assessmentName: finalAssessmentName,
         estimatedProcessingTime: '1-3 minutes'
       }).catch(eventError => {
         logger.warn('Failed to publish analysis started event', {
@@ -244,39 +262,68 @@ const processAssessmentOptimized = async (jobData) => {
       });
     }
 
-    // Step 5: Process with timeout
+    // Step 5: Process with timeout using dynamic assessment analyzer
     const result = await withTimeout(async () => {
-      // Generate persona profile using AI
-      const personaProfile = await withRetry(
-        () => aiService.generatePersonaProfile(assessmentData, jobId),
+      // Use dynamic assessment analyzer instead of direct AI service call
+      const analysisResult = await withRetry(
+        () => assessmentAnalyzer.analyzeAssessment(finalAssessmentName, finalAssessmentData, jobId, raw_responses),
         {
-          operationName: 'AI persona generation',
+          operationName: 'Dynamic assessment analysis',
           shouldRetry: (error) => {
             // Retry network errors and AI service errors (guard against undefined error)
             const code = error?.code;
             return code === ERROR_TYPES.AI_SERVICE_ERROR.code ||
+                   code === ERROR_TYPES.PROCESSING_ERROR.code ||
                    code === 'ECONNREFUSED' ||
                    code === 'ENOTFOUND' ||
                    code === 'ETIMEDOUT';
           }
         }
       );
-      
-      logger.info('Persona profile generated successfully', {
-        jobId,
-        userId,
-        profileArchetype: personaProfile.archetype
-      });
 
-      // Audit: AI operation completed
-      auditLogger.logAIEvent(AUDIT_EVENTS.AI_RESPONSE_RECEIVED, jobId, {
-        archetype: personaProfile.archetype,
-        processingTime: Date.now() - startTime
-      });
+      // Extract persona profile from analysis result
+      // Handle both successful analysis and error responses
+      let personaProfile;
+      if (analysisResult.success && analysisResult.result) {
+        personaProfile = analysisResult.result;
+
+        logger.info('Assessment analysis completed successfully', {
+          jobId,
+          userId,
+          assessmentType: analysisResult.analysisType,
+          analyzer: analysisResult.analyzer,
+          profileArchetype: personaProfile.archetype
+        });
+
+        // Audit: AI operation completed
+        auditLogger.logAIEvent(AUDIT_EVENTS.AI_RESPONSE_RECEIVED, jobId, {
+          archetype: personaProfile.archetype,
+          assessmentType: analysisResult.analysisType,
+          analyzer: analysisResult.analyzer,
+          processingTime: Date.now() - startTime
+        });
+      } else {
+        // Handle analysis failure or unsupported assessment type
+        const errorMessage = analysisResult.error?.message || 'Assessment analysis failed';
+
+        logger.error('Assessment analysis failed', {
+          jobId,
+          userId,
+          assessmentName: finalAssessmentName,
+          error: errorMessage,
+          analysisResult
+        });
+
+        // Create error for unsupported assessment types
+        throw createError(
+          ERROR_TYPES.PROCESSING_ERROR,
+          `Assessment analysis failed: ${errorMessage}`
+        );
+      }
 
       // Save result to Archive Service (optimized with batching)
       const saveResult = await withRetry(
-        () => saveAnalysisResult(userId, assessmentData, personaProfile, jobId, assessmentName),
+        () => saveAnalysisResult(userId, finalAssessmentData, personaProfile, jobId, finalAssessmentName, raw_responses),
         {
           operationName: 'Archive service save',
           shouldRetry: (error) => error.isRetryable
@@ -315,7 +362,7 @@ const processAssessmentOptimized = async (jobData) => {
           userId,
           userEmail,
           resultId: saveResult.id,
-          assessmentName: jobData.assessmentName || 'AI-Driven Talent Mapping',
+          assessmentName: finalAssessmentName,
           processingTime
         }).catch(eventError => {
           logger.warn('Failed to publish analysis completed event', {
@@ -410,10 +457,11 @@ const processAssessmentOptimized = async (jobData) => {
       try {
         const failedResult = await saveFailedAnalysisResult(
           userId,
-          assessmentData,
+          finalAssessmentData,
           error.message,
           jobId,
-          assessmentName
+          finalAssessmentName,
+          raw_responses
         );
 
         // Update job status linking the failed result
@@ -462,7 +510,7 @@ const processAssessmentOptimized = async (jobData) => {
         userId,
         userEmail: jobData.userEmail,
         errorMessage: error.message,
-        assessmentName: jobData.assessmentName || 'AI-Driven Talent Mapping',
+        assessmentName: finalAssessmentName,
         processingTime: errorProcessingTime,
         errorType: error?.code || 'unknown'
       }).catch(eventError => {

@@ -1,23 +1,27 @@
 const Joi = require('joi');
 
-// Raw responses schemas
+// Raw responses schemas - Generic structure for any assessment type
 const rawItem = Joi.object({
   questionId: Joi.string().pattern(/^[A-Z0-9\-_.:]+$/).required()
     .messages({ 'string.pattern.base': 'questionId format invalid' }),
-  value: Joi.number().min(0).max(100).required() // fleksibel: skala 0-100 atau 1-7 tergantung instrumen
+  value: Joi.alternatives().try(
+    Joi.number().min(0).max(100),
+    Joi.string().max(1000),
+    Joi.boolean()
+  ).required()
     .messages({
-      'number.base': 'Answer value must be a number',
+      'alternatives.match': 'Answer value must be a number (0-100), string (max 1000 chars), or boolean',
       'any.required': 'Answer value is required'
     }),
   weight: Joi.number().optional(),
   meta: Joi.object().unknown(true).optional()
 });
 
-const rawResponsesSchema = Joi.object({
-  riasec: Joi.array().items(rawItem).optional(),
-  ocean: Joi.array().items(rawItem).optional(),
-  viaIs: Joi.array().items(rawItem).optional()
-}).optional();
+// Generic raw responses schema - can contain any assessment type
+const rawResponsesSchema = Joi.object().pattern(
+  Joi.string(), // assessment type key (e.g., 'riasec', 'ocean', 'custom_test')
+  Joi.array().items(rawItem)
+).optional();
 
 // RIASEC Schema (6 dimensions)
 const riasecSchema = Joi.object({
@@ -183,8 +187,31 @@ const industryScoreSchema = Joi.object({
 });
 
 
-// Complete Assessment Schema (RIASEC, OCEAN, VIA-IS + optional assessmentName + optional industryScore)
-const assessmentSchema = Joi.object({
+// New Generic Assessment Schema - accepts any structured assessment data
+const newAssessmentSchema = Joi.object({
+  assessment_name: Joi.string()
+    .valid('AI-Driven Talent Mapping', 'AI-Based IQ Test', 'Custom Assessment')
+    .default('AI-Driven Talent Mapping')
+    .messages({
+      'string.base': 'Assessment name must be a string',
+      'any.only': 'Assessment name must be one of: AI-Driven Talent Mapping, AI-Based IQ Test, Custom Assessment'
+    }),
+  assessment_data: Joi.object().required()
+    .messages({
+      'object.base': 'Assessment data must be an object',
+      'any.required': 'Assessment data is required'
+    }),
+  raw_responses: rawResponsesSchema
+    .messages({
+      'object.base': 'Raw responses must be an object'
+    })
+}).messages({
+  'object.base': 'Request body must be an object'
+});
+
+// Legacy Assessment Schema (RIASEC, OCEAN, VIA-IS + optional assessmentName + optional industryScore)
+// Kept for backward compatibility
+const legacyAssessmentSchema = Joi.object({
   riasec: riasecSchema.required().messages({
     'any.required': 'RIASEC assessment data is required'
   }),
@@ -211,10 +238,21 @@ const assessmentSchema = Joi.object({
   'any.required': 'All assessment components are required'
 });
 
+// Main assessment schema that tries new format first, then falls back to legacy
+const assessmentSchema = Joi.alternatives().try(
+  newAssessmentSchema,
+  legacyAssessmentSchema
+).messages({
+  'alternatives.match': 'Request must match either new generic format (assessment_name, assessment_data, raw_responses) or legacy format'
+});
+
 module.exports = {
   assessmentSchema,
+  newAssessmentSchema,
+  legacyAssessmentSchema,
   riasecSchema,
   oceanSchema,
   viaIsSchema,
-  industryScoreSchema
+  industryScoreSchema,
+  rawResponsesSchema
 };

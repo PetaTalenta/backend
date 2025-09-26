@@ -105,10 +105,10 @@ const createJob = async (jobId, userId, assessmentData, assessmentName = 'AI-Dri
       userId
     });
 
+    // Note: analysis_jobs table no longer has assessment_data column after refactoring
     const response = await archiveClient.post('/archive/jobs', {
       job_id: jobId,
       user_id: userId,
-      assessment_data: assessmentData,
       assessment_name: assessmentName,
       status: 'queued'
     });
@@ -135,28 +135,36 @@ const createJob = async (jobId, userId, assessmentData, assessmentName = 'AI-Dri
 /**
  * Create analysis result directly in Archive Service
  * @param {String} userId - User ID
- * @param {Object} assessmentData - Assessment data
- * @param {Object} personaProfile - Persona profile result
+ * @param {Object} testData - Test data (formerly assessmentData)
+ * @param {Object} testResult - Test result (formerly personaProfile)
  * @param {String} assessmentName - Assessment name
  * @param {String} status - Result status ('completed', 'processing', 'failed')
  * @param {String} errorMessage - Error message if status is 'failed'
+ * @param {Object} rawResponses - Raw responses data (optional)
+ * @param {String} chatbotId - Chatbot ID (optional)
+ * @param {Boolean} isPublic - Whether result is public (optional)
  * @returns {Promise<Object>} - Created result
  */
-const createAnalysisResult = async (userId, assessmentData, personaProfile, assessmentName = 'AI-Driven Talent Mapping', status = 'completed', errorMessage = null) => {
+const createAnalysisResult = async (userId, testData, testResult, assessmentName = 'AI-Driven Talent Mapping', status = 'completed', errorMessage = null, rawResponses = null, chatbotId = null, isPublic = false) => {
   try {
     logger.info('Creating analysis result in Archive Service', {
       userId,
       assessmentName,
       status,
-      hasPersonaProfile: !!personaProfile
+      hasTestResult: !!testResult,
+      chatbotId,
+      isPublic
     });
 
     const requestBody = {
       user_id: userId,
-      assessment_data: assessmentData,
-      persona_profile: personaProfile,
+      test_data: testData,
+      test_result: testResult,
       assessment_name: assessmentName,
-      status: status
+      status: status,
+      raw_responses: rawResponses,
+      chatbot_id: chatbotId,
+      is_public: isPublic
     };
 
     // Add error message if status is failed

@@ -56,10 +56,11 @@ router.get('/:id',
 /**
  * POST /archive/results
  * Create new analysis result (internal service only)
+ * Note: Validation is centralized in assessment-service - no additional validation needed here
  */
 router.post('/',
   requireServiceAuth,
-  // Validation removed for analysis-worker requests
+  // No validation middleware - data is already validated by assessment-service
   resultsController.createResult
 );
 
