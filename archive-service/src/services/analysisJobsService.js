@@ -128,14 +128,30 @@ class AnalysisJobsService {
     const transaction = await sequelize.transaction();
     
     try {
-      logger.info('Updating analysis job status', { 
-        jobId, 
-        status, 
-        additionalData 
+      logger.info('Updating analysis job status', {
+        jobId,
+        status,
+        additionalData
       });
 
+      // CRITICAL VALIDATION: Prevent jobs from being marked completed without result_id
+      if (status === 'completed' && !additionalData.result_id) {
+        await transaction.rollback();
+        const errorMsg = `Cannot mark job as completed without result_id. Job ID: ${jobId}`;
+        logger.error(errorMsg, { jobId, status, additionalData });
+        throw new Error(errorMsg);
+      }
+
+      // CRITICAL VALIDATION: Prevent jobs from being marked completed if there's an error message
+      if (status === 'completed' && additionalData.error_message) {
+        await transaction.rollback();
+        const errorMsg = `Cannot mark job as completed when error_message is present. Job ID: ${jobId}, Error: ${additionalData.error_message}`;
+        logger.error(errorMsg, { jobId, status, additionalData });
+        throw new Error(errorMsg);
+      }
+
       const updateData = { status, ...additionalData };
-      
+
       // Set completed_at timestamp for completed or failed jobs
       if (status === 'completed' || status === 'failed') {
         updateData.completed_at = new Date();
@@ -313,49 +329,338 @@ class AnalysisJobsService {
    */
   async deleteJob(jobId, userId) {
     const transaction = await sequelize.transaction();
-    
+
     try {
-      logger.info('Deleting analysis job', { jobId, userId });
+      logger.info('Deleting analysis job - START', { jobId, userId });
 
       // First check if job exists and belongs to user
+      logger.info('Finding job in database', { jobId, userId });
       const job = await AnalysisJob.findOne({
-        where: { 
+        where: {
           job_id: jobId,
-          user_id: userId 
+          user_id: userId
         },
+        include: [{
+          model: AnalysisResult,
+          as: 'result',
+          required: false
+        }],
+        transaction
+      });
+
+      if (!job) {
+        logger.warn('Job not found or access denied', { jobId, userId });
+        await transaction.rollback();
+        throw new Error(`Job with ID ${jobId} not found or access denied`);
+      }
+
+      logger.info('Job found, checking status', {
+        jobId,
+        userId,
+        currentStatus: job.status,
+        hasResult: !!job.result_id
+      });
+
+      // Don't allow deletion of processing jobs
+      if (job.status === 'processing') {
+        logger.warn('Cannot delete processing job', { jobId, userId });
+        await transaction.rollback();
+        throw new Error('Cannot delete job that is currently processing');
+      }
+
+      // If job has a result, delete it first (cascade delete)
+      if (job.result_id) {
+        logger.info('Deleting associated result', { jobId, resultId: job.result_id });
+        await AnalysisResult.destroy({
+          where: { id: job.result_id },
+          transaction
+        });
+      }
+
+      // Update status to indicate deletion
+      logger.info('Updating job status to cancelled', { jobId, userId });
+      const updateResult = await AnalysisJob.update(
+        {
+          status: 'cancelled',
+          result_id: null // Clear result_id since we deleted the result
+        },
+        {
+          where: { job_id: jobId },
+          transaction
+        }
+      );
+
+      logger.info('Update result', { jobId, userId, updateResult });
+
+      await transaction.commit();
+      logger.info('Transaction committed successfully', { jobId, userId });
+
+      logger.info('Analysis job deleted successfully', { jobId, userId });
+      return true;
+    } catch (error) {
+      logger.error('Error in deleteJob - rolling back transaction', {
+        jobId,
+        userId,
+        error: error.message,
+        stack: error.stack
+      });
+      await transaction.rollback();
+      logger.error('Failed to delete job', {
+        jobId,
+        userId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Delete job by job ID (for internal services, no user check)
+   * @param {String} jobId - Job ID
+   * @returns {Promise<Boolean>} Success status
+   */
+  async deleteJobByJobId(jobId) {
+    const transaction = await sequelize.transaction();
+
+    try {
+      logger.info('Deleting analysis job by jobId - START', { jobId });
+
+      // Find job without user restriction (for internal services)
+      const job = await AnalysisJob.findOne({
+        where: { job_id: jobId },
+        include: [{
+          model: AnalysisResult,
+          as: 'result',
+          required: false
+        }],
+        transaction
+      });
+
+      if (!job) {
+        logger.warn('Job not found', { jobId });
+        await transaction.rollback();
+        throw new Error(`Job with ID ${jobId} not found`);
+      }
+
+      logger.info('Job found, checking status', {
+        jobId,
+        currentStatus: job.status,
+        hasResult: !!job.result_id
+      });
+
+      // Don't allow deletion of processing jobs
+      if (job.status === 'processing') {
+        logger.warn('Cannot delete processing job', { jobId });
+        await transaction.rollback();
+        throw new Error('Cannot delete job that is currently processing');
+      }
+
+      // If job has a result, delete it first (cascade delete)
+      if (job.result_id) {
+        logger.info('Deleting associated result', { jobId, resultId: job.result_id });
+        await AnalysisResult.destroy({
+          where: { id: job.result_id },
+          transaction
+        });
+      }
+
+      // Update status to indicate deletion
+      logger.info('Updating job status to cancelled', { jobId });
+      const updateResult = await AnalysisJob.update(
+        {
+          status: 'cancelled',
+          result_id: null // Clear result_id since we deleted the result
+        },
+        {
+          where: { job_id: jobId },
+          transaction
+        }
+      );
+
+      logger.info('Update result', { jobId, updateResult });
+
+      await transaction.commit();
+      logger.info('Transaction committed successfully', { jobId });
+
+      logger.info('Analysis job deleted successfully', { jobId });
+      return true;
+    } catch (error) {
+      logger.error('Error in deleteJobByJobId - rolling back transaction', {
+        jobId,
+        error: error.message,
+        stack: error.stack
+      });
+      await transaction.rollback();
+      logger.error('Failed to delete job by jobId', {
+        jobId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Ensure status consistency between job and result
+   * @param {String} jobId - Job ID
+   * @returns {Promise<Object>} Sync result
+   */
+  async syncJobResultStatus(jobId) {
+    const transaction = await sequelize.transaction();
+
+    try {
+      logger.info('Syncing job-result status', { jobId });
+
+      const job = await AnalysisJob.findOne({
+        where: { job_id: jobId },
+        include: [{
+          model: AnalysisResult,
+          as: 'result',
+          required: false
+        }],
         transaction
       });
 
       if (!job) {
         await transaction.rollback();
-        throw new Error(`Job with ID ${jobId} not found or access denied`);
+        throw new Error(`Job with ID ${jobId} not found`);
       }
 
-      // Don't allow deletion of processing jobs
-      if (job.status === 'processing') {
-        await transaction.rollback();
-        throw new Error('Cannot delete job that is currently processing');
+      let syncActions = [];
+
+      // If job has result_id but no result association, clear result_id
+      if (job.result_id && !job.result) {
+        logger.warn('Job has result_id but no result found, clearing result_id', {
+          jobId,
+          resultId: job.result_id
+        });
+
+        await job.update({ result_id: null }, { transaction });
+        syncActions.push('cleared_orphaned_result_id');
       }
 
-      // Update status to indicate deletion
-      await AnalysisJob.update(
-        { status: 'cancelled' },
-        { 
-          where: { job_id: jobId },
-          transaction 
+      // If job has result, ensure status consistency
+      if (job.result) {
+        const jobStatus = job.status;
+        const resultStatus = job.result.status;
+
+        // Define status mapping rules
+        const statusMapping = {
+          'completed': 'completed',
+          'failed': 'failed',
+          'processing': 'processing',
+          'queued': 'processing', // Results don't have queued status
+          'cancelled': 'failed' // Cancelled jobs should have failed results
+        };
+
+        const expectedResultStatus = statusMapping[jobStatus];
+
+        if (resultStatus !== expectedResultStatus) {
+          logger.info('Status mismatch detected, syncing result status', {
+            jobId,
+            jobStatus,
+            resultStatus,
+            expectedResultStatus
+          });
+
+          await job.result.update({ status: expectedResultStatus }, { transaction });
+          syncActions.push(`synced_result_status_${resultStatus}_to_${expectedResultStatus}`);
         }
-      );
+      }
 
       await transaction.commit();
-      
-      logger.info('Analysis job deleted successfully', { jobId, userId });
-      return true;
+
+      logger.info('Job-result status sync completed', {
+        jobId,
+        syncActions
+      });
+
+      return {
+        jobId,
+        syncActions,
+        success: true
+      };
     } catch (error) {
       await transaction.rollback();
-      logger.error('Failed to delete job', { 
-        jobId, 
-        userId,
-        error: error.message 
+      logger.error('Failed to sync job-result status', {
+        jobId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Clean up orphaned jobs (jobs with result_id that don't exist)
+   * @returns {Promise<Object>} Cleanup result
+   */
+  async cleanupOrphanedJobs() {
+    const transaction = await sequelize.transaction();
+
+    try {
+      logger.info('Starting cleanup of orphaned jobs');
+
+      // Find jobs with result_id that don't have corresponding results
+      const orphanedJobs = await AnalysisJob.findAll({
+        where: {
+          result_id: {
+            [sequelize.Sequelize.Op.ne]: null
+          }
+        },
+        include: [{
+          model: AnalysisResult,
+          as: 'result',
+          required: false
+        }],
+        transaction
+      });
+
+      // Filter jobs where result_id exists but result is null (orphaned)
+      const jobsToDelete = orphanedJobs.filter(job => job.result_id && !job.result);
+
+      if (jobsToDelete.length === 0) {
+        await transaction.commit();
+        logger.info('No orphaned jobs found');
+        return {
+          success: true,
+          deletedCount: 0,
+          message: 'No orphaned jobs found'
+        };
+      }
+
+      const jobIds = jobsToDelete.map(job => job.job_id);
+      logger.info('Found orphaned jobs to delete', {
+        count: jobsToDelete.length,
+        jobIds
+      });
+
+      // Delete orphaned jobs
+      await AnalysisJob.destroy({
+        where: {
+          job_id: {
+            [sequelize.Sequelize.Op.in]: jobIds
+          }
+        },
+        transaction
+      });
+
+      await transaction.commit();
+
+      logger.info('Orphaned jobs cleanup completed successfully', {
+        deletedCount: jobsToDelete.length,
+        deletedJobIds: jobIds
+      });
+
+      return {
+        success: true,
+        deletedCount: jobsToDelete.length,
+        deletedJobIds: jobIds,
+        message: `Successfully deleted ${jobsToDelete.length} orphaned jobs`
+      };
+    } catch (error) {
+      await transaction.rollback();
+      logger.error('Failed to cleanup orphaned jobs', {
+        error: error.message,
+        stack: error.stack
       });
       throw error;
     }
@@ -374,24 +679,24 @@ class AnalysisJobsService {
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
       const [deletedCount] = await sequelize.query(`
-        DELETE FROM archive.analysis_jobs 
-        WHERE created_at < :cutoffDate 
+        DELETE FROM archive.analysis_jobs
+        WHERE created_at < :cutoffDate
         AND status IN ('completed', 'failed', 'cancelled')
       `, {
         replacements: { cutoffDate },
         type: sequelize.QueryTypes.DELETE
       });
 
-      logger.info('Cleanup completed', { 
-        daysOld, 
-        deletedCount: deletedCount || 0 
+      logger.info('Cleanup completed', {
+        daysOld,
+        deletedCount: deletedCount || 0
       });
-      
+
       return deletedCount || 0;
     } catch (error) {
-      logger.error('Failed to cleanup old jobs', { 
+      logger.error('Failed to cleanup old jobs', {
         daysOld,
-        error: error.message 
+        error: error.message
       });
       throw error;
     }

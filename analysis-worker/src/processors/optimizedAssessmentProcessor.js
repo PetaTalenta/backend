@@ -342,11 +342,6 @@ const processAssessmentOptimized = async (jobData) => {
         resultId: saveResult.id
       });
 
-      // Update job status to completed (async)
-      updateAnalysisJobStatus(jobId, 'completed', {
-        result_id: saveResult.id
-      });
-
       // Mark job as completed in deduplication service
       jobDeduplicationService.markAsCompleted(jobId, deduplicationResult.jobHash, saveResult.id, userId);
 
@@ -406,6 +401,31 @@ const processAssessmentOptimized = async (jobData) => {
         processingTime,
         jobHash: deduplicationResult.jobHash
       });
+
+      // CRITICAL FIX: Update job status to completed ONLY after all operations succeed
+      // This prevents race conditions where job is marked completed but then fails
+      try {
+        await updateAnalysisJobStatus(jobId, 'completed', {
+          result_id: saveResult.id
+        });
+
+        logger.info('Job status successfully updated to completed', {
+          jobId,
+          userId,
+          resultId: saveResult.id
+        });
+      } catch (statusError) {
+        logger.error('CRITICAL: Failed to update job status to completed after successful processing', {
+          jobId,
+          userId,
+          resultId: saveResult.id,
+          error: statusError.message
+        });
+
+        // This is a critical error - the job processed successfully but we can't update status
+        // We should still return success since the result was saved, but log this for monitoring
+        // The job will remain in 'processing' status and may need manual intervention
+      }
 
       return {
         success: true,

@@ -389,7 +389,7 @@ services:
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
-      USE_MOCK_MODEL: "true"
+      USE_MOCK_MODEL: "false"
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30

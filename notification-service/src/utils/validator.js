@@ -1,37 +1,41 @@
 const Joi = require('joi');
 const logger = require('./logger');
 
-// Metadata schema for analysis events
-const metadataSchema = Joi.object({
-  assessmentName: Joi.string().optional(),
-  estimatedProcessingTime: Joi.string().optional(),
-  processingTime: Joi.string().optional(),
-  errorType: Joi.string().optional()
-}).optional();
-
+// Enhanced notification schema for Phase 4 - optimized webhook payloads
 const analysisStartedSchema = Joi.object({
   userId: Joi.string().uuid().required(),
   jobId: Joi.string().uuid().required(),
-  status: Joi.string().valid('started').required(),
-  message: Joi.string().optional(),
-  metadata: metadataSchema
+  status: Joi.string().valid('processing', 'started').required(),
+  assessment_name: Joi.string().required(),
+  message: Joi.string().optional()
 });
 
 const analysisCompleteSchema = Joi.object({
   userId: Joi.string().uuid().required(),
   jobId: Joi.string().uuid().required(),
-  resultId: Joi.string().uuid().required(),
-  status: Joi.string().valid('completed').required(),
-  message: Joi.string().optional(),
-  metadata: metadataSchema
+  result_id: Joi.string().uuid().required(),
+  status: Joi.string().valid('berhasil', 'completed', 'success').required(),
+  assessment_name: Joi.string().required(),
+  message: Joi.string().optional()
 });
 
 const analysisFailedSchema = Joi.object({
   userId: Joi.string().uuid().required(),
   jobId: Joi.string().uuid().required(),
-  error: Joi.string().required(),
-  message: Joi.string().optional(),
-  metadata: metadataSchema
+  status: Joi.string().valid('gagal', 'failed', 'error').required(),
+  assessment_name: Joi.string().required(),
+  error_message: Joi.string().required(),
+  message: Joi.string().optional()
+});
+
+// New schema for unknown assessment type scenarios
+const analysisUnknownSchema = Joi.object({
+  userId: Joi.string().uuid().required(),
+  jobId: Joi.string().uuid().required(),
+  status: Joi.string().valid('gagal', 'failed', 'error', 'unknown').required(),
+  assessment_name: Joi.string().required(),
+  error_message: Joi.string().required(),
+  message: Joi.string().optional()
 });
 
 const validateNotification = (req, res, next) => {
@@ -43,6 +47,8 @@ const validateNotification = (req, res, next) => {
     schema = analysisCompleteSchema;
   } else if (req.path === '/analysis-failed') {
     schema = analysisFailedSchema;
+  } else if (req.path === '/analysis-unknown') {
+    schema = analysisUnknownSchema;
   } else {
     return next();
   }
@@ -69,4 +75,10 @@ const validateNotification = (req, res, next) => {
   next();
 };
 
-module.exports = { validateNotification };
+module.exports = { 
+  validateNotification,
+  analysisStartedSchema,
+  analysisCompleteSchema,
+  analysisFailedSchema,
+  analysisUnknownSchema
+};

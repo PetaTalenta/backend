@@ -106,9 +106,40 @@ router.post('/',
 );
 
 /**
+ * GET /stats
+ * Get job statistics for authenticated user or all jobs for internal services
+ * IMPORTANT: This route must be defined BEFORE /:jobId route to avoid parameter conflicts
+ */
+router.get('/stats',
+  (req, res, next) => {
+    // Allow both authenticated users and internal services
+    if (req.isInternalService) {
+      return next();
+    }
+    // For user requests, require authentication
+    authenticateToken(req, res, next);
+  },
+  async (req, res, next) => {
+    try {
+      let stats;
+      if (req.isInternalService) {
+        // Internal services can get stats for all jobs
+        stats = await analysisJobsService.getJobStats();
+      } else {
+        // Users can only get stats for their own jobs
+        stats = await analysisJobsService.getJobStats(req.user.id);
+      }
+      return sendSuccess(res, 'Job statistics retrieved successfully', stats);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * GET /archive/jobs/:jobId
  * Get job status by job ID with result data
- * IMPORTANT: This route must be defined AFTER / route
+ * IMPORTANT: This route must be defined AFTER specific routes like /stats
  */
 router.get('/:jobId',
   (req, res, next) => {
@@ -169,18 +200,17 @@ router.put('/:jobId/status',
   }
 );
 
-
-
 /**
  * DELETE /jobs/:jobId
  * Delete/cancel job (user only)
  */
 router.delete('/:jobId',
+  authenticateToken,
   validateParams(jobIdParamSchema),
   async (req, res, next) => {
     try {
       const { jobId } = req.params;
-      
+
       // For internal services, allow deletion without user check
       if (req.isInternalService) {
         await analysisJobsService.deleteJobByJobId(jobId);
@@ -188,8 +218,45 @@ router.delete('/:jobId',
         // For user requests, check ownership
         await analysisJobsService.deleteJob(jobId, req.user.id);
       }
-      
+
       return sendSuccess(res, 'Job deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * POST /jobs/:jobId/sync-status
+ * Sync status between job and result (internal service only)
+ */
+router.post('/:jobId/sync-status',
+  requireServiceAuth,
+  validateParams(jobIdParamSchema),
+  async (req, res, next) => {
+    try {
+      const { jobId } = req.params;
+      const syncResult = await analysisJobsService.syncJobResultStatus(jobId);
+
+      return sendSuccess(res, 'Job-result status synchronized successfully', syncResult);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * POST /jobs/cleanup-orphaned
+ * Clean up orphaned jobs (jobs with result_id that don't exist)
+ * Internal service only
+ */
+router.post('/cleanup-orphaned',
+  requireServiceAuth,
+  async (req, res, next) => {
+    try {
+      const cleanupResult = await analysisJobsService.cleanupOrphanedJobs();
+
+      return sendSuccess(res, 'Orphaned jobs cleanup completed', cleanupResult);
     } catch (error) {
       next(error);
     }

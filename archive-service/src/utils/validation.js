@@ -338,7 +338,7 @@ const uuidParamSchema = Joi.object({
 
 // Job ID parameter schema
 const jobIdParamSchema = Joi.object({
-  jobId: Joi.string().required()
+  jobId: Joi.string().uuid().required()
 });
 
 // Create analysis job schema

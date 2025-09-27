@@ -118,28 +118,29 @@ const processEvent = async (eventData) => {
 
 /**
  * Handle analysis completed events
+ * Phase 4: Enhanced with streamlined webhook payload
  * @param {Object} eventData - Event data
  */
 const handleAnalysisCompleted = async (eventData) => {
   const { userId, jobId, resultId, metadata } = eventData;
 
   try {
-    // Send notification to user via WebSocket
-    const sent = socketService.sendToUser(userId, 'analysis-complete', {
-      jobId,
-      resultId,
-      status: 'completed',
-      message: 'Your analysis is ready!',
-      metadata: {
-        assessmentName: metadata?.assessmentName,
-        processingTime: metadata?.processingTime
-      }
-    });
+    // Create concise webhook payload per spec
+    const webhookPayload = {
+      status: 'berhasil',
+      result_id: resultId,
+      assessment_name: metadata?.assessmentName || 'Unknown Assessment'
+    };
 
-    logger.info('Analysis complete notification sent via event', {
+    // Send notification to user via WebSocket
+    const sent = socketService.sendToUser(userId, 'analysis-complete', webhookPayload);
+
+    logger.info('Analysis complete notification sent via event (Phase 4)', {
       userId,
       jobId,
-      resultId,
+      result_id: resultId,
+      status: 'berhasil',
+      assessment_name: metadata?.assessmentName,
       sent
     });
 
@@ -156,27 +157,35 @@ const handleAnalysisCompleted = async (eventData) => {
 
 /**
  * Handle analysis failed events
+ * Phase 4: Enhanced with streamlined webhook payload
  * @param {Object} eventData - Event data
  */
 const handleAnalysisFailed = async (eventData) => {
   const { userId, jobId, errorMessage, metadata } = eventData;
 
   try {
-    // Send notification to user via WebSocket
-    const sent = socketService.sendToUser(userId, 'analysis-failed', {
-      jobId,
-      error: errorMessage,
-      message: 'Analysis failed. Please try again.',
-      metadata: {
-        assessmentName: metadata?.assessmentName,
-        errorType: metadata?.errorType
-      }
-    });
+    // Determine if this is an unknown assessment type
+    const isUnknownAssessment = metadata?.errorType === 'UNSUPPORTED_ASSESSMENT_TYPE';
+    const eventType = isUnknownAssessment ? 'analysis-unknown' : 'analysis-failed';
 
-    logger.info('Analysis failed notification sent via event', {
+    // Create concise webhook payload per spec
+    const webhookPayload = {
+      status: 'gagal',
+      result_id: eventData.resultId || null,
+      assessment_name: metadata?.assessmentName || 'Unknown Assessment',
+      error_message: errorMessage
+    };
+
+    // Send notification to user via WebSocket
+    const sent = socketService.sendToUser(userId, eventType, webhookPayload);
+
+    logger.info(`Analysis ${isUnknownAssessment ? 'unknown' : 'failed'} notification sent via event (Phase 4)`, {
       userId,
       jobId,
-      error: errorMessage,
+      status: 'gagal',
+      assessment_name: metadata?.assessmentName,
+      error_message: errorMessage,
+      eventType,
       sent
     });
 

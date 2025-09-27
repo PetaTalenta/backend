@@ -86,7 +86,17 @@ router.get('/archive/results', verifyToken, archiveLimiter, archiveServiceProxy)
 router.post('/archive/results', verifyInternalService, archiveServiceProxy);
 
 // Analysis Jobs endpoints - specific routes first
-router.get('/archive/jobs/stats', verifyToken, archiveLimiter, archiveServiceProxy);
+router.get('/archive/jobs/stats', (req, res, next) => {
+  // Allow both user tokens and internal service authentication
+  const isInternalService = req.headers['x-internal-service'] === 'true';
+  if (isInternalService) {
+    return verifyInternalService(req, res, next);
+  } else {
+    return verifyToken(req, res, () => {
+      archiveLimiter(req, res, next);
+    });
+  }
+}, archiveServiceProxy);
 router.put('/archive/jobs/:jobId/status', verifyInternalService, archiveServiceProxy);
 router.get('/archive/jobs/:jobId', verifyToken, archiveLimiter, archiveServiceProxy);
 router.delete('/archive/jobs/:jobId', verifyToken, archiveLimiter, archiveServiceProxy);

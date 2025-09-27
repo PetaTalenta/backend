@@ -9,127 +9,90 @@ export const assessmentServiceData = {
       method: "POST",
       path: "/api/assessment/submit",
       title: "Submit Assessment",
-      description: "Submit assessment data for AI analysis. Assessment consists of RIASEC (6 dimensions), OCEAN (5 dimensions), VIA-IS (24 character strengths), and optionally rawResponses (item-level answers). rawResponses will be stored as raw_responses (JSONB) in archive.analysis_results.",
+      description: "Submit assessment data for AI analysis (generic). Body must include: assessment_name, assessment_data (generic object, e.g. riasec/ocean/viaIs), and optional raw_responses (item-level answers). raw_responses will be stored as JSONB in archive.analysis_results.",
       authentication: "Bearer Token Required",
       rateLimit: "1000 requests per 1 hour",
       requestBody: {
-        assessmentName: "AI-Driven Talent Mapping",
-        riasec: {
-          realistic: 75,
-          investigative: 80,
-          artistic: 65,
-          social: 70,
-          enterprising: 85,
-          conventional: 60
+        assessment_name: "AI-Driven Talent Mapping",
+        assessment_data: {
+          riasec: {
+            realistic: 75,
+            investigative: 80,
+            artistic: 65,
+            social: 70,
+            enterprising: 85,
+            conventional: 60
+          },
+          ocean: {
+            openness: 80,
+            conscientiousness: 75,
+            extraversion: 70,
+            agreeableness: 85,
+            neuroticism: 40
+          },
+          viaIs: {
+            creativity: 80,
+            curiosity: 85,
+            judgment: 75,
+            loveOfLearning: 90,
+            perspective: 70,
+            bravery: 65,
+            perseverance: 80,
+            honesty: 85,
+            zest: 75,
+            love: 80,
+            kindness: 85,
+            socialIntelligence: 75,
+            teamwork: 80,
+            fairness: 85,
+            leadership: 70,
+            forgiveness: 75,
+            humility: 80,
+            prudence: 75,
+            selfRegulation: 80,
+            appreciationOfBeauty: 70,
+            gratitude: 85,
+            hope: 80,
+            humor: 75,
+            spirituality: 60
+          },
+          industryScore: {
+            teknologi: 24,
+            kesehatan: 24,
+            keuangan: 24
+          }
         },
-        ocean: {
-          openness: 80,
-          conscientiousness: 75,
-          extraversion: 70,
-          agreeableness: 85,
-          neuroticism: 40
-        },
-        viaIs: {
-          creativity: 80,
-          curiosity: 85,
-          judgment: 75,
-          loveOfLearning: 90,
-          perspective: 70,
-          bravery: 65,
-          perseverance: 80,
-          honesty: 85,
-          zest: 75,
-          love: 80,
-          kindness: 85,
-          socialIntelligence: 75,
-          teamwork: 80,
-          fairness: 85,
-          leadership: 70,
-          forgiveness: 75,
-          humility: 80,
-          prudence: 75,
-          selfRegulation: 80,
-          appreciationOfBeauty: 70,
-          gratitude: 85,
-          hope: 80,
-          humor: 75,
-          spirituality: 60
-        },
-        industryScore: {
-          teknologi: 24,
-          kesehatan: 24,
-          keuangan: 24,
-          pendidikan: 24,
-          rekayasa: 24,
-          pemasaran: 24,
-          hukum: 24,
-          kreatif: 24,
-          media: 24,
-          penjualan: 24,
-          sains: 24,
-          manufaktur: 24,
-          agrikultur: 24,
-          pemerintahan: 24,
-          konsultasi: 24,
-          pariwisata: 24,
-          logistik: 24,
-          energi: 24,
-          sosial: 24,
-          olahraga: 24,
-          properti: 24,
-          kuliner: 24,
-          perdagangan: 24,
-          telekomunikasi: 24
-        },
-        rawResponses: {
+        raw_responses: {
           riasec: [{ questionId: "Riasec-R-01", value: 4 }],
           ocean: [{ questionId: "Ocean-O-01", value: 5 }],
           viaIs: [{ questionId: "VIA-Judgement-01", value: 4 }]
         },
-        rawSchemaVersion: "v1"
+        raw_schema_version: "v1"
       },
       parameters: [
         {
-          name: "assessmentName",
+          name: "assessment_name",
+          type: "string",
+          required: true,
+          description: "Name of assessment. Examples: 'AI-Driven Talent Mapping', 'AI-Based IQ Test', 'Custom Assessment'"
+        },
+        {
+          name: "assessment_data",
+          type: "object",
+          required: true,
+          description: "Generic container for any assessment format. For talent mapping, include riasec/ocean/viaIs (and optionally industryScore)."
+        },
+        {
+          name: "raw_responses",
+          type: "object",
+          required: false,
+          description: "Optional item-level responses. Shape: { riasec: [{questionId, value, ...}], ocean: [...], viaIs: [...] }. Stored as JSONB."
+        },
+        {
+          name: "raw_schema_version",
           type: "string",
           required: false,
-          description: "Must be one of: 'AI-Driven Talent Mapping', 'AI-Based IQ Test', or 'Custom Assessment'"
-        },
-        {
-          name: "riasec",
-          type: "object",
-          required: true,
-          description: "RIASEC assessment with 6 dimensions, all scores must be integers between 0-100"
-        },
-        {
-          name: "ocean",
-          type: "object",
-          required: true,
-          description: "Big Five personality traits with 5 dimensions, all scores must be integers between 0-100"
-        },
-        {
-          name: "viaIs",
-          type: "object",
-          required: true,
-          description: "VIA-IS character strengths - all 24 strengths must be provided, scores between 0-100"
-        },
-        {
-          name: "industryScore",
-          type: "object",
-          required: false,
-          description: "Industry interest scores - optional field with 24 industry categories, scores between 0-100"
-        },
-        {
-          name: "rawResponses",
-          type: "object",
-          required: false,
-          description: "Optional item-level responses. Shape: { riasec: [{questionId, value, ...}], ocean: [...], viaIs: [...] }. Will be stored as raw_responses (JSONB) in archive.analysis_results"
-        },
-        {
-          name: "rawSchemaVersion",
-          type: "string",
-          required: false,
-          description: "Schema version for rawResponses (default: 'v1')"
+          description: "Schema version for raw_responses (default: 'v1')"
         }
       ],
       response: {
@@ -149,38 +112,40 @@ export const assessmentServiceData = {
   -H "Content-Type: application/json" \\
   -H "X-Idempotency-Key: YOUR_UNIQUE_KEY" \\
   -d '{
-    "assessmentName": "AI-Driven Talent Mapping",
-    "riasec": {
-      "realistic": 75,
-      "investigative": 80,
-      "artistic": 65,
-      "social": 70,
-      "enterprising": 85,
-      "conventional": 60
+    "assessment_name": "AI-Driven Talent Mapping",
+    "assessment_data": {
+      "riasec": {
+        "realistic": 75,
+        "investigative": 80,
+        "artistic": 65,
+        "social": 70,
+        "enterprising": 85,
+        "conventional": 60
+      },
+      "ocean": {
+        "openness": 80,
+        "conscientiousness": 75,
+        "extraversion": 70,
+        "agreeableness": 85,
+        "neuroticism": 40
+      },
+      "viaIs": {
+        "creativity": 80,
+        "curiosity": 85,
+        "judgment": 75
+      },
+      "industryScore": {
+        "teknologi": 24,
+        "kesehatan": 24,
+        "keuangan": 24
+      }
     },
-    "ocean": {
-      "openness": 80,
-      "conscientiousness": 75,
-      "extraversion": 70,
-      "agreeableness": 85,
-      "neuroticism": 40
-    },
-    "viaIs": {
-      "creativity": 80,
-      "curiosity": 85,
-      "judgment": 75
-    },
-    "rawResponses": {
+    "raw_responses": {
       "riasec": [{ "questionId": "Riasec-R-01", "value": 4 }],
       "ocean": [{ "questionId": "Ocean-O-01", "value": 5 }],
       "viaIs": [{ "questionId": "VIA-Judgement-01", "value": 4 }]
     },
-    "rawSchemaVersion": "v1",
-    "industryScore": {
-      "teknologi": 24,
-      "kesehatan": 24,
-      "keuangan": 24
-    }
+    "raw_schema_version": "v1"
   }'`
     },
     {

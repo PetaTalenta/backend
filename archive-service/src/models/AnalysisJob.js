@@ -29,7 +29,7 @@ const AnalysisJob = sequelize.define('AnalysisJob', {
     allowNull: false,
     defaultValue: 'queued',
     validate: {
-      isIn: [['queued', 'processing', 'completed', 'failed']]
+      isIn: [['queued', 'processing', 'completed', 'failed', 'cancelled']]
     }
   },
   result_id: {
@@ -218,8 +218,7 @@ AnalysisJob.getJobsByUser = async function(userId, options = {}) {
 };
 
 AnalysisJob.getJobStats = async function(userId = null) {
-  const whereClause = userId ? { user_id: userId } : {};
-  
+
   const [results] = await sequelize.query(`
     SELECT
       COUNT(*) as total_jobs,
@@ -227,10 +226,10 @@ AnalysisJob.getJobStats = async function(userId = null) {
       COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing,
       COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
       COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed,
-      AVG(CASE 
-        WHEN status IN ('completed', 'failed') AND completed_at IS NOT NULL 
+      AVG(CASE
+        WHEN status IN ('completed', 'failed') AND completed_at IS NOT NULL
         THEN EXTRACT(EPOCH FROM (completed_at - created_at))
-        ELSE NULL 
+        ELSE NULL
       END) as avg_processing_time_seconds
     FROM archive.analysis_jobs
     ${userId ? 'WHERE user_id = :userId' : ''}
@@ -238,14 +237,23 @@ AnalysisJob.getJobStats = async function(userId = null) {
     replacements: { userId },
     type: sequelize.QueryTypes.SELECT
   });
-  
+
+  const totalJobs = parseInt(results.total_jobs) || 0;
+  const completed = parseInt(results.completed) || 0;
+  const failed = parseInt(results.failed) || 0;
+  const finishedJobs = completed + failed;
+
+  // Calculate success rate (completed jobs / total finished jobs)
+  const successRate = finishedJobs > 0 ? (completed / finishedJobs) : 0;
+
   return {
-    total_jobs: parseInt(results.total_jobs) || 0,
+    total_jobs: totalJobs,
     queued: parseInt(results.queued) || 0,
     processing: parseInt(results.processing) || 0,
-    completed: parseInt(results.completed) || 0,
-    failed: parseInt(results.failed) || 0,
-    avg_processing_time_seconds: results.avg_processing_time_seconds ? 
+    completed: completed,
+    failed: failed,
+    success_rate: parseFloat(successRate.toFixed(4)), // Round to 4 decimal places
+    avg_processing_time_seconds: results.avg_processing_time_seconds ?
       parseFloat(results.avg_processing_time_seconds) : null
   };
 };

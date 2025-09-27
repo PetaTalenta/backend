@@ -4,9 +4,11 @@
  */
 
 const AnalysisResult = require('../models/AnalysisResult');
+const AnalysisJob = require('../models/AnalysisJob');
 const { NotFoundError, ForbiddenError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
 const batchMetrics = require('../middleware/batchMetrics');
+const { sequelize } = require('../config/database');
 
 /**
  * NOTE: Creation-time heavy business validation was deprecated (worker assumed trusted).
@@ -621,31 +623,59 @@ const updateResult = async (resultId, updateData, userId = null, isInternalServi
  * @returns {Promise<void>}
  */
 const deleteResult = async (resultId, userId) => {
+  const transaction = await sequelize.transaction();
+
   try {
     logger.info('Deleting analysis result', {
       resultId,
       userId
     });
-    
-    const result = await AnalysisResult.findByPk(resultId);
-    
+
+    const result = await AnalysisResult.findByPk(resultId, { transaction });
+
     if (!result) {
+      await transaction.rollback();
       throw new NotFoundError('Analysis result not found');
     }
-    
+
     // Check access permissions
     if (result.user_id !== userId) {
+      await transaction.rollback();
       throw new ForbiddenError('You do not have access to this analysis result');
     }
-    
+
+    // Find and delete related jobs (cascade delete)
+    const relatedJobs = await AnalysisJob.findAll({
+      where: { result_id: resultId },
+      transaction
+    });
+
+    if (relatedJobs.length > 0) {
+      logger.info('Deleting related jobs', {
+        resultId,
+        jobCount: relatedJobs.length,
+        jobIds: relatedJobs.map(job => job.job_id)
+      });
+
+      // Delete all related jobs
+      await AnalysisJob.destroy({
+        where: { result_id: resultId },
+        transaction
+      });
+    }
+
     // Delete the result
-    await result.destroy();
-    
+    await result.destroy({ transaction });
+
+    await transaction.commit();
+
     logger.info('Analysis result deleted successfully', {
       resultId,
-      userId
+      userId,
+      relatedJobsDeleted: relatedJobs.length
     });
   } catch (error) {
+    await transaction.rollback();
     logger.error('Failed to delete analysis result', {
       error: error.message,
       resultId,

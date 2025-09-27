@@ -296,7 +296,7 @@ const saveAnalysisResult = async (userId, testData, testResult, jobId, assessmen
     return {
       success: true,
       id: resultId, // Use the pre-generated UUID
-      status: personaProfile ? 'completed' : 'failed',
+      status: testResult ? 'completed' : 'failed',
       created_at: new Date().toISOString(),
       batched: true
     };
@@ -317,6 +317,9 @@ const saveAnalysisResultDirect = async (userId, testData, testResult, jobId, ass
       profileArchetype: testResult?.archetype
     });
 
+    // Determine status based on test result
+    const resultStatus = testResult ? 'completed' : 'failed';
+
     // Prepare request body with new field names
     const requestBody = {
       user_id: userId,
@@ -324,7 +327,7 @@ const saveAnalysisResultDirect = async (userId, testData, testResult, jobId, ass
       test_result: testResult, // Updated field name
       assessment_name: assessmentName,
       raw_responses: rawResponses,
-      status: 'completed'
+      status: resultStatus
     };
 
     // Send request to Archive Service

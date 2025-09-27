@@ -9,22 +9,28 @@ const logger = require('../utils/logger');
 /**
  * POST /notifications/analysis-started
  * Endpoint untuk menerima notifikasi ketika analisis dimulai
+ * Enhanced payload: status, assessment_name
  */
 router.post('/analysis-started', serviceAuth, validateNotification, (req, res) => {
   try {
-    const { userId, jobId, status, message, metadata } = req.body;
+    const { userId, jobId, status, assessment_name, message } = req.body;
 
-    // Send notification to user via WebSocket
-    const sent = socketService.sendToUser(userId, 'analysis-started', {
+    // Create streamlined webhook payload
+    const webhookPayload = {
       jobId,
       status,
-      message: message || 'Your analysis has started processing...',
-      metadata: metadata || {}
-    });
+      assessment_name,
+      message: message || 'Analysis processing started...'
+    };
 
-    logger.info('Analysis started notification processed', {
+    // Send notification to user via WebSocket
+    const sent = socketService.sendToUser(userId, 'analysis-started', webhookPayload);
+
+    logger.info('Analysis started notification processed (Phase 4)', {
       userId,
       jobId,
+      status,
+      assessment_name,
       sent
     });
 
@@ -34,6 +40,8 @@ router.post('/analysis-started', serviceAuth, validateNotification, (req, res) =
       data: {
         userId,
         jobId,
+        status,
+        assessment_name,
         sent
       }
     });
@@ -58,24 +66,31 @@ router.post('/analysis-started', serviceAuth, validateNotification, (req, res) =
 /**
  * POST /notifications/analysis-complete
  * Endpoint untuk menerima notifikasi dari analysis-worker ketika analisis selesai
+ * Enhanced payload: status='berhasil', result_id, assessment_name
  */
 router.post('/analysis-complete', serviceAuth, validateNotification, (req, res) => {
   try {
-    const { userId, jobId, resultId, status, message, metadata } = req.body;
+    const { userId, jobId, result_id, status, assessment_name } = req.body;
+
+    // Normalize status to the final spec value
+    const normalizedStatus = 'berhasil';
+
+    // Create concise webhook payload per spec
+    const webhookPayload = {
+      status: normalizedStatus,
+      result_id,
+      assessment_name
+    };
 
     // Send notification to user via WebSocket
-    const sent = socketService.sendToUser(userId, 'analysis-complete', {
-      jobId,
-      resultId,
-      status,
-      message: message || 'Your analysis is ready!',
-      metadata: metadata || {}
-    });
+    const sent = socketService.sendToUser(userId, 'analysis-complete', webhookPayload);
 
-    logger.info('Analysis complete notification processed', {
+    logger.info('Analysis complete notification processed (Phase 4)', {
       userId,
       jobId,
-      resultId,
+      result_id,
+      status,
+      assessment_name,
       sent
     });
 
@@ -85,7 +100,9 @@ router.post('/analysis-complete', serviceAuth, validateNotification, (req, res) 
       data: {
         userId,
         jobId,
-        resultId,
+        result_id,
+        status,
+        assessment_name,
         sent
       }
     });
@@ -110,23 +127,32 @@ router.post('/analysis-complete', serviceAuth, validateNotification, (req, res) 
 /**
  * POST /notifications/analysis-failed
  * Endpoint untuk menerima notifikasi ketika analisis gagal
+ * Enhanced payload: status='gagal', assessment_name, error_message
  */
 router.post('/analysis-failed', serviceAuth, validateNotification, (req, res) => {
   try {
-    const { userId, jobId, error, message, metadata } = req.body;
+    const { userId, jobId, status, assessment_name, error_message, result_id } = req.body;
+
+    // Normalize status to the final spec value
+    const normalizedStatus = 'gagal';
+
+    // Create concise webhook payload per spec
+    const webhookPayload = {
+      status: normalizedStatus,
+      result_id: result_id || null,
+      assessment_name,
+      error_message
+    };
 
     // Send notification to user via WebSocket
-    const sent = socketService.sendToUser(userId, 'analysis-failed', {
-      jobId,
-      error,
-      message: message || 'Analysis failed. Please try again.',
-      metadata: metadata || {}
-    });
+    const sent = socketService.sendToUser(userId, 'analysis-failed', webhookPayload);
 
-    logger.info('Analysis failed notification processed', {
+    logger.info('Analysis failed notification processed (Phase 4)', {
       userId,
       jobId,
-      error,
+      status,
+      assessment_name,
+      error_message,
       sent
     });
 
@@ -136,13 +162,77 @@ router.post('/analysis-failed', serviceAuth, validateNotification, (req, res) =>
       data: {
         userId,
         jobId,
-        error,
+        status,
+        assessment_name,
+        error_message,
         sent
       }
     });
 
   } catch (error) {
     logger.error('Error processing analysis failed notification', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body
+    });
+
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to process notification'
+      }
+    });
+  }
+});
+
+/**
+ * POST /notifications/analysis-unknown
+ * Endpoint untuk menerima notifikasi ketika jenis asesmen tidak dikenal
+ * Enhanced payload: status='gagal', assessment_name, error_message
+ */
+router.post('/analysis-unknown', serviceAuth, validateNotification, (req, res) => {
+  try {
+    const { userId, jobId, status, assessment_name, error_message, result_id } = req.body;
+
+    // Normalize status to the final spec value
+    const normalizedStatus = 'gagal';
+
+    // Create concise webhook payload for unknown assessment type per spec
+    const webhookPayload = {
+      status: normalizedStatus,
+      result_id: result_id || null,
+      assessment_name,
+      error_message
+    };
+
+    // Send notification to user via WebSocket
+    const sent = socketService.sendToUser(userId, 'analysis-unknown', webhookPayload);
+
+    logger.warn('Unknown assessment type notification processed (Phase 4)', {
+      userId,
+      jobId,
+      status,
+      assessment_name,
+      error_message,
+      sent
+    });
+
+    res.json({
+      success: true,
+      message: 'Unknown assessment notification sent',
+      data: {
+        userId,
+        jobId,
+        status,
+        assessment_name,
+        error_message,
+        sent
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error processing unknown assessment notification', {
       error: error.message,
       stack: error.stack,
       body: req.body

@@ -38,7 +38,7 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
     allowNull: false,
     defaultValue: 'completed',
     validate: {
-      isIn: [['completed', 'processing', 'failed']]
+      isIn: [['completed', 'processing', 'failed', 'queued', 'cancelled']]
     }
   },
   error_message: {

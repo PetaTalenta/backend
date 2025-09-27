@@ -16,8 +16,7 @@ const {
   uuidParamSchema,
   jobIdParamSchema,
   updateAnalysisJobStatusSchema,
-  createAnalysisJobSchema,
-  togglePublicStatusSchema
+  createAnalysisJobSchema
 } = require('../utils/validation');
 
 const router = express.Router();
@@ -224,22 +223,6 @@ router.put('/jobs/:jobId/status',
 );
 
 // Note: Jobs routes moved to /archive/jobs (directJobs.js) for better organization
-
-/**
- * GET /archive/jobs/stats
- * Get job statistics for authenticated user
- */
-router.get('/jobs/stats',
-  authenticateToken,
-  async (req, res, next) => {
-    try {
-      const stats = await analysisJobsService.getJobStats(req.user.id);
-      return sendSuccess(res, 'Job statistics retrieved successfully', stats);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
 
 /**
  * DELETE /archive/jobs/:jobId

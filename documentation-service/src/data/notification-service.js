@@ -2,7 +2,7 @@ export const notificationServiceData = {
   name: "Notification Service",
   description: "Real-time notification system for ATMA using WebSocket (Socket.IO). Provides instant notifications for analysis status updates including started, completed, and failed events.",
   baseUrl: "api.futureguide.id",
-  websocketUrl: "api.futureguide.id",
+  websocketUrl: "https://api.futureguide.id",
   version: "1.0.0",
   protocol: "Socket.IO v4.7.2",
   authentication: "JWT Token Required",
@@ -28,7 +28,7 @@ npm install socket.io-client
 // Basic connection setup
 import { io } from 'socket.io-client';
 
-const socket = io('api.futureguide.id', {
+const socket = io('https://api.futureguide.id', {
   autoConnect: false,
   transports: ['websocket', 'polling']
 });
@@ -63,11 +63,8 @@ socket.on('auth_error', (error) => {
         data: {
           jobId: "uuid",
           status: "started",
+          assessment_name: "Assessment Name",
           message: "Your analysis has started processing...",
-          metadata: {
-            assessmentName: "Assessment Name",
-            estimatedProcessingTime: "5-10 minutes"
-          },
           timestamp: "2024-01-01T12:00:00.000Z"
         },
         example: `socket.on('analysis-started', (data) => {
@@ -80,41 +77,33 @@ socket.on('auth_error', (error) => {
         name: "analysis-complete",
         description: "Emitted when an analysis job completes successfully",
         data: {
-          jobId: "uuid",
-          resultId: "uuid",
-          status: "completed",
-          message: "Your analysis is ready!",
-          metadata: {
-            assessmentName: "Assessment Name",
-            processingTime: "7 minutes"
-          },
+          status: "berhasil",
+          result_id: "uuid",
+          assessment_name: "Assessment Name",
           timestamp: "2024-01-01T12:00:00.000Z"
         },
         example: `socket.on('analysis-complete', (data) => {
   console.log('Analysis completed:', data);
   // Show success notification and redirect to results
-  showNotification('Analysis Complete', data.message, 'success');
+  showNotification('Analysis Complete', 'Your analysis is ready!', 'success');
   // Optionally redirect to results page
-  window.location.href = \`/results/\${data.resultId}\`;
+  window.location.href = \`/results/\${data.result_id}\`;
 });`
       },
       {
         name: "analysis-failed",
         description: "Emitted when an analysis job fails",
         data: {
-          jobId: "uuid",
-          error: "Error message",
-          message: "Analysis failed. Please try again.",
-          metadata: {
-            assessmentName: "Assessment Name",
-            errorType: "PROCESSING_ERROR"
-          },
+          status: "gagal",
+          result_id: null,
+          assessment_name: "Assessment Name",
+          error_message: "Error message",
           timestamp: "2024-01-01T12:00:00.000Z"
         },
         example: `socket.on('analysis-failed', (data) => {
   console.error('Analysis failed:', data);
   // Show error notification
-  showNotification('Analysis Failed', data.message, 'error');
+  showNotification('Analysis Failed', data.error_message, 'error');
   // Optionally show retry button
 });`
       },
@@ -148,86 +137,164 @@ socket.on('auth_error', (error) => {
 
   endpoints: [
     {
-      method: "GET",
-      path: "/api/notifications/health",
-      title: "Health Check",
-      description: "Check the health status of the notification service and get connection statistics.",
-      authentication: null,
-      rateLimit: "No limit",
-      response: {
-        success: true,
-        data: {
-          status: "healthy",
-          connections: {
-            total: 15,
-            authenticated: 12,
-            users: 8
-          },
-          uptime: "2h 30m 45s",
-          version: "1.0.0"
-        },
-        timestamp: "2024-01-01T12:00:00.000Z"
-      },
-      example: `curl -X GET api.futureguide.id/api/notifications/health`
-    },
-    {
       method: "POST",
-      path: "/api/notifications/send",
-      title: "Send Notification (Internal)",
-      description: "Internal endpoint for sending notifications to specific users. Used by other services.",
+      path: "/api/notifications/analysis-started",
+      title: "Notify Analysis Started (Internal)",
+      description: "Internal webhook called by services when analysis begins. Emits WebSocket 'analysis-started' with minimal payload.",
       authentication: "Internal Service Token",
       rateLimit: "No limit",
       requestBody: {
         userId: "550e8400-e29b-41d4-a716-446655440000",
-        event: "analysis-complete",
-        data: {
-          jobId: "job-uuid",
-          resultId: "result-uuid",
-          message: "Your analysis is ready!"
-        }
+        jobId: "job-uuid",
+        assessment_name: "AI-Driven Talent Mapping",
+        message: "Your analysis has started processing... (optional)"
       },
-      parameters: [
-        {
-          name: "userId",
-          type: "string",
-          required: true,
-          description: "UUID of the user to send notification to"
-        },
-        {
-          name: "event",
-          type: "string",
-          required: true,
-          description: "Event type: analysis-started, analysis-complete, analysis-failed"
-        },
-        {
-          name: "data",
-          type: "object",
-          required: true,
-          description: "Notification data payload"
-        }
-      ],
       response: {
         success: true,
+        message: "Notification sent",
         data: {
-          sent: true,
           userId: "550e8400-e29b-41d4-a716-446655440000",
-          event: "analysis-complete",
-          socketCount: 2
-        },
-        message: "Notification sent successfully"
+          jobId: "job-uuid",
+          assessment_name: "AI-Driven Talent Mapping",
+          status: "started",
+          sent: true
+        }
       },
-      example: `curl -X POST api.futureguide.id/api/notifications/send \\
+      example: `curl -X POST https://api.futureguide.id/api/notifications/analysis-started \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer INTERNAL_SERVICE_TOKEN" \\
   -d '{
     "userId": "550e8400-e29b-41d4-a716-446655440000",
-    "event": "analysis-complete",
-    "data": {
-      "jobId": "job-uuid",
-      "resultId": "result-uuid",
-      "message": "Your analysis is ready!"
-    }
+    "jobId": "job-uuid",
+    "assessment_name": "AI-Driven Talent Mapping",
+    "message": "Your analysis has started processing..."
   }'`
+    },
+    {
+      method: "POST",
+      path: "/api/notifications/analysis-complete",
+      title: "Notify Analysis Completed (Internal)",
+      description: "Internal webhook called by worker when analysis completes. Emits 'analysis-complete' with streamlined payload.",
+      authentication: "Internal Service Token",
+      rateLimit: "No limit",
+      requestBody: {
+        userId: "550e8400-e29b-41d4-a716-446655440000",
+        jobId: "job-uuid",
+        result_id: "result-uuid",
+        assessment_name: "AI-Driven Talent Mapping"
+      },
+      response: {
+        success: true,
+        message: "Notification sent",
+        data: {
+          userId: "550e8400-e29b-41d4-a716-446655440000",
+          jobId: "job-uuid",
+          result_id: "result-uuid",
+          assessment_name: "AI-Driven Talent Mapping",
+          status: "berhasil",
+          sent: true
+        }
+      },
+      example: `curl -X POST https://api.futureguide.id/api/notifications/analysis-complete \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer INTERNAL_SERVICE_TOKEN" \\
+  -d '{
+    "userId": "550e8400-e29b-41d4-a716-446655440000",
+    "jobId": "job-uuid",
+    "result_id": "result-uuid",
+    "assessment_name": "AI-Driven Talent Mapping"
+  }'`
+    },
+    {
+      method: "POST",
+      path: "/api/notifications/analysis-failed",
+      title: "Notify Analysis Failed (Internal)",
+      description: "Internal webhook called by worker when analysis fails. Emits 'analysis-failed' with payload {status: 'gagal', result_id, assessment_name, error_message}.",
+      authentication: "Internal Service Token",
+      rateLimit: "No limit",
+      requestBody: {
+        userId: "550e8400-e29b-41d4-a716-446655440000",
+        jobId: "job-uuid",
+        assessment_name: "AI-Driven Talent Mapping",
+        error_message: "Error message",
+        result_id: null
+      },
+      response: {
+        success: true,
+        message: "Notification sent",
+        data: {
+          userId: "550e8400-e29b-41d4-a716-446655440000",
+          jobId: "job-uuid",
+          assessment_name: "AI-Driven Talent Mapping",
+          status: "gagal",
+          sent: true
+        }
+      },
+      example: `curl -X POST https://api.futureguide.id/api/notifications/analysis-failed \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer INTERNAL_SERVICE_TOKEN" \\
+  -d '{
+    "userId": "550e8400-e29b-41d4-a716-446655440000",
+    "jobId": "job-uuid",
+    "assessment_name": "AI-Driven Talent Mapping",
+    "error_message": "Validation failed"
+  }'`
+    },
+    {
+      method: "POST",
+      path: "/api/notifications/analysis-unknown",
+      title: "Notify Unknown Assessment (Internal)",
+      description: "Internal webhook used when assessment type is unsupported. Emits 'analysis-unknown' with {status: 'gagal', result_id, assessment_name, error_message}.",
+      authentication: "Internal Service Token",
+      rateLimit: "No limit",
+      requestBody: {
+        userId: "550e8400-e29b-41d4-a716-446655440000",
+        jobId: "job-uuid",
+        assessment_name: "Unknown Assessment",
+        error_message: "Unsupported assessment type",
+        result_id: null
+      },
+      response: {
+        success: true,
+        message: "Unknown assessment notification sent",
+        data: {
+          userId: "550e8400-e29b-41d4-a716-446655440000",
+          jobId: "job-uuid",
+          assessment_name: "Unknown Assessment",
+          status: "gagal",
+          sent: true
+        }
+      },
+      example: `curl -X POST https://api.futureguide.id/api/notifications/analysis-unknown \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer INTERNAL_SERVICE_TOKEN" \\
+  -d '{
+    "userId": "550e8400-e29b-41d4-a716-446655440000",
+    "jobId": "job-uuid",
+    "assessment_name": "Unknown Assessment",
+    "error_message": "Unsupported assessment type"
+  }'`
+    },
+    {
+      method: "GET",
+      path: "/api/notifications/status",
+      title: "Service Status (Internal)",
+      description: "Check service operational status and connection stats.",
+      authentication: "Internal Service Token",
+      rateLimit: "No limit",
+      response: {
+        success: true,
+        service: "notification-service",
+        status: "operational",
+        connections: {
+          total: 15,
+          authenticated: 12,
+          users: 8
+        },
+        timestamp: "2024-01-01T12:00:00.000Z"
+      },
+      example: `curl -X GET https://api.futureguide.id/api/notifications/status \\
+  -H "Authorization: Bearer INTERNAL_SERVICE_TOKEN"`
     }
   ],
 
@@ -247,7 +314,7 @@ export const useNotifications = (token) => {
   useEffect(() => {
     if (!token) return;
 
-    const newSocket = io('api.futureguide.id', {
+    const newSocket = io('https://api.futureguide.id', {
       autoConnect: false,
       transports: ['websocket', 'polling']
     });
@@ -317,7 +384,7 @@ export function useNotifications(token) {
   const connect = () => {
     if (!token.value) return;
 
-    socket.value = io('api.futureguide.id', {
+    socket.value = io('https://api.futureguide.id', {
       autoConnect: false,
       transports: ['websocket', 'polling']
     });
@@ -413,7 +480,7 @@ export function useNotifications(token) {
       }
     ],
     debugSteps: [
-      "Check service status: GET api.futureguide.id/api/notifications/health",
+      "Check service status: GET https://api.futureguide.id/api/notifications/health",
       "Enable debug mode: localStorage.debug = 'socket.io-client:socket'",
       "Monitor network tab for WebSocket connections",
       "Verify JWT token payload and expiry",
