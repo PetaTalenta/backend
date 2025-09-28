@@ -16,7 +16,7 @@ const jobMessageSchema = Joi.alternatives().try(
     userEmail: Joi.string().email().required(),
     assessment_name: Joi.string().valid('AI-Driven Talent Mapping', 'AI-Based IQ Test', 'Custom Assessment').default('AI-Driven Talent Mapping'),
     assessment_data: Joi.object().required(), // Trust that assessment-service already validated this
-    raw_responses: Joi.object().optional(),
+    raw_responses: Joi.object().allow(null).optional(),
     timestamp: Joi.string().isoDate().required(),
     retryCount: Joi.number().min(0).default(0),
     messageVersion: Joi.string().valid('v2').optional()

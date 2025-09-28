@@ -29,10 +29,10 @@ async function testRetryEndpoint() {
     console.log('✅ Token obtained successfully');
     
     // Step 2: Test retry endpoint
-    console.log(`\n2. Testing retry endpoint with result ID: ${RESULT_ID}`);
+    console.log(`\n2. Testing retry endpoint with job ID: ${RESULT_ID}`);
     try {
       const retryResponse = await axios.post(`${BASE_URL}/assessment/retry`, 
-        { resultId: RESULT_ID },
+        { jobId: RESULT_ID },
         {
           headers: { 
             'Authorization': `Bearer ${token}`,

@@ -60,12 +60,15 @@ async function ensureDevUser(userId, sequelize) {
  * Validate business logic for update operations
  * @param {Object} updateData - Update data
  * @param {Object} existingResult - Existing result from database
+ * @param {Object} options - Additional options (e.g., isRetry)
  * @throws {Error} - If validation fails
  */
-const validateUpdateBusinessLogic = async (updateData, existingResult) => {
-  // 1. Prevent status regression (completed -> processing)
+const validateUpdateBusinessLogic = async (updateData, existingResult, options = {}) => {
+  // 1. Prevent status regression (completed -> processing) except for retry operations
   if (updateData.status && existingResult.status === 'completed' && updateData.status === 'processing') {
-    throw new Error('Cannot change status from completed back to processing');
+    if (!options.isRetry) {
+      throw new Error('Cannot change status from completed back to processing');
+    }
   }
 
   // 2. Validate status transitions
@@ -75,7 +78,10 @@ const validateUpdateBusinessLogic = async (updateData, existingResult) => {
     'completed': ['failed'] // Allow marking as failed if issues found
   };
 
-  if (updateData.status && existingResult.status !== updateData.status) {
+  // Allow completed -> processing transition for retry operations
+  if (options.isRetry && existingResult.status === 'completed' && updateData.status === 'processing') {
+    // Allow this transition for retry
+  } else if (updateData.status && existingResult.status !== updateData.status) {
     const allowedTransitions = validTransitions[existingResult.status] || [];
     if (!allowedTransitions.includes(updateData.status)) {
       throw new Error(`Invalid status transition from ${existingResult.status} to ${updateData.status}`);
@@ -572,9 +578,10 @@ const getResultById = async (resultId, userId = null, isInternalService = false)
  * @param {Object} updateData - Update data
  * @param {String} userId - User ID (for access control)
  * @param {Boolean} isInternalService - Whether request is from internal service
+ * @param {Object} options - Additional options (e.g., isRetry)
  * @returns {Promise<Object>} - Updated result
  */
-const updateResult = async (resultId, updateData, userId = null, isInternalService = false) => {
+const updateResult = async (resultId, updateData, userId = null, isInternalService = false, options = {}) => {
   try {
     logger.info('Updating analysis result', {
       resultId,
@@ -595,7 +602,7 @@ const updateResult = async (resultId, updateData, userId = null, isInternalServi
     }
 
     // Business logic validation for updates
-    await validateUpdateBusinessLogic(updateData, result);
+    await validateUpdateBusinessLogic(updateData, result, options);
 
     // Update the result
     await result.update(updateData);

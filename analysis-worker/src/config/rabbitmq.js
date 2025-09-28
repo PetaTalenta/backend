@@ -71,25 +71,18 @@ const initialize = async () => {
       durable: true
     });
 
-    // Setup main queue with TTL and timeout configurations
+    // Setup main queue with dead letter exchange (matching assessment service configuration)
     await channel.assertQueue(config.queue, {
       durable: config.options.durable,
       arguments: {
         'x-dead-letter-exchange': config.exchange,
-        'x-dead-letter-routing-key': 'dlq',
-        'x-message-ttl': config.messageTTL,           // Message TTL
-        'x-expires': config.queueTTL,                 // Queue TTL when unused
-        'x-max-length': parseInt(process.env.QUEUE_MAX_LENGTH || '10000') // Max queue length
+        'x-dead-letter-routing-key': 'dlq'
       }
     });
 
     // Setup dead letter queue
     await channel.assertQueue(config.deadLetterQueue, {
-      durable: config.options.durable,
-      arguments: {
-        'x-message-ttl': config.queueTTL, // DLQ messages expire after 24 hours
-        'x-max-length': parseInt(process.env.DLQ_MAX_LENGTH || '1000') // Max DLQ length
-      }
+      durable: config.options.durable
     });
 
     // Bind queues to exchange

@@ -250,19 +250,28 @@ const getAnalysisResult = async (resultId) => {
  * Update analysis result in Archive Service
  * @param {String} resultId - Result ID
  * @param {Object} updateData - Data to update
+ * @param {Object} options - Additional options (e.g., isRetry)
  * @returns {Promise<Object>} - Updated result
  */
-const updateAnalysisResult = async (resultId, updateData) => {
+const updateAnalysisResult = async (resultId, updateData, options = {}) => {
   try {
     logger.info('Updating analysis result in Archive Service', {
       resultId,
-      updateFields: Object.keys(updateData)
+      updateFields: Object.keys(updateData),
+      isRetry: options.isRetry
     });
 
-    const response = await archiveClient.put(`/archive/results/${resultId}`, updateData);
+    // Add retry flag to request headers if this is a retry operation
+    const headers = {};
+    if (options.isRetry) {
+      headers['x-retry-operation'] = 'true';
+    }
+
+    const response = await archiveClient.put(`/archive/results/${resultId}`, updateData, { headers });
 
     logger.info('Analysis result updated in Archive Service successfully', {
-      resultId
+      resultId,
+      isRetry: options.isRetry
     });
 
     return response.data.data;
@@ -271,7 +280,8 @@ const updateAnalysisResult = async (resultId, updateData) => {
       resultId,
       error: error.message,
       status: error.response?.status,
-      statusText: error.response?.statusText
+      statusText: error.response?.statusText,
+      isRetry: options.isRetry
     });
     throw error;
   }

@@ -341,7 +341,7 @@ router.post('/retry',
           status: 'processing',
           test_result: null, // clear previous test_result
           error_message: null // clear any previous error
-        });
+        }, { isRetry: true });
       } catch (archiveErr) {
         logger.error('Failed to update result status for retry, refunding tokens', {
           jobId,

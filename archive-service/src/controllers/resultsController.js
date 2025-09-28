@@ -184,12 +184,18 @@ const updateResult = async (req, res, next) => {
     const resultId = req.params.id;
     const userId = req.user?.id;
     const isInternalService = req.isInternalService;
-    
+
+    // Check for retry flag in request body or headers
+    const options = {
+      isRetry: req.body.isRetry || req.headers['x-retry-operation'] === 'true'
+    };
+
     const result = await resultsService.updateResult(
       resultId,
       req.body,
       userId,
-      isInternalService
+      isInternalService,
+      options
     );
     
     res.json({

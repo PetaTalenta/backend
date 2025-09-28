@@ -280,11 +280,12 @@ const createAnalysisResultSchema = Joi.object({
 // Update analysis result schema with enhanced validation
 const updateAnalysisResultSchema = Joi.object({
   persona_profile: personaProfileSchema.allow(null).optional(),
+  test_result: Joi.object().allow(null).optional(), // Allow test_result updates for retry operations
   status: Joi.string().valid('completed', 'processing', 'failed').optional()
     .messages({
       'any.only': 'Status must be one of: completed, processing, failed'
     }),
-  error_message: Joi.string().trim().max(2000).optional()
+  error_message: Joi.string().trim().max(2000).allow(null).optional()
     .messages({
       'string.max': 'Error message must be at most 2000 characters'
     }),
@@ -307,17 +308,17 @@ const updateAnalysisResultSchema = Joi.object({
   'object.min': 'At least one field must be provided for update'
 }).custom((value, helpers) => {
   // Business logic validation for updates
-  if (value.status === 'completed' && value.persona_profile === null) {
-    return helpers.error('custom.completedWithoutProfile');
+  if (value.status === 'completed' && value.persona_profile === null && value.test_result === null) {
+    return helpers.error('custom.completedWithoutResult');
   }
 
-  if (value.status === 'failed' && value.persona_profile && !value.error_message) {
+  if (value.status === 'failed' && (value.persona_profile || value.test_result) && !value.error_message) {
     return helpers.error('custom.failedWithoutError');
   }
 
   return value;
 }).messages({
-  'custom.completedWithoutProfile': 'Cannot mark as completed without persona_profile',
+  'custom.completedWithoutResult': 'Cannot mark as completed without persona_profile or test_result',
   'custom.failedWithoutError': 'Failed status requires error_message'
 });
 
@@ -354,7 +355,7 @@ const createAnalysisJobSchema = Joi.object({
 const updateAnalysisJobStatusSchema = Joi.object({
   status: Joi.string().valid('queued', 'processing', 'completed', 'failed').required(),
   result_id: uuidSchema.optional(),
-  error_message: Joi.string().optional()
+  error_message: Joi.string().allow(null).optional()
 }).min(1);
 
 // Query parameters schema for list jobs
