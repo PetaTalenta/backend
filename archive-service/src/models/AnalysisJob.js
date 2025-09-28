@@ -29,7 +29,7 @@ const AnalysisJob = sequelize.define('AnalysisJob', {
     allowNull: false,
     defaultValue: 'queued',
     validate: {
-      isIn: [['queued', 'processing', 'completed', 'failed', 'cancelled']]
+      isIn: [['queued', 'processing', 'completed', 'failed']]
     }
   },
   result_id: {
@@ -88,6 +88,14 @@ const AnalysisJob = sequelize.define('AnalysisJob', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   underscored: true,
+  validate: {
+    // Custom validation: if status is 'failed', error_message must be present
+    statusErrorMessageRequired() {
+      if (this.status === 'failed' && (!this.error_message || this.error_message.trim() === '')) {
+        throw new Error('Error message is required when status is failed');
+      }
+    }
+  },
   indexes: [
     {
       unique: true,

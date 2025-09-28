@@ -33,19 +33,7 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
     allowNull: true,
     field: 'raw_responses'
   },
-  status: {
-    type: DataTypes.STRING(50),
-    allowNull: false,
-    defaultValue: 'completed',
-    validate: {
-      isIn: [['completed', 'processing', 'failed', 'queued', 'cancelled']]
-    }
-  },
-  error_message: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-    field: 'error_message'
-  },
+
   created_at: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -58,15 +46,7 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
     defaultValue: DataTypes.NOW,
     field: 'updated_at'
   },
-  assessment_name: {
-    type: DataTypes.STRING(255),
-    allowNull: false,
-    defaultValue: 'AI-Driven Talent Mapping',
-    field: 'assessment_name',
-    validate: {
-      isIn: [['AI-Driven Talent Mapping', 'AI-Based IQ Test', 'Custom Assessment']]
-    }
-  },
+
   is_public: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
@@ -93,10 +73,7 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
       name: 'idx_analysis_results_user_id',
       fields: ['user_id']
     },
-    {
-      name: 'idx_analysis_results_status',
-      fields: ['status']
-    },
+
     {
       name: 'idx_analysis_results_created_at',
       fields: ['created_at']
@@ -105,10 +82,7 @@ const AnalysisResult = sequelize.define('AnalysisResult', {
       name: 'idx_analysis_results_user_created',
       fields: ['user_id', 'created_at']
     },
-    {
-      name: 'idx_analysis_results_assessment_name',
-      fields: ['assessment_name']
-    },
+
     {
       name: 'idx_analysis_results_chatbot_id',
       fields: ['chatbot_id'],

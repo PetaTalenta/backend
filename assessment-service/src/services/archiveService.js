@@ -145,12 +145,11 @@ const createJob = async (jobId, userId, assessmentData, assessmentName = 'AI-Dri
  * @param {Boolean} isPublic - Whether result is public (optional)
  * @returns {Promise<Object>} - Created result
  */
-const createAnalysisResult = async (userId, testData, testResult, assessmentName = 'AI-Driven Talent Mapping', status = 'completed', errorMessage = null, rawResponses = null, chatbotId = null, isPublic = false) => {
+const createAnalysisResult = async (userId, testData, testResult, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null, chatbotId = null, isPublic = false) => {
   try {
     logger.info('Creating analysis result in Archive Service', {
       userId,
       assessmentName,
-      status,
       hasTestResult: !!testResult,
       chatbotId,
       isPublic
@@ -160,17 +159,12 @@ const createAnalysisResult = async (userId, testData, testResult, assessmentName
       user_id: userId,
       test_data: testData,
       test_result: testResult,
-      assessment_name: assessmentName,
-      status: status,
       raw_responses: rawResponses,
       chatbot_id: chatbotId,
       is_public: isPublic
     };
 
-    // Add error message if status is failed
-    if (status === 'failed' && errorMessage) {
-      requestBody.error_message = errorMessage;
-    }
+    // Note: status, error_message, and assessment_name are now managed in analysis_jobs table only
 
     const response = await archiveClient.post('/archive/results', requestBody);
 

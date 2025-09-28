@@ -106,8 +106,6 @@ const createResult = async (req, res, next) => {
       data: {
         id: result?.id,
         user_id: result?.user_id,
-        status: result?.status,
-        assessment_name: result?.assessment_name,
         created_at: result?.created_at,
         batched: options.useBatching
       }

@@ -377,11 +377,13 @@ class AnalysisJobsService {
         });
       }
 
-      // Update status to indicate deletion
-      logger.info('Updating job status to cancelled', { jobId, userId });
+      // Update status to indicate deletion (mark as failed since cancelled status is removed)
+      logger.info('Updating job status to failed (deleted)', { jobId, userId });
       const updateResult = await AnalysisJob.update(
         {
-          status: 'cancelled',
+          status: 'failed',
+          error_message: 'Job deleted by user',
+          completed_at: new Date(),
           result_id: null // Clear result_id since we deleted the result
         },
         {
@@ -464,11 +466,13 @@ class AnalysisJobsService {
         });
       }
 
-      // Update status to indicate deletion
-      logger.info('Updating job status to cancelled', { jobId });
+      // Update status to indicate deletion (mark as failed since cancelled status is removed)
+      logger.info('Updating job status to failed (deleted)', { jobId });
       const updateResult = await AnalysisJob.update(
         {
-          status: 'cancelled',
+          status: 'failed',
+          error_message: 'Job deleted by internal service',
+          completed_at: new Date(),
           result_id: null // Clear result_id since we deleted the result
         },
         {
@@ -548,8 +552,7 @@ class AnalysisJobsService {
           'completed': 'completed',
           'failed': 'failed',
           'processing': 'processing',
-          'queued': 'processing', // Results don't have queued status
-          'cancelled': 'failed' // Cancelled jobs should have failed results
+          'queued': 'processing' // Results don't have queued status
         };
 
         const expectedResultStatus = statusMapping[jobStatus];
@@ -681,7 +684,7 @@ class AnalysisJobsService {
       const [deletedCount] = await sequelize.query(`
         DELETE FROM archive.analysis_jobs
         WHERE created_at < :cutoffDate
-        AND status IN ('completed', 'failed', 'cancelled')
+        AND status IN ('completed', 'failed')
       `, {
         replacements: { cutoffDate },
         type: sequelize.QueryTypes.DELETE

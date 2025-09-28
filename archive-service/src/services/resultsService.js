@@ -64,45 +64,8 @@ async function ensureDevUser(userId, sequelize) {
  * @throws {Error} - If validation fails
  */
 const validateUpdateBusinessLogic = async (updateData, existingResult, options = {}) => {
-  // 1. Prevent status regression (completed -> processing) except for retry operations
-  if (updateData.status && existingResult.status === 'completed' && updateData.status === 'processing') {
-    if (!options.isRetry) {
-      throw new Error('Cannot change status from completed back to processing');
-    }
-  }
-
-  // 2. Validate status transitions
-  const validTransitions = {
-    'processing': ['completed', 'failed'],
-    'failed': ['processing'], // Allow retry
-    'completed': ['failed'] // Allow marking as failed if issues found
-  };
-
-  // Allow completed -> processing transition for retry operations
-  if (options.isRetry && existingResult.status === 'completed' && updateData.status === 'processing') {
-    // Allow this transition for retry
-  } else if (updateData.status && existingResult.status !== updateData.status) {
-    const allowedTransitions = validTransitions[existingResult.status] || [];
-    if (!allowedTransitions.includes(updateData.status)) {
-      throw new Error(`Invalid status transition from ${existingResult.status} to ${updateData.status}`);
-    }
-  }
-
-  // 3. Validate data consistency for updates
-  if (updateData.status === 'completed') {
-    // persona_profile must exist either after update or currently stored
-    const personaAfter = updateData.persona_profile !== undefined ? updateData.persona_profile : existingResult.persona_profile;
-    if (!personaAfter) {
-      throw new Error('Cannot mark as completed without persona_profile');
-    }
-  }
-
-  if (updateData.status === 'failed') {
-    const personaPresent = !!(updateData.persona_profile || existingResult.persona_profile);
-    if (personaPresent && !updateData.error_message) {
-      throw new Error('Failed status requires error_message when persona_profile exists');
-    }
-  }
+  // Note: Status and error_message validation is now handled in analysis_jobs table
+  // This function now only validates data consistency for analysis_results
 
   // 4. Validate persona profile updates
   if (updateData.persona_profile && typeof updateData.persona_profile === 'object') {
@@ -125,9 +88,7 @@ const validateUpdateBusinessLogic = async (updateData, existingResult, options =
 
   logger.debug('Update business logic validation passed', {
     resultId: existingResult.id,
-    updateFields: Object.keys(updateData),
-    currentStatus: existingResult.status,
-    newStatus: updateData.status
+    updateFields: Object.keys(updateData)
   });
 };
 
@@ -408,7 +369,6 @@ const createResult = async (data, options = {}) => {
 
     logger.info('Creating new analysis result', {
       userId: normalized.user_id,
-      status: normalized.status,
       dataKeys: Object.keys(normalized),
       assessmentDataType: typeof normalized.assessment_data,
       personaProfileType: typeof normalized.persona_profile,
@@ -441,8 +401,7 @@ const createResult = async (data, options = {}) => {
 
     logger.info('Analysis result created individually', {
       id: result.id,
-      userId: result.user_id,
-      status: result.status
+      userId: result.user_id
     });
 
     return result;

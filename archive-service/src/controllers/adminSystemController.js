@@ -773,11 +773,10 @@ const cancelJob = async (req, res, next) => {
       });
     }
 
-    // Update job status to cancelled
-    const updatedJob = await analysisJobsService.updateJobStatus(jobId, 'cancelled', {
-      cancelled_at: new Date(),
-      cancelled_by: req.admin.id,
-      cancellation_reason: 'Admin cancellation'
+    // Update job status to failed (cancelled jobs are now marked as failed)
+    const updatedJob = await analysisJobsService.updateJobStatus(jobId, 'failed', {
+      completed_at: new Date(),
+      error_message: `Job cancelled by admin: ${req.admin.username}. Reason: Admin cancellation`
     });
 
     const responseTime = Date.now() - startTime;
@@ -796,8 +795,8 @@ const cancelJob = async (req, res, next) => {
       data: {
         job_id: updatedJob.job_id,
         previous_status: job.status,
-        current_status: 'cancelled',
-        cancelled_at: updatedJob.cancelled_at,
+        current_status: 'failed',
+        cancelled_at: updatedJob.completed_at,
         cancelled_by: req.admin.username
       }
     });
@@ -845,8 +844,8 @@ const retryJob = async (req, res, next) => {
       });
     }
 
-    // Check if job can be retried (only failed or cancelled jobs)
-    if (!['failed', 'cancelled'].includes(job.status)) {
+    // Check if job can be retried (only failed jobs)
+    if (job.status !== 'failed') {
       logger.warn('Job cannot be retried - invalid status', {
         adminId: req.admin.id,
         adminUsername: req.admin.username,
@@ -855,7 +854,7 @@ const retryJob = async (req, res, next) => {
       });
       return res.status(400).json({
         success: false,
-        error: `Job cannot be retried. Current status: ${job.status}. Only failed or cancelled jobs can be retried.`
+        error: `Job cannot be retried. Current status: ${job.status}. Only failed jobs can be retried.`
       });
     }
 
@@ -967,15 +966,14 @@ const bulkJobOperation = async (req, res, next) => {
         if (operation === 'cancel') {
           // Check if job can be cancelled
           if (['queued', 'processing'].includes(job.status)) {
-            await analysisJobsService.updateJobStatus(job.job_id, 'cancelled', {
-              cancelled_at: new Date(),
-              cancelled_by: req.admin.id,
-              cancellation_reason: 'Admin bulk cancellation'
+            await analysisJobsService.updateJobStatus(job.job_id, 'failed', {
+              completed_at: new Date(),
+              error_message: `Job cancelled by admin: ${req.admin.username}. Reason: Admin bulk cancellation`
             });
             results.successful.push({
               job_id: job.job_id,
               previous_status: job.status,
-              new_status: 'cancelled'
+              new_status: 'failed'
             });
           } else {
             results.skipped.push({

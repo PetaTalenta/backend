@@ -317,17 +317,13 @@ const saveAnalysisResultDirect = async (userId, testData, testResult, jobId, ass
       profileArchetype: testResult?.archetype
     });
 
-    // Determine status based on test result
-    const resultStatus = testResult ? 'completed' : 'failed';
-
     // Prepare request body with new field names
+    // Note: status, error_message, and assessment_name are now managed in analysis_jobs table only
     const requestBody = {
       user_id: userId,
       test_data: testData, // Updated field name
       test_result: testResult, // Updated field name
-      assessment_name: assessmentName,
-      raw_responses: rawResponses,
-      status: resultStatus
+      raw_responses: rawResponses
     };
 
     // Send request to Archive Service
