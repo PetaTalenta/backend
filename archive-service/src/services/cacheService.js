@@ -312,6 +312,98 @@ class CacheService {
   }
 
   /**
+   * Get Redis info for performance monitoring
+   * Phase 4 Enhancement - Advanced cache monitoring
+   */
+  async getInfo() {
+    if (!this.isAvailable()) {
+      return null;
+    }
+
+    try {
+      const info = await this.client.info();
+      const lines = info.split('\r\n');
+      const result = {};
+
+      lines.forEach(line => {
+        if (line.includes(':')) {
+          const [key, value] = line.split(':');
+          if (key && value) {
+            // Parse numeric values
+            if (!isNaN(value)) {
+              result[key] = parseInt(value);
+            } else {
+              result[key] = value;
+            }
+          }
+        }
+      });
+
+      // Get keyspace info
+      const keyspaceInfo = await this.client.info('keyspace');
+      const keyspaceLines = keyspaceInfo.split('\r\n');
+      keyspaceLines.forEach(line => {
+        if (line.startsWith('db')) {
+          const [db, stats] = line.split(':');
+          const statsObj = {};
+          stats.split(',').forEach(stat => {
+            const [key, value] = stat.split('=');
+            statsObj[key] = parseInt(value);
+          });
+          result[db] = statsObj;
+        }
+      });
+
+      return result;
+    } catch (error) {
+      logger.error('Failed to get Redis info', { error: error.message });
+      return null;
+    }
+  }
+
+  /**
+   * Get cache performance metrics
+   * Phase 4 Enhancement - Detailed cache analytics
+   */
+  async getPerformanceMetrics() {
+    if (!this.isAvailable()) {
+      return {
+        isAvailable: false,
+        hitRatio: 0,
+        totalKeys: 0,
+        memoryUsage: 'N/A'
+      };
+    }
+
+    try {
+      const info = await this.getInfo();
+
+      const hitRatio = info.keyspace_hits && info.keyspace_misses ?
+        info.keyspace_hits / (info.keyspace_hits + info.keyspace_misses) : 0;
+
+      return {
+        isAvailable: true,
+        hitRatio,
+        totalHits: info.keyspace_hits || 0,
+        totalMisses: info.keyspace_misses || 0,
+        totalKeys: info.db0?.keys || 0,
+        memoryUsage: info.used_memory_human || 'N/A',
+        memoryUsageBytes: info.used_memory || 0,
+        connectedClients: info.connected_clients || 0,
+        totalCommandsProcessed: info.total_commands_processed || 0
+      };
+    } catch (error) {
+      logger.error('Failed to get cache performance metrics', { error: error.message });
+      return {
+        isAvailable: false,
+        hitRatio: 0,
+        totalKeys: 0,
+        memoryUsage: 'N/A'
+      };
+    }
+  }
+
+  /**
    * Close Redis connection
    */
   async close() {

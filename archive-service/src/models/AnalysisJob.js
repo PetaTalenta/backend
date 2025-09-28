@@ -150,7 +150,7 @@ AnalysisJob.associate = (models) => {
  */
 AnalysisJob.prototype.toJSON = function() {
   const values = Object.assign({}, this.get());
-  
+
   // Convert timestamps to ISO strings for consistency
   if (values.created_at) {
     values.created_at = values.created_at.toISOString();
@@ -161,8 +161,18 @@ AnalysisJob.prototype.toJSON = function() {
   if (values.completed_at) {
     values.completed_at = values.completed_at.toISOString();
   }
-  
-  return values;
+
+  // API Consistency Fix: Remove database internal ID and use job_id as primary identifier
+  // This prevents frontend from receiving the wrong ID type and ensures consistency
+  const apiResponse = { ...values };
+
+  // Remove the database internal ID from API responses
+  delete apiResponse.id;
+
+  // Use job_id as the primary identifier for API operations
+  // Keep job_id field as is - frontend should use this field consistently
+
+  return apiResponse;
 };
 
 /**

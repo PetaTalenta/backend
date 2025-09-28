@@ -43,5 +43,54 @@ router.put('/users/:userId/token-balance/archive', (req, res) => {
   return usersProxy(`/archive/admin/users/${userId}/token-balance`, { method: 'PUT', body: value, headers: { authorization: req.headers.authorization } }, req, res);
 });
 
+// ===== PHASE 2: SYSTEM MONITORING & ANALYTICS =====
+
+// Global statistics
+router.get('/stats/global', (req, res) => usersProxy('/archive/admin/stats/global', { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+
+// Job monitoring
+router.get('/jobs/monitor', (req, res) => usersProxy('/archive/admin/jobs/monitor', { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+
+// Queue status
+router.get('/jobs/queue', (req, res) => usersProxy('/archive/admin/jobs/queue', { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+
+// ===== PHASE 3: DEEP ANALYTICS & ASSESSMENT DETAILS =====
+
+// Daily analytics
+router.get('/analytics/daily', (req, res) => usersProxy('/archive/admin/analytics/daily', { method: 'GET', query: req.query, headers: { authorization: req.headers.authorization } }, req, res));
+
+// Assessment details
+router.get('/assessments/:resultId/details', (req, res) => usersProxy(`/archive/admin/assessments/${req.params.resultId}/details`, { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+
+// Assessment search
+router.get('/assessments/search', (req, res) => usersProxy('/archive/admin/assessments/search', { method: 'GET', query: req.query, headers: { authorization: req.headers.authorization } }, req, res));
+
+// ===== PHASE 4: ADVANCED JOB MANAGEMENT =====
+
+// Cancel job
+router.post('/jobs/:jobId/cancel', (req, res) => usersProxy(`/archive/admin/jobs/${req.params.jobId}/cancel`, { method: 'POST', headers: { authorization: req.headers.authorization } }, req, res));
+
+// Retry job
+router.post('/jobs/:jobId/retry', (req, res) => usersProxy(`/archive/admin/jobs/${req.params.jobId}/retry`, { method: 'POST', headers: { authorization: req.headers.authorization } }, req, res));
+
+// Bulk job operations
+router.post('/jobs/bulk', (req, res) => usersProxy('/archive/admin/jobs/bulk', { method: 'POST', body: req.body, headers: { authorization: req.headers.authorization } }, req, res));
+
+// ===== PHASE 4: PERFORMANCE OPTIMIZATION =====
+
+// Performance report
+router.get('/performance/report', (req, res) => usersProxy('/archive/admin/performance/report', { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+
+// Database optimization
+router.post('/performance/optimize', (req, res) => usersProxy('/archive/admin/performance/optimize', { method: 'POST', headers: { authorization: req.headers.authorization } }, req, res));
+
+// ===== PHASE 4: SECURITY ENHANCEMENTS =====
+
+// Security audit report
+router.get('/security/audit', (req, res) => usersProxy('/archive/admin/security/audit', { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+
+// GDPR data anonymization
+router.post('/security/anonymize/:userId', (req, res) => usersProxy(`/archive/admin/security/anonymize/${req.params.userId}`, { method: 'POST', headers: { authorization: req.headers.authorization } }, req, res));
+
 module.exports = router;
 

@@ -60,12 +60,13 @@ const getUserOverview = async (userId) => {
     // Get user's recent archetypes (last 5 completed)
     const recentArchetypes = await sequelize.query(`
       SELECT
-        persona_profile->0->>'archetype' as archetype,
+        test_result->>'archetype' as archetype,
         created_at
       FROM archive.analysis_results
       WHERE user_id = :userId
         AND status = 'completed'
-        AND persona_profile IS NOT NULL
+        AND test_result IS NOT NULL
+        AND test_result->>'archetype' IS NOT NULL
       ORDER BY created_at DESC
       LIMIT 5
     `, {
@@ -127,13 +128,14 @@ const getSummaryStats = async () => {
     
     // Get top archetypes
     const topArchetypes = await sequelize.query(`
-      SELECT 
-        persona_profile->0->>'archetype' as archetype,
+      SELECT
+        test_result->>'archetype' as archetype,
         COUNT(*) as count
-      FROM archive.analysis_results 
+      FROM archive.analysis_results
       WHERE status = 'completed'
-        AND persona_profile IS NOT NULL
-      GROUP BY persona_profile->0->>'archetype'
+        AND test_result IS NOT NULL
+        AND test_result->>'archetype' IS NOT NULL
+      GROUP BY test_result->>'archetype'
       ORDER BY count DESC
       LIMIT 5
     `, {

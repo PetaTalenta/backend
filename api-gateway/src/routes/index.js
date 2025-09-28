@@ -137,6 +137,29 @@ router.put('/archive/admin/users/:userId/token-balance', verifyToken, verifyAdmi
 router.delete('/archive/admin/users/:userId', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
 router.get('/archive/admin/users', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
 
+// Phase 2: System monitoring and analytics endpoints
+router.get('/archive/admin/stats/global', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.get('/archive/admin/jobs/monitor', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.get('/archive/admin/jobs/queue', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+
+// Phase 3: Deep analytics and assessment details endpoints
+router.get('/archive/admin/analytics/daily', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.get('/archive/admin/assessments/:resultId/details', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.get('/archive/admin/assessments/search', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+
+// Phase 4: Advanced job management endpoints
+router.post('/archive/admin/jobs/:jobId/cancel', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.post('/archive/admin/jobs/:jobId/retry', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.post('/archive/admin/jobs/bulk', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+
+// Phase 4: Performance optimization endpoints
+router.get('/archive/admin/performance/report', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.post('/archive/admin/performance/optimize', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+
+// Phase 4: Security enhancement endpoints
+router.get('/archive/admin/security/audit', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.post('/archive/admin/security/anonymize/:userId', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+
 // Unified API v1 endpoints
 router.get('/archive/v1/stats', (req, res, next) => {
   // Flexible authentication based on type parameter

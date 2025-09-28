@@ -209,6 +209,89 @@ const logSystemStatsView = () => {
   });
 };
 
+/**
+ * Middleware specifically for job monitoring viewing
+ */
+const logJobMonitoringView = () => {
+  return logActivity('job_monitoring_view', {
+    additionalData: {
+      operation: 'job_monitoring_view'
+    }
+  });
+};
+
+/**
+ * Middleware specifically for daily analytics viewing
+ */
+const logAnalyticsView = () => {
+  return logActivity('analytics_view', {
+    additionalData: {
+      operation: 'daily_analytics_view'
+    }
+  });
+};
+
+/**
+ * Middleware specifically for assessment details viewing
+ */
+const logAssessmentDetailsView = () => {
+  return logActivity('assessment_details_view', {
+    additionalData: {
+      operation: 'assessment_details_view'
+    }
+  });
+};
+
+/**
+ * Middleware specifically for assessment search
+ */
+const logAssessmentSearchView = () => {
+  return logActivity('assessment_search_view', {
+    additionalData: {
+      operation: 'assessment_search_view'
+    }
+  });
+};
+
+/**
+ * Log job cancellation activity
+ * Phase 4 Implementation - Advanced Job Management Logging
+ */
+const logJobCancellation = () => {
+  return logActivity('job_cancellation', {
+    description: 'Admin cancelled a job',
+    additionalData: {
+      operation: 'job_cancellation'
+    }
+  });
+};
+
+/**
+ * Log job retry activity
+ * Phase 4 Implementation - Advanced Job Management Logging
+ */
+const logJobRetry = () => {
+  return logActivity('job_retry', {
+    description: 'Admin retried a failed job',
+    additionalData: {
+      operation: 'job_retry'
+    }
+  });
+};
+
+/**
+ * Log bulk job operations activity
+ * Phase 4 Implementation - Advanced Job Management Logging
+ */
+const logBulkJobOperation = () => {
+  return logActivity('bulk_job_operation', {
+    description: 'Admin performed bulk job operation',
+    additionalData: {
+      operation: 'bulk_job_operation'
+    }
+  });
+};
+
 module.exports = {
   logActivity,
   logProfileUpdate,
@@ -216,5 +299,12 @@ module.exports = {
   logUserDeletion,
   logUserView,
   logUserListView,
-  logSystemStatsView
+  logSystemStatsView,
+  logJobMonitoringView,
+  logAnalyticsView,
+  logAssessmentDetailsView,
+  logAssessmentSearchView,
+  logJobCancellation,
+  logJobRetry,
+  logBulkJobOperation
 };
