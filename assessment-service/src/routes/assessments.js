@@ -264,69 +264,66 @@ router.post('/submit',
 
 /**
  * @route POST /assessment/retry
- * @description Retry an assessment analysis using an existing result's assessment_data
+ * @description Retry an assessment analysis using an existing job's test data
  * @access Private
- * Body: { resultId: UUID }
+ * Body: { jobId: string }
  */
 router.post('/retry',
   authenticateToken,
   requireTokenBalance(1),
   async (req, res, next) => {
     try {
-      // Allow retry by resultId OR jobId (mutually exclusive)
+      // Only accept jobId for retry
       const schema = Joi.object({
-        resultId: Joi.string().uuid().optional(),
-        jobId: Joi.string().trim().optional()
-      }).xor('resultId', 'jobId')
-        .messages({ 'object.missing': 'Either resultId or jobId is required', 'object.xor': 'Provide only one of resultId or jobId' });
+        jobId: Joi.string().trim().required()
+      });
 
       const { error, value } = schema.validate(req.body);
       if (error) {
         return sendError(res, 'VALIDATION_ERROR', 'Invalid request body', error.details.reduce((acc, d) => { acc[d.path.join('.')] = d.message; return acc; }, {}), 400);
       }
 
-      const { resultId, jobId: sourceJobId } = value;
+      const { jobId } = value;
       const { id: userId, email: userEmail } = req.user;
 
-      logger.info('Assessment retry requested', { userId, resultId, sourceJobId, mode: resultId ? 'result' : 'job' });
+      logger.info('Assessment retry requested', { userId, jobId });
 
-      let assessmentData, assessmentName, originalResultId = null;
-
-      if (resultId) {
-        // Fetch existing analysis result
-        const existingResult = await archiveService.getAnalysisResult(resultId);
-        if (!existingResult) {
-          return sendNotFound(res, 'Result not found');
-        }
-        if (existingResult.user_id !== userId) {
-          return sendError(res, 'FORBIDDEN', 'Access denied to this result', {}, 403);
-        }
-        assessmentData = existingResult.test_data; // Updated field name
-        assessmentName = existingResult.assessment_name || 'AI-Driven Talent Mapping';
-        originalResultId = resultId;
-      } else {
-        // Retry using jobId route (job_id, not DB primary key)
-        let existingJob;
-        try {
-          existingJob = await archiveService.getJobStatus(sourceJobId);
-        } catch (archiveErr) {
-          logger.warn('Failed to fetch job for retry', { sourceJobId, error: archiveErr.message });
-          existingJob = null;
-        }
-        if (!existingJob) {
-          return sendNotFound(res, 'Job not found');
-        }
-        if (existingJob.user_id !== userId) {
-          return sendError(res, 'FORBIDDEN', 'Access denied to this job', {}, 403);
-        }
-        assessmentData = existingJob.assessment_data;
-        assessmentName = existingJob.assessment_name || 'AI-Driven Talent Mapping';
+      // Step 1: Get existing job
+      let existingJob;
+      try {
+        existingJob = await archiveService.getJobStatus(jobId);
+      } catch (archiveErr) {
+        logger.warn('Failed to fetch job for retry', { jobId, error: archiveErr.message });
+        existingJob = null;
       }
+
+      if (!existingJob) {
+        return sendNotFound(res, 'Job not found');
+      }
+
+      if (existingJob.user_id !== userId) {
+        return sendError(res, 'FORBIDDEN', 'Access denied to this job', {}, 403);
+      }
+
+      // Step 2: Check if job has a result_id to get test data from
+      if (!existingJob.result_id) {
+        return sendError(res, 'NO_RESULT_DATA', 'Job does not have associated result data to retry from', {}, 400);
+      }
+
+      // Step 3: Get existing result to extract test_data
+      const existingResult = await archiveService.getAnalysisResult(existingJob.result_id);
+      if (!existingResult) {
+        return sendError(res, 'RESULT_NOT_FOUND', 'Associated result not found', {}, 404);
+      }
+
+      const assessmentData = existingResult.test_data;
+      const assessmentName = existingResult.assessment_name || 'AI-Driven Talent Mapping';
 
       if (!assessmentData || Object.keys(assessmentData).length === 0) {
-        return sendError(res, 'NO_ASSESSMENT_DATA', 'Source does not contain assessment data to retry', {}, 400);
+        return sendError(res, 'NO_ASSESSMENT_DATA', 'Result does not contain test data to retry', {}, 400);
       }
 
+      // Step 4: Deduct tokens
       const tokenCost = parseInt(process.env.ANALYSIS_TOKEN_COST || '1');
       try {
         const updatedUser = await authService.deductTokens(userId, req.token, tokenCost);
@@ -338,27 +335,61 @@ router.post('/retry',
         throw deductErr;
       }
 
-      const newJobId = uuidv4();
+      // Step 5: Update existing result status to 'processing' and clear previous test_result
       try {
-        await archiveService.createJob(newJobId, userId, assessmentData, assessmentName);
+        await archiveService.updateAnalysisResult(existingJob.result_id, {
+          status: 'processing',
+          test_result: null, // clear previous test_result
+          error_message: null // clear any previous error
+        });
       } catch (archiveErr) {
-        logger.error('Failed to create retry job in Archive Service, refunding tokens', { newJobId, userId, source: resultId || sourceJobId, error: archiveErr.message });
+        logger.error('Failed to update result status for retry, refunding tokens', {
+          jobId,
+          resultId: existingJob.result_id,
+          error: archiveErr.message
+        });
         try {
           await authService.refundTokens(userId, req.token, tokenCost);
         } catch (refundErr) {
-          logger.error('Failed to refund tokens after Archive Service retry job error', { userId, tokenCost, error: refundErr.message });
+          logger.error('Failed to refund tokens after result update error', {
+            userId,
+            tokenCost,
+            error: refundErr.message
+          });
         }
-        throw new AppError('ARCHIVE_SERVICE_ERROR', 'Failed to create retry job in archive service', 503);
+        throw new AppError('ARCHIVE_SERVICE_ERROR', 'Failed to update result for retry', 503);
       }
 
-      jobTracker.createJob(newJobId, userId, userEmail, assessmentData, assessmentName);
-      await queueService.publishAssessmentJob(assessmentData, userId, userEmail, newJobId, assessmentName);
+      // Step 6: Update existing job status to 'processing'
+      try {
+        await archiveService.updateJobStatus(jobId, 'processing', {
+          error_message: null // clear any previous error
+        });
+      } catch (archiveErr) {
+        logger.error('Failed to update job status for retry, refunding tokens', {
+          jobId,
+          error: archiveErr.message
+        });
+        try {
+          await authService.refundTokens(userId, req.token, tokenCost);
+        } catch (refundErr) {
+          logger.error('Failed to refund tokens after job update error', {
+            userId,
+            tokenCost,
+            error: refundErr.message
+          });
+        }
+        throw new AppError('ARCHIVE_SERVICE_ERROR', 'Failed to update job for retry', 503);
+      }
+
+      // Step 7: Update job tracker and queue the job for processing
+      jobTracker.createJob(jobId, userId, userEmail, assessmentData, assessmentName);
+      await queueService.publishAssessmentJob(assessmentData, userId, userEmail, jobId, assessmentName);
       const queueStats = await queueService.getQueueStats();
 
       return sendSuccess(res, 'Assessment retry queued successfully', {
-        jobId: newJobId,
-        originalResultId,
-        sourceJobId: resultId ? null : sourceJobId,
+        jobId: jobId, // same job ID, not a new one
+        resultId: existingJob.result_id, // same result ID, will be updated by worker
         status: jobTracker.JOB_STATUS.QUEUED,
         estimatedProcessingTime: '2-5 minutes',
         queuePosition: queueStats.messageCount,

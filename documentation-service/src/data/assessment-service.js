@@ -152,32 +152,34 @@ export const assessmentServiceData = {
       method: "POST",
       path: "/api/assessment/retry",
       title: "Retry Assessment",
-      description: "Re-run AI analysis using existing assessment_data from a previous result. Creates a new jobId and consumes tokens like a fresh submission.",
+      description: "Re-run AI analysis using existing test_data from a failed job. Updates the existing job and result status to 'processing'. Uses the same job and result records.",
       authentication: "Bearer Token Required",
       rateLimit: "Follow general gateway limit",
       requestBody: {
-        resultId: "550e8400-e29b-41d4-a716-446655440010"
+        jobId: "job-550e8400-e29b-41d4-a716-446655440099"
       },
       parameters: [
         {
-          name: "resultId",
+          name: "jobId",
           type: "string",
           required: true,
-          description: "UUID of previous analysis result owned by the user"
+          description: "ID of existing analysis job to retry"
         }
       ],
       notes: [
-        "Result must belong to authenticated user",
-        "Result must contain non-empty assessment_data",
-        "New job stored in Archive Service; original result remains unchanged",
-        "Token deducted (ANALYSIS_TOKEN_COST). Refunded automatically if archive job creation fails"
+        "Job must belong to authenticated user",
+        "Job must have an associated result_id with test_data",
+        "Updates existing result status to 'processing' and clears previous test_result",
+        "Job status changes from 'failed' to 'processing'",
+        "Analysis worker will update the same result record with new test_result",
+        "Token deducted (ANALYSIS_TOKEN_COST). Refunded automatically if operation fails"
       ],
       response: {
         success: true,
         message: "Assessment retry queued successfully",
         data: {
-          jobId: "550e8400-e29b-41d4-a716-446655440099",
-          originalResultId: "550e8400-e29b-41d4-a716-446655440010",
+          jobId: "job-550e8400-e29b-41d4-a716-446655440099",
+          resultId: "550e8400-e29b-41d4-a716-446655440010",
           status: "queued",
           estimatedProcessingTime: "2-5 minutes",
           queuePosition: 2,
@@ -189,7 +191,7 @@ export const assessmentServiceData = {
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "resultId": "550e8400-e29b-41d4-a716-446655440010"
+    "jobId": "job-550e8400-e29b-41d4-a716-446655440099"
   }'`
     },
     {

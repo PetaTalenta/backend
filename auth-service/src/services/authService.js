@@ -258,8 +258,9 @@ const loginUser = async (credentials) => {
     // Cache the user for future requests (without password_hash)
     userCacheService.setUser(user.toJSON());
 
-    // Generate JWT token first (main response)
-    const token = generateToken(user, 'user');
+    // Generate JWT token - use admin type for admin users
+    const tokenType = user.user_type === 'admin' || user.user_type === 'superadmin' ? 'admin' : 'user';
+    const token = generateToken(user, tokenType);
 
     // Update last login asynchronously (fire-and-forget) if enabled
     if (process.env.ASYNC_LAST_LOGIN === 'true') {

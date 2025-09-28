@@ -132,6 +132,7 @@ router.get('/archive/metrics', verifyInternalService, archiveServiceProxy);
 
 // Admin endpoints for archive service (admin authentication required)
 router.get('/archive/admin/users/:userId', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
+router.put('/archive/admin/users/:userId/profile', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
 router.put('/archive/admin/users/:userId/token-balance', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
 router.delete('/archive/admin/users/:userId', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);
 router.get('/archive/admin/users', verifyToken, verifyAdmin, adminLimiter, archiveServiceProxy);

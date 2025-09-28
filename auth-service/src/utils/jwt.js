@@ -24,7 +24,7 @@ const generateToken = (user, type = 'user') => {
         id: user.id,
         username: user.username,
         email: user.email,
-        role: user.role,
+        role: user.user_type, // Use user_type as role for admin tokens
         type: 'admin'
       };
     } else {

@@ -31,12 +31,12 @@ describe('POST /assessment/retry', () => {
   it('should require authentication', async () => {
     const res = await request(app)
       .post(endpoint)
-      .send({ resultId: 'b3f1d5b3-4b5d-4e4d-8c2d-9f8b7a6c5d4e' });
+      .send({ jobId: 'job-123' });
     expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
   });
 
-  it('should validate body (missing resultId)', async () => {
+  it('should validate body (missing jobId)', async () => {
     authService.verifyUser = jest.fn().mockResolvedValue({ id: userId, email: 'user@example.com', token_balance: 5 });
     const res = await request(app)
       .post(endpoint)
@@ -47,45 +47,80 @@ describe('POST /assessment/retry', () => {
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
   });
 
-  it('should return 404 if result not found', async () => {
+  it('should return 404 if job not found', async () => {
     // Mock authService.verifyUser inside auth middleware chain
     authService.verifyUser = jest.fn().mockResolvedValue({ id: userId, email: 'user@example.com', token_balance: 5 });
     authService.deductTokens = jest.fn().mockResolvedValue({ token_balance: 4 });
-    archiveService.getAnalysisResult.mockResolvedValue(null);
+    archiveService.getJobStatus.mockResolvedValue(null);
 
     const res = await request(app)
       .post(endpoint)
       .set('Authorization', authHeader)
-      .send({ resultId: 'b3f1d5b3-4b5d-4e4d-8c2d-9f8b7a6c5d4e' });
+      .send({ jobId: 'job-123' });
 
     expect(res.status).toBe(404);
     expect(res.body.error.code).toBe('NOT_FOUND');
-    expect(archiveService.getAnalysisResult).toHaveBeenCalled();
+    expect(archiveService.getJobStatus).toHaveBeenCalled();
   });
 
-  it('should reject if result belongs to another user', async () => {
+  it('should reject if job belongs to another user', async () => {
     authService.verifyUser = jest.fn().mockResolvedValue({ id: userId, email: 'user@example.com', token_balance: 5 });
     authService.deductTokens = jest.fn().mockResolvedValue({ token_balance: 4 });
-    archiveService.getAnalysisResult.mockResolvedValue({ id: 'res1', user_id: 'other-user', assessment_data: { riasec: {} }, assessment_name: 'AI-Driven Talent Mapping' });
+    archiveService.getJobStatus.mockResolvedValue({
+      job_id: 'job-123',
+      user_id: 'other-user',
+      result_id: 'result-123',
+      status: 'failed'
+    });
 
     const res = await request(app)
       .post(endpoint)
       .set('Authorization', authHeader)
-      .send({ resultId: 'b3f1d5b3-4b5d-4e4d-8c2d-9f8b7a6c5d4e' });
+      .send({ jobId: 'job-123' });
 
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe('FORBIDDEN');
   });
 
-  it('should reject if result has no assessment_data', async () => {
+  it('should reject if job has no result_id', async () => {
     authService.verifyUser = jest.fn().mockResolvedValue({ id: userId, email: 'user@example.com', token_balance: 5 });
     authService.deductTokens = jest.fn().mockResolvedValue({ token_balance: 4 });
-    archiveService.getAnalysisResult.mockResolvedValue({ id: 'res1', user_id: userId, assessment_data: {}, assessment_name: 'AI-Driven Talent Mapping' });
+    archiveService.getJobStatus.mockResolvedValue({
+      job_id: 'job-123',
+      user_id: userId,
+      result_id: null,
+      status: 'failed'
+    });
 
     const res = await request(app)
       .post(endpoint)
       .set('Authorization', authHeader)
-      .send({ resultId: 'b3f1d5b3-4b5d-4e4d-8c2d-9f8b7a6c5d4e' });
+      .send({ jobId: 'job-123' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('NO_RESULT_DATA');
+  });
+
+  it('should reject if result has no test_data', async () => {
+    authService.verifyUser = jest.fn().mockResolvedValue({ id: userId, email: 'user@example.com', token_balance: 5 });
+    authService.deductTokens = jest.fn().mockResolvedValue({ token_balance: 4 });
+    archiveService.getJobStatus.mockResolvedValue({
+      job_id: 'job-123',
+      user_id: userId,
+      result_id: 'result-123',
+      status: 'failed'
+    });
+    archiveService.getAnalysisResult.mockResolvedValue({
+      id: 'result-123',
+      user_id: userId,
+      test_data: {},
+      assessment_name: 'AI-Driven Talent Mapping'
+    });
+
+    const res = await request(app)
+      .post(endpoint)
+      .set('Authorization', authHeader)
+      .send({ jobId: 'job-123' });
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('NO_ASSESSMENT_DATA');
@@ -95,20 +130,61 @@ describe('POST /assessment/retry', () => {
     authService.verifyUser = jest.fn().mockResolvedValue({ id: userId, email: 'user@example.com', token_balance: 5 });
     authService.deductTokens = jest.fn().mockResolvedValue({ token_balance: 4 });
     authService.refundTokens = jest.fn();
-    archiveService.getAnalysisResult.mockResolvedValue({ id: 'res1', user_id: userId, assessment_data: { riasec: { realistic: 3.2 }}, assessment_name: 'AI-Driven Talent Mapping' });
-    archiveService.createJob.mockResolvedValue({ job_id: 'new-job' });
-    queueService.publishAssessmentJob.mockResolvedValue('new-job');
+
+    // Mock job status
+    archiveService.getJobStatus.mockResolvedValue({
+      job_id: 'job-123',
+      user_id: userId,
+      result_id: 'result-123',
+      status: 'failed'
+    });
+
+    // Mock existing result
+    archiveService.getAnalysisResult.mockResolvedValue({
+      id: 'result-123',
+      user_id: userId,
+      test_data: { riasec: { realistic: 3.2 }},
+      assessment_name: 'AI-Driven Talent Mapping',
+      chatbot_id: null,
+      is_public: false
+    });
+
+    // Mock result update (clear test_result and set status to processing)
+    archiveService.updateAnalysisResult.mockResolvedValue({
+      id: 'result-123',
+      user_id: userId,
+      status: 'processing',
+      test_result: null
+    });
+
+    // Mock job status update
+    archiveService.updateJobStatus.mockResolvedValue({
+      job_id: 'job-123',
+      status: 'processing',
+      result_id: 'result-123'
+    });
+
+    queueService.publishAssessmentJob.mockResolvedValue('job-123');
     queueService.getQueueStats.mockResolvedValue({ messageCount: 1, consumerCount: 0 });
 
     const res = await request(app)
       .post(endpoint)
       .set('Authorization', authHeader)
-      .send({ resultId: 'b3f1d5b3-4b5d-4e4d-8c2d-9f8b7a6c5d4e' });
+      .send({ jobId: 'job-123' });
 
     expect(res.status).toBe(202);
     expect(res.body.success).toBe(true);
-    expect(res.body.data).toHaveProperty('jobId');
-    expect(res.body.data).toHaveProperty('originalResultId');
+    expect(res.body.data).toHaveProperty('jobId', 'job-123'); // same job ID
+    expect(res.body.data).toHaveProperty('resultId', 'result-123'); // same result ID
+    expect(archiveService.updateAnalysisResult).toHaveBeenCalledTimes(1);
+    expect(archiveService.updateJobStatus).toHaveBeenCalledTimes(1);
     expect(queueService.publishAssessmentJob).toHaveBeenCalledTimes(1);
+
+    // Verify that updateAnalysisResult was called with correct parameters
+    expect(archiveService.updateAnalysisResult).toHaveBeenCalledWith('result-123', {
+      status: 'processing',
+      test_result: null,
+      error_message: null
+    });
   });
 });

@@ -109,7 +109,7 @@ const getUserById = async (req, res, next) => {
     const { userId } = req.params;
 
     const userQuery = `
-      SELECT 
+      SELECT
         id,
         email,
         token_balance,
@@ -135,9 +135,34 @@ const getUserById = async (req, res, next) => {
       });
     }
 
+    // Get user profile information
+    const profileQuery = `
+      SELECT
+        up.full_name,
+        up.date_of_birth,
+        up.gender,
+        up.school_id,
+        up.created_at as profile_created_at,
+        up.updated_at as profile_updated_at,
+        s.name as school_name,
+        s.type as school_type,
+        s.city as school_city,
+        s.province as school_province
+      FROM auth.user_profiles up
+      LEFT JOIN archive.schools s ON up.school_id = s.id
+      WHERE up.user_id = :userId
+    `;
+
+    const profileResult = await sequelize.query(profileQuery, {
+      replacements: { userId },
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    const profile = profileResult[0] || null;
+
     // Get user's analysis results count
     const statsQuery = `
-      SELECT 
+      SELECT
         COUNT(*) as total_analyses,
         COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_analyses,
         COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing_analyses,
@@ -154,11 +179,31 @@ const getUserById = async (req, res, next) => {
 
     const stats = statsResult[0];
 
+    // Get user's job statistics
+    const jobStatsQuery = `
+      SELECT
+        COUNT(*) as total_jobs,
+        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_jobs,
+        COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing_jobs,
+        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_jobs,
+        COUNT(CASE WHEN status = 'queued' THEN 1 END) as queued_jobs
+      FROM archive.analysis_jobs
+      WHERE user_id = :userId
+    `;
+
+    const jobStatsResult = await sequelize.query(jobStatsQuery, {
+      replacements: { userId },
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    const jobStats = jobStatsResult[0];
+
     logger.info('User details retrieved by admin', {
       adminId: req.admin.id,
       adminUsername: req.admin.username,
       userId,
-      userEmail: user.email
+      userEmail: user.email,
+      hasProfile: !!profile
     });
 
     res.status(200).json({
@@ -166,12 +211,48 @@ const getUserById = async (req, res, next) => {
       data: {
         user: {
           ...user,
-          stats: stats || {
-            total_analyses: 0,
-            completed_analyses: 0,
-            processing_analyses: 0,
-            failed_analyses: 0,
-            latest_analysis: null
+          profile: profile ? {
+            full_name: profile.full_name,
+            date_of_birth: profile.date_of_birth,
+            gender: profile.gender,
+            school_id: profile.school_id,
+            school: profile.school_id ? {
+              id: profile.school_id,
+              name: profile.school_name,
+              type: profile.school_type,
+              city: profile.school_city,
+              province: profile.school_province
+            } : null,
+            profile_created_at: profile.profile_created_at,
+            profile_updated_at: profile.profile_updated_at
+          } : null,
+          stats: {
+            analyses: stats ? {
+              total: parseInt(stats.total_analyses) || 0,
+              completed: parseInt(stats.completed_analyses) || 0,
+              processing: parseInt(stats.processing_analyses) || 0,
+              failed: parseInt(stats.failed_analyses) || 0,
+              latest_analysis: stats.latest_analysis
+            } : {
+              total: 0,
+              completed: 0,
+              processing: 0,
+              failed: 0,
+              latest_analysis: null
+            },
+            jobs: jobStats ? {
+              total: parseInt(jobStats.total_jobs) || 0,
+              completed: parseInt(jobStats.completed_jobs) || 0,
+              processing: parseInt(jobStats.processing_jobs) || 0,
+              failed: parseInt(jobStats.failed_jobs) || 0,
+              queued: parseInt(jobStats.queued_jobs) || 0
+            } : {
+              total: 0,
+              completed: 0,
+              processing: 0,
+              failed: 0,
+              queued: 0
+            }
           }
         }
       }
@@ -367,9 +448,159 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+/**
+ * Update user profile information
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ */
+const updateUserProfile = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { full_name, date_of_birth, gender, school_id } = req.body;
+
+    // Check if user exists
+    const checkUserQuery = `
+      SELECT id, email
+      FROM auth.users
+      WHERE id = :userId
+    `;
+
+    const existingUserResult = await sequelize.query(checkUserQuery, {
+      replacements: { userId },
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    const existingUser = existingUserResult[0];
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+
+    // Validate school_id if provided
+    if (school_id) {
+      const schoolQuery = `
+        SELECT id FROM archive.schools WHERE id = :schoolId
+      `;
+      const schoolResult = await sequelize.query(schoolQuery, {
+        replacements: { schoolId: school_id },
+        type: sequelize.QueryTypes.SELECT
+      });
+
+      if (schoolResult.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_SCHOOL',
+            message: 'School not found'
+          }
+        });
+      }
+    }
+
+    // Prepare update data
+    const updateData = {};
+    if (full_name !== undefined) updateData.full_name = full_name;
+    if (date_of_birth !== undefined) updateData.date_of_birth = date_of_birth;
+    if (gender !== undefined) updateData.gender = gender;
+    if (school_id !== undefined) updateData.school_id = school_id;
+
+    // If no data to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'NO_UPDATE_DATA',
+          message: 'No profile data provided for update'
+        }
+      });
+    }
+
+    // Check if profile exists, create if not
+    const checkProfileQuery = `
+      SELECT user_id FROM auth.user_profiles WHERE user_id = :userId
+    `;
+    const profileExists = await sequelize.query(checkProfileQuery, {
+      replacements: { userId },
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    let updatedProfile;
+    if (profileExists.length === 0) {
+      // Create new profile
+      const createProfileQuery = `
+        INSERT INTO auth.user_profiles (user_id, full_name, date_of_birth, gender, school_id, created_at, updated_at)
+        VALUES (:userId, :full_name, :date_of_birth, :gender, :school_id, NOW(), NOW())
+        RETURNING *
+      `;
+
+      const createResult = await sequelize.query(createProfileQuery, {
+        replacements: {
+          userId,
+          full_name: updateData.full_name || null,
+          date_of_birth: updateData.date_of_birth || null,
+          gender: updateData.gender || null,
+          school_id: updateData.school_id || null
+        },
+        type: sequelize.QueryTypes.SELECT
+      });
+
+      updatedProfile = createResult[0];
+    } else {
+      // Update existing profile
+      const setParts = [];
+      const replacements = { userId };
+
+      Object.keys(updateData).forEach(key => {
+        setParts.push(`${key} = :${key}`);
+        replacements[key] = updateData[key];
+      });
+
+      const updateProfileQuery = `
+        UPDATE auth.user_profiles
+        SET ${setParts.join(', ')}, updated_at = NOW()
+        WHERE user_id = :userId
+        RETURNING *
+      `;
+
+      const updateResult = await sequelize.query(updateProfileQuery, {
+        replacements,
+        type: sequelize.QueryTypes.SELECT
+      });
+
+      updatedProfile = updateResult[0];
+    }
+
+    logger.info('User profile updated by admin', {
+      adminId: req.admin.id,
+      adminUsername: req.admin.username,
+      userId,
+      userEmail: existingUser.email,
+      updatedFields: Object.keys(updateData)
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'User profile updated successfully',
+      data: {
+        profile: updatedProfile,
+        updatedFields: Object.keys(updateData)
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   updateUserTokenBalance,
-  deleteUser
+  deleteUser,
+  updateUserProfile
 };

@@ -8,6 +8,7 @@ const AnalysisResult = require('./AnalysisResult');
 const AnalysisJob = require('./AnalysisJob');
 const UserProfile = require('./UserProfile');
 const School = require('./School');
+const UserActivityLog = require('./UserActivityLog');
 
 // Initialize models
 const models = {
@@ -15,6 +16,7 @@ const models = {
   AnalysisJob,
   UserProfile,
   School,
+  UserActivityLog,
   sequelize
 };
 

@@ -13,6 +13,7 @@ router.post('/admin/logout', (req, res) => adminProxy('/admin/logout', { method:
 // Users management (proxy to archive-service admin)
 router.get('/users', (req, res) => usersProxy('/archive/admin/users', { method: 'GET', query: req.query, headers: { authorization: req.headers.authorization } }, req, res));
 router.get('/users/:userId', (req, res) => usersProxy(`/archive/admin/users/${req.params.userId}`, { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+router.put('/users/:userId/profile', (req, res) => usersProxy(`/archive/admin/users/${req.params.userId}/profile`, { method: 'PUT', body: req.body, headers: { authorization: req.headers.authorization } }, req, res));
 router.delete('/users/:userId', (req, res) => usersProxy(`/archive/admin/users/${req.params.userId}`, { method: 'DELETE', headers: { authorization: req.headers.authorization } }, req, res));
 
 // Token operations

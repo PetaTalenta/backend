@@ -277,9 +277,52 @@ const updateAnalysisResult = async (resultId, updateData) => {
   }
 };
 
+/**
+ * Update job status in Archive Service
+ * @param {String} jobId - Job ID
+ * @param {String} status - New status
+ * @param {Object} additionalData - Additional data to update (e.g., result_id, error_message)
+ * @returns {Promise<Object>} - Updated job data
+ */
+const updateJobStatus = async (jobId, status, additionalData = {}) => {
+  try {
+    logger.info('Updating job status in Archive Service', {
+      jobId,
+      status,
+      additionalData
+    });
+
+    const requestBody = {
+      status,
+      ...additionalData
+    };
+
+    const response = await archiveClient.put(`/archive/jobs/${jobId}/status`, requestBody);
+
+    logger.info('Job status updated in Archive Service successfully', {
+      jobId,
+      status,
+      updatedAt: response.data.data.updated_at
+    });
+
+    return response.data.data;
+  } catch (error) {
+    logger.error('Failed to update job status in Archive Service', {
+      jobId,
+      status,
+      additionalData,
+      error: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText
+    });
+    throw error;
+  }
+};
+
 module.exports = {
   syncJobStatus,
   getJobStatus,
+  updateJobStatus,
   createJob,
   createAnalysisResult,
   getAnalysisResult,
