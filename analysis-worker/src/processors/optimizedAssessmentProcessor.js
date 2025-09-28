@@ -7,6 +7,7 @@ const { jobDeduplicationService, tokenRefundService } = require('../services/job
 const { auditLogger, AUDIT_EVENTS, RISK_LEVELS } = require('../services/auditLogger');
 const notificationService = require('../services/notificationService'); // Keep for backward compatibility
 const { getEventPublisher } = require('../services/eventPublisher');
+const jobHeartbeat = require('../services/jobHeartbeat');
 const logger = require('../utils/logger');
 const { withRetry, withTimeout, ERROR_TYPES, createError } = require('../utils/errorHandler');
 
@@ -178,6 +179,9 @@ const processAssessmentOptimized = async (jobData) => {
       userEmail,
       userId
     });
+
+    // Start heartbeat for long-running job
+    jobHeartbeat.startHeartbeat(jobId, userId, 'processing');
 
     // Step 1: Rate limiting check
     const rateLimitResult = checkRateLimits(userId, userIP);
@@ -427,6 +431,9 @@ const processAssessmentOptimized = async (jobData) => {
         // The job will remain in 'processing' status and may need manual intervention
       }
 
+      // Stop heartbeat on successful completion
+      jobHeartbeat.stopHeartbeat(jobId, 'completed');
+
       return {
         success: true,
         id: saveResult.id,
@@ -442,12 +449,27 @@ const processAssessmentOptimized = async (jobData) => {
   } catch (error) {
     const errorProcessingTime = Date.now() - startTime;
 
-    logger.error('Failed to process assessment job (optimized)', {
-      jobId,
-      userId,
-      error: error.message,
-      processingTime: `${errorProcessingTime}ms`
-    });
+    // Log with special attention for AI timeout errors
+    if (error?.code === 'AI_TIMEOUT') {
+      logger.error('🚨 AI MODEL TIMEOUT - Job failed due to AI request timeout', {
+        jobId,
+        userId,
+        userEmail: jobData.userEmail,
+        error: error.message,
+        errorCode: error.code,
+        processingTime: `${errorProcessingTime}ms`,
+        aiTimeout: process.env.AI_REQUEST_TIMEOUT || '300000ms',
+        assessmentName: finalAssessmentName
+      });
+    } else {
+      logger.error('Failed to process assessment job (optimized)', {
+        jobId,
+        userId,
+        error: error.message,
+        errorCode: error?.code,
+        processingTime: `${errorProcessingTime}ms`
+      });
+    }
 
     // Mark job as failed in deduplication service
     if (deduplicationResult && deduplicationResult.jobHash) {
@@ -456,7 +478,8 @@ const processAssessmentOptimized = async (jobData) => {
 
     // Handle token refund for certain error types
     if (error?.code === ERROR_TYPES.DUPLICATE_JOB_ERROR.code ||
-        error?.code === ERROR_TYPES.RATE_LIMIT_ERROR.code) {
+        error?.code === ERROR_TYPES.RATE_LIMIT_ERROR.code ||
+        error?.code === 'AI_TIMEOUT') {  // ✅ TAMBAH AI_TIMEOUT untuk refund
       
       // Queue token refund if tokens were consumed
       if (error.tokenData) {
@@ -472,8 +495,8 @@ const processAssessmentOptimized = async (jobData) => {
       jobHash: deduplicationResult?.jobHash
     });
 
-    // For rate limit exceeded errors, also persist a failed AnalysisResult so user can see it
-    if (error?.code === ERROR_TYPES.RATE_LIMIT_ERROR.code) {
+    // For rate limit exceeded errors and AI timeout, also persist a failed AnalysisResult so user can see it
+    if (error?.code === ERROR_TYPES.RATE_LIMIT_ERROR.code || error?.code === 'AI_TIMEOUT') {
       try {
         const failedResult = await saveFailedAnalysisResult(
           userId,
@@ -568,6 +591,9 @@ const processAssessmentOptimized = async (jobData) => {
           });
         });
     }
+
+    // Stop heartbeat on failure
+    jobHeartbeat.stopHeartbeat(jobId, 'failed');
 
     throw error;
   }

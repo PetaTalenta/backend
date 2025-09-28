@@ -50,6 +50,11 @@ const ERROR_TYPES = {
     message: 'Error calling AI service',
     isRetryable: true
   },
+  AI_TIMEOUT: {
+    code: 'AI_TIMEOUT',
+    message: 'AI service request timed out',
+    isRetryable: true
+  },
   AI_RESPONSE_PARSE_ERROR: {
     code: 'AI_RESPONSE_PARSE_ERROR',
     message: 'Failed to parse AI service response',

@@ -158,10 +158,13 @@ const handleMessageError = async (message, jobData, error) => {
     const errMsg = error?.message || '';
     const shouldNotRetry = errCode === 'VALIDATION_ERROR' ||
                            errCode === 'AI_RESPONSE_PARSE_ERROR' ||
+                           errCode === 'AI_TIMEOUT' ||  // ✅ TAMBAH INI: Jangan retry timeout!
                            errMsg.includes('AI service') ||
                            errMsg.includes('persona profile') ||
                            errMsg.includes('Invalid persona profile') ||
-                           errMsg.includes('Failed to generate persona profile');
+                           errMsg.includes('Failed to generate persona profile') ||
+                           errMsg.includes('timed out') ||  // ✅ TAMBAH INI: Catch timeout messages
+                           errMsg.includes('timeout');
 
     if (retryCount <= maxRetries && !shouldNotRetry) {
       // Retry the message by publishing a new message with updated retry count

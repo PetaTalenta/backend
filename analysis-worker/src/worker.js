@@ -15,6 +15,8 @@ require('dotenv').config();
 // Import dependencies
 const logger = require('./utils/logger');
 const queueConsumer = require('./services/queueConsumer');
+const dlqMonitor = require('./services/dlqMonitor');
+const jobHeartbeat = require('./services/jobHeartbeat');
 const { gracefulShutdown } = require('./utils/shutdown');
 
 // Log worker startup
@@ -35,13 +37,22 @@ async function startWorker() {
     // Start consuming messages
     await queueConsumer.startConsuming();
 
+    // Start DLQ monitoring
+    await dlqMonitor.startMonitoring();
+
+    // Start job heartbeat cleanup scheduler
+    jobHeartbeat.startCleanupScheduler();
+
     // Log successful startup
     logger.info('Analysis Worker ready - consuming messages');
 
     // Setup heartbeat for monitoring (reduced frequency)
     const heartbeatInterval = parseInt(process.env.HEARTBEAT_INTERVAL || '300000'); // 5 minutes default
     setInterval(() => {
-      logger.info('Worker heartbeat', { status: 'running' });
+      logger.info('Worker heartbeat', { 
+        status: 'running',
+        activeHeartbeats: jobHeartbeat.getActiveJobsCount()
+      });
     }, heartbeatInterval);
 
   } catch (error) {

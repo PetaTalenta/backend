@@ -22,7 +22,11 @@ const config = {
   options: {
     durable: process.env.QUEUE_DURABLE === 'true',
     persistent: process.env.MESSAGE_PERSISTENT === 'true'
-  }
+  },
+  // Message TTL and timeout settings
+  messageTTL: parseInt(process.env.MESSAGE_TTL || '3600000'), // 1 hour default
+  queueTTL: parseInt(process.env.QUEUE_TTL || '86400000'),   // 24 hours default
+  messageTimeout: parseInt(process.env.MESSAGE_TIMEOUT || '1800000') // 30 minutes default
 };
 
 // Connection and channel variables
@@ -67,18 +71,25 @@ const initialize = async () => {
       durable: true
     });
 
-    // Setup main queue
+    // Setup main queue with TTL and timeout configurations
     await channel.assertQueue(config.queue, {
       durable: config.options.durable,
       arguments: {
         'x-dead-letter-exchange': config.exchange,
-        'x-dead-letter-routing-key': 'dlq'
+        'x-dead-letter-routing-key': 'dlq',
+        'x-message-ttl': config.messageTTL,           // Message TTL
+        'x-expires': config.queueTTL,                 // Queue TTL when unused
+        'x-max-length': parseInt(process.env.QUEUE_MAX_LENGTH || '10000') // Max queue length
       }
     });
 
     // Setup dead letter queue
     await channel.assertQueue(config.deadLetterQueue, {
-      durable: config.options.durable
+      durable: config.options.durable,
+      arguments: {
+        'x-message-ttl': config.queueTTL, // DLQ messages expire after 24 hours
+        'x-max-length': parseInt(process.env.DLQ_MAX_LENGTH || '1000') // Max DLQ length
+      }
     });
 
     // Bind queues to exchange

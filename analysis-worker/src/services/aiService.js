@@ -365,11 +365,16 @@ const responseSchema = {
 };
 
 
-    // Generate content with structured output and rate limiting
+    // Generate content with structured output and rate limiting with timeout
+    const aiTimeout = parseInt(process.env.AI_REQUEST_TIMEOUT || '300000'); // 5 minutes default
     const response = await rateLimiter.executeWithRateLimit(async () => {
-      logger.debug('Making AI API call with rate limiting', { jobId });
+      logger.debug('Making AI API call with rate limiting and timeout', { 
+        jobId, 
+        timeout: aiTimeout 
+      });
 
-      return await client.models.generateContent({
+      // Use Promise.race for timeout handling (more reliable than AbortController)
+      const aiPromise = client.models.generateContent({
         model: ai.config.model,
         contents: prompt,
         config: {
@@ -379,6 +384,20 @@ const responseSchema = {
           temperature: ai.config.temperature,
         },
       });
+
+      // Create timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          logger.warn('AI request timed out', { jobId, timeout: aiTimeout });
+          reject(createError(ERROR_TYPES.AI_TIMEOUT, `AI model request timed out after ${aiTimeout}ms`, { jobId }));
+        }, aiTimeout);
+      });
+
+      // Race between AI request and timeout
+      const aiResponse = await Promise.race([aiPromise, timeoutPromise]);
+      
+      logger.debug('AI request completed successfully', { jobId });
+      return aiResponse;
     }, jobId);
 
     // Extract usage metadata from API response

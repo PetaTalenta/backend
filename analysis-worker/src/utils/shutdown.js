@@ -4,6 +4,8 @@
 
 const logger = require('./logger');
 const queueConsumer = require('../services/queueConsumer');
+const dlqMonitor = require('../services/dlqMonitor');
+const jobHeartbeat = require('../services/jobHeartbeat');
 
 // Flag to prevent multiple shutdown attempts
 let isShuttingDown = false;
@@ -26,12 +28,18 @@ async function gracefulShutdown(signal) {
   });
   
   try {
+    // Stop DLQ monitoring
+    logger.info('Stopping DLQ monitoring...');
+    dlqMonitor.stopMonitoring();
+    
+    // Shutdown job heartbeats
+    logger.info('Shutting down job heartbeats...');
+    jobHeartbeat.shutdown();
+    
     // Close queue consumer connection
     logger.info('Closing queue consumer connection...');
     await queueConsumer.close();
     logger.info('Queue consumer connection closed successfully');
-    
-    // Add any other cleanup tasks here
     
     logger.info('Graceful shutdown completed successfully');
     
