@@ -197,8 +197,8 @@ const processAssessmentOptimized = async (jobData) => {
       throw error;
     }
 
-    // Step 2: Job deduplication check
-    deduplicationResult = jobDeduplicationService.checkDuplicate(jobId, userId, finalAssessmentData);
+    // Step 2: Job deduplication check (now async)
+    deduplicationResult = await jobDeduplicationService.checkDuplicate(jobId, userId, finalAssessmentData);
     
     if (deduplicationResult.isDuplicate) {
       auditLogger.logJobEvent(AUDIT_EVENTS.JOB_DUPLICATE_DETECTED, jobData, {
@@ -326,8 +326,11 @@ const processAssessmentOptimized = async (jobData) => {
       }
 
       // Save result to Archive Service (optimized with batching)
+      // Check if we should allow overwrite for incomplete results
+      const allowOverwrite = deduplicationResult.allowOverwrite || false;
+      
       const saveResult = await withRetry(
-        () => saveAnalysisResult(userId, finalAssessmentData, personaProfile, jobId, finalAssessmentName, raw_responses),
+        () => saveAnalysisResult(userId, finalAssessmentData, personaProfile, jobId, finalAssessmentName, raw_responses, false, allowOverwrite),
         {
           operationName: 'Archive service save',
           shouldRetry: (error) => error.isRetryable

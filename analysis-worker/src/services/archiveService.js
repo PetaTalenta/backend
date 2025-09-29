@@ -242,6 +242,27 @@ const processBatch = async () => {
 };
 
 const addToBatch = (userId, testData, testResult, jobId, assessmentName, rawResponses = null) => {
+  // CRITICAL: Validate test_result completeness before adding to batch
+  if (!testResult || typeof testResult !== 'object') {
+    const error = new Error('Cannot batch incomplete analysis result - test_result is null or invalid');
+    error.code = 'INCOMPLETE_RESULT';
+    error.jobId = jobId;
+    error.userId = userId;
+    throw error;
+  }
+
+  // Validate required fields in test_result
+  const requiredFields = ['archetype', 'shortSummary'];
+  const missingFields = requiredFields.filter(field => !testResult[field]);
+  if (missingFields.length > 0) {
+    const error = new Error(`Cannot batch incomplete analysis result - missing required fields: ${missingFields.join(', ')}`);
+    error.code = 'INCOMPLETE_RESULT';
+    error.jobId = jobId;
+    error.userId = userId;
+    error.missingFields = missingFields;
+    throw error;
+  }
+
   // Generate UUID immediately for proper tracking
   const { v4: uuidv4 } = require('uuid');
   const resultId = uuidv4();
@@ -253,7 +274,7 @@ const addToBatch = (userId, testData, testResult, jobId, assessmentName, rawResp
     test_result: testResult, // Updated field name
     assessment_name: assessmentName,
     raw_responses: rawResponses,
-    status: testResult ? 'completed' : 'failed',
+    status: 'completed', // Only completed results should be batched
     jobId // For logging purposes
   });
 
@@ -285,9 +306,31 @@ const addToBatch = (userId, testData, testResult, jobId, assessmentName, rawResp
  * @param {String} assessmentName - Assessment name
  * @param {Object} rawResponses - Raw responses data (optional)
  * @param {Boolean} forceDirect - Force direct save (skip batching)
+ * @param {Boolean} allowOverwrite - Allow overwriting existing incomplete results
  * @returns {Promise<Object>} - Save result
  */
-const saveAnalysisResult = async (userId, testData, testResult, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null, forceDirect = false) => {
+const saveAnalysisResult = async (userId, testData, testResult, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null, forceDirect = false, allowOverwrite = false) => {
+  // CRITICAL: Validate test_result is complete before saving
+  if (!testResult || typeof testResult !== 'object') {
+    const error = new Error('Cannot save incomplete analysis result - test_result is null or invalid');
+    error.code = 'INCOMPLETE_RESULT';
+    error.jobId = jobId;
+    error.userId = userId;
+    throw error;
+  }
+
+  // Validate required fields in test_result
+  const requiredFields = ['archetype', 'shortSummary'];
+  const missingFields = requiredFields.filter(field => !testResult[field]);
+  if (missingFields.length > 0) {
+    const error = new Error(`Cannot save incomplete analysis result - missing required fields: ${missingFields.join(', ')}`);
+    error.code = 'INCOMPLETE_RESULT';
+    error.jobId = jobId;
+    error.userId = userId;
+    error.missingFields = missingFields;
+    throw error;
+  }
+
   // Use batching for better performance unless forced direct
   if (!forceDirect && process.env.ENABLE_BATCH_PROCESSING !== 'false') {
     const resultId = addToBatch(userId, testData, testResult, jobId, assessmentName, rawResponses);
@@ -303,18 +346,19 @@ const saveAnalysisResult = async (userId, testData, testResult, jobId, assessmen
   }
 
   // Direct processing
-  return saveAnalysisResultDirect(userId, testData, testResult, jobId, assessmentName, rawResponses);
+  return saveAnalysisResultDirect(userId, testData, testResult, jobId, assessmentName, rawResponses, allowOverwrite);
 };
 
 /**
  * Save analysis result directly (no batching)
  */
-const saveAnalysisResultDirect = async (userId, testData, testResult, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null) => {
+const saveAnalysisResultDirect = async (userId, testData, testResult, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null, allowOverwrite = false) => {
   return withRetry(async () => {
     logger.info('Saving analysis result to Archive Service', {
       jobId,
       userId,
-      profileArchetype: testResult?.archetype
+      profileArchetype: testResult?.archetype,
+      allowOverwrite
     });
 
     // Prepare request body with new field names
@@ -325,6 +369,12 @@ const saveAnalysisResultDirect = async (userId, testData, testResult, jobId, ass
       test_result: testResult, // Updated field name
       raw_responses: rawResponses
     };
+
+    // Add overwrite flag if needed
+    if (allowOverwrite) {
+      requestBody.allow_overwrite = true;
+      logger.info('Allowing overwrite of existing incomplete results', { jobId, userId });
+    }
 
     // Send request to Archive Service
     const response = await archiveClient.post('/archive/results', requestBody);

@@ -5,6 +5,7 @@
 
 const crypto = require('crypto');
 const logger = require('../utils/logger');
+const axios = require('axios');
 
 class JobDeduplicationService {
   constructor() {
@@ -47,9 +48,9 @@ class JobDeduplicationService {
    * @param {String} jobId - Current job ID
    * @param {String} userId - User ID
    * @param {Object} assessmentData - Assessment data
-   * @returns {Object} - Deduplication result
+   * @returns {Promise<Object>} - Deduplication result
    */
-  checkDuplicate(jobId, userId, assessmentData) {
+  async checkDuplicate(jobId, userId, assessmentData) {
     const jobHash = this.generateJobHash(userId, assessmentData);
     const now = Date.now();
     
@@ -86,6 +87,31 @@ class JobDeduplicationService {
           timeSinceProcessed: `${timeSinceProcessed}ms`
         });
         
+        // CRITICAL FIX: Check if the result is complete before blocking reprocessing
+        // If result is incomplete (test_result is null), allow reprocessing
+        const existingResult = await this.checkResultCompleteness(processedJob.resultId);
+        
+        if (existingResult && existingResult.isIncomplete) {
+          logger.warn('Allowing reprocessing of incomplete result', {
+            currentJobId: jobId,
+            originalJobId: processedJob.jobId,
+            originalResultId: processedJob.resultId,
+            userId,
+            reason: 'INCOMPLETE_RESULT_REPROCESSING'
+          });
+          
+          // Remove from processed cache to allow reprocessing
+          this.processedJobs.delete(jobHash);
+          
+          return {
+            isDuplicate: false,
+            jobHash,
+            reason: 'INCOMPLETE_RESULT_REPROCESSING',
+            originalResultId: processedJob.resultId,
+            allowOverwrite: true
+          };
+        }
+
         return {
           isDuplicate: true,
           reason: 'RECENTLY_PROCESSED',
@@ -229,6 +255,61 @@ class JobDeduplicationService {
         remainingProcessed: this.processedJobs.size,
         remainingProcessing: this.processingJobs.size
       });
+    }
+  }
+
+  /**
+   * Check if analysis result is complete
+   * @param {String} resultId - Result ID to check
+   * @returns {Promise<Object>} - Result completeness info
+   */
+  async checkResultCompleteness(resultId) {
+    try {
+      // Create archive service client
+      const archiveClient = axios.create({
+        baseURL: process.env.ARCHIVE_SERVICE_URL || 'http://archive-service:3000',
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SERVICE_SECRET}`
+        }
+      });
+
+      const response = await archiveClient.get(`/archive/results/${resultId}`);
+      const result = response.data.data;
+      
+      // Check if test_result is null or incomplete
+      const isIncomplete = !result.test_result || 
+                          typeof result.test_result !== 'object' ||
+                          !result.test_result.archetype ||
+                          !result.test_result.shortSummary;
+      
+      logger.debug('Result completeness check', {
+        resultId,
+        hasTestResult: !!result.test_result,
+        hasArchetype: !!(result.test_result?.archetype),
+        hasShortSummary: !!(result.test_result?.shortSummary),
+        isIncomplete
+      });
+      
+      return {
+        resultId,
+        isIncomplete,
+        testResult: result.test_result,
+        status: result.status
+      };
+    } catch (error) {
+      logger.warn('Failed to check result completeness, assuming complete', {
+        resultId,
+        error: error.message
+      });
+      
+      // If we can't check, assume it's complete to avoid infinite loops
+      return {
+        resultId,
+        isIncomplete: false,
+        error: error.message
+      };
     }
   }
 

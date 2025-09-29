@@ -319,6 +319,49 @@ class BatchProcessor {
   async createSingleResult(data) {
     // This is the original createResult logic for individual items
     try {
+      // CRITICAL: Validate test_result completeness before saving
+      if (!data.test_result || typeof data.test_result !== 'object') {
+        const error = new Error('Cannot save incomplete analysis result - test_result is null or invalid');
+        error.code = 'INCOMPLETE_RESULT';
+        error.userId = data.user_id;
+        throw error;
+      }
+
+      // Check if this is an overwrite operation for incomplete results
+      if (data.allow_overwrite) {
+        logger.info('Attempting to overwrite existing incomplete result', {
+          userId: data.user_id,
+          hasTestResult: !!data.test_result
+        });
+
+        // Find existing incomplete result for this user
+        const existingIncompleteResult = await AnalysisResult.findOne({
+          where: {
+            user_id: data.user_id,
+            test_result: null
+          },
+          order: [['created_at', 'DESC']]
+        });
+
+        if (existingIncompleteResult) {
+          logger.info('Found incomplete result to overwrite', {
+            userId: data.user_id,
+            existingResultId: existingIncompleteResult.id,
+            existingCreatedAt: existingIncompleteResult.created_at
+          });
+
+          // Update existing result instead of creating new one
+          await existingIncompleteResult.update({
+            test_result: data.test_result,
+            test_data: data.test_data || existingIncompleteResult.test_data,
+            raw_responses: data.raw_responses || existingIncompleteResult.raw_responses,
+            updated_at: new Date()
+          });
+
+          return existingIncompleteResult;
+        }
+      }
+
       const result = await AnalysisResult.create(data);
       return result;
     } catch (error) {
