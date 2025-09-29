@@ -1256,7 +1256,10 @@ curl -X GET https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a7
     "Orphaned Data Cleanup: Sistem otomatis membersihkan job dengan result_id yang tidak valid",
     "Status Synchronization: Endpoint khusus untuk sinkronisasi status antara job dan result",
     "Transaction Safety: Semua operasi delete menggunakan database transaction untuk atomicity",
-    "Internal Service Endpoints: Endpoint sync-status dan cleanup-orphaned hanya dapat diakses internal service"
+    "Internal Service Endpoints: Endpoint sync-status dan cleanup-orphaned hanya dapat diakses internal service",
+    "Database Migration: Kolom status, error_message, dan assessment_name telah dipindahkan dari analysis_results ke analysis_jobs untuk normalisasi data",
+    "JOIN Implementation: Endpoint results menggunakan LEFT JOIN dengan analysis_jobs untuk mendapatkan status, error_message, dan assessment_name",
+    "Backward Compatibility: Response format tetap sama dengan mengembalikan field status dan assessment_name di level result untuk kompatibilitas"
   ],
   personaProfileSchema: {
     description: "Skema lengkap persona_profile (semua field wajib ada) sesuai spesifikasi terbaru",

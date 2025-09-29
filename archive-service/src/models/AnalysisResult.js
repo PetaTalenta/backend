@@ -142,7 +142,7 @@ AnalysisResult.associate = function(models) {
  */
 
 /**
- * Find results by user ID with pagination (legacy)
+ * Find results by user ID with pagination (updated for post-migration)
  * @param {String} userId - User ID
  * @param {Object} options - Query options
  * @returns {Promise<Object>} - Results with pagination
@@ -159,26 +159,62 @@ AnalysisResult.findByUserWithPagination = async function(userId, options = {}) {
 
   const offset = (page - 1) * limit;
 
+  // Build where clause for analysis_results
   const whereClause = { user_id: userId };
+
+  // Build include clause for analysis_jobs with filtering
+  const includeClause = {
+    model: this.sequelize.models.AnalysisJob,
+    as: 'jobs',
+    required: false, // LEFT JOIN to include results even without jobs
+    where: {}
+  };
+
+  // Apply filters on analysis_jobs
   if (status) {
-    whereClause.status = status;
+    includeClause.where.status = status;
+    includeClause.required = true; // INNER JOIN when filtering by status
   }
   if (assessment_name) {
-    whereClause.assessment_name = assessment_name;
+    includeClause.where.assessment_name = assessment_name;
+    includeClause.required = true; // INNER JOIN when filtering by assessment_name
+  }
+
+  // If no filters on jobs, remove empty where clause
+  if (Object.keys(includeClause.where).length === 0) {
+    delete includeClause.where;
   }
 
   const { count, rows } = await this.findAndCountAll({
     where: whereClause,
+    include: [includeClause],
     limit: parseInt(limit),
     offset: parseInt(offset),
     order: [[sort, order.toUpperCase()]],
-    raw: false
+    raw: false,
+    distinct: true // Prevent duplicate counting when joining
+  });
+
+  // Transform results to include job data at the result level
+  const transformedRows = rows.map(result => {
+    const resultData = result.toJSON();
+    const job = resultData.jobs && resultData.jobs.length > 0 ? resultData.jobs[0] : null;
+
+    return {
+      ...resultData,
+      // Add job fields to result level for backward compatibility
+      status: job ? job.status : null,
+      error_message: job ? job.error_message : null,
+      assessment_name: job ? job.assessment_name : null,
+      // Keep jobs array for detailed access if needed
+      jobs: resultData.jobs
+    };
   });
 
   const totalPages = Math.ceil(count / limit);
 
   return {
-    results: rows,
+    results: transformedRows,
     pagination: {
       page: parseInt(page),
       limit: parseInt(limit),
@@ -192,7 +228,7 @@ AnalysisResult.findByUserWithPagination = async function(userId, options = {}) {
 };
 
 /**
- * Find results by user ID with cursor-based pagination
+ * Find results by user ID with cursor-based pagination (updated for post-migration)
  * Phase 2.1: Cursor-based pagination for 70-90% faster performance
  * @param {String} userId - User ID
  * @param {Object} options - Query options
@@ -210,16 +246,35 @@ AnalysisResult.findByUserWithCursor = async function(userId, options = {}) {
     orderDirection = 'DESC'
   } = options;
 
+  // Build where clause for analysis_results
   const whereClause = { user_id: userId };
+
+  // Build include clause for analysis_jobs with filtering
+  const includeClause = {
+    model: this.sequelize.models.AnalysisJob,
+    as: 'jobs',
+    required: false, // LEFT JOIN to include results even without jobs
+    where: {}
+  };
+
+  // Apply filters on analysis_jobs
   if (status) {
-    whereClause.status = status;
+    includeClause.where.status = status;
+    includeClause.required = true; // INNER JOIN when filtering by status
   }
   if (assessment_name) {
-    whereClause.assessment_name = assessment_name;
+    includeClause.where.assessment_name = assessment_name;
+    includeClause.required = true; // INNER JOIN when filtering by assessment_name
+  }
+
+  // If no filters on jobs, remove empty where clause
+  if (Object.keys(includeClause.where).length === 0) {
+    delete includeClause.where;
   }
 
   return await CursorPagination.paginate(this, {
     where: whereClause,
+    include: [includeClause],
     cursor,
     limit: parseInt(limit),
     orderBy,
