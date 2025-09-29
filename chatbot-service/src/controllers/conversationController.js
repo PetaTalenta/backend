@@ -14,12 +14,12 @@ const createConversation = async (req, res, next) => {
     const { title, profilePersona, resultsId, metadata } = req.body;
     const userId = req.user.id; // From auth middleware
 
-    // Create conversation without storing profilePersona in database
+    // Create conversation and store profilePersona in context_data if provided
     const conversation = await Conversation.create({
       user_id: userId,
       title: title || 'New Conversation',
       context_type: 'career_guidance',
-      context_data: null, // Don't store profilePersona in database
+      context_data: profilePersona ? { profilePersona } : null, // Store profilePersona for later use
       metadata,
       status: 'active'
     });

@@ -119,6 +119,57 @@ class MessageController {
         userId
       });
 
+      // Detect various career guidance questions for monitoring and debugging
+      const isArchetypeQuestion = /apa archetype|archetype saya|tipe kepribadian|personality type|kepribadian saya|karakter saya/i.test(content);
+      const isStrengthQuestion = /kekuatan|strength|kelebihan|keunggulan/i.test(content);
+      const isWeaknessQuestion = /kelemahan|weakness|kekurangan/i.test(content);
+      const isCareerQuestion = /karir|career|pekerjaan|profesi|rekomendasi/i.test(content);
+      const isPersonalityQuestion = /kepribadian|personality|sifat|karakter/i.test(content);
+
+      // Enhanced logging for different question types
+      if (isArchetypeQuestion) {
+        logger.info('ARCHETYPE QUESTION DETECTED', {
+          conversationId,
+          userId,
+          question: content.substring(0, 100),
+          hasConversationPersona: !!(conversation.context_data?.profilePersona),
+          conversationContextType: conversation.context_type,
+          messageId: userMessage.id
+        });
+      } else if (isStrengthQuestion) {
+        logger.info('STRENGTH QUESTION DETECTED', {
+          conversationId,
+          userId,
+          question: content.substring(0, 100),
+          hasConversationPersona: !!(conversation.context_data?.profilePersona),
+          messageId: userMessage.id
+        });
+      } else if (isWeaknessQuestion) {
+        logger.info('WEAKNESS QUESTION DETECTED', {
+          conversationId,
+          userId,
+          question: content.substring(0, 100),
+          hasConversationPersona: !!(conversation.context_data?.profilePersona),
+          messageId: userMessage.id
+        });
+      } else if (isCareerQuestion) {
+        logger.info('CAREER QUESTION DETECTED', {
+          conversationId,
+          userId,
+          question: content.substring(0, 100),
+          hasConversationPersona: !!(conversation.context_data?.profilePersona),
+          messageId: userMessage.id
+        });
+      } else if (isPersonalityQuestion) {
+        logger.info('PERSONALITY QUESTION DETECTED', {
+          conversationId,
+          userId,
+          question: content.substring(0, 100),
+          hasConversationPersona: !!(conversation.context_data?.profilePersona),
+          messageId: userMessage.id
+        });
+      }
+
       // Build conversation context for AI
       const conversationHistory = await contextService.buildConversationContext(conversationId);
       

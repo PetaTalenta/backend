@@ -122,9 +122,32 @@ class OpenRouterService {
       const response = await this.client.post('/chat/completions', payload);
       const processingTime = Date.now() - startTime;
 
+      // Validate response structure
+      if (!response.data) {
+        throw new Error('Invalid response: missing data');
+      }
+
+      if (!response.data.choices || !Array.isArray(response.data.choices) || response.data.choices.length === 0) {
+        logger.error('Invalid OpenRouter response structure', {
+          hasData: !!response.data,
+          hasChoices: !!response.data.choices,
+          choicesLength: response.data.choices?.length,
+          responseData: JSON.stringify(response.data, null, 2)
+        });
+        throw new Error('Invalid response: missing or empty choices array');
+      }
+
       // Extract response data
       const choice = response.data.choices[0];
       const usage = response.data.usage || {};
+
+      // Validate choice structure
+      if (!choice.message || !choice.message.content) {
+        logger.error('Invalid choice structure', {
+          choice: JSON.stringify(choice, null, 2)
+        });
+        throw new Error('Invalid response: missing message content');
+      }
 
       const result = {
         content: choice.message.content,
