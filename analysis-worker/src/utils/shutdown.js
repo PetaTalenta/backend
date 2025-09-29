@@ -6,6 +6,7 @@ const logger = require('./logger');
 const queueConsumer = require('../services/queueConsumer');
 const dlqMonitor = require('../services/dlqMonitor');
 const jobHeartbeat = require('../services/jobHeartbeat');
+const stuckJobMonitor = require('../services/stuckJobMonitor');
 
 // Flag to prevent multiple shutdown attempts
 let isShuttingDown = false;
@@ -35,6 +36,10 @@ async function gracefulShutdown(signal) {
     // Shutdown job heartbeats
     logger.info('Shutting down job heartbeats...');
     jobHeartbeat.shutdown();
+    
+    // Stop stuck job monitor
+    logger.info('Stopping stuck job monitor...');
+    stuckJobMonitor.stop();
     
     // Close queue consumer connection
     logger.info('Closing queue consumer connection...');

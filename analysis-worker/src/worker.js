@@ -17,6 +17,7 @@ const logger = require('./utils/logger');
 const queueConsumer = require('./services/queueConsumer');
 const dlqMonitor = require('./services/dlqMonitor');
 const jobHeartbeat = require('./services/jobHeartbeat');
+const stuckJobMonitor = require('./services/stuckJobMonitor');
 const { gracefulShutdown } = require('./utils/shutdown');
 
 // Log worker startup
@@ -42,6 +43,9 @@ async function startWorker() {
 
     // Start job heartbeat cleanup scheduler
     jobHeartbeat.startCleanupScheduler();
+
+    // Start stuck job monitor
+    stuckJobMonitor.start();
 
     // Log successful startup
     logger.info('Analysis Worker ready - consuming messages');

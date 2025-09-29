@@ -452,9 +452,12 @@ const checkHealth = async () => {
  * @param {String} jobId - Job ID
  * @param {String} status - New status
  * @param {Object} additionalData - Additional data to update
- * @returns {Promise<Object|null>} - Updated job or null if failed
+ * @returns {Promise<Object>} - Updated job data
+ * @throws {Error} - Throws error for critical status updates (completed/failed)
  */
 const updateAnalysisJobStatus = async (jobId, status, additionalData = {}) => {
+  const isCriticalStatus = ['completed', 'failed'].includes(status);
+  
   try {
     return await withRetry(async () => {
       logger.info('Updating analysis job status', { jobId, status });
@@ -472,9 +475,18 @@ const updateAnalysisJobStatus = async (jobId, status, additionalData = {}) => {
       status,
       error: error.message,
       responseStatus: error.response?.status,
-      statusText: error.response?.statusText
+      statusText: error.response?.statusText,
+      isCriticalStatus
     });
-    // Don't throw error - allow processing to continue
+    
+    // For critical status updates (completed/failed), throw error to prevent silent failures
+    if (isCriticalStatus) {
+      const errorMsg = `Critical error: Failed to update job ${jobId} status to ${status}. This job may remain stuck in processing state.`;
+      logger.error(errorMsg, { jobId, status, originalError: error.message });
+      throw new Error(errorMsg);
+    }
+    
+    // For non-critical updates (processing, heartbeats), allow processing to continue
     return null;
   }
 };

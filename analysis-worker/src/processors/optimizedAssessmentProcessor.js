@@ -408,27 +408,54 @@ const processAssessmentOptimized = async (jobData) => {
 
       // CRITICAL FIX: Update job status to completed ONLY after all operations succeed
       // This prevents race conditions where job is marked completed but then fails
-      try {
-        await updateAnalysisJobStatus(jobId, 'completed', {
-          result_id: saveResult.id
-        });
+      let statusUpdateSuccess = false;
+      let statusUpdateRetries = 0;
+      const maxStatusRetries = 3;
+      
+      while (!statusUpdateSuccess && statusUpdateRetries < maxStatusRetries) {
+        try {
+          statusUpdateRetries++;
+          await updateAnalysisJobStatus(jobId, 'completed', {
+            result_id: saveResult.id
+          });
 
-        logger.info('Job status successfully updated to completed', {
-          jobId,
-          userId,
-          resultId: saveResult.id
-        });
-      } catch (statusError) {
-        logger.error('CRITICAL: Failed to update job status to completed after successful processing', {
-          jobId,
-          userId,
-          resultId: saveResult.id,
-          error: statusError.message
-        });
+          logger.info('Job status successfully updated to completed', {
+            jobId,
+            userId,
+            resultId: saveResult.id,
+            retry: statusUpdateRetries
+          });
+          statusUpdateSuccess = true;
+        } catch (statusError) {
+          logger.error(`CRITICAL: Failed to update job status to completed (attempt ${statusUpdateRetries}/${maxStatusRetries})`, {
+            jobId,
+            userId,
+            resultId: saveResult.id,
+            error: statusError.message,
+            retry: statusUpdateRetries
+          });
 
-        // This is a critical error - the job processed successfully but we can't update status
-        // We should still return success since the result was saved, but log this for monitoring
-        // The job will remain in 'processing' status and may need manual intervention
+          if (statusUpdateRetries >= maxStatusRetries) {
+            // Final attempt failed, log critical error but don't fail the entire operation
+            logger.error('CRITICAL: All attempts to update job status failed - job will remain stuck', {
+              jobId,
+              userId,
+              resultId: saveResult.id,
+              error: statusError.message,
+              totalRetries: statusUpdateRetries
+            });
+
+            // Send alert to monitoring system
+            auditLogger.logJobEvent(AUDIT_EVENTS.CRITICAL_ERROR, jobData, {
+              error: 'Status update failed after all retries',
+              resultId: saveResult.id,
+              statusError: statusError.message
+            });
+          } else {
+            // Wait before retry
+            await new Promise(resolve => setTimeout(resolve, 1000 * statusUpdateRetries));
+          }
+        }
       }
 
       // Stop heartbeat on successful completion
