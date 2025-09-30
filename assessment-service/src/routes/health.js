@@ -4,6 +4,7 @@ const queueService = require('../services/queueService');
 const authService = require('../services/authService');
 const archiveService = require('../services/archiveService');
 const jobTracker = require('../jobs/jobTracker');
+const stuckJobMonitor = require('../jobs/stuckJobMonitor');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -151,6 +152,59 @@ router.get('/queue', async(req, res) => {
       status: 'error',
       timestamp: new Date().toISOString(),
       error: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /health/stuck-jobs/check
+ * @description Manually trigger stuck job check (Week 2)
+ * @access Internal
+ */
+router.post('/stuck-jobs/check', async(req, res) => {
+  try {
+    logger.info('Manual stuck job check triggered via API');
+
+    const result = await stuckJobMonitor.manualCheck();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Stuck job check completed',
+      timestamp: new Date().toISOString(),
+      data: result
+    });
+  } catch (error) {
+    logger.error('Manual stuck job check error', { error: error.message });
+
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
+ * @route GET /health/stuck-jobs/stats
+ * @description Get stuck job monitor statistics (Week 2)
+ * @access Internal
+ */
+router.get('/stuck-jobs/stats', async(req, res) => {
+  try {
+    const stats = await stuckJobMonitor.getStats();
+
+    return res.status(200).json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      data: stats
+    });
+  } catch (error) {
+    logger.error('Stuck job stats error', { error: error.message });
+
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });

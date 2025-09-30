@@ -272,19 +272,21 @@ const processAssessmentOptimized = async (jobData) => {
       }
     }
 
-    // Step 4.1: Publish analysis started event (async, non-blocking)
+    // Step 4.1: Publish analysis started event (async, non-blocking) - Week 2 Enhanced
     try {
       const eventPublisher = getEventPublisher();
       eventPublisher.publishAnalysisStarted({
         jobId,
         userId,
         userEmail,
+        resultId, // Week 2: Include resultId for enhanced notifications
         assessmentName: finalAssessmentName,
         estimatedProcessingTime: '1-3 minutes'
       }).catch(eventError => {
         logger.warn('Failed to publish analysis started event', {
           jobId,
           userId,
+          resultId,
           error: eventError.message
         });
       });
@@ -292,6 +294,7 @@ const processAssessmentOptimized = async (jobData) => {
       logger.warn('Failed to get event publisher for started event, skipping', {
         jobId,
         userId,
+        resultId,
         error: error.message
       });
     }

@@ -201,27 +201,31 @@ const handleAnalysisFailed = async (eventData) => {
 };
 
 /**
- * Handle analysis started events (optional for future use)
+ * Handle analysis started events (Week 2 Enhanced)
  * @param {Object} eventData - Event data
  */
 const handleAnalysisStarted = async (eventData) => {
-  const { userId, jobId, metadata } = eventData;
+  const { userId, jobId, resultId, metadata } = eventData;
 
   try {
-    // Send notification to user via WebSocket
-    const sent = socketService.sendToUser(userId, 'analysis-started', {
+    // Create enhanced webhook payload with resultId (Week 2)
+    const webhookPayload = {
       jobId,
-      status: 'started',
+      resultId: resultId || null,
+      status: 'processing',
+      assessment_name: metadata?.assessmentName || 'Unknown Assessment',
       message: 'Your analysis has started processing...',
-      metadata: {
-        assessmentName: metadata?.assessmentName,
-        estimatedProcessingTime: metadata?.estimatedProcessingTime
-      }
-    });
+      estimated_time: metadata?.estimatedProcessingTime || '1-3 minutes'
+    };
 
-    logger.info('Analysis started notification sent via event', {
+    // Send notification to user via WebSocket
+    const sent = socketService.sendToUser(userId, 'analysis-started', webhookPayload);
+
+    logger.info('Analysis started notification sent via event (Week 2)', {
       userId,
       jobId,
+      resultId,
+      assessment_name: metadata?.assessmentName,
       sent
     });
 
@@ -229,6 +233,7 @@ const handleAnalysisStarted = async (eventData) => {
     logger.error('Failed to handle analysis started event', {
       userId,
       jobId,
+      resultId: eventData.resultId,
       error: error.message
     });
     throw error;

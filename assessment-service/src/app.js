@@ -19,6 +19,7 @@ const queueService = require('./services/queueService');
 const eventConsumer = require('./services/eventConsumer');
 const database = require('./config/database');
 const idempotencyCleanupJob = require('./jobs/idempotencyCleanup');
+const stuckJobMonitor = require('./jobs/stuckJobMonitor');
 
 // Create Express app
 const app = express();
@@ -104,6 +105,15 @@ const initializeServices = async() => {
       // Don't exit the process, cleanup can be done manually
     }
 
+    // Start stuck job monitor (Week 2 Implementation)
+    try {
+      stuckJobMonitor.start();
+      logger.info('Stuck job monitor started');
+    } catch (monitorError) {
+      logger.error('Failed to start stuck job monitor', { error: monitorError.message });
+      // Don't exit the process, monitoring can be done manually
+    }
+
     logger.info('All services initialized successfully');
   } catch (error) {
     logger.error('Failed to initialize services', { error: error.message });
@@ -115,6 +125,14 @@ const initializeServices = async() => {
 const gracefulShutdown = async() => {
   logger.info('Shutting down gracefully...');
   try {
+    // Stop stuck job monitor (Week 2 Implementation)
+    try {
+      await stuckJobMonitor.stop();
+      logger.info('Stuck job monitor stopped');
+    } catch (monitorError) {
+      logger.error('Error stopping stuck job monitor', { error: monitorError.message });
+    }
+
     // Stop idempotency cleanup job
     try {
       idempotencyCleanupJob.stop();

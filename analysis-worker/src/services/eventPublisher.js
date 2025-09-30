@@ -96,7 +96,7 @@ class EventPublisher {
   }
 
   /**
-   * Publish analysis started event (optional for future use)
+   * Publish analysis started event (Week 2 Enhanced)
    * @param {Object} eventData - Event data
    */
   async publishAnalysisStarted(eventData) {
@@ -106,6 +106,7 @@ class EventPublisher {
       jobId: eventData.jobId,
       userId: eventData.userId,
       userEmail: eventData.userEmail,
+      resultId: eventData.resultId || null, // Week 2: Include resultId
       metadata: {
         assessmentName: eventData.assessmentName || 'AI-Driven Talent Mapping',
         estimatedProcessingTime: eventData.estimatedProcessingTime || 0

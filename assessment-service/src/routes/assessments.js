@@ -300,9 +300,10 @@ router.post('/submit',
     // Get queue position
     const queueStats = await queueService.getQueueStats();
 
-    // Return success response
+    // Return success response (Week 2: Include resultId)
     return sendSuccess(res, 'Assessment submitted successfully and queued for analysis', {
       jobId,
+      resultId, // Week 2: Include resultId in response
       status: jobTracker.JOB_STATUS.QUEUED,
       estimatedProcessingTime: '2-5 minutes',
       queuePosition: queueStats.messageCount,
