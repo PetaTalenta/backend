@@ -79,8 +79,8 @@ class StuckJobMonitor {
     try {
       logger.debug('Checking for stuck jobs...');
 
-      // Find jobs that are stuck in processing but have corresponding analysis results
-      const stuckJobsQuery = `
+      // Query 1: Find jobs that are stuck in processing but have corresponding analysis results
+      const stuckJobsWithResultsQuery = `
         SELECT 
           aj.id,
           aj.job_id,
@@ -91,7 +91,8 @@ class StuckJobMonitor {
           ar.id as result_id,
           ar.created_at as result_created_at,
           u.email,
-          EXTRACT(EPOCH FROM (NOW() - aj.updated_at))/3600 as hours_stuck
+          EXTRACT(EPOCH FROM (NOW() - aj.updated_at))/3600 as hours_stuck,
+          'has_result' as stuck_type
         FROM archive.analysis_jobs aj
         JOIN auth.users u ON aj.user_id = u.id
         LEFT JOIN archive.analysis_results ar ON aj.user_id = ar.user_id 
@@ -103,26 +104,56 @@ class StuckJobMonitor {
         ORDER BY aj.created_at ASC
       `;
 
-      const result = await client.query(stuckJobsQuery);
-      const stuckJobs = result.rows;
+      // Query 2: Find jobs that are stuck in processing for too long without results (timeout)
+      const stuckJobsTimeoutQuery = `
+        SELECT 
+          aj.id,
+          aj.job_id,
+          aj.user_id,
+          aj.status,
+          aj.created_at,
+          aj.updated_at,
+          NULL as result_id,
+          NULL as result_created_at,
+          u.email,
+          EXTRACT(EPOCH FROM (NOW() - aj.updated_at))/3600 as hours_stuck,
+          'timeout' as stuck_type
+        FROM archive.analysis_jobs aj
+        JOIN auth.users u ON aj.user_id = u.id
+        WHERE aj.status = 'processing'
+          AND aj.updated_at < NOW() - INTERVAL '2 hours'
+        ORDER BY aj.created_at ASC
+      `;
 
-      if (stuckJobs.length === 0) {
+      const [resultWithResults, resultTimeout] = await Promise.all([
+        client.query(stuckJobsWithResultsQuery),
+        client.query(stuckJobsTimeoutQuery)
+      ]);
+
+      // Combine results and deduplicate
+      const allStuckJobs = [...resultWithResults.rows, ...resultTimeout.rows];
+      const uniqueStuckJobs = allStuckJobs.filter((job, index, arr) => 
+        arr.findIndex(j => j.id === job.id) === index
+      );
+
+      if (uniqueStuckJobs.length === 0) {
         logger.debug('No stuck jobs found');
         return { fixed: 0, total: 0 };
       }
 
-      logger.info(`Found ${stuckJobs.length} stuck jobs to fix`, {
-        stuckJobs: stuckJobs.map(job => ({
+      logger.info(`Found ${uniqueStuckJobs.length} stuck jobs to fix`, {
+        stuckJobs: uniqueStuckJobs.map(job => ({
           jobId: job.job_id,
           email: job.email,
-          hoursStuck: Math.round(job.hours_stuck * 100) / 100
+          hoursStuck: Math.round(job.hours_stuck * 100) / 100,
+          type: job.stuck_type
         }))
       });
 
       let fixedCount = 0;
 
       // Fix each stuck job
-      for (const job of stuckJobs) {
+      for (const job of uniqueStuckJobs) {
         try {
           await this.fixStuckJob(client, job);
           fixedCount++;
@@ -136,12 +167,12 @@ class StuckJobMonitor {
       }
 
       logger.info('Stuck job monitor completed', {
-        totalFound: stuckJobs.length,
+        totalFound: uniqueStuckJobs.length,
         fixed: fixedCount,
-        failed: stuckJobs.length - fixedCount
+        failed: uniqueStuckJobs.length - fixedCount
       });
 
-      return { fixed: fixedCount, total: stuckJobs.length };
+      return { fixed: fixedCount, total: uniqueStuckJobs.length };
 
     } catch (error) {
       logger.error('Error in stuck job monitoring', { error: error.message });
@@ -162,37 +193,67 @@ class StuckJobMonitor {
         jobId: job.job_id,
         email: job.email,
         resultId: job.result_id,
+        stuckType: job.stuck_type,
         hoursStuck: Math.round(job.hours_stuck * 100) / 100
       });
 
-      // Update the job status to completed
-      const updateQuery = `
-        UPDATE archive.analysis_jobs
-        SET 
-          status = 'completed',
-          result_id = $1,
-          completed_at = $2,
-          updated_at = NOW()
-        WHERE job_id = $3
-      `;
+      if (job.stuck_type === 'has_result' && job.result_id) {
+        // Case 1: Job has result but status is stuck - mark as completed
+        const updateQuery = `
+          UPDATE archive.analysis_jobs
+          SET 
+            status = 'completed',
+            result_id = $1,
+            completed_at = $2,
+            updated_at = NOW()
+          WHERE job_id = $3
+        `;
 
-      const updateResult = await client.query(updateQuery, [
-        job.result_id,
-        job.result_created_at,
-        job.job_id
-      ]);
+        const updateResult = await client.query(updateQuery, [
+          job.result_id,
+          job.result_created_at,
+          job.job_id
+        ]);
 
-      if (updateResult.rowCount === 0) {
-        throw new Error('Job not found or already updated');
+        if (updateResult.rowCount === 0) {
+          throw new Error('Job not found or already updated');
+        }
+
+        logger.info('Successfully fixed stuck job with existing result', {
+          jobId: job.job_id,
+          email: job.email,
+          resultId: job.result_id
+        });
+
+      } else {
+        // Case 2: Job has been processing too long without result - mark as failed
+        const updateQuery = `
+          UPDATE archive.analysis_jobs
+          SET 
+            status = 'failed',
+            error_message = $1,
+            updated_at = NOW()
+          WHERE job_id = $2
+        `;
+
+        const errorMessage = `Job timed out after ${Math.round(job.hours_stuck * 100) / 100} hours. No result was produced.`;
+        const updateResult = await client.query(updateQuery, [
+          errorMessage,
+          job.job_id
+        ]);
+
+        if (updateResult.rowCount === 0) {
+          throw new Error('Job not found or already updated');
+        }
+
+        logger.info('Successfully marked timed out job as failed', {
+          jobId: job.job_id,
+          email: job.email,
+          hoursStuck: Math.round(job.hours_stuck * 100) / 100
+        });
       }
 
       await client.query('COMMIT');
-
-      logger.info('Successfully fixed stuck job', {
-        jobId: job.job_id,
-        email: job.email,
-        resultId: job.result_id
-      });
 
     } catch (error) {
       await client.query('ROLLBACK');

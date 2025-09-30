@@ -11,9 +11,10 @@ const { AppError } = require('../middleware/errorHandler');
  * @param {String} jobId - Job ID (passed from caller)
  * @param {String} assessmentName - Assessment name
  * @param {Object} rawResponses - Raw responses data (optional)
+ * @param {String} resultId - Result ID (optional, for Phase 1 implementation)
  * @returns {Promise<String>} - Job ID
  */
-const publishAssessmentJob = async(assessmentData, userId, userEmail, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null) => {
+const publishAssessmentJob = async(assessmentData, userId, userEmail, jobId, assessmentName = 'AI-Driven Talent Mapping', rawResponses = null, resultId = null) => {
   try {
     const channel = await rabbitmq.getChannel();
 
@@ -25,6 +26,7 @@ const publishAssessmentJob = async(assessmentData, userId, userEmail, jobId, ass
       assessment_name: assessmentName,
       assessment_data: assessmentData,
       raw_responses: rawResponses,
+      resultId: resultId,  // PHASE 1: Include resultId in queue message
       timestamp: new Date().toISOString(),
       retryCount: 0,
       messageVersion: 'v2' // Version for backward compatibility

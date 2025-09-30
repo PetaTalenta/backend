@@ -239,11 +239,63 @@ router.post('/submit',
       throw new AppError('ARCHIVE_SERVICE_ERROR', 'Failed to create job in archive service', 503);
     }
 
+    // PHASE 1: Create analysis_results immediately with status 'queued'
+    let resultId = null;
+    try {
+      const resultData = await archiveService.createAnalysisResult(
+        userId,
+        assessment_data,  // test_data - assessment data stored here
+        null,             // test_result - will be filled by worker
+        finalAssessmentName,
+        raw_responses,
+        null,             // chatbot_id
+        false             // is_public
+      );
+      resultId = resultData.id;
+
+      logger.info('Analysis result created with queued status', {
+        jobId,
+        userId,
+        resultId
+      });
+    } catch (resultError) {
+      logger.error('Failed to create analysis result in Archive Service, refunding tokens', {
+        jobId,
+        userId,
+        error: resultError.message
+      });
+
+      // Refund tokens if result creation fails
+      try {
+        await authService.refundTokens(userId, req.token, tokenCost);
+      } catch (refundError) {
+        logger.error('Failed to refund tokens after result creation error', {
+          userId,
+          tokenCost,
+          error: refundError.message
+        });
+      }
+
+      throw new AppError('ARCHIVE_SERVICE_ERROR', 'Failed to create analysis result in archive service', 503);
+    }
+
+    // Update job with result_id
+    try {
+      await archiveService.updateJobStatus(jobId, 'queued', { result_id: resultId });
+    } catch (updateError) {
+      logger.warn('Failed to update job with result_id', {
+        jobId,
+        resultId,
+        error: updateError.message
+      });
+      // Don't fail the request if this update fails
+    }
+
     // Create job in local tracker
     jobTracker.createJob(jobId, userId, userEmail, assessment_data, finalAssessmentName);
 
-    // Publish job to queue with the same jobId - include raw_responses
-    await queueService.publishAssessmentJob(assessment_data, userId, userEmail, jobId, finalAssessmentName, raw_responses);
+    // Publish job to queue with the same jobId - include raw_responses and resultId
+    await queueService.publishAssessmentJob(assessment_data, userId, userEmail, jobId, finalAssessmentName, raw_responses, resultId);
 
     // Get queue position
     const queueStats = await queueService.getQueueStats();
@@ -384,7 +436,7 @@ router.post('/retry',
 
       // Step 7: Update job tracker and queue the job for processing
       jobTracker.createJob(jobId, userId, userEmail, assessmentData, assessmentName);
-      await queueService.publishAssessmentJob(assessmentData, userId, userEmail, jobId, assessmentName);
+      await queueService.publishAssessmentJob(assessmentData, userId, userEmail, jobId, assessmentName, null, existingJob.result_id);
       const queueStats = await queueService.getQueueStats();
 
       return sendSuccess(res, 'Assessment retry queued successfully', {

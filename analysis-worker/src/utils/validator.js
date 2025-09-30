@@ -9,7 +9,7 @@ const { personaProfileSchema } = require('../schemas/personaProfile');
 // Schema for job message validation - supports both legacy and new formats
 // Assessment data validation is already done in assessment-service
 const jobMessageSchema = Joi.alternatives().try(
-  // New format (v2)
+  // New format (v2) - PHASE 2: Added resultId field
   Joi.object({
     jobId: Joi.string().uuid().required(),
     userId: Joi.string().uuid().required(),
@@ -17,6 +17,7 @@ const jobMessageSchema = Joi.alternatives().try(
     assessment_name: Joi.string().valid('AI-Driven Talent Mapping', 'AI-Based IQ Test', 'Custom Assessment').default('AI-Driven Talent Mapping'),
     assessment_data: Joi.object().required(), // Trust that assessment-service already validated this
     raw_responses: Joi.object().allow(null).optional(),
+    resultId: Joi.string().uuid().allow(null).optional(), // PHASE 2: Result ID for updating existing result
     timestamp: Joi.string().isoDate().required(),
     retryCount: Joi.number().min(0).default(0),
     messageVersion: Joi.string().valid('v2').optional()

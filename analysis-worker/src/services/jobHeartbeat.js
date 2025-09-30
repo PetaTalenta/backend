@@ -187,22 +187,42 @@ class JobHeartbeat {
       const age = now - jobInfo.startTime.getTime();
       
       if (age > maxHeartbeatAge) {
-        staleJobs.push(jobId);
+        staleJobs.push({ jobId, jobInfo, age });
       }
     }
 
-    // Clean up stale heartbeats
-    staleJobs.forEach(jobId => {
-      logger.warn('Cleaning up stale heartbeat', { 
+    // Clean up stale heartbeats and mark jobs as failed
+    staleJobs.forEach(async ({ jobId, jobInfo, age }) => {
+      logger.warn('Cleaning up stale heartbeat and marking job as failed', { 
         jobId,
-        age: `${Math.round((now - this.activeJobs.get(jobId).startTime.getTime()) / 1000)}s`
+        userId: jobInfo.userId,
+        age: `${Math.round(age / 1000)}s`
       });
       
-      this.stopHeartbeat(jobId);
+      // Mark job as failed due to timeout
+      try {
+        const { updateAnalysisJobStatus } = require('./archiveService');
+        await updateAnalysisJobStatus(jobId, 'failed', {
+          error_message: `Job timed out after ${Math.round(age / 1000)} seconds. Worker heartbeat stopped responding.`
+        });
+        
+        logger.info('Successfully marked timed out job as failed', {
+          jobId,
+          userId: jobInfo.userId
+        });
+      } catch (error) {
+        logger.error('Failed to mark timed out job as failed', {
+          jobId,
+          userId: jobInfo.userId,
+          error: error.message
+        });
+      }
+      
+      this.stopHeartbeat(jobId, 'timeout_cleanup');
     });
 
     if (staleJobs.length > 0) {
-      logger.info('Cleaned up stale heartbeats', { count: staleJobs.length });
+      logger.info('Cleaned up stale heartbeats and marked jobs as failed', { count: staleJobs.length });
     }
 
     return staleJobs.length;

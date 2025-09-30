@@ -431,6 +431,44 @@ const updateAnalysisResult = async (resultId, status, jobId) => {
 };
 
 /**
+ * Update analysis result test_result field (PHASE 2)
+ * @param {String} resultId - Result ID
+ * @param {Object} testResult - Test result data to update
+ * @param {String} jobId - Job ID for logging
+ * @returns {Promise<Object>} - Update result
+ */
+const updateAnalysisResultTestData = async (resultId, testResult, jobId) => {
+  return withRetry(async () => {
+    logger.info('Updating analysis result test_result', {
+      jobId,
+      resultId,
+      hasTestResult: !!testResult
+    });
+
+    // Prepare request body with test_result and status
+    const requestBody = {
+      test_result: testResult,
+      status: 'completed'
+    };
+
+    // Send request to Archive Service
+    const response = await archiveClient.put(`/archive/results/${resultId}`, requestBody);
+
+    logger.info('Analysis result test_result updated successfully', {
+      jobId,
+      resultId,
+      status: response.status
+    });
+
+    return {
+      success: true,
+      id: response.data.data.id,
+      updated_at: response.data.data.updated_at
+    };
+  });
+};
+
+/**
  * Save failed analysis result to Archive Service
  * @param {String} userId - User ID
  * @param {Object} testData - Test data (formerly assessmentData)
@@ -573,6 +611,7 @@ module.exports = {
   saveAnalysisResultDirect,
   saveFailedAnalysisResult,
   updateAnalysisResult,
+  updateAnalysisResultTestData,
   checkHealth,
   updateAnalysisJobStatus,
   flushBatch,

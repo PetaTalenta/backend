@@ -2,7 +2,7 @@
  * Optimized Assessment Processor with Deduplication, Rate Limiting, and Audit Logging
  */
 
-const { saveAnalysisResult, saveFailedAnalysisResult, updateAnalysisJobStatus, checkHealth } = require('../services/archiveService');
+const { saveAnalysisResult, saveFailedAnalysisResult, updateAnalysisJobStatus, updateAnalysisResult, updateAnalysisResultTestData, checkHealth } = require('../services/archiveService');
 const { jobDeduplicationService, tokenRefundService } = require('../services/jobDeduplicationService');
 const { auditLogger, AUDIT_EVENTS, RISK_LEVELS } = require('../services/auditLogger');
 const notificationService = require('../services/notificationService'); // Keep for backward compatibility
@@ -157,6 +157,7 @@ const processAssessmentOptimized = async (jobData) => {
     assessment_data,
     assessment_name = 'AI-Driven Talent Mapping',
     raw_responses,
+    resultId,  // PHASE 2: Extract resultId from queue message
     userIP,
     // Legacy format support
     assessmentData,
@@ -239,8 +240,37 @@ const processAssessmentOptimized = async (jobData) => {
       jobHash: deduplicationResult.jobHash
     });
 
-    // Step 4: Update job status to processing (async)
-    updateAnalysisJobStatus(jobId, 'processing');
+    // Step 4: Update job status to processing (with error handling)
+    try {
+      await updateAnalysisJobStatus(jobId, 'processing');
+    } catch (statusError) {
+      logger.error('Failed to update job status to processing', {
+        jobId,
+        userId,
+        error: statusError.message
+      });
+      // Continue processing even if status update fails for non-critical status
+    }
+
+    // PHASE 2: Update result status to processing if resultId exists
+    if (resultId) {
+      try {
+        await updateAnalysisResult(resultId, 'processing', jobId);
+        logger.info('Analysis result status updated to processing', {
+          jobId,
+          userId,
+          resultId
+        });
+      } catch (resultStatusError) {
+        logger.error('Failed to update result status to processing', {
+          jobId,
+          userId,
+          resultId,
+          error: resultStatusError.message
+        });
+        // Continue processing even if result status update fails
+      }
+    }
 
     // Step 4.1: Publish analysis started event (async, non-blocking)
     try {
@@ -325,23 +355,44 @@ const processAssessmentOptimized = async (jobData) => {
         );
       }
 
-      // Save result to Archive Service (optimized with batching)
-      // Check if we should allow overwrite for incomplete results
-      const allowOverwrite = deduplicationResult.allowOverwrite || false;
-      
-      const saveResult = await withRetry(
-        () => saveAnalysisResult(userId, finalAssessmentData, personaProfile, jobId, finalAssessmentName, raw_responses, false, allowOverwrite),
-        {
-          operationName: 'Archive service save',
-          shouldRetry: (error) => error.isRetryable
-        }
-      );
-      
-      logger.info('Analysis result saved to Archive Service', {
-        jobId,
-        userId,
-        resultId: saveResult.id
-      });
+      // PHASE 2: Save or update result based on whether resultId exists
+      let saveResult;
+
+      if (resultId) {
+        // Update existing result with test_result data
+        await withRetry(
+          () => updateAnalysisResultTestData(resultId, personaProfile, jobId),
+          {
+            operationName: 'Archive service update test_result',
+            shouldRetry: (error) => error.isRetryable
+          }
+        );
+
+        saveResult = { id: resultId };
+
+        logger.info('Analysis result test_result updated in Archive Service', {
+          jobId,
+          userId,
+          resultId
+        });
+      } else {
+        // Legacy path: Create new result (for backward compatibility)
+        const allowOverwrite = deduplicationResult.allowOverwrite || false;
+
+        saveResult = await withRetry(
+          () => saveAnalysisResult(userId, finalAssessmentData, personaProfile, jobId, finalAssessmentName, raw_responses, false, allowOverwrite),
+          {
+            operationName: 'Archive service save',
+            shouldRetry: (error) => error.isRetryable
+          }
+        );
+
+        logger.info('Analysis result saved to Archive Service', {
+          jobId,
+          userId,
+          resultId: saveResult.id
+        });
+      }
 
       // Audit: Data saved
       auditLogger.logDataAccess('SAVE', userId, 'ANALYSIS_RESULT', {
@@ -525,23 +576,47 @@ const processAssessmentOptimized = async (jobData) => {
       jobHash: deduplicationResult?.jobHash
     });
 
-    // For rate limit exceeded errors and AI timeout, also persist a failed AnalysisResult so user can see it
+    // PHASE 2: Handle failed result - update existing result if resultId exists
     if (error?.code === ERROR_TYPES.RATE_LIMIT_ERROR.code || error?.code === 'AI_TIMEOUT') {
       try {
-        const failedResult = await saveFailedAnalysisResult(
-          userId,
-          finalAssessmentData,
-          error.message,
-          jobId,
-          finalAssessmentName,
-          raw_responses
-        );
+        let failedResultId;
+
+        if (resultId) {
+          // Update existing result to failed status
+          await updateAnalysisResult(resultId, 'failed', jobId);
+          failedResultId = resultId;
+
+          logger.info('Analysis result status updated to failed', {
+            jobId,
+            userId,
+            resultId
+          });
+        } else {
+          // Legacy path: Create new failed result
+          const failedResult = await saveFailedAnalysisResult(
+            userId,
+            finalAssessmentData,
+            error.message,
+            jobId,
+            finalAssessmentName,
+            raw_responses
+          );
+          failedResultId = failedResult.id;
+        }
 
         // Update job status linking the failed result
-        updateAnalysisJobStatus(jobId, 'failed', {
-          error_message: error.message,
-          result_id: failedResult.id
-        });
+        try {
+          await updateAnalysisJobStatus(jobId, 'failed', {
+            error_message: error.message,
+            result_id: failedResultId
+          });
+        } catch (statusError) {
+          logger.error('Failed to update job status to failed with result', {
+            jobId,
+            resultId: failedResultId,
+            statusError: statusError.message
+          });
+        }
       } catch (failedSaveErr) {
         logger.error('Failed to persist failed analysis result for rate limit error', {
           jobId,
@@ -550,7 +625,7 @@ const processAssessmentOptimized = async (jobData) => {
         });
         // Fallback: at least mark job failed without result linkage
         try {
-          updateAnalysisJobStatus(jobId, 'failed', {
+          await updateAnalysisJobStatus(jobId, 'failed', {
             error_message: error.message
           });
         } catch (statusError) {
@@ -563,7 +638,7 @@ const processAssessmentOptimized = async (jobData) => {
     } else {
       // Generic failure path (no dedicated failed result creation here)
       try {
-        updateAnalysisJobStatus(jobId, 'failed', {
+        await updateAnalysisJobStatus(jobId, 'failed', {
           error_message: error?.message
         });
       } catch (statusError) {
