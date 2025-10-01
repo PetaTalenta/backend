@@ -50,6 +50,16 @@ const initialize = async() => {
     // Create channel
     channel = await connection.createChannel();
 
+    // Handle channel events
+    channel.on('close', () => {
+      logger.warn('RabbitMQ channel closed');
+      channel = null;
+    });
+
+    channel.on('error', (err) => {
+      logger.error('RabbitMQ channel error', { error: err.message });
+    });
+
     // Setup main exchange for job publishing
     await channel.assertExchange(config.exchange, 'direct', {
       durable: config.options.durable
@@ -157,13 +167,11 @@ const close = async() => {
 const checkHealth = async() => {
   try {
     if (!connection || !channel) {
-      logger.warn('RabbitMQ connection or channel not initialized');
       return false;
     }
 
-    // Check if connection and channel are still open
-    if (!connection.isOpen || !channel.isOpen) {
-      logger.warn('RabbitMQ connection or channel is closed');
+    // Check if connection is still alive
+    if (!connection.connection || connection.connection.closed) {
       return false;
     }
 
@@ -172,11 +180,9 @@ const checkHealth = async() => {
       await channel.checkQueue(config.queue);
       return true;
     } catch (queueError) {
-      logger.warn('RabbitMQ queue check failed', { error: queueError.message });
       return false;
     }
   } catch (error) {
-    logger.error('Error checking RabbitMQ health', { error: error.message });
     return false;
   }
 };

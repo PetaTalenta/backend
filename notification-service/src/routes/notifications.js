@@ -72,8 +72,8 @@ router.post('/analysis-complete', serviceAuth, validateNotification, (req, res) 
   try {
     const { userId, jobId, result_id, status, assessment_name } = req.body;
 
-    // Normalize status to the final spec value
-    const normalizedStatus = 'berhasil';
+    // Normalize status to database value: 'completed'
+    const normalizedStatus = 'completed';
 
     // Create concise webhook payload per spec
     const webhookPayload = {
@@ -133,8 +133,8 @@ router.post('/analysis-failed', serviceAuth, validateNotification, (req, res) =>
   try {
     const { userId, jobId, status, assessment_name, error_message, result_id } = req.body;
 
-    // Normalize status to the final spec value
-    const normalizedStatus = 'gagal';
+    // Normalize status to database value: 'failed'
+    const normalizedStatus = 'failed';
 
     // Create concise webhook payload per spec
     const webhookPayload = {
@@ -195,8 +195,8 @@ router.post('/analysis-unknown', serviceAuth, validateNotification, (req, res) =
   try {
     const { userId, jobId, status, assessment_name, error_message, result_id } = req.body;
 
-    // Normalize status to the final spec value
-    const normalizedStatus = 'gagal';
+    // Normalize status to database value: 'failed'
+    const normalizedStatus = 'failed';
 
     // Create concise webhook payload for unknown assessment type per spec
     const webhookPayload = {

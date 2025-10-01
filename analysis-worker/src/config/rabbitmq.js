@@ -7,7 +7,7 @@ const logger = require('../utils/logger');
 
 // RabbitMQ configuration
 const config = {
-  url: process.env.RABBITMQ_URL || 'amqp://localhost:5672',
+  url: process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672',
   exchange: process.env.EXCHANGE_NAME || 'atma_exchange',
   queue: process.env.QUEUE_NAME || 'assessment_analysis',
   routingKey: process.env.ROUTING_KEY || 'analysis.process',

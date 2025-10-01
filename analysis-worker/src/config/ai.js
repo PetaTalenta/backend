@@ -2,7 +2,7 @@
  * Google Generative AI Configuration
  */
 
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const logger = require('../utils/logger');
 
 // AI configuration
@@ -28,9 +28,7 @@ const initialize = () => {
     }
 
     // Initialize Google Generative AI with API key
-    genAI = new GoogleGenAI({
-      apiKey: config.apiKey
-    });
+    genAI = new GoogleGenerativeAI(config.apiKey);
 
     logger.info('Google Generative AI initialized successfully', {
       model: config.model,

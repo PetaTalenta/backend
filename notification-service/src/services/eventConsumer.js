@@ -125,9 +125,9 @@ const handleAnalysisCompleted = async (eventData) => {
   const { userId, jobId, resultId, metadata } = eventData;
 
   try {
-    // Create concise webhook payload per spec
+    // Create concise webhook payload per spec (using database status: 'completed')
     const webhookPayload = {
-      status: 'berhasil',
+      status: 'completed',
       result_id: resultId,
       assessment_name: metadata?.assessmentName || 'Unknown Assessment'
     };
@@ -139,7 +139,7 @@ const handleAnalysisCompleted = async (eventData) => {
       userId,
       jobId,
       result_id: resultId,
-      status: 'berhasil',
+      status: 'completed',
       assessment_name: metadata?.assessmentName,
       sent
     });
@@ -168,9 +168,9 @@ const handleAnalysisFailed = async (eventData) => {
     const isUnknownAssessment = metadata?.errorType === 'UNSUPPORTED_ASSESSMENT_TYPE';
     const eventType = isUnknownAssessment ? 'analysis-unknown' : 'analysis-failed';
 
-    // Create concise webhook payload per spec
+    // Create concise webhook payload per spec (using database status: 'failed')
     const webhookPayload = {
-      status: 'gagal',
+      status: 'failed',
       result_id: eventData.resultId || null,
       assessment_name: metadata?.assessmentName || 'Unknown Assessment',
       error_message: errorMessage
@@ -182,7 +182,7 @@ const handleAnalysisFailed = async (eventData) => {
     logger.info(`Analysis ${isUnknownAssessment ? 'unknown' : 'failed'} notification sent via event (Phase 4)`, {
       userId,
       jobId,
-      status: 'gagal',
+      status: 'failed',
       assessment_name: metadata?.assessmentName,
       error_message: errorMessage,
       eventType,

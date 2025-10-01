@@ -62,28 +62,36 @@ socket.on('auth_error', (error) => {
         description: "Emitted when an analysis job begins processing",
         data: {
           jobId: "uuid",
-          status: "started",
+          resultId: "uuid",
+          status: "processing",
           assessment_name: "Assessment Name",
           message: "Your analysis has started processing...",
+          estimated_time: "1-3 minutes",
           timestamp: "2024-01-01T12:00:00.000Z"
         },
         example: `socket.on('analysis-started', (data) => {
   console.log('Analysis started:', data);
-  // Show notification to user
-  showNotification('Analysis Started', data.message, 'info');
+  // data.status will be "processing"
+  // Show notification to user with estimated time
+  showNotification(
+    'Analysis Started', 
+    \`\${data.message} Estimated time: \${data.estimated_time}\`,
+    'info'
+  );
 });`
       },
       {
         name: "analysis-complete",
         description: "Emitted when an analysis job completes successfully",
         data: {
-          status: "berhasil",
+          status: "completed",
           result_id: "uuid",
           assessment_name: "Assessment Name",
           timestamp: "2024-01-01T12:00:00.000Z"
         },
         example: `socket.on('analysis-complete', (data) => {
   console.log('Analysis completed:', data);
+  // data.status will be "completed"
   // Show success notification and redirect to results
   showNotification('Analysis Complete', 'Your analysis is ready!', 'success');
   // Optionally redirect to results page
@@ -94,7 +102,7 @@ socket.on('auth_error', (error) => {
         name: "analysis-failed",
         description: "Emitted when an analysis job fails",
         data: {
-          status: "gagal",
+          status: "failed",
           result_id: null,
           assessment_name: "Assessment Name",
           error_message: "Error message",
@@ -102,6 +110,7 @@ socket.on('auth_error', (error) => {
         },
         example: `socket.on('analysis-failed', (data) => {
   console.error('Analysis failed:', data);
+  // data.status will be "failed"
   // Show error notification
   showNotification('Analysis Failed', data.error_message, 'error');
   // Optionally show retry button
@@ -156,7 +165,7 @@ socket.on('auth_error', (error) => {
           userId: "550e8400-e29b-41d4-a716-446655440000",
           jobId: "job-uuid",
           assessment_name: "AI-Driven Talent Mapping",
-          status: "started",
+          status: "processing",
           sent: true
         }
       },
@@ -191,7 +200,7 @@ socket.on('auth_error', (error) => {
           jobId: "job-uuid",
           result_id: "result-uuid",
           assessment_name: "AI-Driven Talent Mapping",
-          status: "berhasil",
+          status: "completed",
           sent: true
         }
       },
@@ -226,7 +235,7 @@ socket.on('auth_error', (error) => {
           userId: "550e8400-e29b-41d4-a716-446655440000",
           jobId: "job-uuid",
           assessment_name: "AI-Driven Talent Mapping",
-          status: "gagal",
+          status: "failed",
           sent: true
         }
       },
@@ -261,7 +270,7 @@ socket.on('auth_error', (error) => {
           userId: "550e8400-e29b-41d4-a716-446655440000",
           jobId: "job-uuid",
           assessment_name: "Unknown Assessment",
-          status: "gagal",
+          status: "failed",
           sent: true
         }
       },

@@ -2,7 +2,7 @@
  * Google Generative AI Service
  */
 
-const { Type } = require("@google/genai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const ai = require("../config/ai");
 const logger = require("../utils/logger");
 const { validatePersonaProfile } = require("../utils/validator");
