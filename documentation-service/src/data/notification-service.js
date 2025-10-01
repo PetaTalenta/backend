@@ -311,6 +311,300 @@ socket.on('auth_error', (error) => {
     title: "Frontend Implementation Guide",
     description: "Complete guide for implementing WebSocket notifications in your frontend application",
     
+    completeReactExample: `// Complete React Implementation with TypeScript
+// types/notification.ts
+export interface NotificationData {
+  jobId?: string;
+  resultId?: string | null;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  assessment_name: string;
+  message?: string;
+  estimated_time?: string;
+  error_message?: string;
+  result_id?: string;
+  timestamp: string;
+}
+
+export type NotificationEvent = 
+  | 'analysis-started'
+  | 'analysis-complete'
+  | 'analysis-failed'
+  | 'analysis-unknown';
+
+// hooks/useNotificationService.ts
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { io, Socket } from 'socket.io-client';
+import type { NotificationData, NotificationEvent } from '../types/notification';
+
+interface NotificationState {
+  connected: boolean;
+  authenticated: boolean;
+  notifications: Array<NotificationData & { type: NotificationEvent; id: string }>;
+  error: string | null;
+}
+
+export const useNotificationService = (token: string | null) => {
+  const [state, setState] = useState<NotificationState>({
+    connected: false,
+    authenticated: false,
+    notifications: [],
+    error: null
+  });
+  
+  const socketRef = useRef<Socket | null>(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
+
+  const connect = useCallback(() => {
+    if (!token) {
+      setState(prev => ({ ...prev, error: 'No authentication token' }));
+      return;
+    }
+
+    if (socketRef.current?.connected) {
+      return; // Already connected
+    }
+
+    const socket = io('https://api.futureguide.id', {
+      autoConnect: false,
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: maxReconnectAttempts,
+      reconnectionDelay: 1000,
+      timeout: 20000
+    });
+
+    // Connection handlers
+    socket.on('connect', () => {
+      console.log('[Notification] Connected to server');
+      setState(prev => ({ ...prev, connected: true, error: null }));
+      reconnectAttempts.current = 0;
+      
+      // Authenticate immediately after connection
+      socket.emit('authenticate', { token });
+    });
+
+    socket.on('authenticated', (data) => {
+      console.log('[Notification] Authenticated:', data);
+      setState(prev => ({ ...prev, authenticated: true }));
+    });
+
+    socket.on('auth_error', (error) => {
+      console.error('[Notification] Auth error:', error);
+      setState(prev => ({ 
+        ...prev, 
+        authenticated: false,
+        error: error.message || 'Authentication failed'
+      }));
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('[Notification] Disconnected:', reason);
+      setState(prev => ({ ...prev, connected: false, authenticated: false }));
+      
+      if (reason === 'io server disconnect') {
+        // Server disconnected, reconnect manually
+        socket.connect();
+      }
+    });
+
+    socket.on('reconnect', (attemptNumber) => {
+      console.log('[Notification] Reconnected after', attemptNumber, 'attempts');
+      // Re-authenticate after reconnection
+      socket.emit('authenticate', { token });
+    });
+
+    socket.on('reconnect_failed', () => {
+      console.error('[Notification] Reconnection failed after max attempts');
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to reconnect to notification service'
+      }));
+    });
+
+    socket.on('connect_error', (error) => {
+      reconnectAttempts.current++;
+      console.error('[Notification] Connection error:', error.message);
+      
+      if (reconnectAttempts.current >= maxReconnectAttempts) {
+        setState(prev => ({ 
+          ...prev, 
+          error: 'Unable to connect to notification service. Please check your connection.'
+        }));
+      }
+    });
+
+    // Analysis event handlers
+    const addNotification = (type: NotificationEvent, data: NotificationData) => {
+      setState(prev => ({
+        ...prev,
+        notifications: [
+          {
+            ...data,
+            type,
+            id: \`\${type}-\${data.jobId || Date.now()}\`,
+            timestamp: data.timestamp || new Date().toISOString()
+          },
+          ...prev.notifications
+        ].slice(0, 50) // Keep only last 50 notifications
+      }));
+    };
+
+    socket.on('analysis-started', (data: NotificationData) => {
+      console.log('[Notification] Analysis started:', data);
+      addNotification('analysis-started', data);
+    });
+
+    socket.on('analysis-complete', (data: NotificationData) => {
+      console.log('[Notification] Analysis complete:', data);
+      addNotification('analysis-complete', data);
+    });
+
+    socket.on('analysis-failed', (data: NotificationData) => {
+      console.log('[Notification] Analysis failed:', data);
+      addNotification('analysis-failed', data);
+    });
+
+    socket.on('analysis-unknown', (data: NotificationData) => {
+      console.log('[Notification] Unknown assessment:', data);
+      addNotification('analysis-unknown', data);
+    });
+
+    socketRef.current = socket;
+    socket.connect();
+  }, [token]);
+
+  const disconnect = useCallback(() => {
+    if (socketRef.current) {
+      socketRef.current.close();
+      socketRef.current = null;
+      setState({
+        connected: false,
+        authenticated: false,
+        notifications: [],
+        error: null
+      });
+    }
+  }, []);
+
+  const clearNotifications = useCallback(() => {
+    setState(prev => ({ ...prev, notifications: [] }));
+  }, []);
+
+  const removeNotification = useCallback((id: string) => {
+    setState(prev => ({
+      ...prev,
+      notifications: prev.notifications.filter(n => n.id !== id)
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      connect();
+    }
+
+    return () => {
+      disconnect();
+    };
+  }, [token, connect, disconnect]);
+
+  return {
+    ...state,
+    connect,
+    disconnect,
+    clearNotifications,
+    removeNotification,
+    socket: socketRef.current
+  };
+};
+
+// components/NotificationProvider.tsx
+import React, { createContext, useContext } from 'react';
+import { useNotificationService } from '../hooks/useNotificationService';
+
+const NotificationContext = createContext<ReturnType<typeof useNotificationService> | null>(null);
+
+export const NotificationProvider: React.FC<{ token: string | null; children: React.ReactNode }> = ({ 
+  token, 
+  children 
+}) => {
+  const notification = useNotificationService(token);
+
+  return (
+    <NotificationContext.Provider value={notification}>
+      {children}
+    </NotificationContext.Provider>
+  );
+};
+
+export const useNotifications = () => {
+  const context = useContext(NotificationContext);
+  if (!context) {
+    throw new Error('useNotifications must be used within NotificationProvider');
+  }
+  return context;
+};
+
+// components/NotificationDisplay.tsx
+import React, { useEffect } from 'react';
+import { useNotifications } from './NotificationProvider';
+import toast from 'react-hot-toast'; // or your preferred toast library
+
+export const NotificationDisplay: React.FC = () => {
+  const { notifications, removeNotification } = useNotifications();
+
+  useEffect(() => {
+    const latest = notifications[0];
+    if (!latest) return;
+
+    switch (latest.type) {
+      case 'analysis-started':
+        toast.loading(
+          \`\${latest.message || 'Processing...'} (\${latest.estimated_time || '2-5 min'})\`,
+          { id: latest.jobId, duration: 5000 }
+        );
+        break;
+
+      case 'analysis-complete':
+        toast.success('Analysis completed successfully!', {
+          id: latest.jobId,
+          duration: 5000
+        });
+        // Auto-redirect or show result button
+        setTimeout(() => {
+          if (latest.result_id) {
+            window.location.href = \`/results/\${latest.result_id}\`;
+          }
+        }, 2000);
+        break;
+
+      case 'analysis-failed':
+      case 'analysis-unknown':
+        toast.error(
+          latest.error_message || 'Analysis failed. Please try again.',
+          { id: latest.jobId, duration: 8000 }
+        );
+        break;
+    }
+  }, [notifications]);
+
+  return null; // This component only handles toast notifications
+};
+
+// Usage in App.tsx
+import { NotificationProvider, NotificationDisplay } from './components';
+
+function App() {
+  const { token } = useAuth(); // Your auth hook
+
+  return (
+    <NotificationProvider token={token}>
+      <NotificationDisplay />
+      {/* Your app content */}
+    </NotificationProvider>
+  );
+}`,
+    
     reactExample: `// React Hook for WebSocket notifications
 import { useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
@@ -710,5 +1004,214 @@ const startPolling = () => {
       "Verify JWT token payload and expiry",
       "Check console logs for connection events"
     ]
+  },
+
+  uiGuidelines: {
+    title: "UI/UX Guidelines for Status Display",
+    description: "Recommended UI patterns for displaying different notification statuses",
+    
+    statusColors: {
+      queued: {
+        color: "#6B7280", // Gray
+        icon: "clock",
+        message: "Queued for processing"
+      },
+      processing: {
+        color: "#3B82F6", // Blue
+        icon: "spinner",
+        message: "Processing your assessment..."
+      },
+      completed: {
+        color: "#10B981", // Green
+        icon: "check-circle",
+        message: "Analysis completed successfully"
+      },
+      failed: {
+        color: "#EF4444", // Red
+        icon: "x-circle",
+        message: "Analysis failed"
+      }
+    },
+
+    cssExample: `/* Tailwind CSS classes for status indicators */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-sm font-medium inline-flex items-center gap-2;
+}
+
+.status-queued {
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200;
+}
+
+.status-processing {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+}
+
+.status-completed {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.status-failed {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}`,
+
+    reactComponentExample: `// Status Badge Component
+import React from 'react';
+import { 
+  ClockIcon, 
+  ArrowPathIcon, 
+  CheckCircleIcon, 
+  XCircleIcon 
+} from '@heroicons/react/24/outline';
+
+type Status = 'queued' | 'processing' | 'completed' | 'failed';
+
+interface StatusBadgeProps {
+  status: Status;
+  showIcon?: boolean;
+  showText?: boolean;
+  className?: string;
+}
+
+const statusConfig = {
+  queued: {
+    icon: ClockIcon,
+    text: 'Queued',
+    className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+  },
+  processing: {
+    icon: ArrowPathIcon,
+    text: 'Processing',
+    className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    animate: 'animate-spin'
+  },
+  completed: {
+    icon: CheckCircleIcon,
+    text: 'Completed',
+    className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+  },
+  failed: {
+    icon: XCircleIcon,
+    text: 'Failed',
+    className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
   }
 };
+
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ 
+  status, 
+  showIcon = true, 
+  showText = true,
+  className = ''
+}) => {
+  const config = statusConfig[status];
+  const Icon = config.icon;
+
+  return (
+    <span className={\`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium \${config.className} \${className}\`}>
+      {showIcon && (
+        <Icon className={\`h-4 w-4 \${config.animate || ''}\`} />
+      )}
+      {showText && config.text}
+    </span>
+  );
+};
+
+// Usage
+<StatusBadge status="processing" />
+<StatusBadge status="completed" showIcon={false} />
+<StatusBadge status="failed" />`,
+
+    translationMapping: {
+      title: "Status Translation Mapping",
+      description: "If you need to display status in different languages, use this mapping in your frontend",
+      example: `// i18n translation mapping
+export const statusTranslations = {
+  en: {
+    queued: 'Queued',
+    processing: 'Processing',
+    completed: 'Completed',
+    failed: 'Failed'
+  },
+  id: {
+    queued: 'Dalam Antrian',
+    processing: 'Sedang Diproses',
+    completed: 'Selesai',
+    failed: 'Gagal'
+  }
+};
+
+// Usage with i18next
+import { useTranslation } from 'react-i18next';
+
+const StatusDisplay = ({ status }) => {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      {t(\`status.\${status}\`)} {/* Will use statusTranslations */}
+    </div>
+  );
+};
+
+// Or simple mapping
+const getStatusText = (status, language = 'en') => {
+  return statusTranslations[language][status] || status;
+};`
+    }
+  },
+
+  apiConsistency: {
+    title: "API Consistency Notes",
+    description: "Important notes about API consistency across the platform",
+    notes: [
+      {
+        title: "Status Values Are Constants",
+        content: "Status values ('queued', 'processing', 'completed', 'failed') are database-level constants. DO NOT translate or modify these values in API requests or responses."
+      },
+      {
+        title: "Status Matches Database",
+        content: "All status values in notifications exactly match the database schema. This ensures consistency when polling job status via REST API vs receiving WebSocket notifications."
+      },
+      {
+        title: "Cross-Service Consistency",
+        content: "The same status values are used across all services (Assessment Service, Archive Service, Notification Service). You can safely compare status from different endpoints."
+      },
+      {
+        title: "Translation Layer",
+        content: "If you need to display status in different languages (e.g., Indonesian), implement translation in the frontend presentation layer only. Never translate status values in API communication."
+      }
+    ],
+    comparisonExample: `// ✅ CORRECT: Compare status from different sources
+const jobStatusFromAPI = await fetch('/api/assessment/status/job-id');
+const jobData = await jobStatusFromAPI.json();
+
+// Status from WebSocket notification
+socket.on('analysis-complete', (notification) => {
+  if (notification.status === jobData.data.status) {
+    // ✅ This works! Both use the same status values
+    console.log('Status matches:', notification.status); // "completed"
+  }
+});
+
+// ✅ CORRECT: Use status for logic
+if (jobData.data.status === 'completed') {
+  navigateToResults(jobData.data.result_id);
+}
+
+// ✅ CORRECT: Translate only for display
+const displayStatus = translateStatus(jobData.data.status, 'id');
+// displayStatus = "Selesai" (for UI), but API still uses "completed"
+
+// ❌ WRONG: Don't expect translated values from API
+if (notification.status === 'berhasil') {
+  // ❌ This will never match! API uses "completed", not "berhasil"
+}
+
+// ❌ WRONG: Don't send translated status to API
+fetch('/api/assessment/submit', {
+  body: JSON.stringify({
+    status: 'dalam antrian' // ❌ Wrong! Use 'queued'
+  })
+});`
+  }
+};
+
