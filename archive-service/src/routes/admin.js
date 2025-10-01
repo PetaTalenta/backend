@@ -133,6 +133,17 @@ const bulkJobOperationSchema = Joi.object({
     })
 });
 
+const getAllJobsQuerySchema = Joi.object({
+  limit: Joi.number().integer().min(1).max(100).default(50).optional(),
+  offset: Joi.number().integer().min(0).default(0).optional(),
+  status: Joi.string().valid('queued', 'processing', 'completed', 'failed', 'deleted').optional(),
+  assessment_name: Joi.string().valid('AI-Driven Talent Mapping', 'AI-Based IQ Test', 'Custom Assessment').optional(),
+  user_id: Joi.string().uuid().optional(),
+  include_deleted: Joi.string().valid('true', 'false').default('true').optional(),
+  sort_by: Joi.string().valid('created_at', 'updated_at', 'status', 'assessment_name', 'priority').default('created_at').optional(),
+  sort_order: Joi.string().valid('ASC', 'DESC').default('DESC').optional()
+});
+
 // Validation middleware is now imported from '../middleware/validation'
 
 /**
@@ -231,6 +242,18 @@ router.get('/jobs/queue',
   authenticateAdmin,
   logJobMonitoringView(),
   adminSystemController.getQueueStatus
+);
+
+/**
+ * GET /admin/jobs/all
+ * Get all jobs including deleted ones (admin only)
+ * Requires: admin authentication
+ */
+router.get('/jobs/all',
+  authenticateAdmin,
+  validateQuery(getAllJobsQuerySchema),
+  logJobMonitoringView(),
+  adminSystemController.getAllJobs
 );
 
 // ===== PHASE 3: DEEP ANALYTICS & ASSESSMENT DETAILS ENDPOINTS =====

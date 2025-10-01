@@ -144,19 +144,19 @@ class PerformanceOptimizationService {
       const indexStats = await sequelize.query(`
         SELECT
           schemaname,
-          tablename,
-          indexname,
-          idx_scan as scans,
-          idx_tup_read as tuples_read,
-          idx_tup_fetch as tuples_fetched,
-          CASE 
-            WHEN idx_scan = 0 THEN 0
-            ELSE ROUND(idx_tup_read::numeric / idx_scan, 2)
+          relname as tablename,
+          indexrelname as indexname,
+          COALESCE(idx_scan, 0) as scans,
+          COALESCE(idx_tup_read, 0) as tuples_read,
+          COALESCE(idx_tup_fetch, 0) as tuples_fetched,
+          CASE
+            WHEN COALESCE(idx_scan, 0) = 0 THEN 0
+            ELSE ROUND(COALESCE(idx_tup_read, 0)::numeric / COALESCE(idx_scan, 1), 2)
           END as avg_tuples_per_scan
         FROM pg_stat_user_indexes
-        WHERE schemaname IN ('archive', 'auth')
-          AND tablename IN ('analysis_results', 'analysis_jobs', 'user_profiles', 'system_metrics')
-        ORDER BY idx_scan DESC;
+        WHERE schemaname IN ('archive', 'auth', 'public')
+          AND relname IN ('analysis_results', 'analysis_jobs', 'user_profiles', 'system_metrics', 'users')
+        ORDER BY idx_scan DESC NULLS LAST;
       `, {
         type: sequelize.QueryTypes.SELECT
       });

@@ -839,8 +839,8 @@ curl -X GET https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a7
     {
       method: "DELETE",
       path: "/api/archive/jobs/:jobId",
-      title: "Delete Job (Cascade)",
-      description: "Menghapus/membatalkan job dengan cascade delete ke result terkait. Soft delete job (status = cancelled) dan hard delete result terkait.",
+      title: "Delete Job (Soft Delete)",
+      description: "Menghapus/membatalkan job dengan soft delete. Job status akan diubah menjadi 'deleted' dan result terkait tidak dihapus.",
       authentication: "Bearer Token Required atau Internal Service",
       rateLimit: "5000 requests per 15 minutes",
       parameters: [
@@ -857,17 +857,18 @@ curl -X GET https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a7
         data: {
           deleted_job_id: "string",
           deleted_at: "timestamp",
-          cascade_actions: ["deleted_associated_result"],
-          result_id_cleared: true
+          status: "deleted",
+          result_preserved: true
         }
       },
       example: `curl -X DELETE https://api.futureguide.id/api/archive/jobs/job_12345abcdef \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`,
       notes: [
-        "Soft delete job dengan mengubah status menjadi 'cancelled'",
-        "Hard delete result terkait secara otomatis",
-        "Clear result_id dari job untuk konsistensi data",
-        "Menggunakan transaction untuk memastikan atomicity"
+        "Soft delete job dengan mengubah status menjadi 'deleted'",
+        "Result terkait tetap dipertahankan dan dapat diakses",
+        "Job dengan status 'deleted' tidak ditampilkan dalam listing normal",
+        "Menggunakan transaction untuk memastikan atomicity",
+        "Tidak dapat menghapus job yang sedang 'processing'"
       ]
     },
     {
@@ -1012,40 +1013,6 @@ curl -X GET https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a7
       },
       example: `curl -X GET https://api.futureguide.id/api/archive/stats/overview \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN"`
-    },
-    {
-      method: "DELETE",
-      path: "/api/archive/results/:resultId",
-      title: "Delete Result (Cascade)",
-      description: "Menghapus hasil analisis dengan cascade delete ke job terkait. Hard delete result dan hard delete job terkait.",
-      authentication: "Bearer Token Required",
-      rateLimit: "5000 requests per 15 minutes",
-      parameters: [
-        {
-          name: "resultId",
-          type: "UUID",
-          required: true,
-          description: "ID hasil analisis"
-        }
-      ],
-      response: {
-        success: true,
-        message: "Result deleted successfully",
-        data: {
-          deleted_result_id: "550e8400-e29b-41d4-a716-446655440000",
-          deleted_at: "2024-01-15T10:30:00.000Z",
-          cascade_actions: ["deleted_related_job"],
-          deleted_job_id: "job_12345abcdef"
-        }
-      },
-      example: `curl -X DELETE https://api.futureguide.id/api/archive/results/550e8400-e29b-41d4-a716-446655440000 \\
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"`,
-      notes: [
-        "Hard delete result dan job terkait secara otomatis",
-        "Tidak mengupdate status job ke 'cancelled', tapi menghapus job",
-        "Menggunakan transaction untuk memastikan atomicity",
-        "Berbeda dengan delete job yang soft delete"
-      ]
     },
     {
       method: "GET",

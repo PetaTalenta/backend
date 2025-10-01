@@ -5,10 +5,11 @@ const { adminProxy, usersProxy, tokenProxy } = require('../services/proxy');
 const router = express.Router();
 
 // Admin auth (proxy to auth-service)
-router.post('/admin/login', (req, res) => adminProxy('/admin/login', { method: 'POST', body: req.body }, req, res));
-router.get('/admin/profile', (req, res) => adminProxy('/admin/profile', { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
-router.put('/admin/profile', (req, res) => adminProxy('/admin/profile', { method: 'PUT', body: req.body, headers: { authorization: req.headers.authorization } }, req, res));
-router.post('/admin/logout', (req, res) => adminProxy('/admin/logout', { method: 'POST', headers: { authorization: req.headers.authorization } }, req, res));
+// Admin login uses the same /auth/login endpoint but with admin credentials
+router.post('/admin/login', (req, res) => adminProxy('/auth/login', { method: 'POST', body: req.body }, req, res));
+router.get('/admin/profile', (req, res) => adminProxy('/auth/profile', { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+router.put('/admin/profile', (req, res) => adminProxy('/auth/profile', { method: 'PUT', body: req.body, headers: { authorization: req.headers.authorization } }, req, res));
+router.post('/admin/logout', (req, res) => adminProxy('/auth/logout', { method: 'POST', headers: { authorization: req.headers.authorization } }, req, res));
 
 // Users management (proxy to archive-service admin)
 router.get('/users', (req, res) => usersProxy('/archive/admin/users', { method: 'GET', query: req.query, headers: { authorization: req.headers.authorization } }, req, res));
@@ -53,6 +54,9 @@ router.get('/jobs/monitor', (req, res) => usersProxy('/archive/admin/jobs/monito
 
 // Queue status
 router.get('/jobs/queue', (req, res) => usersProxy('/archive/admin/jobs/queue', { method: 'GET', headers: { authorization: req.headers.authorization } }, req, res));
+
+// Get all jobs (including deleted)
+router.get('/jobs/all', (req, res) => usersProxy('/archive/admin/jobs/all', { method: 'GET', query: req.query, headers: { authorization: req.headers.authorization } }, req, res));
 
 // ===== PHASE 3: DEEP ANALYTICS & ASSESSMENT DETAILS =====
 

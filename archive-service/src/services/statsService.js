@@ -47,8 +47,6 @@ const getUserOverview = async (userId) => {
     const [userStats] = await sequelize.query(`
       SELECT
         COUNT(*) as total_analyses,
-        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_analyses,
-        COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing_analyses,
         MAX(created_at) as last_analysis_date
       FROM archive.analysis_results
       WHERE user_id = :userId
@@ -64,7 +62,6 @@ const getUserOverview = async (userId) => {
         created_at
       FROM archive.analysis_results
       WHERE user_id = :userId
-        AND status = 'completed'
         AND test_result IS NOT NULL
         AND test_result->>'archetype' IS NOT NULL
       ORDER BY created_at DESC
@@ -77,8 +74,6 @@ const getUserOverview = async (userId) => {
     const overview = {
       user_stats: {
         total_analyses: parseInt(userStats.total_analyses) || 0,
-        completed_analyses: parseInt(userStats.completed_analyses) || 0,
-        processing_analyses: parseInt(userStats.processing_analyses) || 0,
         last_analysis_date: userStats.last_analysis_date
       },
       recent_archetypes: recentArchetypes.map(item => ({
@@ -114,13 +109,9 @@ const getSummaryStats = async () => {
     
     // Get overall statistics
     const [overallStats] = await sequelize.query(`
-      SELECT 
+      SELECT
         COUNT(*) as total_results,
-        COUNT(DISTINCT user_id) as total_users,
-        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_results,
-        COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing_results,
-        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_results,
-        AVG(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) * 100 as success_rate
+        COUNT(DISTINCT user_id) as total_users
       FROM archive.analysis_results
     `, {
       type: sequelize.QueryTypes.SELECT
@@ -132,8 +123,7 @@ const getSummaryStats = async () => {
         test_result->>'archetype' as archetype,
         COUNT(*) as count
       FROM archive.analysis_results
-      WHERE status = 'completed'
-        AND test_result IS NOT NULL
+      WHERE test_result IS NOT NULL
         AND test_result->>'archetype' IS NOT NULL
       GROUP BY test_result->>'archetype'
       ORDER BY count DESC
@@ -156,11 +146,7 @@ const getSummaryStats = async () => {
     const stats = {
       overall: {
         total_results: parseInt(overallStats.total_results) || 0,
-        total_users: parseInt(overallStats.total_users) || 0,
-        completed_results: parseInt(overallStats.completed_results) || 0,
-        processing_results: parseInt(overallStats.processing_results) || 0,
-        failed_results: parseInt(overallStats.failed_results) || 0,
-        success_rate: parseFloat(overallStats.success_rate) || 0
+        total_users: parseInt(overallStats.total_users) || 0
       },
       top_archetypes: topArchetypes.map(item => ({
         archetype: item.archetype,

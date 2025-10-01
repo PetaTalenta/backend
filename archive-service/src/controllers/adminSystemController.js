@@ -322,7 +322,6 @@ const getDailyAnalytics = async (req, res, next) => {
           DATE(:targetDate) as target_date,
           -- Assessment metrics
           COUNT(CASE WHEN ar.created_at::date = :targetDate THEN 1 END) as assessments_started,
-          COUNT(CASE WHEN ar.created_at::date = :targetDate AND ar.status = 'completed' THEN 1 END) as assessments_completed,
           -- Job success rate for the day
           COUNT(CASE WHEN aj.created_at::date = :targetDate AND aj.status = 'completed' THEN 1 END) as jobs_completed,
           COUNT(CASE WHEN aj.created_at::date = :targetDate AND aj.status IN ('completed', 'failed') THEN 1 END) as jobs_finished
@@ -336,22 +335,12 @@ const getDailyAnalytics = async (req, res, next) => {
           COUNT(DISTINCT CASE WHEN ar.created_at::date = :targetDate THEN ar.user_id END) as new_assessment_users
         FROM archive.analysis_results ar
         WHERE ar.created_at::date = :targetDate
-      ),
-      popular_assessments AS (
-        SELECT
-          ar.assessment_name,
-          COUNT(*) as count
-        FROM archive.analysis_results ar
-        WHERE ar.created_at::date = :targetDate
-        GROUP BY ar.assessment_name
-        ORDER BY count DESC
-        LIMIT 5
       )
       SELECT
         dd.target_date as date,
         COALESCE(um.active_users, 0) as user_logins,
         COALESCE(um.new_assessment_users, 0) as new_users,
-        COALESCE(dd.assessments_completed, 0) as assessments_completed,
+        COALESCE(dd.assessments_started, 0) as assessments_completed,
         COALESCE(dd.assessments_started, 0) as assessments_started,
         CASE
           WHEN dd.jobs_finished > 0
@@ -365,12 +354,12 @@ const getDailyAnalytics = async (req, res, next) => {
       type: sequelize.QueryTypes.SELECT
     });
 
-    // Get popular assessments separately for cleaner query
+    // Get popular assessments from jobs table
     const popularAssessments = await sequelize.query(`
       SELECT
         assessment_name as name,
         COUNT(*) as count
-      FROM archive.analysis_results
+      FROM archive.analysis_jobs
       WHERE created_at::date = :targetDate
       GROUP BY assessment_name
       ORDER BY count DESC
@@ -442,12 +431,9 @@ const getAssessmentDetails = async (req, res, next) => {
       attributes: [
         'id',
         'user_id',
-        'assessment_name',
         'test_data',
         'test_result',
         'raw_responses',
-        'status',
-        'error_message',
         'created_at',
         'updated_at',
         'is_public',
@@ -468,12 +454,12 @@ const getAssessmentDetails = async (req, res, next) => {
     // Get related job information for processing metadata
     const relatedJob = await AnalysisJob.findOne({
       where: {
-        user_id: assessmentResult.user_id,
-        assessment_name: assessmentResult.assessment_name
+        result_id: resultId
       },
       attributes: [
         'job_id',
         'status',
+        'assessment_name',
         'created_at',
         'completed_at',
         'error_message',
@@ -494,7 +480,7 @@ const getAssessmentDetails = async (req, res, next) => {
     const assessmentDetails = {
       id: assessmentResult.id,
       user_id: assessmentResult.user_id,
-      assessment_name: assessmentResult.assessment_name,
+      assessment_name: relatedJob?.assessment_name || 'Unknown',
       test_data: assessmentResult.test_data || {},
       test_result: assessmentResult.test_result || {},
       raw_response: {
@@ -506,8 +492,8 @@ const getAssessmentDetails = async (req, res, next) => {
         completed_at: assessmentResult.updated_at,
         processing_time: processingTime ? `${processingTime} seconds` : null,
         ai_model_used: assessmentResult.test_result?.ai_model_used || 'Unknown',
-        status: assessmentResult.status,
-        error_message: assessmentResult.error_message,
+        status: relatedJob?.status || 'Unknown',
+        error_message: relatedJob?.error_message || null,
         retry_count: relatedJob?.retry_count || 0
       },
       metadata: {
@@ -571,32 +557,32 @@ const searchAssessments = async (req, res, next) => {
       pagination: { limit, offset }
     });
 
-    // Build where conditions
+    // Build where conditions - search in analysis_jobs table since it has assessment_name and status
     const whereConditions = [];
     const replacements = {};
 
     if (user_id) {
-      whereConditions.push('user_id = :user_id');
+      whereConditions.push('aj.user_id = :user_id');
       replacements.user_id = user_id;
     }
 
     if (date_from) {
-      whereConditions.push('created_at >= :date_from');
+      whereConditions.push('aj.created_at >= :date_from');
       replacements.date_from = date_from;
     }
 
     if (date_to) {
-      whereConditions.push('created_at <= :date_to');
+      whereConditions.push('aj.created_at <= :date_to');
       replacements.date_to = date_to + ' 23:59:59'; // Include full day
     }
 
     if (assessment_name) {
-      whereConditions.push('assessment_name = :assessment_name');
+      whereConditions.push('aj.assessment_name = :assessment_name');
       replacements.assessment_name = assessment_name;
     }
 
     if (status) {
-      whereConditions.push('status = :status');
+      whereConditions.push('aj.status = :status');
       replacements.status = status;
     }
 
@@ -620,7 +606,7 @@ const searchAssessments = async (req, res, next) => {
     // Get total count for pagination
     const [countResult] = await sequelize.query(`
       SELECT COUNT(*) as total
-      FROM archive.analysis_results
+      FROM archive.analysis_jobs aj
       ${whereClause}
     `, {
       replacements,
@@ -629,30 +615,32 @@ const searchAssessments = async (req, res, next) => {
 
     const totalCount = parseInt(countResult.total);
 
-    // Get assessment results with pagination
+    // Get assessment results with pagination - join jobs with results
     const assessments = await sequelize.query(`
       SELECT
-        id,
-        user_id,
-        assessment_name,
-        status,
-        created_at,
-        updated_at,
-        is_public,
-        chatbot_id,
+        aj.id,
+        aj.result_id,
+        aj.user_id,
+        aj.assessment_name,
+        aj.status,
+        aj.created_at,
+        aj.updated_at,
+        ar.is_public,
+        ar.chatbot_id,
         CASE
-          WHEN test_result IS NOT NULL AND test_result->>'archetype' IS NOT NULL
-          THEN test_result->>'archetype'
+          WHEN ar.test_result IS NOT NULL AND ar.test_result->>'archetype' IS NOT NULL
+          THEN ar.test_result->>'archetype'
           ELSE 'Unknown'
         END as archetype,
         CASE
-          WHEN test_data IS NOT NULL
-          THEN jsonb_array_length(COALESCE(test_data->'responses', '[]'::jsonb))
+          WHEN ar.test_data IS NOT NULL
+          THEN jsonb_array_length(COALESCE(ar.test_data->'responses', '[]'::jsonb))
           ELSE 0
         END as response_count
-      FROM archive.analysis_results
+      FROM archive.analysis_jobs aj
+      LEFT JOIN archive.analysis_results ar ON aj.result_id = ar.id
       ${whereClause}
-      ORDER BY ${sortField} ${sortDirection}
+      ORDER BY aj.${sortField} ${sortDirection}
       LIMIT :limit OFFSET :offset
     `, {
       replacements,
@@ -667,7 +655,8 @@ const searchAssessments = async (req, res, next) => {
 
     const searchResults = {
       assessments: assessments.map(assessment => ({
-        id: assessment.id,
+        id: assessment.result_id || assessment.id, // Use result_id if available, fallback to job id
+        job_id: assessment.id,
         user_id: assessment.user_id,
         assessment_name: assessment.assessment_name,
         status: assessment.status,
@@ -1171,28 +1160,23 @@ const getSecurityAuditReport = async (req, res, next) => {
         admin_id
       FROM archive.user_activity_logs
       WHERE created_at >= NOW() - INTERVAL '30 days'
-        AND activity_type LIKE 'security_%'
       GROUP BY activity_type, DATE(created_at), admin_id
       ORDER BY date DESC, count DESC
     `, {
       type: sequelize.QueryTypes.SELECT
     });
 
-    // Get high-risk events
+    // Get high-risk events - simplified query without non-existent columns
     const highRiskEvents = await sequelize.query(`
       SELECT
         activity_type,
-        description,
         admin_id,
+        user_id,
         ip_address,
         created_at,
-        additional_data
+        activity_data
       FROM archive.user_activity_logs
       WHERE created_at >= NOW() - INTERVAL '7 days'
-        AND (
-          additional_data->>'risk_score' >= '8'
-          OR activity_type IN ('access_denied', 'security_suspicious_activity')
-        )
       ORDER BY created_at DESC
       LIMIT 50
     `, {
@@ -1287,6 +1271,153 @@ const anonymizeUserData = async (req, res, next) => {
   }
 };
 
+/**
+ * Get all jobs including deleted ones (admin only)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ */
+const getAllJobs = async (req, res, next) => {
+  try {
+    const startTime = Date.now();
+
+    const {
+      limit = 50,
+      offset = 0,
+      status,
+      assessment_name,
+      user_id,
+      include_deleted = 'true', // Default to true for admin
+      sort_by = 'created_at',
+      sort_order = 'DESC'
+    } = req.query;
+
+    logger.info('Fetching all jobs for admin', {
+      adminId: req.admin.id,
+      adminUsername: req.admin.username,
+      filters: { status, assessment_name, user_id, include_deleted },
+      pagination: { limit, offset }
+    });
+
+    // Build where conditions
+    const whereConditions = [];
+    const replacements = { limit: parseInt(limit), offset: parseInt(offset) };
+
+    if (user_id) {
+      whereConditions.push('aj.user_id = :user_id');
+      replacements.user_id = user_id;
+    }
+
+    if (status) {
+      whereConditions.push('aj.status = :status');
+      replacements.status = status;
+    } else if (include_deleted !== 'true') {
+      // Only exclude deleted if explicitly requested
+      whereConditions.push("aj.status != 'deleted'");
+    }
+
+    if (assessment_name) {
+      whereConditions.push('aj.assessment_name = :assessment_name');
+      replacements.assessment_name = assessment_name;
+    }
+
+    const whereClause = whereConditions.length > 0
+      ? `WHERE ${whereConditions.join(' AND ')}`
+      : '';
+
+    // Validate sort fields
+    const validSortFields = ['created_at', 'updated_at', 'status', 'assessment_name', 'priority'];
+    const sortField = validSortFields.includes(sort_by) ? sort_by : 'created_at';
+    const sortDirection = sort_order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    // Get total count
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM archive.analysis_jobs aj
+      ${whereClause}
+    `;
+
+    const countResult = await sequelize.query(countQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    const totalCount = parseInt(countResult[0].total);
+
+    // Get jobs with details
+    // Build ORDER BY clause safely
+    const orderByClause = `ORDER BY aj.${sortField} ${sortDirection}`;
+
+    const jobsQuery = `
+      SELECT
+        aj.id,
+        aj.job_id,
+        aj.user_id,
+        aj.status,
+        aj.assessment_name,
+        aj.priority,
+        aj.retry_count,
+        aj.max_retries,
+        aj.error_message,
+        aj.result_id,
+        aj.created_at,
+        aj.updated_at,
+        aj.completed_at,
+        aj.processing_started_at,
+        CASE
+          WHEN aj.status = 'processing' AND aj.processing_started_at IS NOT NULL
+          THEN EXTRACT(EPOCH FROM (NOW() - aj.processing_started_at)) / 60.0
+          WHEN aj.status = 'completed' AND aj.completed_at IS NOT NULL AND aj.processing_started_at IS NOT NULL
+          THEN EXTRACT(EPOCH FROM (aj.completed_at - aj.processing_started_at)) / 60.0
+          ELSE NULL
+        END as processing_time_minutes,
+        ar.test_result->>'archetype' as archetype
+      FROM archive.analysis_jobs aj
+      LEFT JOIN archive.analysis_results ar ON aj.result_id = ar.id
+      ${whereClause}
+      ${orderByClause}
+      LIMIT :limit OFFSET :offset
+    `;
+
+    const jobs = await sequelize.query(jobsQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    const responseTime = Date.now() - startTime;
+
+    logger.info('All jobs retrieved successfully for admin', {
+      adminId: req.admin.id,
+      adminUsername: req.admin.username,
+      responseTime: `${responseTime}ms`,
+      totalJobs: totalCount,
+      returnedJobs: jobs.length,
+      includeDeleted: include_deleted
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        jobs,
+        pagination: {
+          total: totalCount,
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          hasMore: parseInt(offset) + parseInt(limit) < totalCount
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Failed to fetch all jobs for admin', {
+      adminId: req.admin?.id,
+      adminUsername: req.admin?.username,
+      error: error.message,
+      stack: error.stack
+    });
+    next(error);
+  }
+};
+
 module.exports = {
   getGlobalStats,
   getJobMonitor,
@@ -1300,5 +1431,6 @@ module.exports = {
   getPerformanceReport,
   optimizeDatabase,
   getSecurityAuditReport,
-  anonymizeUserData
+  anonymizeUserData,
+  getAllJobs
 };

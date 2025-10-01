@@ -347,13 +347,13 @@ const createAnalysisJobSchema = Joi.object({
   job_id: Joi.string().required(),
   user_id: uuidSchema,
   assessment_data: assessmentDataSchema.optional(),
-  status: Joi.string().valid('queued', 'processing', 'completed', 'failed').default('queued'),
+  status: Joi.string().valid('queued', 'processing', 'completed', 'failed', 'deleted').default('queued'),
   assessment_name: assessmentNameSchema.optional()
 });
 
 // Update analysis job status schema
 const updateAnalysisJobStatusSchema = Joi.object({
-  status: Joi.string().valid('queued', 'processing', 'completed', 'failed').required(),
+  status: Joi.string().valid('queued', 'processing', 'completed', 'failed', 'deleted').required(),
   result_id: uuidSchema.optional(),
   error_message: Joi.string().allow(null).optional()
 }).min(1);
@@ -362,7 +362,7 @@ const updateAnalysisJobStatusSchema = Joi.object({
 const listJobsQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).default(1),
   limit: Joi.number().integer().min(1).max(100).default(10),
-  status: Joi.string().valid('queued', 'processing', 'completed', 'failed').optional(),
+  status: Joi.string().valid('queued', 'processing', 'completed', 'failed', 'deleted').optional(),
   assessment_name: Joi.string().valid('AI-Driven Talent Mapping', 'AI-Based IQ Test', 'Custom Assessment').optional(),
   sort: Joi.string().valid('created_at', 'updated_at').default('created_at'),
   order: Joi.string().valid('asc', 'desc', 'ASC', 'DESC').default('desc')

@@ -174,6 +174,9 @@ AnalysisResult.findByUserWithPagination = async function(userId, options = {}) {
   if (status) {
     includeClause.where.status = status;
     includeClause.required = true; // INNER JOIN when filtering by status
+  } else {
+    // Always exclude deleted jobs even when no specific status filter is applied
+    includeClause.where.status = { [this.sequelize.Sequelize.Op.ne]: 'deleted' };
   }
   if (assessment_name) {
     includeClause.where.assessment_name = assessment_name;
@@ -261,6 +264,9 @@ AnalysisResult.findByUserWithCursor = async function(userId, options = {}) {
   if (status) {
     includeClause.where.status = status;
     includeClause.required = true; // INNER JOIN when filtering by status
+  } else {
+    // Always exclude deleted jobs even when no specific status filter is applied
+    includeClause.where.status = { [this.sequelize.Sequelize.Op.ne]: 'deleted' };
   }
   if (assessment_name) {
     includeClause.where.assessment_name = assessment_name;

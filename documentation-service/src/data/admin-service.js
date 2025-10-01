@@ -1,6 +1,6 @@
 export const adminServiceData = {
   name: "Admin Service",
-  description: "Comprehensive admin orchestrator service for ATMA. Provides centralized admin management by proxying requests to auth-service and archive-service. Features include admin authentication, user management, token operations, system monitoring, analytics, job management, performance optimization, and security auditing. All 4 development phases completed with 17 production-ready endpoints.",
+  description: "Comprehensive admin orchestrator service for ATMA. Provides centralized admin management by proxying requests to auth-service and archive-service. Features include admin authentication, user management, token operations, system monitoring, analytics, job management, performance optimization, and security auditing. All 4 development phases completed with 18 production-ready endpoints.",
   baseUrl: "api.futureguide.id",
   version: "2.0.0",
   port: "3007",
@@ -559,6 +559,110 @@ export const adminServiceData = {
         }
       },
       example: `curl -X GET https://api.futureguide.id/api/admin/jobs/queue \\
+  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
+    },
+    {
+      method: "GET",
+      path: "/api/admin/jobs/all",
+      title: "Get All Jobs (Including Deleted)",
+      description: "Get all jobs including those with deleted status. Supports advanced filtering, pagination, and sorting. Phase 2 feature with comprehensive job management.",
+      authentication: "Bearer Token (Admin)",
+      rateLimit: "Admin Limiter (1000/15min)",
+      requestBody: null,
+      parameters: [
+        {
+          name: "limit",
+          type: "integer",
+          required: false,
+          description: "Number of items per page (default: 20, max: 100)"
+        },
+        {
+          name: "offset",
+          type: "integer", 
+          required: false,
+          description: "Number of items to skip for pagination (default: 0)"
+        },
+        {
+          name: "status",
+          type: "string",
+          required: false,
+          description: "Filter by job status (queued, processing, completed, failed, deleted)"
+        },
+        {
+          name: "user_id",
+          type: "string",
+          required: false,
+          description: "Filter by user ID (UUID)"
+        },
+        {
+          name: "assessment_name",
+          type: "string",
+          required: false,
+          description: "Filter by assessment name"
+        },
+        {
+          name: "include_deleted",
+          type: "boolean",
+          required: false,
+          description: "Include deleted jobs (default: true)"
+        },
+        {
+          name: "sort_by",
+          type: "string",
+          required: false,
+          description: "Sort field: created_at, updated_at, status, assessment_name, priority (default: created_at)"
+        },
+        {
+          name: "sort_order",
+          type: "string",
+          required: false,
+          description: "Sort order: ASC or DESC (default: DESC)"
+        }
+      ],
+      response: {
+        success: true,
+        data: {
+          jobs: [
+            {
+              job_id: "job-550e8400",
+              user_id: "550e8400-e29b-41d4-a716-446655440000",
+              status: "completed",
+              assessment_name: "Career Assessment",
+              priority: 1,
+              created_at: "2024-01-20T14:00:00.000Z",
+              updated_at: "2024-01-20T14:15:00.000Z",
+              processing_time: "15 minutes",
+              test_result: {
+                archetype: "The Analyst"
+              }
+            },
+            {
+              job_id: "job-550e8401",
+              user_id: "550e8400-e29b-41d4-a716-446655440001",
+              status: "deleted",
+              assessment_name: "Personality Assessment",
+              priority: 2,
+              created_at: "2024-01-19T10:30:00.000Z",
+              updated_at: "2024-01-19T10:45:00.000Z",
+              processing_time: "12 minutes",
+              test_result: {
+                archetype: "The Creator"
+              }
+            }
+          ],
+          pagination: {
+            limit: 20,
+            offset: 0,
+            total: 749,
+            has_more: true
+          }
+        }
+      },
+      errorResponses: [
+        { code: "VALIDATION_ERROR", status: 400, message: "Invalid parameters provided" },
+        { code: "UNAUTHORIZED", status: 401, message: "Admin access required" }
+      ],
+      example: `curl -X GET "https://api.futureguide.id/api/admin/jobs/all?limit=20&status=completed&include_deleted=true" \\
   -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"`
     },
     {

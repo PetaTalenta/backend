@@ -247,7 +247,9 @@ class AnalysisJobsService {
       // For internal services, we can get all jobs without user restriction
       const { limit = 10, offset = 0, status, assessment_name } = options;
 
-      const whereClause = {};
+      const whereClause = {
+        status: { [AnalysisJob.sequelize.Sequelize.Op.ne]: 'deleted' } // Exclude deleted jobs
+      };
       if (status) {
         whereClause.status = status;
       }
@@ -368,23 +370,19 @@ class AnalysisJobsService {
         throw new Error('Cannot delete job that is currently processing');
       }
 
-      // If job has a result, delete it first (cascade delete)
+      // Don't delete the result, just mark job as deleted
+      // Result remains accessible for user but job is marked as deleted
       if (job.result_id) {
-        logger.info('Deleting associated result', { jobId, resultId: job.result_id });
-        await AnalysisResult.destroy({
-          where: { id: job.result_id },
-          transaction
-        });
+        logger.info('Job has associated result, keeping result but marking job as deleted', { jobId, resultId: job.result_id });
       }
 
-      // Update status to indicate deletion (mark as failed since cancelled status is removed)
-      logger.info('Updating job status to failed (deleted)', { jobId, userId });
+      // Update status to indicate deletion (mark as deleted)
+      logger.info('Updating job status to deleted', { jobId, userId });
       const updateResult = await AnalysisJob.update(
         {
-          status: 'failed',
+          status: 'deleted',
           error_message: 'Job deleted by user',
-          completed_at: new Date(),
-          result_id: null // Clear result_id since we deleted the result
+          completed_at: new Date()
         },
         {
           where: { job_id: jobId },
@@ -457,23 +455,19 @@ class AnalysisJobsService {
         throw new Error('Cannot delete job that is currently processing');
       }
 
-      // If job has a result, delete it first (cascade delete)
+      // Don't delete the result, just mark job as deleted
+      // Result remains accessible for internal services but job is marked as deleted
       if (job.result_id) {
-        logger.info('Deleting associated result', { jobId, resultId: job.result_id });
-        await AnalysisResult.destroy({
-          where: { id: job.result_id },
-          transaction
-        });
+        logger.info('Job has associated result, keeping result but marking job as deleted', { jobId, resultId: job.result_id });
       }
 
-      // Update status to indicate deletion (mark as failed since cancelled status is removed)
-      logger.info('Updating job status to failed (deleted)', { jobId });
+      // Update status to indicate deletion (mark as deleted)
+      logger.info('Updating job status to deleted', { jobId });
       const updateResult = await AnalysisJob.update(
         {
-          status: 'failed',
+          status: 'deleted',
           error_message: 'Job deleted by internal service',
-          completed_at: new Date(),
-          result_id: null // Clear result_id since we deleted the result
+          completed_at: new Date()
         },
         {
           where: { job_id: jobId },

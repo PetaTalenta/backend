@@ -145,11 +145,11 @@ const getUserById = async (req, res, next) => {
         up.created_at as profile_created_at,
         up.updated_at as profile_updated_at,
         s.name as school_name,
-        s.type as school_type,
+        s.address as school_address,
         s.city as school_city,
         s.province as school_province
       FROM auth.user_profiles up
-      LEFT JOIN archive.schools s ON up.school_id = s.id
+      LEFT JOIN public.schools s ON up.school_id = s.id
       WHERE up.user_id = :userId
     `;
 
@@ -164,9 +164,6 @@ const getUserById = async (req, res, next) => {
     const statsQuery = `
       SELECT
         COUNT(*) as total_analyses,
-        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_analyses,
-        COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing_analyses,
-        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_analyses,
         MAX(created_at) as latest_analysis
       FROM archive.analysis_results
       WHERE user_id = :userId
@@ -219,7 +216,7 @@ const getUserById = async (req, res, next) => {
             school: profile.school_id ? {
               id: profile.school_id,
               name: profile.school_name,
-              type: profile.school_type,
+              address: profile.school_address,
               city: profile.school_city,
               province: profile.school_province
             } : null,
@@ -229,15 +226,9 @@ const getUserById = async (req, res, next) => {
           stats: {
             analyses: stats ? {
               total: parseInt(stats.total_analyses) || 0,
-              completed: parseInt(stats.completed_analyses) || 0,
-              processing: parseInt(stats.processing_analyses) || 0,
-              failed: parseInt(stats.failed_analyses) || 0,
               latest_analysis: stats.latest_analysis
             } : {
               total: 0,
-              completed: 0,
-              processing: 0,
-              failed: 0,
               latest_analysis: null
             },
             jobs: jobStats ? {

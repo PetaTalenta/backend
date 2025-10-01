@@ -29,7 +29,7 @@ const AnalysisJob = sequelize.define('AnalysisJob', {
     allowNull: false,
     defaultValue: 'queued',
     validate: {
-      isIn: [['queued', 'processing', 'completed', 'failed']]
+      isIn: [['queued', 'processing', 'completed', 'failed', 'deleted']]
     }
   },
   result_id: {
@@ -89,10 +89,10 @@ const AnalysisJob = sequelize.define('AnalysisJob', {
   updatedAt: 'updated_at',
   underscored: true,
   validate: {
-    // Custom validation: if status is 'failed', error_message must be present
+    // Custom validation: if status is 'failed' or 'deleted', error_message must be present
     statusErrorMessageRequired() {
-      if (this.status === 'failed' && (!this.error_message || this.error_message.trim() === '')) {
-        throw new Error('Error message is required when status is failed');
+      if ((this.status === 'failed' || this.status === 'deleted') && (!this.error_message || this.error_message.trim() === '')) {
+        throw new Error('Error message is required when status is failed or deleted');
       }
     }
   },
@@ -207,7 +207,10 @@ AnalysisJob.findByJobId = async function(jobId, includeAssociations = false) {
 AnalysisJob.getJobsByUser = async function(userId, options = {}) {
   const { limit = 10, offset = 0, status, assessment_name, includeAssociations = false } = options;
 
-  const whereClause = { user_id: userId };
+  const whereClause = { 
+    user_id: userId,
+    status: { [this.sequelize.Sequelize.Op.ne]: 'deleted' } // Exclude deleted jobs
+  };
   if (status) {
     whereClause.status = status;
   }

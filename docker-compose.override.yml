@@ -163,8 +163,14 @@ services:
         INCLUDE_DEV_DEPS: "true"
     environment:
       NODE_ENV: development
+      PORT: 3007
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ARCHIVE_SERVICE_URL: http://archive-service:3002
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
     container_name: atma-admin-service
     command: npm run dev
+    networks:
+      - atma-network
     volumes:
       - ./admin-service:/app
       - /app/node_modules
