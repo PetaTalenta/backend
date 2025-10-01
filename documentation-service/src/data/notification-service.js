@@ -464,6 +464,221 @@ export function useNotifications(token) {
 }`
   },
 
+  statusValues: {
+    title: "Status Values Reference",
+    description: "All status values used in notifications match the database schema exactly. Use these values for comparison and UI state management.",
+    values: [
+      {
+        status: "queued",
+        description: "Job is waiting in queue to be processed",
+        source: "Initial state when job is submitted",
+        uiSuggestion: "Show loading indicator with 'Queued' message"
+      },
+      {
+        status: "processing",
+        description: "Job is currently being analyzed by worker",
+        source: "WebSocket event: 'analysis-started'",
+        uiSuggestion: "Show progress indicator with estimated time"
+      },
+      {
+        status: "completed",
+        description: "Job completed successfully with results available",
+        source: "WebSocket event: 'analysis-complete'",
+        uiSuggestion: "Show success message and redirect to results page"
+      },
+      {
+        status: "failed",
+        description: "Job failed due to error (includes unknown assessment types)",
+        source: "WebSocket events: 'analysis-failed' or 'analysis-unknown'",
+        uiSuggestion: "Show error message with details and retry option"
+      }
+    ],
+    example: `// Status handling example
+const handleNotificationStatus = (status, data) => {
+  switch(status) {
+    case 'queued':
+      showMessage('Your assessment is queued for processing', 'info');
+      break;
+    case 'processing':
+      showMessage(\`Processing... Estimated time: \${data.estimated_time || '2-5 minutes'}\`, 'info');
+      break;
+    case 'completed':
+      showMessage('Analysis completed successfully!', 'success');
+      navigateToResults(data.result_id);
+      break;
+    case 'failed':
+      showMessage(\`Analysis failed: \${data.error_message || 'Unknown error'}\`, 'error');
+      showRetryButton();
+      break;
+    default:
+      console.warn('Unknown status:', status);
+  }
+};
+
+// Usage with WebSocket events
+socket.on('analysis-started', (data) => {
+  handleNotificationStatus(data.status, data); // status = "processing"
+});
+
+socket.on('analysis-complete', (data) => {
+  handleNotificationStatus(data.status, data); // status = "completed"
+});
+
+socket.on('analysis-failed', (data) => {
+  handleNotificationStatus(data.status, data); // status = "failed"
+});`,
+    notes: [
+      "⚠️ IMPORTANT: Status values are in English and match database exactly",
+      "✅ Always use === comparison for status checks",
+      "✅ Handle all four status values in your UI state management",
+      "❌ DO NOT translate status values - they are API constants",
+      "💡 If you need translated UI text, map status to translations in frontend"
+    ]
+  },
+
+  bestPractices: {
+    title: "Frontend Best Practices",
+    description: "Recommended patterns for implementing notifications in your application",
+    practices: [
+      {
+        title: "Connection Management",
+        description: "Handle WebSocket lifecycle properly",
+        example: `// Reconnection strategy
+const socket = io('https://api.futureguide.id', {
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  timeout: 20000
+});
+
+socket.on('disconnect', (reason) => {
+  if (reason === 'io server disconnect') {
+    // Server disconnected, need to reconnect manually
+    socket.connect();
+  }
+  // else the socket will automatically try to reconnect
+});
+
+socket.on('reconnect', (attemptNumber) => {
+  console.log('Reconnected after', attemptNumber, 'attempts');
+  // Re-authenticate after reconnection
+  socket.emit('authenticate', { token: getAuthToken() });
+});`
+      },
+      {
+        title: "Token Refresh Handling",
+        description: "Handle token expiration and refresh",
+        example: `// Token refresh on auth error
+socket.on('auth_error', async (error) => {
+  if (error.message.includes('expired') || error.message.includes('invalid')) {
+    try {
+      const newToken = await refreshAuthToken();
+      socket.emit('authenticate', { token: newToken });
+    } catch (err) {
+      // Redirect to login if refresh fails
+      redirectToLogin();
+    }
+  }
+});`
+      },
+      {
+        title: "Notification Persistence",
+        description: "Store notifications for offline viewing",
+        example: `// Save notifications to localStorage
+const saveNotification = (notification) => {
+  const stored = JSON.parse(localStorage.getItem('notifications') || '[]');
+  stored.unshift({
+    ...notification,
+    receivedAt: new Date().toISOString(),
+    read: false
+  });
+  // Keep only last 50 notifications
+  const trimmed = stored.slice(0, 50);
+  localStorage.setItem('notifications', JSON.stringify(trimmed));
+};
+
+socket.on('analysis-complete', (data) => {
+  saveNotification({ type: 'analysis-complete', ...data });
+  showNotification(data);
+});`
+      },
+      {
+        title: "UI State Synchronization",
+        description: "Keep UI state in sync with job status",
+        example: `// React example with state management
+const [jobStatus, setJobStatus] = useState({});
+
+useEffect(() => {
+  if (!socket) return;
+
+  socket.on('analysis-started', (data) => {
+    setJobStatus(prev => ({
+      ...prev,
+      [data.jobId]: { 
+        status: data.status, // "processing"
+        progress: 0,
+        message: data.message 
+      }
+    }));
+  });
+
+  socket.on('analysis-complete', (data) => {
+    setJobStatus(prev => ({
+      ...prev,
+      [data.jobId]: { 
+        status: data.status, // "completed"
+        progress: 100,
+        resultId: data.result_id 
+      }
+    }));
+  });
+
+  socket.on('analysis-failed', (data) => {
+    setJobStatus(prev => ({
+      ...prev,
+      [data.jobId]: { 
+        status: data.status, // "failed"
+        error: data.error_message 
+      }
+    }));
+  });
+}, [socket]);`
+      },
+      {
+        title: "Error Boundary",
+        description: "Graceful degradation when WebSocket fails",
+        example: `// Fallback to polling if WebSocket fails
+const [usePolling, setUsePolling] = useState(false);
+
+socket.on('connect_error', (error) => {
+  console.error('WebSocket connection failed:', error);
+  // Fall back to polling after 3 failed attempts
+  if (error.context?.attempts >= 3) {
+    setUsePolling(true);
+    startPolling();
+  }
+});
+
+const startPolling = () => {
+  const interval = setInterval(async () => {
+    try {
+      const response = await fetch('/api/assessment/status/' + jobId);
+      const data = await response.json();
+      updateJobStatus(data.data);
+      
+      if (data.data.status === 'completed' || data.data.status === 'failed') {
+        clearInterval(interval);
+      }
+    } catch (error) {
+      console.error('Polling error:', error);
+    }
+  }, 5000); // Poll every 5 seconds
+};`
+      }
+    ]
+  },
+
   troubleshooting: {
     title: "Troubleshooting Guide",
     commonIssues: [
