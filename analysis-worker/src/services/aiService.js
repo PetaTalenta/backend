@@ -2,7 +2,7 @@
  * Google Generative AI Service
  */
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
 const ai = require("../config/ai");
 const logger = require("../utils/logger");
 const { validatePersonaProfile } = require("../utils/validator");
@@ -111,87 +111,87 @@ const generatePersonaProfile = async (assessmentData, jobId) => {
 
     // Define response schema for structured output
 const responseSchema = {
-  type: Type.OBJECT,
+  type: SchemaType.OBJECT,
   description: "Analisis persona profile",
   properties: {
     archetype: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Nama archetype yang paling sesuai, misal: The Analytical Innovator",
     },
     coreMotivators: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       minItems: 2,
       maxItems: 4,
-      items: { type: Type.STRING, description: "Motivasi fundamental" },
+      items: { type: SchemaType.STRING, description: "Motivasi fundamental" },
       description: "Fundamental drivers atau motivasi inti dari persona",
     },
     learningStyle: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Gaya belajar yang paling efektif untuk persona ini, misal: Visual & Kinesthetic, Anda dapat mendapatkan pengalaman belajar paling baik dengan melihat contoh dan langsung mencoba ",
     },
     shortSummary: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Ringkasan singkat (2 paragraf) tentang persona user",
     },
     strengthSummary: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Ringkasan kekuatan utama persona (2 paragraf)",
     },
     strengths: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       minItems: 3,
       maxItems: 6,
       items: {
-        type: Type.STRING,
+        type: SchemaType.STRING,
         description: "Kekuatan spesifik persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat. HANYA berisi konten kekuatan, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
       },
       description: "Daftar kekuatan utama persona. Array ini hanya berisi konten kekuatan, bukan kata 'justification'.",
     },
     weaknessSummary: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Ringkasan kelemahan utama persona (1 paragraf)",
     },
     weaknesses: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       minItems: 3,
       maxItems: 6,
       items: {
-        type: Type.STRING,
+        type: SchemaType.STRING,
         description: "Kelemahan atau area pengembangan persona berdasarkan sintesis data dengan fokus pada VIAIS dan OCEAN, Riasec adalah pendukung, Dalam 1 Kalimat. HANYA berisi konten kelemahan, JANGAN menambahkan kata 'justification' atau kata meta lainnya.",
       },
       description: "Daftar kelemahan persona. Array ini hanya berisi konten kelemahan, bukan kata 'justification'.",
     },
     careerRecommendation: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       minItems: 3,
       maxItems: 5,
       description:
         "Daftar rekomendasi karir sesuai persona dan kecocokan industri, beserta prospeknya",
       items: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         required: ["careerName", "justification", "relatedMajors", "careerProspect"],
         properties: {
           careerName: {
-            type: Type.STRING,
+            type: SchemaType.STRING,
             description: "Nama karir atau profesi yang direkomendasikan (utamakan pekerjaan umum yang dikenal luas; hindari jabatan niche/sangat spesifik). Fokus data yang dipakai adalah RIASEC dan VIAIS lalu OCEAN adalah pendukung",
           },
           justification: {
-            type: Type.STRING,
+            type: SchemaType.STRING,
             description: "Penjelasan mengapa karir ini cocok berdasarkan data psikometrik diatas",
           },
 
           relatedMajors: {
-            type: Type.ARRAY,
+            type: SchemaType.ARRAY,
             minItems: 2,
             maxItems: 5,
             items: {
-              type: Type.STRING,
+              type: SchemaType.STRING,
               description: "Nama jurusan kuliah yang relevan. HANYA berisi nama jurusan, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
             },
             description: "Jurusan kuliah yang relevan dengan karir ini. Array ini hanya berisi nama jurusan, bukan kata 'justification'.",
           },
           careerProspect: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             required: [
               "jobAvailability",
               "salaryPotential",
@@ -202,37 +202,37 @@ const responseSchema = {
             ],
             properties: {
               jobAvailability: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description:
                   "Sejauh mana lapangan pekerjaan tersedia di bidang tersebut",
                 enum: ["super high", "high", "moderate", "low", "super low"],
               },
               salaryPotential: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description:
                   "Potensi pendapatan dari profesi tersebut, termasuk bonus dan insentif",
                 enum: ["super high", "high", "moderate", "low", "super low"],
               },
               careerProgression: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description:
                   "Peluang naik jabatan atau spesialisasi di bidang tersebut",
                 enum: ["super high", "high", "moderate", "low", "super low"],
               },
               industryGrowth: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description:
                   "Pertumbuhan industri terkait profesi ini di masa depan",
                 enum: ["super high", "high", "moderate", "low", "super low"],
               },
               skillDevelopment: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description:
                   "Peluang mengembangkan keahlian di profesi ini",
                 enum: ["super high", "high", "moderate", "low", "super low"],
               },
               aiOvertake: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description:
                   "Seberapa besar kemungkinan profesi ini akan digantikan oleh AI di masa depan",
                 enum: ["super high", "high", "moderate", "low", "super low"],
@@ -243,59 +243,59 @@ const responseSchema = {
       },
     },
     insights: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       minItems: 3,
       maxItems: 5,
       items: {
-        type: Type.STRING,
+        type: SchemaType.STRING,
         description: "Saran pengembangan diri yang actionable, berdasarkan kelemahan yang didapatkan sebelumnya juga data psikometrik. HANYA berisi konten saran, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
       },
       description: "Insight atau saran actionable. Array ini hanya berisi konten saran, bukan kata 'justification'.",
     },
     skillSuggestion: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       minItems: 3,
       maxItems: 6,
       items: {
-        type: Type.STRING,
+        type: SchemaType.STRING,
         description: "Keahlian atau kompetensi yang disarankan untuk dikembangkan berdasarkan kekuatan yang didapatkan sebelumnya juga data psikometrik. HANYA berisi nama skill, JANGAN menambahkan kata 'justification' atau kata meta lainnya.",
       },
       description: "Rekomendasi pengembangan skill jangka pendek dan menengah. Array ini hanya berisi nama skill, bukan kata 'justification'.",
     },
     possiblePitfalls: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       minItems: 2,
       maxItems: 5,
       items: {
-        type: Type.STRING,
+        type: SchemaType.STRING,
         description: "Kesalahan atau jebakan karir yang perlu diwaspadai, khususnya dengan data OCEAN dan RIASEC, VIAIS adalah pendukung. HANYA berisi konten jebakan/tantangan, JANGAN menambahkan kata 'justification' atau kata meta lainnya.",
       },
       description: "Hal-hal yang sebaiknya dihindari untuk pengembangan optimal. Array ini hanya berisi konten jebakan/tantangan, bukan kata 'justification'.",
     },
     riskTolerance: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description:
         "Seberapa tinggi toleransi risiko persona dalam mengambil keputusan karir dan pekerjaan",
       enum: ["very high", "high", "moderate", "low", "very low"],
     },
     workEnvironment: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Lingkungan kerja ideal (1 paragraf)",
     },
     roleModel: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       minItems: 2,
       maxItems: 3,
       items: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         required: ["name", "title"],
         properties: {
           name: {
-            type: Type.STRING,
+            type: SchemaType.STRING,
             description: "Nama role model"
           },
           title: {
-            type: Type.STRING,
+            type: SchemaType.STRING,
             description: "Title atau jabatan utama role model"
           }
         }
@@ -303,37 +303,37 @@ const responseSchema = {
       description: "Daftar role model inspiratif (wajib sertakan title/jabatan)",
     },
     developmentActivities: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       required: ["extracurricular", "bookRecommendations"],
       properties: {
         extracurricular: {
-          type: Type.ARRAY,
+          type: SchemaType.ARRAY,
           minItems: 2,
           maxItems: 4,
           items: {
-            type: Type.STRING,
+            type: SchemaType.STRING,
             description: "Nama kegiatan ekstrakurikuler yang spesifik. HANYA berisi nama kegiatan, JANGAN menambahkan kata 'justification' atau kata meta lainnya."
           },
           description: "Kegiatan ekstrakurikuler yang disarankan. Array ini hanya berisi nama kegiatan, bukan kata 'justification' atau kata meta lainnya.",
         },
         bookRecommendations: {
-          type: Type.ARRAY,
+          type: SchemaType.ARRAY,
           minItems: 6,
           maxItems: 6,
           items: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             required: ["title", "author", "reason"],
             properties: {
               title: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: "Judul buku",
               },
               author: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: "Nama penulis",
               },
               reason: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: "Alasan mengapa buku ini cocok untuk persona",
               },
             },
@@ -373,17 +373,19 @@ const responseSchema = {
         timeout: aiTimeout 
       });
 
-      // Use Promise.race for timeout handling (more reliable than AbortController)
-      const aiPromise = client.models.generateContent({
+      // Get the generative model with the schema and configuration
+      const model = client.getGenerativeModel({
         model: ai.config.model,
-        contents: prompt,
-        config: {
-          systemInstruction: "Anda adalah seorang Psikolog Pakar Analisis Karir dan Kepribadian. Keahlian utama Anda adalah mensintesis data dari berbagai asesmen psikometrik (RIASEC, OCEAN, VIA-IS) menjadi sebuah laporan persona yang koheren, mendalam, dan sangat actionable. Gaya komunikasi Anda bersifat klinis, objektif, dan langsung pada inti persoalan (no sugarcoating) untuk memberikan pemahaman yang jujur dan jernih kepada audiens (mahasiswa/pelajar).",
+        systemInstruction: "Anda adalah seorang Psikolog Pakar Analisis Karir dan Kepribadian. Keahlian utama Anda adalah mensintesis data dari berbagai asesmen psikometrik (RIASEC, OCEAN, VIA-IS) menjadi sebuah laporan persona yang koheren, mendalam, dan sangat actionable. Gaya komunikasi Anda bersifat klinis, objektif, dan langsung pada inti persoalan (no sugarcoating) untuk memberikan pemahaman yang jujur dan jernih kepada audiens (mahasiswa/pelajar).",
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: responseSchema,
           temperature: ai.config.temperature,
         },
       });
+
+      // Use Promise.race for timeout handling (more reliable than AbortController)
+      const aiPromise = model.generateContent(prompt);
 
       // Create timeout promise
       const timeoutPromise = new Promise((_, reject) => {
@@ -400,9 +402,12 @@ const responseSchema = {
       return aiResponse;
     }, jobId);
 
+    // Extract the actual response object from GenerateContentResult
+    const aiResponse = response.response;
+
     // Extract usage metadata from API response
     try {
-      outputTokenData = await tokenCounter.extractUsageMetadata(response, jobId);
+      outputTokenData = await tokenCounter.extractUsageMetadata(aiResponse, jobId);
 
       logger.info("AI response received", {
         jobId,
@@ -418,16 +423,40 @@ const responseSchema = {
       // Fallback to original logging format (guard against undefined fields)
       logger.info("AI response received", {
         jobId,
-        responseLength: (typeof response?.text === 'string' ? response.text.length : 0),
-        thoughtsTokenCount: response?.usageMetadata?.thoughtsTokenCount || 0,
-        candidatesTokenCount: response?.usageMetadata?.candidatesTokenCount || 0,
+        usageMetadata: aiResponse?.usageMetadata || {},
+        thoughtsTokenCount: aiResponse?.usageMetadata?.thoughtsTokenCount || 0,
+        candidatesTokenCount: aiResponse?.usageMetadata?.candidatesTokenCount || 0,
       });
     }
 
     // Ensure we have JSON text and parse safely
-    const rawText = typeof response?.text === 'string' ? response.text.trim() : '';
+    // The text() method returns the text from the first candidate
+    let rawText = '';
+    try {
+      rawText = aiResponse.text().trim();
+    } catch (textError) {
+      // If text() throws, it might be because the response was blocked
+      logger.warn("Failed to extract text from AI response", {
+        jobId,
+        error: textError.message,
+        promptFeedback: aiResponse?.promptFeedback
+      });
+    }
+
     if (!rawText) {
-      const blockMsg = response?.promptFeedback?.blockReasonMessage || response?.promptFeedback?.blockReason || 'no text returned';
+      const blockMsg = aiResponse?.promptFeedback?.blockReasonMessage ||
+                       aiResponse?.promptFeedback?.blockReason ||
+                       'no text returned';
+
+      // Log detailed information about the response for debugging
+      logger.error("AI returned empty response", {
+        jobId,
+        blockReason: blockMsg,
+        promptFeedback: aiResponse?.promptFeedback,
+        candidates: aiResponse?.candidates?.length || 0,
+        firstCandidate: aiResponse?.candidates?.[0]
+      });
+
       throw createError(
         ERROR_TYPES.AI_RESPONSE_PARSE_ERROR,
         `AI returned empty/undefined JSON text (${blockMsg})`

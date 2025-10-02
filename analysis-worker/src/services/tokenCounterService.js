@@ -60,9 +60,9 @@ class TokenCounterService {
       // Prepare contents for token counting
       const formattedContents = this._formatContentsForCounting(contents);
 
-      // Use Gemini's countTokens API
-      const tokenCountResult = await client.models.countTokens({
-        model: model,
+      // Get the generative model and use countTokens API
+      const geminiModel = client.getGenerativeModel({ model: model });
+      const tokenCountResult = await geminiModel.countTokens({
         contents: formattedContents
       });
 
