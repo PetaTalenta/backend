@@ -332,6 +332,7 @@ services:
       DEFAULT_MODEL: ${DEFAULT_MODEL}
       FALLBACK_MODEL: ${FALLBACK_MODEL}
       EMERGENCY_FALLBACK_MODEL: ${EMERGENCY_FALLBACK_MODEL}
+      ADDITIONAL_FALLBACK_MODEL: ${ADDITIONAL_FALLBACK_MODEL}
       USE_FREE_MODELS_ONLY: ${USE_FREE_MODELS_ONLY}
       MAX_TOKENS: ${MAX_TOKENS}
       TEMPERATURE: ${TEMPERATURE}
@@ -377,6 +378,13 @@ services:
     environment:
       NODE_ENV: production
       WORKER_ID: ${HOSTNAME:-worker}
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # RabbitMQ Configuration
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
       RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
@@ -386,10 +394,10 @@ services:
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
-      GOOGLE_AI_API_KEY: AIzaSyCSoKJIaaMapc22uS4NYM6nBHhb53xuNxA
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
       GOOGLE_AI_MODEL: gemini-2.5-flash
       AI_TEMPERATURE: 0.2
-      USE_MOCK_MODEL: "false"
+      USE_MOCK_MODEL: ${USE_MOCK_MODEL}
       ENABLE_TOKEN_COUNTING: true
       TOKEN_USAGE_RETENTION_DAYS: 30
       INPUT_TOKEN_PRICE_PER_1K: 0.30
@@ -446,6 +454,8 @@ services:
       JOB_CLEANUP_QUEUED_HOURS: 24
       JOB_CLEANUP_INTERVAL: 3600000
     depends_on:
+      postgres:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     networks:

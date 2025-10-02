@@ -10,9 +10,10 @@ class OpenRouterService {
   constructor() {
     this.baseURL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
     this.apiKey = process.env.OPENROUTER_API_KEY;
-    this.defaultModel = process.env.DEFAULT_MODEL || 'qwen/qwen-2.5-coder-32b-instruct:free';
-    this.fallbackModel = process.env.FALLBACK_MODEL || 'meta-llama/llama-3.2-3b-instruct:free';
-    this.emergencyFallbackModel = process.env.EMERGENCY_FALLBACK_MODEL || 'openai/gpt-4o-mini';
+    this.defaultModel = process.env.DEFAULT_MODEL || 'x-ai/grok-4-fast:free';
+    this.fallbackModel = process.env.FALLBACK_MODEL || 'z-ai/glm-4.5-air:free';
+    this.emergencyFallbackModel = process.env.EMERGENCY_FALLBACK_MODEL || 'deepseek/deepseek-chat-v3.1:free';
+    this.additionalFallbackModel = process.env.ADDITIONAL_FALLBACK_MODEL || 'deepseek/deepseek-r1-0528:free';
     this.useFreeModelsOnly = process.env.USE_FREE_MODELS_ONLY === 'true';
     this.maxTokens = parseInt(process.env.MAX_TOKENS) || 1000;
     this.temperature = parseFloat(process.env.TEMPERATURE) || 0.7;
@@ -74,6 +75,9 @@ class OpenRouterService {
     logger.info('OpenRouter Service initialized', {
       baseURL: this.baseURL,
       defaultModel: this.defaultModel,
+      fallbackModel: this.fallbackModel,
+      emergencyFallbackModel: this.emergencyFallbackModel,
+      additionalFallbackModel: this.additionalFallbackModel,
       useFreeModelsOnly: this.useFreeModelsOnly,
       timeout: this.timeout
     });
@@ -92,10 +96,21 @@ class OpenRouterService {
       const model = options.model || this.defaultModel;
       const isFreeModel = this.isFreeModel(model);
 
+      // SECURITY: Reject any attempt to use paid tools (web_search, etc.)
+      // This chatbot only does text-to-text completion to avoid costs
+      if (options.tools) {
+        logger.error('REJECTED: Attempt to use paid tools detected', {
+          tools: options.tools,
+          userId: options.userId
+        });
+        throw new Error('Tools usage is disabled. This chatbot only supports text-to-text completion.');
+      }
+
       // Use messages as-is since profile persona context is handled during conversation creation
       let processedMessages = [...messages];
 
       // Build request payload according to OpenRouter API spec
+      // NOTE: We deliberately DO NOT include 'tools' parameter to avoid paid features
       const payload = {
         model: model,
         messages: processedMessages,
@@ -111,6 +126,12 @@ class OpenRouterService {
       if (options.topK) payload.top_k = options.topK;
       if (options.frequencyPenalty) payload.frequency_penalty = options.frequencyPenalty;
       if (options.presencePenalty) payload.presence_penalty = options.presencePenalty;
+
+      // SECURITY: Double-check that tools are never accidentally added to payload
+      if (payload.tools) {
+        delete payload.tools;
+        logger.warn('Removed tools parameter from payload to prevent paid features');
+      }
 
       logger.info('Generating OpenRouter response', {
         model,
@@ -195,7 +216,7 @@ class OpenRouterService {
   async handleFallback(messages, options, originalError) {
     const currentModel = options.model || this.defaultModel;
 
-    // First fallback: try free fallback model
+    // First fallback: try second free model
     if (currentModel !== this.fallbackModel && !options.isFirstRetry) {
       logger.info('Attempting first fallback model', {
         from: currentModel,
@@ -209,12 +230,9 @@ class OpenRouterService {
       });
     }
 
-    // Second fallback: try emergency paid model (if allowed)
-    if (!this.useFreeModelsOnly && 
-        currentModel !== this.emergencyFallbackModel && 
-        !options.isSecondRetry) {
-      
-      logger.info('Attempting emergency fallback model', {
+    // Second fallback: try third free model
+    if (currentModel !== this.emergencyFallbackModel && !options.isSecondRetry) {
+      logger.info('Attempting second fallback model', {
         from: currentModel,
         to: this.emergencyFallbackModel
       });
@@ -226,11 +244,26 @@ class OpenRouterService {
       });
     }
 
+    // Third fallback: try fourth free model
+    if (currentModel !== this.additionalFallbackModel && !options.isThirdRetry) {
+      logger.info('Attempting third fallback model', {
+        from: currentModel,
+        to: this.additionalFallbackModel
+      });
+
+      return this.generateResponse(messages, {
+        ...options,
+        model: this.additionalFallbackModel,
+        isThirdRetry: true
+      });
+    }
+
     // All fallbacks exhausted
     logger.error('All OpenRouter models failed', {
-      originalModel: this.defaultModel,
+      defaultModel: this.defaultModel,
       fallbackModel: this.fallbackModel,
       emergencyModel: this.emergencyFallbackModel,
+      additionalModel: this.additionalFallbackModel,
       originalError: originalError.message,
       useFreeModelsOnly: this.useFreeModelsOnly
     });
@@ -245,9 +278,10 @@ class OpenRouterService {
    */
   isFreeModel(model) {
     return model.includes(':free') ||
-           model === 'qwen/qwen-2.5-coder-32b-instruct:free' ||
-           model === 'meta-llama/llama-3.2-3b-instruct:free' ||
-           model === 'qwen/qwen3-235b-a22b-07-25:free';
+           model === 'x-ai/grok-4-fast:free' ||
+           model === 'z-ai/glm-4.5-air:free' ||
+           model === 'deepseek/deepseek-chat-v3.1:free' ||
+           model === 'deepseek/deepseek-r1-0528:free';
   }
 
   /**

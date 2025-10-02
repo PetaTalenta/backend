@@ -141,7 +141,6 @@ services:
         INCLUDE_DEV_DEPS: "true"
     environment:
       NODE_ENV: development
-      USE_MOCK_MODEL: "false"
     command: npm run dev
     volumes:
       - ./analysis-worker:/app
