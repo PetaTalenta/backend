@@ -8,6 +8,7 @@ const config = {
   // Service URLs
   services: {
     auth: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
+    authV2: process.env.AUTH_V2_SERVICE_URL || 'http://localhost:3008',
     archive: process.env.ARCHIVE_SERVICE_URL || 'http://localhost:3002',
     assessment: process.env.ASSESSMENT_SERVICE_URL || 'http://localhost:3003',
     notification: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005',

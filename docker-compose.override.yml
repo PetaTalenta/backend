@@ -9,6 +9,7 @@ services:
         INCLUDE_DEV_DEPS: "true"
     environment:
       NODE_ENV: development
+      AUTH_V2_SERVICE_URL: http://auth-v2-service:3008
     command: npm run dev
     volumes:
       - ./api-gateway:/app
@@ -179,6 +180,37 @@ services:
       watch:
         - action: sync
           path: ./admin-service
+          target: /app
+          ignore:
+            - node_modules/
+            - logs/
+
+  auth-v2-service:
+    build:
+      context: ./auth-v2-service
+      dockerfile: Dockerfile
+      args:
+        INCLUDE_DEV_DEPS: "true"
+    environment:
+      NODE_ENV: development
+      PORT: 3008
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      FIREBASE_API_KEY: ${FIREBASE_API_KEY}
+      LOG_LEVEL: debug
+    container_name: atma-auth-v2-service
+    command: bun run dev
+    networks:
+      - atma-network
+    volumes:
+      - ./auth-v2-service:/app
+      - /app/node_modules
+      - ./auth-v2-service/logs:/app/logs
+    develop:
+      watch:
+        - action: sync
+          path: ./auth-v2-service
           target: /app
           ignore:
             - node_modules/

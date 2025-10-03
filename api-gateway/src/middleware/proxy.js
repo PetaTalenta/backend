@@ -191,9 +191,20 @@ const chatbotServiceProxy = createServiceProxy(config.services.chatbot, {
   }
 });
 
+/**
+ * Proxy untuk Auth V2 Service (Firebase-based)
+ */
+const authV2ServiceProxy = createServiceProxy(config.services.authV2 || process.env.AUTH_V2_SERVICE_URL || 'http://auth-v2-service:3008', {
+  pathRewrite: {
+    '^/api/auth/v2/health': '/health',                // Health endpoint
+    '^/api/auth/v2': '/v1/auth'                       // Rewrite /api/auth/v2 to /v1/auth
+  }
+});
+
 module.exports = {
   createServiceProxy,
   authServiceProxy,
+  authV2ServiceProxy,
   archiveServiceProxy,
   assessmentServiceProxy,
   notificationServiceProxy,

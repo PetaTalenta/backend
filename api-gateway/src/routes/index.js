@@ -1,7 +1,7 @@
 const express = require('express');
 const { verifyToken, verifyInternalService, verifyAdmin } = require('../middleware/auth');
 const { authLimiter, assessmentLimiter, adminLimiter, archiveLimiter, chatLimiter } = require('../middleware/rateLimiter');
-const { authServiceProxy, archiveServiceProxy, assessmentServiceProxy, notificationServiceProxy, socketIOProxy, chatbotServiceProxy } = require('../middleware/proxy');
+const { authServiceProxy, authV2ServiceProxy, archiveServiceProxy, assessmentServiceProxy, notificationServiceProxy, socketIOProxy, chatbotServiceProxy } = require('../middleware/proxy');
 const { adminServiceProxy } = require('../middleware/adminServiceProxy');
 
 const router = express.Router();
@@ -58,6 +58,24 @@ router.get('/auth/schools/distribution', verifyToken, authServiceProxy);
 
 // School users endpoint (with parameter)
 router.get('/auth/schools/:schoolId/users', verifyToken, authServiceProxy);
+
+// ===== AUTH V2 SERVICE ROUTES (Firebase-based) =====
+
+// Public auth v2 endpoints (no authentication required)
+router.post('/auth/v2/register', authLimiter, authV2ServiceProxy);
+router.post('/auth/v2/login', authLimiter, authV2ServiceProxy);
+router.post('/auth/v2/refresh', authLimiter, authV2ServiceProxy);
+router.post('/auth/v2/forgot-password', authLimiter, authV2ServiceProxy);
+router.post('/auth/v2/reset-password', authLimiter, authV2ServiceProxy);
+
+// Protected auth v2 endpoints (Firebase token required)
+// Note: These endpoints use Firebase token validation, not JWT
+router.post('/auth/v2/logout', authV2ServiceProxy);
+router.patch('/auth/v2/profile', authV2ServiceProxy);
+router.delete('/auth/v2/user', authV2ServiceProxy);
+
+// Health endpoint for auth v2
+router.get('/auth/v2/health', authV2ServiceProxy);
 
 // ===== ADMIN ROUTES =====
 

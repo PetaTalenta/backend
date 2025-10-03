@@ -79,6 +79,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       AUTH_SERVICE_URL: http://auth-service:3001
+      AUTH_V2_SERVICE_URL: http://auth-v2-service:3008
       ASSESSMENT_SERVICE_URL: http://assessment-service:3003
       ARCHIVE_SERVICE_URL: http://archive-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
@@ -161,6 +162,30 @@ services:
     restart: unless-stopped
     volumes:
       - ./auth-service/logs:/app/logs
+
+  # Auth Service V2 (Firebase-based)
+  auth-v2-service:
+    build:
+      context: ./auth-v2-service
+      dockerfile: Dockerfile
+    container_name: atma-auth-v2-service
+    environment:
+      NODE_ENV: production
+      PORT: 3008
+      # Firebase Configuration
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      FIREBASE_API_KEY: ${FIREBASE_API_KEY}
+      # Logging
+      LOG_LEVEL: info
+    ports:
+      - "3008:3008"
+    networks:
+      - atma-network
+    restart: unless-stopped
+    volumes:
+      - ./auth-v2-service/logs:/app/logs
 
   # Assessment Service
   assessment-service:

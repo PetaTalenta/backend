@@ -9,6 +9,7 @@ import 'prismjs/components/prism-http';
 
 // Import service data
 import { authServiceData } from './data/auth-service.js';
+import { authV2ServiceData } from './data/auth-v2-service.js';
 import { assessmentServiceData } from './data/assessment-service.js';
 import { archiveServiceData } from './data/archive-service.js';
 import { archiveServiceSharingDocs } from './data/archive-service-sharing-docs.js';
@@ -22,6 +23,7 @@ class DocumentationApp {
     this.services = {
       'global-endpoints': globalEndpointsData,
       'auth-service': authServiceData,
+      'auth-v2-service': authV2ServiceData,
       'assessment-service': assessmentServiceData,
       'archive-service': archiveServiceData,
       'archive-service-sharing': archiveServiceSharingDocs,
