@@ -5,6 +5,7 @@ class SocketService {
   constructor() {
     this.io = null;
     this.userConnections = new Map(); // userId -> Set of socket IDs
+    this.offlineNotificationCount = new Map(); // userId -> count of offline notifications
   }
 
   initialize(io) {
@@ -126,7 +127,7 @@ class SocketService {
   sendToUser(userId, event, data) {
     const room = `user:${userId}`;
     const socketCount = this.io.sockets.adapter.rooms.get(room)?.size || 0;
-    
+
     if (socketCount > 0) {
       this.io.to(room).emit(event, {
         ...data,
@@ -139,9 +140,25 @@ class SocketService {
         data: data
       });
 
+      // Reset offline notification count when user is online
+      if (this.offlineNotificationCount.has(userId)) {
+        this.offlineNotificationCount.delete(userId);
+      }
+
       return true;
     } else {
-      logger.warn(`No active connections for user ${userId}`, { event });
+      // Implement aggregated logging to reduce noise
+      const currentCount = (this.offlineNotificationCount.get(userId) || 0) + 1;
+      this.offlineNotificationCount.set(userId, currentCount);
+
+      // Only log every 10th notification or first notification to reduce log noise
+      if (currentCount === 1 || currentCount % 10 === 0) {
+        logger.debug(`User ${userId} offline - ${currentCount} notification(s) attempted`, {
+          event,
+          totalAttempts: currentCount
+        });
+      }
+
       return false;
     }
   }
