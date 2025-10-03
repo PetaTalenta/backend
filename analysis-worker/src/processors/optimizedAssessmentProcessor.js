@@ -209,12 +209,83 @@ const processAssessmentOptimized = async (jobData) => {
 
       // Handle duplicate job
       if (deduplicationResult.reason === 'RECENTLY_PROCESSED' && deduplicationResult.originalResultId) {
-        // Return existing result
-        logger.info('Returning existing result for duplicate job', {
+        // CRITICAL FIX: Update job status to completed and publish events for duplicate job
+        logger.info('Duplicate job detected - using cached result', {
           jobId,
           originalJobId: deduplicationResult.originalJobId,
           originalResultId: deduplicationResult.originalResultId
         });
+
+        try {
+          // Update job status to completed
+          await updateAnalysisJobStatus(jobId, 'completed', {
+            result_id: deduplicationResult.originalResultId,
+            message: 'Duplicate job - used cached result from previous analysis'
+          });
+
+          logger.info('Duplicate job status updated to completed', {
+            jobId,
+            originalJobId: deduplicationResult.originalJobId,
+            resultId: deduplicationResult.originalResultId
+          });
+
+          // Publish analysis completed event
+          try {
+            const eventPublisher = getEventPublisher();
+            await eventPublisher.publishAnalysisCompleted({
+              jobId,
+              userId,
+              userEmail: jobData.userEmail,
+              resultId: deduplicationResult.originalResultId,
+              assessmentName: finalAssessmentName,
+              processingTime: 0, // No actual processing
+              isDuplicate: true,
+              originalJobId: deduplicationResult.originalJobId
+            });
+
+            logger.info('Duplicate job completed event published', {
+              jobId,
+              resultId: deduplicationResult.originalResultId
+            });
+          } catch (eventError) {
+            logger.warn('Failed to publish duplicate job completed event, using fallback', {
+              jobId,
+              error: eventError.message
+            });
+
+            // Fallback to direct HTTP notification
+            notificationService.sendAnalysisCompleteNotification(
+              userId, 
+              jobId, 
+              deduplicationResult.originalResultId, 
+              'completed'
+            ).catch(fallbackError => {
+              logger.error('Fallback notification for duplicate job also failed', {
+                jobId,
+                error: fallbackError.message
+              });
+            });
+          }
+
+          // Audit: Job completed (duplicate)
+          auditLogger.logJobEvent(AUDIT_EVENTS.JOB_COMPLETED, jobData, {
+            resultId: deduplicationResult.originalResultId,
+            processingTime: 0,
+            isDuplicate: true,
+            originalJobId: deduplicationResult.originalJobId
+          });
+
+        } catch (statusError) {
+          logger.error('CRITICAL: Failed to update duplicate job status to completed', {
+            jobId,
+            originalJobId: deduplicationResult.originalJobId,
+            resultId: deduplicationResult.originalResultId,
+            error: statusError.message
+          });
+
+          // Even if status update fails, return the result
+          // The stuck job monitor will eventually catch and fix this
+        }
 
         return {
           success: true,
