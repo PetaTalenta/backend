@@ -4,3 +4,6 @@
 [submodule "assessment-service"]
 	path = assessment-service
 	url = https://github.com/PetaTalenta/assessment-service.git
+[submodule "archive-service"]
+	path = archive-service
+	url = https://github.com/PetaTalenta/archive-service.git
