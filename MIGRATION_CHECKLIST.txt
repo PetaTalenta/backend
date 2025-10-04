@@ -1,0 +1,231 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                  MIGRATION TO SUBMODULES - CHECKLIST                 ║
+║                    GitHub Organization: PetaTalenta                  ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ PHASE 1: PREPARATION                                                 │
+└──────────────────────────────────────────────────────────────────────┘
+
+  ☐ GitHub CLI installed (gh)
+      $ gh --version
+
+  ☐ GitHub authentication completed
+      $ gh auth login
+      → Choose: GitHub.com → HTTPS → Yes → Browser login
+
+  ☐ Git configured
+      $ git config --global user.name
+      $ git config --global user.email
+
+  ☐ All devices and tools ready
+
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ PHASE 2: PRE-FLIGHT CHECK                                           │
+└──────────────────────────────────────────────────────────────────────┘
+
+  ☐ Run preflight check
+      $ ./preflight-check.sh
+
+  ☐ All checks passed:
+      ☐ GitHub CLI authenticated
+      ☐ Git configured properly
+      ☐ Can access PetaTalenta organization
+      ☐ All service directories exist:
+          ☐ api-gateway
+          ☐ admin-service
+          ☐ analysis-worker
+          ☐ documentation-service
+          ☐ chatbot-service
+          ☐ notification-service
+      ☐ No uncommitted changes
+
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ PHASE 3: MIGRATION EXECUTION                                         │
+└──────────────────────────────────────────────────────────────────────┘
+
+  ☐ Run migration script
+      $ ./migrate-to-submodules.sh
+
+  ☐ Step 1: GitHub repositories created
+      ☐ PetaTalenta/api-gateway
+      ☐ PetaTalenta/admin-service
+      ☐ PetaTalenta/analysis-worker
+      ☐ PetaTalenta/documentation-service
+      ☐ PetaTalenta/chatbot-service
+      ☐ PetaTalenta/notification-service
+
+  ☐ Step 2: Code pushed to repositories
+      ☐ All services initialized with git
+      ☐ Initial commits created
+      ☐ Pushed to remote repositories
+
+  ☐ Step 3: Backup created
+      ☐ Backup location noted: __________________________
+
+  ☐ Step 4: Converted to submodules
+      ☐ .gitmodules file created
+      ☐ All services added as submodules
+      ☐ Changes committed to main repo
+
+  ☐ Step 5: Repositories made public
+      ☐ All 6 service repos are public
+      ☐ Main backend repo is public
+
+  ☐ Step 6: Docker services started
+      ☐ docker-compose down executed
+      ☐ docker-compose up -d executed
+      ☐ Services initialized (15s wait)
+
+  ☐ Step 7: ECONNREFUSED errors handled
+      ☐ analysis-worker checked
+      ☐ notification-service checked
+      ☐ Services restarted if needed
+
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ PHASE 4: VERIFICATION                                                │
+└──────────────────────────────────────────────────────────────────────┘
+
+  ☐ Verify GitHub repositories
+      $ gh repo list PetaTalenta
+
+  ☐ Check repository visibility (all should be public)
+      $ gh repo view PetaTalenta/api-gateway
+      $ gh repo view PetaTalenta/admin-service
+      $ gh repo view PetaTalenta/analysis-worker
+      $ gh repo view PetaTalenta/documentation-service
+      $ gh repo view PetaTalenta/chatbot-service
+      $ gh repo view PetaTalenta/notification-service
+      $ gh repo view PetaTalenta/backend
+
+  ☐ Verify submodules
+      $ git submodule status
+      → All should show commit hash and path
+
+  ☐ Check .gitmodules file
+      $ cat .gitmodules
+      → Should list all 6 submodules
+
+  ☐ Verify Docker services
+      $ docker-compose ps
+      → All services should be "Up"
+
+  ☐ Check for errors in logs
+      $ docker-compose logs analysis-worker | grep -i error
+      $ docker-compose logs notification-service | grep -i error
+
+  ☐ Verify no ECONNREFUSED
+      $ docker-compose logs analysis-worker | grep ECONNREFUSED
+      $ docker-compose logs notification-service | grep ECONNREFUSED
+      → Should return empty (no matches)
+
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ PHASE 5: POST-MIGRATION                                              │
+└──────────────────────────────────────────────────────────────────────┘
+
+  ☐ Test cloning repository
+      $ cd /tmp
+      $ git clone --recursive https://github.com/PetaTalenta/backend.git test-clone
+      $ cd test-clone
+      $ ls -la api-gateway/  # Should have files
+
+  ☐ Test submodule update
+      $ git submodule update --remote --merge
+
+  ☐ Test making changes (optional)
+      $ cd api-gateway/
+      $ touch test-file.txt
+      $ git add test-file.txt
+      $ git commit -m "Test commit"
+      $ git push
+      $ cd ..
+      $ git add api-gateway
+      $ git commit -m "Update api-gateway submodule"
+
+  ☐ Document backup location
+      Backup: /home/rayin/Desktop/atma-backend-backup-______________
+
+  ☐ Update team documentation
+      ☐ Notify team about new structure
+      ☐ Share PANDUAN_MIGRASI_SUBMODULES.md
+      ☐ Share QUICK_REFERENCE.txt
+
+  ☐ Update CI/CD pipelines (if applicable)
+      ☐ Update clone commands to use --recursive
+      ☐ Update deployment scripts
+      ☐ Update Docker build contexts
+
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ TROUBLESHOOTING (IF NEEDED)                                          │
+└──────────────────────────────────────────────────────────────────────┘
+
+  Docker ECONNREFUSED Issues:
+    $ ./fix-docker-econnrefused.sh
+
+  Submodule Not Initialized:
+    $ git submodule update --init --recursive
+
+  Service Won't Start:
+    $ docker-compose restart <service-name>
+    $ docker-compose logs -f <service-name>
+
+  Need to Rollback:
+    $ cd /home/rayin/Desktop
+    $ rm -rf atma-backend
+    $ mv atma-backend-backup-YYYYMMDD_HHMMSS atma-backend
+    $ cd atma-backend
+    $ docker-compose up -d
+
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ COMPLETION SUMMARY                                                   │
+└──────────────────────────────────────────────────────────────────────┘
+
+  Date Completed: ____________________
+
+  Repositories Created:
+    ☐ https://github.com/PetaTalenta/api-gateway
+    ☐ https://github.com/PetaTalenta/admin-service
+    ☐ https://github.com/PetaTalenta/analysis-worker
+    ☐ https://github.com/PetaTalenta/documentation-service
+    ☐ https://github.com/PetaTalenta/chatbot-service
+    ☐ https://github.com/PetaTalenta/notification-service
+    ☐ https://github.com/PetaTalenta/backend (made public)
+
+  Services Status:
+    Docker Services: ☐ All Running  ☐ Some Issues  ☐ Need Attention
+    ECONNREFUSED:    ☐ None         ☐ Fixed        ☐ Persistent
+
+  Notes:
+  ___________________________________________________________________
+  ___________________________________________________________________
+  ___________________________________________________________________
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                    ✅ MIGRATION COMPLETE                             ║
+║                                                                      ║
+║  All services are now independent repositories!                     ║
+║  Docker services are running and monitored.                         ║
+║  Backup available for rollback if needed.                           ║
+║                                                                      ║
+║  🎉 Congratulations! Your backend is now modular! 🎉                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+
+Quick Commands for Daily Use:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Clone:           git clone --recursive https://github.com/PetaTalenta/backend.git
+  Update:          git submodule update --remote --merge
+  Docker Status:   docker-compose ps
+  Docker Logs:     docker-compose logs -f <service>
+  Fix Errors:      ./fix-docker-econnrefused.sh
+  Restart Service: docker-compose restart <service>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
