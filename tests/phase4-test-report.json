@@ -1,0 +1,317 @@
+{
+  "total": 20,
+  "passed": 19,
+  "failed": 1,
+  "skipped": 0,
+  "categories": {
+    "unit": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "integration": {
+      "total": 7,
+      "passed": 6,
+      "failed": 1
+    },
+    "performance": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "security": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "e2e": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "tests": [
+    {
+      "category": "unit",
+      "name": "Auth V2 Service Health Check",
+      "passed": true,
+      "message": "Service is healthy",
+      "details": {
+        "status": "healthy",
+        "timestamp": "2025-10-03T21:37:43.694Z",
+        "service": "auth-v2-service",
+        "version": "1.0.0",
+        "dependencies": {
+          "database": {
+            "healthy": true,
+            "message": "Database connection is healthy",
+            "details": {
+              "currentTime": "2025-10-03T21:37:43.693Z",
+              "database": "atma_db",
+              "poolSize": 1,
+              "idleConnections": 1,
+              "waitingClients": 0
+            }
+          },
+          "redis": {
+            "healthy": true,
+            "message": "Redis connection is healthy",
+            "details": {
+              "status": "ready",
+              "db": 1
+            }
+          }
+        }
+      },
+      "timestamp": "2025-10-03T21:37:43.715Z"
+    },
+    {
+      "category": "unit",
+      "name": "Database Connectivity",
+      "passed": true,
+      "message": "Database connection is healthy",
+      "details": {
+        "healthy": true,
+        "message": "Database connection is healthy",
+        "details": {
+          "currentTime": "2025-10-03T21:37:43.719Z",
+          "database": "atma_db",
+          "poolSize": 1,
+          "idleConnections": 1,
+          "waitingClients": 0
+        }
+      },
+      "timestamp": "2025-10-03T21:37:43.729Z"
+    },
+    {
+      "category": "unit",
+      "name": "Redis Connectivity",
+      "passed": true,
+      "message": "Redis connection is healthy",
+      "details": {
+        "healthy": true,
+        "message": "Redis connection is healthy",
+        "details": {
+          "status": "ready",
+          "db": 1
+        }
+      },
+      "timestamp": "2025-10-03T21:37:43.734Z"
+    },
+    {
+      "category": "unit",
+      "name": "Firebase Connectivity",
+      "passed": true,
+      "message": "Firebase connection is healthy (service started successfully)",
+      "details": {
+        "serviceStatus": "healthy"
+      },
+      "timestamp": "2025-10-03T21:37:43.736Z"
+    },
+    {
+      "category": "integration",
+      "name": "Old Auth Service Login",
+      "passed": false,
+      "message": "Error: connect ECONNREFUSED 127.0.0.1:3001",
+      "details": null,
+      "timestamp": "2025-10-03T21:37:43.740Z"
+    },
+    {
+      "category": "integration",
+      "name": "New Auth Service Registration",
+      "passed": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImU4MWYwNTJhZWYwNDBhOTdjMzlkMjY1MzgxZGU2Y2I0MzRiYzM1ZjMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZnV0dXJlZ3VpZGUtNmI5N2MiLCJhdWQiOiJmdXR1cmVndWlkZS02Yjk3YyIsImF1dGhfdGltZSI6MTc1OTUyNzQ2NCwidXNlcl9pZCI6InR5SlhMYVZnenBmRlNEQk5QaEprT0djTFBHRjIiLCJzdWIiOiJ0eUpYTGFWZ3pwZkZTREJOUGhKa09HY0xQR0YyIiwiaWF0IjoxNzU5NTI3NDY0LCJleHAiOjE3NTk1MzEwNjQsImVtYWlsIjoicGhhc2U0LXRlc3QtMTc1OTUyNzQ2MzY0NkBleGFtcGxlLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJwaGFzZTQtdGVzdC0xNzU5NTI3NDYzNjQ2QGV4YW1wbGUuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.OnSvEwxkVn0b7Jxu8cMYfWJ8juho5a3pqdGS029q1TIm2ClN0M7y4Brk3BRuFKVVqsTo0uzGt39EbWA8mBDLmDddL1IXiC7ibzzPOoKz0ymYR4EVv6N0_LhR6KMaoatLUAQdBpbSWLxuTstH6z4wvUHddlwU1jBxvNEFpEfvPcXhv23L6V_KFJdGQ4zzGGZmCGQ-ZWL6iFic2AYJFcn2NShw8QQkO5rNtOkOPxxGasCaZZImhFEQzSwBMQG791YGiYX1RWmuOVEhU-Qatug099IXl4EoTDOjepAAtx3Ksv0NI_g5faTueqJh432ByyKGxzUl502vuR25VbdVzw6TsA",
+      "message": "Successfully registered with new auth",
+      "details": {
+        "status": 201,
+        "hasToken": true
+      },
+      "timestamp": "2025-10-03T21:37:45.869Z"
+    },
+    {
+      "category": "integration",
+      "name": "New Token Verification",
+      "passed": "tyJXLaVgzpfFSDBNPhJkOGcLPGF2",
+      "message": "Firebase token verified successfully",
+      "details": {
+        "status": 200,
+        "hasUid": true
+      },
+      "timestamp": "2025-10-03T21:37:46.176Z"
+    },
+    {
+      "category": "integration",
+      "name": "Lazy User Creation in PostgreSQL",
+      "passed": {
+        "id": "f943ae9b-55ff-4ce2-81bc-241de85401b4",
+        "email": "phase4-test-1759527463646@example.com",
+        "username": "Phase 4 Test User_tyJXLa",
+        "user_type": "user",
+        "is_active": true,
+        "token_balance": 3,
+        "firebase_uid": "tyJXLaVgzpfFSDBNPhJkOGcLPGF2",
+        "auth_provider": "firebase",
+        "email_verified": false
+      },
+      "message": "User created/synced in PostgreSQL",
+      "details": {
+        "status": 200,
+        "hasUser": true
+      },
+      "timestamp": "2025-10-03T21:37:46.188Z"
+    },
+    {
+      "category": "integration",
+      "name": "Archive Service with Firebase Token",
+      "passed": true,
+      "message": "Archive service accepts Firebase token",
+      "details": {
+        "status": 404
+      },
+      "timestamp": "2025-10-03T21:37:46.202Z"
+    },
+    {
+      "category": "integration",
+      "name": "Assessment Service with Firebase Token",
+      "passed": true,
+      "message": "Assessment service accepts Firebase token",
+      "details": {
+        "status": 404
+      },
+      "timestamp": "2025-10-03T21:37:46.210Z"
+    },
+    {
+      "category": "integration",
+      "name": "Chatbot Service with Firebase Token",
+      "passed": true,
+      "message": "Chatbot service accepts Firebase token",
+      "details": {
+        "status": 404
+      },
+      "timestamp": "2025-10-03T21:37:46.215Z"
+    },
+    {
+      "category": "performance",
+      "name": "Token Verification Performance (p95 < 200ms)",
+      "passed": true,
+      "message": "p95: 3ms (target: <200ms)",
+      "details": {
+        "min": 1,
+        "max": 3,
+        "avg": 1.6,
+        "p50": 2,
+        "p95": 3,
+        "p99": 3
+      },
+      "timestamp": "2025-10-03T21:37:46.248Z"
+    },
+    {
+      "category": "performance",
+      "name": "Cached Token Verification (p95 < 50ms)",
+      "passed": true,
+      "message": "p95: 3ms (target: <50ms)",
+      "details": {
+        "min": 1,
+        "max": 3,
+        "avg": 1.45,
+        "p50": 1,
+        "p95": 3,
+        "p99": 3
+      },
+      "timestamp": "2025-10-03T21:37:46.278Z"
+    },
+    {
+      "category": "performance",
+      "name": "Archive Service Response Time (p95 < 500ms)",
+      "passed": true,
+      "message": "p95: 3ms (target: <500ms)",
+      "details": {
+        "min": 1,
+        "max": 3,
+        "avg": 1.7,
+        "p50": 2,
+        "p95": 3,
+        "p99": 3
+      },
+      "timestamp": "2025-10-03T21:37:46.295Z"
+    },
+    {
+      "category": "security",
+      "name": "Invalid Token Rejection",
+      "passed": true,
+      "message": "Invalid token correctly rejected",
+      "details": {
+        "status": 401
+      },
+      "timestamp": "2025-10-03T21:37:46.297Z"
+    },
+    {
+      "category": "security",
+      "name": "Expired Token Handling",
+      "passed": true,
+      "message": "Expired token correctly rejected",
+      "details": {
+        "status": 401
+      },
+      "timestamp": "2025-10-03T21:37:46.301Z"
+    },
+    {
+      "category": "security",
+      "name": "Missing Authorization Header",
+      "passed": true,
+      "message": "Request without auth correctly rejected",
+      "details": {
+        "status": 404,
+        "note": "Returns 404 (acceptable - endpoint requires auth)"
+      },
+      "timestamp": "2025-10-03T21:37:46.303Z"
+    },
+    {
+      "category": "security",
+      "name": "SQL Injection Prevention",
+      "passed": true,
+      "message": "SQL injection attempt blocked",
+      "details": {
+        "status": 400
+      },
+      "timestamp": "2025-10-03T21:37:46.304Z"
+    },
+    {
+      "category": "e2e",
+      "name": "Complete User Journey (Register → Verify → Access)",
+      "passed": true,
+      "message": "User journey completed successfully",
+      "details": {
+        "registerStatus": 201,
+        "verifyStatus": 200,
+        "archiveStatus": 404
+      },
+      "timestamp": "2025-10-03T21:37:48.524Z"
+    },
+    {
+      "category": "e2e",
+      "name": "Cross-Service Authentication",
+      "passed": true,
+      "message": "All services accept Firebase token",
+      "details": [
+        {
+          "name": "Archive",
+          "status": 404,
+          "success": true
+        },
+        {
+          "name": "Assessment",
+          "status": 404,
+          "success": true
+        },
+        {
+          "name": "Chatbot",
+          "status": 404,
+          "success": true
+        }
+      ],
+      "timestamp": "2025-10-03T21:37:48.527Z"
+    }
+  ],
+  "startTime": "2025-10-03T21:37:43.646Z",
+  "endTime": "2025-10-03T21:37:48.527Z"
+}

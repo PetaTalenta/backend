@@ -1,27 +1,9 @@
-const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
+const unifiedAuthService = require('../services/unifiedAuthService');
 
 /**
- * Verify JWT token
- * @param {string} token - JWT token
- * @returns {Object} Decoded token payload
- */
-const verifyToken = (token) => {
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      throw new Error('Token has expired');
-    } else if (error.name === 'JsonWebTokenError') {
-      throw new Error('Invalid token format');
-    } else {
-      throw new Error('Token verification failed');
-    }
-  }
-};
-
-/**
- * Middleware to authenticate JWT token
+ * Unified authentication middleware
+ * Supports both JWT (legacy) and Firebase tokens
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
@@ -72,58 +54,47 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Verify token
-    const decoded = verifyToken(token);
+    // Verify token (supports both JWT and Firebase)
+    const user = await unifiedAuthService.verifyToken(token);
 
-    logger.info('Token verification result', {
-      hasDecoded: !!decoded,
-      decodedId: decoded?.id,
-      decodedEmail: decoded?.email,
-      url: req.originalUrl
-    });
-
-    // For chatbot service, we'll make a request to auth service to validate user
-    // For now, we'll use a simplified approach and trust the JWT payload
-    if (!decoded.id) {
-      logger.warn('Authentication failed: Invalid token payload', {
+    if (!user || !user.id) {
+      logger.warn('Authentication failed: Invalid token', {
         ip: req.ip,
         requestId: req.id,
-        decoded: decoded
+        url: req.originalUrl
       });
       return res.status(401).json({
         success: false,
         error: {
           code: 'UNAUTHORIZED',
-          message: 'Invalid token payload'
+          message: 'Invalid or expired token'
         }
       });
     }
 
     // Attach user information to request
     req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      user_type: decoded.user_type || 'user'
+      id: user.id,
+      email: user.email,
+      user_type: user.user_type || 'user',
+      username: user.username,
+      auth_provider: user.auth_provider,
+      tokenType: user.tokenType
     };
     req.token = token;
 
-    logger.info('User attached to request', {
+    logger.info('User authenticated successfully', {
       userId: req.user.id,
       userEmail: req.user.email,
-      url: req.originalUrl
-    });
-
-    logger.debug('User authenticated successfully', {
-      userId: req.user.id,
-      email: req.user.email,
-      userType: req.user.user_type,
+      tokenType: user.tokenType,
+      authProvider: user.auth_provider,
       url: req.originalUrl,
       requestId: req.id
     });
 
     next();
   } catch (error) {
-    logger.warn('Authentication failed', {
+    logger.error('Authentication error', {
       error: error.message,
       ip: req.ip,
       userAgent: req.get('User-Agent'),
@@ -133,9 +104,9 @@ const authenticateToken = async (req, res, next) => {
 
     let statusCode = 401;
     let errorCode = 'UNAUTHORIZED';
-    let errorMessage = 'Invalid or expired token';
+    let errorMessage = 'Authentication failed';
 
-    if (error.message === 'Token has expired') {
+    if (error.message && error.message.includes('expired')) {
       errorCode = 'TOKEN_EXPIRED';
       errorMessage = 'Token has expired';
     } else if (error.message === 'Invalid token format') {
@@ -248,6 +219,5 @@ const setUserContext = async (req, res, next) => {
 module.exports = {
   authenticateToken,
   authenticateInternalService,
-  setUserContext,
-  verifyToken
+  setUserContext
 };

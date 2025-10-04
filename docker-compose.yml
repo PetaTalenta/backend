@@ -177,10 +177,32 @@ services:
       FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
       FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
       FIREBASE_API_KEY: ${FIREBASE_API_KEY}
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: auth
+      DB_POOL_MAX: 10
+      DB_POOL_MIN: 2
+      DB_POOL_ACQUIRE: 30000
+      DB_POOL_IDLE: 10000
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_DB: 1
+      REDIS_KEY_PREFIX: "atma:auth-v2:"
       # Logging
       LOG_LEVEL: info
     ports:
       - "3008:3008"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - atma-network
     restart: unless-stopped
