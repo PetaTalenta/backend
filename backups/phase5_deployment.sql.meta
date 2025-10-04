@@ -1,0 +1,16 @@
+Backup Metadata
+===============
+Timestamp: 20251004_082658
+Database: atma_db
+Container: atma-postgres
+Backup File: backups/phase5_deployment.sql
+Size: 1.0K
+Lines: 4368
+
+Database Statistics:
+- Total Users: 457
+- Firebase Users: 12
+- Local Users: 445
+
+Created by: backup-database.sh
+Phase: 5 - Migration & Deployment
