@@ -7,3 +7,21 @@
 [submodule "archive-service"]
 	path = archive-service
 	url = https://github.com/PetaTalenta/archive-service.git
+[submodule "api-gateway"]
+	path = api-gateway
+	url = https://github.com/PetaTalenta/api-gateway.git
+[submodule "admin-service"]
+	path = admin-service
+	url = https://github.com/PetaTalenta/admin-service.git
+[submodule "analysis-worker"]
+	path = analysis-worker
+	url = https://github.com/PetaTalenta/analysis-worker.git
+[submodule "documentation-service"]
+	path = documentation-service
+	url = https://github.com/PetaTalenta/documentation-service.git
+[submodule "chatbot-service"]
+	path = chatbot-service
+	url = https://github.com/PetaTalenta/chatbot-service.git
+[submodule "notification-service"]
+	path = notification-service
+	url = https://github.com/PetaTalenta/notification-service.git
