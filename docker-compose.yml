@@ -326,6 +326,8 @@ services:
       PORT: 3005
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      AUTH_V2_SERVICE_URL: http://auth-v2-service:3008
       CORS_ORIGIN: "*"
       LOG_LEVEL: info
       LOG_FILE: logs/notification-service.log
