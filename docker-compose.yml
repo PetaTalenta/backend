@@ -17,7 +17,7 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database_backup.sql:/docker-entrypoint-initdb.d/01-database_backup.sql
+      # - ./database_backup.sql:/docker-entrypoint-initdb.d/01-database_backup.sql
     ports:
       - "5432:5432"
     networks:
@@ -129,6 +129,7 @@ services:
       DB_POOL_EVICT: 10000
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 7d
+      AUTH_V2_SERVICE_URL: http://auth-v2-service:3008
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}

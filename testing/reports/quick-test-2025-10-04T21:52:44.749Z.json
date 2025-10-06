@@ -1,0 +1,77 @@
+{
+  "total": 14,
+  "passed": 1,
+  "failed": 13,
+  "tests": [
+    {
+      "name": "Get Firebase Token",
+      "status": "passed",
+      "duration": 1112
+    },
+    {
+      "name": "Get JWT Token",
+      "status": "failed",
+      "error": "No token"
+    },
+    {
+      "name": "Archive - List Jobs (Firebase)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Archive - List Jobs (JWT)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Archive - Create Job (Firebase)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Archive - Create Job (JWT)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Assessment - List (Firebase)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Assessment - List (JWT)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Chatbot - List Conversations (Firebase)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Chatbot - List Conversations (JWT)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Performance - 20 Concurrent Requests (Mixed)",
+      "status": "failed",
+      "error": "Success rate 0% < 95%"
+    },
+    {
+      "name": "Performance - Token Caching",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Security - Invalid Token Rejected",
+      "status": "failed",
+      "error": "Expected 401, got 404"
+    },
+    {
+      "name": "Security - Missing Token Rejected",
+      "status": "failed",
+      "error": "Expected 401, got 404"
+    }
+  ]
+}

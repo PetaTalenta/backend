@@ -1,0 +1,24 @@
+{
+  "total": 2,
+  "passed": 1,
+  "failed": 1,
+  "tests": [
+    {
+      "name": "Login with Firebase Auth-V2",
+      "status": "passed",
+      "duration": 759,
+      "result": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImU4MWYwNTJhZWYwNDBhOTdjMzlkMjY1MzgxZGU2Y2I0MzRiYzM1ZjMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoicmF5aW5haWwgdXBkYXRlZCIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9mdXR1cmVndWlkZS02Yjk3YyIsImF1ZCI6ImZ1dHVyZWd1aWRlLTZiOTdjIiwiYXV0aF90aW1lIjoxNzU5NjE0MTAyLCJ1c2VyX2lkIjoicGlEMTAyanNVNGhJdkZlb3ZxbGJGdVR3bm1IMiIsInN1YiI6InBpRDEwMmpzVTRoSXZGZW92cWxiRnVUd25tSDIiLCJpYXQiOjE3NTk2MTQxMDIsImV4cCI6MTc1OTYxNzcwMiwiZW1haWwiOiJrYXN5a29pQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJrYXN5a29pQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.BiEMKtrjuMnEylurIjXlt0qAQ4MgQPvjqQLSaw2Ac4JVPcuN9sRfAPgfOiSV9bJ_iRItoSw4ZNz3jS-F7RcvFX-yGyjC53mqTnK-z5tCr3hAfhRn3YKdRajjaTGPPRbYYkGprtzCqZx4lADJkOLfX0PbJVyZ7LK00mQaO1kFdEAkcOJyZ1iVXuYS4_ijgNl_SS6YpMzg0_0ZuZaVJBCLu3zu4mzI8B3bJ1PLXZX7N4lFALhn3HNebR3CSaILfPCSLPESvYLGFD0YXOKbx7wGzhJepkjKomjqv23rYqG0iaVRI7CuWCqAK-1b71foDMY2m0Z6aY0JAKTLC03P3e60JA",
+        "userId": "piD102jsU4hIvFeovqlbFuTwnmH2"
+      }
+    },
+    {
+      "name": "Verify Firebase Token",
+      "status": "failed",
+      "error": "User ID mismatch"
+    }
+  ],
+  "duration": 1.181,
+  "successRate": "50.00",
+  "timestamp": "2025-10-04T21:41:42.951Z"
+}

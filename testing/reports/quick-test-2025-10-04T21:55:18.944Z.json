@@ -1,0 +1,77 @@
+{
+  "total": 14,
+  "passed": 10,
+  "failed": 4,
+  "tests": [
+    {
+      "name": "Get Firebase Token",
+      "status": "passed",
+      "duration": 682
+    },
+    {
+      "name": "Get JWT Token",
+      "status": "passed",
+      "duration": 152
+    },
+    {
+      "name": "Archive - List Jobs (Firebase)",
+      "status": "passed",
+      "duration": 486
+    },
+    {
+      "name": "Archive - List Jobs (JWT)",
+      "status": "passed",
+      "duration": 70
+    },
+    {
+      "name": "Archive - Create Job (Firebase)",
+      "status": "failed",
+      "error": "Request failed with status code 403"
+    },
+    {
+      "name": "Archive - Create Job (JWT)",
+      "status": "failed",
+      "error": "Request failed with status code 403"
+    },
+    {
+      "name": "Assessment - Get Stats (Firebase)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Assessment - Get Stats (JWT)",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "name": "Chatbot - List Conversations (Firebase)",
+      "status": "passed",
+      "duration": 57
+    },
+    {
+      "name": "Chatbot - List Conversations (JWT)",
+      "status": "passed",
+      "duration": 38
+    },
+    {
+      "name": "Performance - 20 Concurrent Requests (Mixed)",
+      "status": "passed",
+      "duration": 235
+    },
+    {
+      "name": "Performance - Token Caching",
+      "status": "passed",
+      "duration": 21
+    },
+    {
+      "name": "Security - Invalid Token Rejected",
+      "status": "passed",
+      "duration": 10
+    },
+    {
+      "name": "Security - Missing Token Rejected",
+      "status": "passed",
+      "duration": 4
+    }
+  ]
+}

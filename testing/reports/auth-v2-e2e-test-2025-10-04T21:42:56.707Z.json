@@ -1,0 +1,48 @@
+{
+  "total": 3,
+  "passed": 2,
+  "failed": 1,
+  "tests": [
+    {
+      "name": "Login with Firebase Auth-V2",
+      "status": "passed",
+      "duration": 721,
+      "result": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImU4MWYwNTJhZWYwNDBhOTdjMzlkMjY1MzgxZGU2Y2I0MzRiYzM1ZjMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoicmF5aW5haWwgdXBkYXRlZCIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9mdXR1cmVndWlkZS02Yjk3YyIsImF1ZCI6ImZ1dHVyZWd1aWRlLTZiOTdjIiwiYXV0aF90aW1lIjoxNzU5NjE0MTc1LCJ1c2VyX2lkIjoicGlEMTAyanNVNGhJdkZlb3ZxbGJGdVR3bm1IMiIsInN1YiI6InBpRDEwMmpzVTRoSXZGZW92cWxiRnVUd25tSDIiLCJpYXQiOjE3NTk2MTQxNzUsImV4cCI6MTc1OTYxNzc3NSwiZW1haWwiOiJrYXN5a29pQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJrYXN5a29pQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.MKAWjaNQ5cx9QvlTJJ0kOw77vgRyIELIGVVwtc7nIkvgVINuWMCCi4gZvMSJosF3hImAIKmI8OobLsN0VLledgMt8_Ycs8-uhfQMj1Oylhtwe7Znz-JDq0AqX6O32EKy3nr7Lis15cKeu2SCCpBgDDiArF6PncqOCGieJjAAbHorYhyCbPMmqrrmFYC0OuNYvSDN1zVUiAVhMqIw0wAxb006MIxjIeOWVxq8B_UPujB-cjsnlOsMCg_GYhn0ibtM-0tC9CyW-nT7LR284yKZFLnurI9OQIs_4sspb0gw-MpPVRxyMAEUG08hCZ4Skz1sWTAggxtGlUBsCWIP-gB9JQ",
+        "userId": "piD102jsU4hIvFeovqlbFuTwnmH2"
+      }
+    },
+    {
+      "name": "Verify Firebase Token",
+      "status": "passed",
+      "duration": 319,
+      "result": {
+        "valid": true,
+        "user": {
+          "id": "f843ce6b-0f41-4e3a-9c53-055ba85e4c61",
+          "email": "kasykoi@gmail.com",
+          "username": "rayinail updated",
+          "user_type": "user",
+          "is_active": true,
+          "token_balance": 100000016,
+          "firebase_uid": "piD102jsU4hIvFeovqlbFuTwnmH2",
+          "auth_provider": "hybrid",
+          "email_verified": false
+        },
+        "firebaseUid": "piD102jsU4hIvFeovqlbFuTwnmH2",
+        "email": "kasykoi@gmail.com",
+        "emailVerified": false,
+        "tokenExpiration": 1759617775,
+        "issuedAt": 1759614175
+      }
+    },
+    {
+      "name": "Get User Profile",
+      "status": "failed",
+      "error": "Request failed with status code 404"
+    }
+  ],
+  "duration": 1.046,
+  "successRate": "66.67",
+  "timestamp": "2025-10-04T21:42:56.707Z"
+}
