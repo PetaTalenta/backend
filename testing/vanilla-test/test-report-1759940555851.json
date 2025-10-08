@@ -1,0 +1,84 @@
+{
+  "timestamp": "2025-10-08T16:22:35.843Z",
+  "testEmail": "test_user_1759940477672@example.com",
+  "baseURL": "https://api.futureguide.id",
+  "results": [
+    {
+      "name": "User Registration",
+      "success": true,
+      "duration": 3024
+    },
+    {
+      "name": "First Logout",
+      "success": true,
+      "duration": 723
+    },
+    {
+      "name": "Re-login",
+      "success": true,
+      "duration": 770
+    },
+    {
+      "name": "WebSocket Connection",
+      "success": true,
+      "duration": 1017
+    },
+    {
+      "name": "Get User Profile",
+      "success": true,
+      "duration": 154
+    },
+    {
+      "name": "Get Archive Data",
+      "success": true,
+      "duration": 466
+    },
+    {
+      "name": "Submit Assessment",
+      "success": true,
+      "duration": 2424
+    },
+    {
+      "name": "Wait for WebSocket Notification",
+      "success": true,
+      "duration": 31037
+    },
+    {
+      "name": "Poll Job Status",
+      "success": true,
+      "duration": 162
+    },
+    {
+      "name": "Get Result Details",
+      "success": true,
+      "duration": 112
+    },
+    {
+      "name": "Create Chatbot Conversation",
+      "success": true,
+      "duration": 6350
+    },
+    {
+      "name": "Send Chatbot Messages",
+      "success": true,
+      "duration": 31229
+    },
+    {
+      "name": "Get Conversation Messages",
+      "success": true,
+      "duration": 161
+    },
+    {
+      "name": "Final Logout",
+      "success": true,
+      "duration": 521
+    }
+  ],
+  "state": {
+    "jobId": "c0883331-48b7-4bf1-bb7d-d45947ff694d",
+    "resultId": "eed94421-ca94-4927-9360-5c736cb1812b",
+    "conversationId": "93d36784-b98b-4ce0-8400-bf214f7d3804",
+    "wsAuthenticated": true,
+    "wsEventsReceived": 2
+  }
+}

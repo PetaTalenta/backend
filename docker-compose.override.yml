@@ -140,6 +140,9 @@ services:
       dockerfile: Dockerfile
       args:
         INCLUDE_DEV_DEPS: "true"
+    # All environment variables are loaded from root .env file
+    # No need to override specific variables here - they will be injected by docker-compose
+    env_file: ./.env
     environment:
       NODE_ENV: development
     command: npm run dev
