@@ -196,6 +196,8 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_DB: 1
       REDIS_KEY_PREFIX: "atma:auth-v2:"
+      # Token Configuration
+      DEFAULT_TOKEN_BALANCE: 3
       # Logging
       LOG_LEVEL: info
     ports:
