@@ -54,6 +54,10 @@ test-results/
 *.spec.log
 test-results-*.log
 
+# Testing and scripts directories
+**/testing/
+**/scripts/
+
 # IDE and editors
 .vscode/
 .idea/

@@ -520,7 +520,7 @@ services:
     volumes:
       - ./analysis-worker/logs:/app/logs
     deploy:
-      replicas: 2
+      replicas: 10
 
 
   # Admin Service (commented out - no volumes)
