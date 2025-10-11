@@ -12,6 +12,11 @@ All endpoints (except login) require JWT authentication via the `Authorization` 
 Authorization: Bearer <jwt_token>
 ```
 
+**Testing Credentials:**
+- Email: `superadmin@atma.com`
+- Password: `admin123`
+- User Type: `admin`
+
 ## Endpoints
 
 ## Phase 1: Core Admin Endpoints
@@ -319,15 +324,16 @@ limit: number (optional, default: 10, min: 1, max: 100)
         "user_id": "uuid",
         "admin_id": "uuid",
         "activity_type": "token_balance_update",
-        "activity_description": "Admin updated token balance for user: uuid",
-        "metadata": {
+        "activity_type": "token_balance_update",
+        "activity_data": {
           "userId": "uuid",
           "action": "add|deduct",
           "amount": 5,
           "endpoint": "/admin/direct/users/uuid/tokens/add",
           "method": "POST",
           "statusCode": 200,
-          "success": true
+          "success": true,
+          "description": "Admin updated token balance for user: uuid"
         },
         "ip_address": "127.0.0.1",
         "user_agent": "curl/7.68.0",
