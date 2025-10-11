@@ -14,6 +14,8 @@ Authorization: Bearer <jwt_token>
 
 ## Endpoints
 
+## Phase 1: Core Admin Endpoints
+
 ### 1. Admin Authentication
 
 #### POST `/admin/direct/login`
@@ -366,6 +368,240 @@ Database connection health check.
 }
 ```
 
+## Phase 2: Advanced Admin Endpoints & Analytics
+
+### Analytics Endpoints
+
+#### GET `/admin/direct/analytics/users/overview`
+Get comprehensive user analytics overview.
+
+**Query Parameters:**
+- `period` (optional): `daily`, `weekly`, `monthly` (default: `daily`)
+- `startDate` (optional): ISO date string
+- `endDate` (optional): ISO date string
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "overview": {
+      "totalUsers": 315,
+      "activeUsers": 194,
+      "newRegistrations": 215,
+      "activeUserRate": "61.59"
+    },
+    "trends": [...],
+    "distribution": [...]
+  }
+}
+```
+
+#### GET `/admin/direct/analytics/users/activity`
+Get user activity analytics.
+
+#### GET `/admin/direct/analytics/users/demographics`
+Get user demographic analysis.
+
+#### GET `/admin/direct/analytics/users/retention`
+Get user retention analysis.
+
+### Assessment Management Endpoints
+
+#### GET `/admin/direct/assessments/overview`
+Get assessment overview and statistics.
+
+#### GET `/admin/direct/assessments/:resultId/details`
+Get detailed assessment result analysis.
+
+#### GET `/admin/direct/assessments/raw-analysis`
+Get raw analysis data for assessments.
+
+#### GET `/admin/direct/assessments/performance`
+Get assessment performance metrics.
+
+#### GET `/admin/direct/assessments/trends`
+Get assessment trend analysis.
+
+### Token Management Endpoints
+
+#### GET `/admin/direct/tokens/overview`
+Get token usage overview and statistics.
+
+#### GET `/admin/direct/tokens/transactions`
+Get token transaction history.
+
+#### GET `/admin/direct/tokens/analytics`
+Get token usage analytics.
+
+#### POST `/admin/direct/tokens/bulk-operations`
+Perform bulk token operations.
+
+### Job Monitoring Endpoints
+
+#### GET `/admin/direct/jobs/monitor`
+Get job monitoring dashboard data.
+
+#### GET `/admin/direct/jobs/queue/status`
+Get job queue status information.
+
+#### GET `/admin/direct/jobs/analytics`
+Get job processing analytics.
+
+#### POST `/admin/direct/jobs/:jobId/retry`
+Retry a failed job.
+
+#### DELETE `/admin/direct/jobs/:jobId`
+Cancel a pending or processing job.
+
+### System Performance Endpoints
+
+#### GET `/admin/direct/system/metrics`
+Get system performance metrics.
+
+#### GET `/admin/direct/system/health`
+Get comprehensive system health check.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "overallStatus": "healthy",
+    "components": {
+      "database": {
+        "status": "healthy",
+        "responseTime": 45,
+        "lastChecked": "2025-10-11T01:38:20.650Z"
+      },
+      "jobQueue": {
+        "status": "healthy",
+        "metrics": {
+          "pendingJobs": 0,
+          "processingJobs": 0,
+          "recentFailures": 0
+        }
+      },
+      "services": {...}
+    }
+  }
+}
+```
+
+#### GET `/admin/direct/system/database/stats`
+Get database performance statistics.
+
+#### GET `/admin/direct/system/errors`
+Get error tracking and analysis.
+
+## Phase 3: Comprehensive Monitoring & Security Features
+
+### Advanced Security Features
+
+#### GET `/admin/direct/security/audit`
+Get security audit report.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "failedLogins": [...],
+    "suspiciousIPs": [...],
+    "securityStatus": {
+      "total_users": "313",
+      "active_users": "313",
+      "suspended_users": "0",
+      "inactive_users": "16"
+    }
+  }
+}
+```
+
+#### GET `/admin/direct/security/suspicious-activities`
+Get suspicious activity detection.
+
+#### GET `/admin/direct/security/login-patterns`
+Get login pattern analysis.
+
+#### POST `/admin/direct/security/user/:userId/suspend`
+Suspend user account.
+
+**Request Body:**
+```json
+{
+  "reason": "string (optional)"
+}
+```
+
+#### POST `/admin/direct/security/user/:userId/activate`
+Activate user account.
+
+### Comprehensive Audit Logging
+
+#### GET `/admin/direct/audit/activities`
+Get all admin activities.
+
+#### GET `/admin/direct/audit/user/:userId/history`
+Get user-specific audit trail.
+
+#### GET `/admin/direct/audit/data-access`
+Get data access logging.
+
+#### GET `/admin/direct/audit/exports`
+Export audit data.
+
+### Data Analytics & Insights
+
+#### GET `/admin/direct/insights/user-behavior`
+Get user behavior analysis.
+
+#### GET `/admin/direct/insights/assessment-effectiveness`
+Get assessment effectiveness metrics.
+
+#### GET `/admin/direct/insights/business-metrics`
+Get business intelligence metrics.
+
+#### GET `/admin/direct/insights/predictive-analytics`
+Get predictive user analytics.
+
+### Advanced Data Management
+
+#### POST `/admin/direct/data/export`
+Data export functionality.
+
+**Request Body:**
+```json
+{
+  "dataType": "users|assessments|activities",
+  "format": "json|csv",
+  "filters": {...}
+}
+```
+
+#### POST `/admin/direct/data/backup`
+Database backup operations.
+
+#### POST `/admin/direct/data/anonymize/:userId`
+GDPR compliance data anonymization.
+
+#### GET `/admin/direct/data/integrity-check`
+Data integrity verification.
+
+### Real-time Dashboard Features
+
+#### GET `/admin/direct/dashboard/realtime`
+Get real-time dashboard data.
+
+#### GET `/admin/direct/dashboard/alerts`
+Get system alerts and notifications.
+
+#### GET `/admin/direct/dashboard/kpis`
+Get key performance indicators.
+
+#### WebSocket `/admin/direct/dashboard/live`
+Live dashboard updates (WebSocket connection).
+
 ## Notes
 
 1. All endpoints return consistent error responses with `success: false` and an `error` object containing `code` and `message`.
@@ -375,3 +611,6 @@ Database connection health check.
 5. Password fields are never returned in responses.
 6. All timestamps are in ISO 8601 format (UTC).
 7. UUIDs are used for all entity identifiers.
+8. Phase 2 and Phase 3 endpoints provide advanced analytics, security, and monitoring capabilities.
+9. Some endpoints may return empty results if no data exists in the database.
+10. All admin actions are logged to the `archive.user_activity_logs` table for audit purposes.
