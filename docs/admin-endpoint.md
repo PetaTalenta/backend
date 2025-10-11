@@ -1,0 +1,377 @@
+# Admin Service Direct Database Endpoints
+
+## Overview
+
+This document describes the request and response parameters for the admin service endpoints that use direct database access. These endpoints are available at `/admin/direct/*` and provide comprehensive admin functionality with direct PostgreSQL database access.
+
+## Authentication
+
+All endpoints (except login) require JWT authentication via the `Authorization` header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+## Endpoints
+
+### 1. Admin Authentication
+
+#### POST `/admin/direct/login`
+Admin login endpoint.
+
+**Request Body:**
+```json
+{
+  "email": "string (required, email format)",
+  "password": "string (required, min 6 characters)"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "username": "string|null",
+      "email": "string",
+      "user_type": "admin",
+      "is_active": true,
+      "token_balance": 0,
+      "last_login": "2025-10-11T01:07:30.432Z",
+      "created_at": "2025-10-11T01:07:07.518Z",
+      "updated_at": "2025-10-11T01:07:30.436Z"
+    },
+    "token": "jwt_token_string",
+    "expiresIn": "24h"
+  }
+}
+```
+
+#### GET `/admin/direct/profile`
+Get admin profile information.
+
+**Request:** No body required.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "username": "string|null",
+    "email": "string",
+    "user_type": "admin",
+    "is_active": true,
+    "token_balance": 0,
+    "last_login": "2025-10-11T01:07:30.432Z",
+    "created_at": "2025-10-11T01:07:07.518Z",
+    "updated_at": "2025-10-11T01:07:30.443Z"
+  }
+}
+```
+
+#### PUT `/admin/direct/profile`
+Update admin profile.
+
+**Request Body:**
+```json
+{
+  "username": "string (optional, alphanumeric, 3-100 chars)",
+  "email": "string (optional, email format)"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "username": "string|null",
+    "email": "string",
+    "user_type": "admin",
+    "is_active": true,
+    "token_balance": 0,
+    "last_login": "2025-10-11T01:07:30.432Z",
+    "created_at": "2025-10-11T01:07:07.518Z",
+    "updated_at": "2025-10-11T01:07:30.443Z"
+  }
+}
+```
+
+#### POST `/admin/direct/logout`
+Admin logout.
+
+**Request:** No body required.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+```
+
+### 2. User Management
+
+#### GET `/admin/direct/users`
+Get paginated user list with filtering.
+
+**Query Parameters:**
+```
+page: number (optional, default: 1, min: 1)
+limit: number (optional, default: 10, min: 1, max: 100)
+search: string (optional, searches email and username)
+userType: string (optional, values: "user", "admin")
+isActive: string (optional, values: "true", "false")
+sortBy: string (optional, values: "created_at", "email", "username", "token_balance", default: "created_at")
+sortOrder: string (optional, values: "ASC", "DESC", default: "DESC")
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "users": [
+      {
+        "id": "uuid",
+        "username": "string|null",
+        "email": "string",
+        "user_type": "user|admin",
+        "is_active": true,
+        "token_balance": 0,
+        "last_login": "2025-10-11T01:07:30.432Z|null",
+        "created_at": "2025-10-11T01:07:07.518Z",
+        "updated_at": "2025-10-11T01:07:30.443Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 315,
+      "totalPages": 32,
+      "hasNext": true,
+      "hasPrev": false
+    }
+  }
+}
+```
+
+#### GET `/admin/direct/users/:userId`
+Get detailed user profile with statistics.
+
+**Path Parameters:**
+```
+userId: uuid (required)
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "username": "string|null",
+    "email": "string",
+    "user_type": "user|admin",
+    "is_active": true,
+    "token_balance": 16,
+    "last_login": "2025-10-11T01:07:30.432Z|null",
+    "created_at": "2025-10-11T01:07:07.518Z",
+    "updated_at": "2025-10-11T01:07:30.443Z",
+    "statistics": {
+      "totalJobs": 0,
+      "totalResults": 0,
+      "lastActivity": {
+        "date": "2025-10-11T01:07:30.432Z",
+        "status": "completed"
+      } | null
+    }
+  }
+}
+```
+
+#### PUT `/admin/direct/users/:userId/profile`
+Update user information.
+
+**Path Parameters:**
+```
+userId: uuid (required)
+```
+
+**Request Body:**
+```json
+{
+  "username": "string (optional, alphanumeric, 3-100 chars)",
+  "email": "string (optional, email format)",
+  "is_active": "boolean (optional)",
+  "user_type": "string (optional, values: 'user', 'admin')"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "username": "string|null",
+    "email": "string",
+    "user_type": "user|admin",
+    "is_active": true,
+    "token_balance": 16,
+    "last_login": "2025-10-11T01:07:30.432Z|null",
+    "created_at": "2025-10-11T01:07:07.518Z",
+    "updated_at": "2025-10-11T01:07:30.443Z"
+  }
+}
+```
+
+### 3. Token Management
+
+#### POST `/admin/direct/users/:userId/tokens/add`
+Add tokens to user account.
+
+**Path Parameters:**
+```
+userId: uuid (required)
+```
+
+**Request Body:**
+```json
+{
+  "amount": "number (required, integer, min: 1)",
+  "reason": "string (optional, max: 255 chars)"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "uuid",
+    "previousBalance": 14,
+    "addedAmount": 5,
+    "newBalance": 19,
+    "reason": "Testing token addition v2"
+  }
+}
+```
+
+#### POST `/admin/direct/users/:userId/tokens/deduct`
+Deduct tokens from user account.
+
+**Path Parameters:**
+```
+userId: uuid (required)
+```
+
+**Request Body:**
+```json
+{
+  "amount": "number (required, integer, min: 1)",
+  "reason": "string (optional, max: 255 chars)"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "uuid",
+    "previousBalance": 19,
+    "deductedAmount": 3,
+    "newBalance": 16,
+    "reason": "Testing token deduction"
+  }
+}
+```
+
+#### GET `/admin/direct/users/:userId/tokens/history`
+Get token transaction history for user.
+
+**Path Parameters:**
+```
+userId: uuid (required)
+```
+
+**Query Parameters:**
+```
+page: number (optional, default: 1, min: 1)
+limit: number (optional, default: 10, min: 1, max: 100)
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "transactions": [
+      {
+        "id": "uuid",
+        "user_id": "uuid",
+        "admin_id": "uuid",
+        "activity_type": "token_balance_update",
+        "activity_description": "Admin updated token balance for user: uuid",
+        "metadata": {
+          "userId": "uuid",
+          "action": "add|deduct",
+          "amount": 5,
+          "endpoint": "/admin/direct/users/uuid/tokens/add",
+          "method": "POST",
+          "statusCode": 200,
+          "success": true
+        },
+        "ip_address": "127.0.0.1",
+        "user_agent": "curl/7.68.0",
+        "created_at": "2025-10-11T01:07:30.432Z",
+        "admin": {
+          "id": "uuid",
+          "email": "superadmin@atma.com",
+          "username": null
+        }
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 2,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrev": false
+    }
+  }
+}
+```
+
+### 4. Health Check
+
+#### GET `/admin/direct/health/db`
+Database connection health check.
+
+**Request:** No parameters required.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Direct database connection is healthy",
+  "timestamp": "2025-10-11T01:06:41.131Z",
+  "service": "admin-service-direct-db"
+}
+```
+
+## Notes
+
+1. All endpoints return consistent error responses with `success: false` and an `error` object containing `code` and `message`.
+2. Input validation is performed using Joi schemas with detailed error messages.
+3. All database operations are logged for audit purposes.
+4. JWT tokens expire after 24 hours by default.
+5. Password fields are never returned in responses.
+6. All timestamps are in ISO 8601 format (UTC).
+7. UUIDs are used for all entity identifiers.
