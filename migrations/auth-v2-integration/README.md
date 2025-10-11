@@ -29,11 +29,11 @@ These migrations add support for Firebase Authentication while maintaining backw
 
 ```bash
 # Full database backup
-docker exec atma-postgres pg_dump -U atma_user atma_db \
+docker exec fg-postgres pg_dump -U fg_user fg_db \
   > backup_before_auth_v2_$(date +%Y%m%d_%H%M%S).sql
 
 # Auth schema only
-docker exec atma-postgres pg_dump -U atma_user -n auth atma_db \
+docker exec fg-postgres pg_dump -U fg_user -n auth fg_db \
   > backup_auth_schema_$(date +%Y%m%d_%H%M%S).sql
 
 # Verify backup size
@@ -46,15 +46,15 @@ ls -lh backup_*.sql
 
 ```bash
 # Migration 001
-docker exec -i atma-postgres psql -U atma_user -d atma_db \
+docker exec -i fg-postgres psql -U fg_user -d fg_db \
   < 001_add_firebase_uid.sql
 
 # Migration 002
-docker exec -i atma-postgres psql -U atma_user -d atma_db \
+docker exec -i fg-postgres psql -U fg_user -d fg_db \
   < 002_add_federation_metadata.sql
 
 # Migration 003
-docker exec -i atma-postgres psql -U atma_user -d atma_db \
+docker exec -i fg-postgres psql -U fg_user -d fg_db \
   < 003_optional_password_hash.sql
 ```
 
@@ -62,7 +62,7 @@ docker exec -i atma-postgres psql -U atma_user -d atma_db \
 
 ```bash
 # Connect to database
-docker exec -it atma-postgres psql -U atma_user -d atma_db
+docker exec -it fg-postgres psql -U fg_user -d fg_db
 
 # Check schema
 \d+ auth.users
@@ -479,7 +479,7 @@ After successfully applying these migrations:
 ## Support
 
 For issues or questions:
-- Check logs: `docker logs atma-postgres`
+- Check logs: `docker logs fg-postgres`
 - Review migration files for rollback scripts
 - Test on staging environment first
 - Always have database backup ready

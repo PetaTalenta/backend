@@ -1,11 +1,11 @@
 # Vanilla JavaScript Testing Implementation Report
-## ATMA Backend E2E Testing Suite
+## FutureGuide Backend E2E Testing Suite
 
 ---
 
 ## 📋 Executive Summary
 
-Telah berhasil dibuat program testing sederhana menggunakan JavaScript vanilla (Node.js) untuk melakukan end-to-end testing pada ATMA Backend API sesuai dengan Comprehensive Testing Plan. Program ini tidak menggunakan tools khusus seperti k6, Artillery, atau JMeter, melainkan hanya menggunakan library dasar seperti axios dan socket.io-client.
+Telah berhasil dibuat program testing sederhana menggunakan JavaScript vanilla (Node.js) untuk melakukan end-to-end testing pada FutureGuide Backend API sesuai dengan Comprehensive Testing Plan. Program ini tidak menggunakan tools khusus seperti k6, Artillery, atau JMeter, melainkan hanya menggunakan library dasar seperti axios dan socket.io-client.
 
 ### Status: ✅ **BERHASIL DIIMPLEMENTASIKAN DAN DIJALANKAN**
 
@@ -174,7 +174,7 @@ testing/vanilla-test/
 
 ```
 ╔════════════════════════════════════════════════════════════════════════════╗
-║                    ATMA Backend E2E Testing Suite                          ║
+║                 FutureGuide Backend E2E Testing Suite                      ║
 ║                         Vanilla JavaScript Edition                         ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 

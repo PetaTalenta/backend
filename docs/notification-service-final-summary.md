@@ -238,12 +238,12 @@ curl http://localhost:3005/debug/connections | jq .
 
 ### View Logs
 ```bash
-docker logs atma-notification-service --tail 50
+docker logs fg-notification-service --tail 50
 ```
 
 ### Restart Service
 ```bash
-docker restart atma-notification-service
+docker restart fg-notification-service
 ```
 
 ### Check RabbitMQ Queues

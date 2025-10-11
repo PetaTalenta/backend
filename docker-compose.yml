@@ -9,7 +9,7 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:17-alpine
-    container_name: atma-postgres
+    container_name: fg-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -21,7 +21,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - atma-network
+      - fg-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -32,7 +32,7 @@ services:
   # RabbitMQ Message Broker
   rabbitmq:
     image: rabbitmq:4.1-management-alpine
-    container_name: atma-rabbitmq
+    container_name: fg-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
@@ -43,7 +43,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     networks:
-      - atma-network
+      - fg-network
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
       interval: 10s
@@ -55,14 +55,14 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: atma-redis
+    container_name: fg-redis
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     ports:
       - "6379:6379"
     networks:
-      - atma-network
+      - fg-network
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "--raw", "incr", "ping"]
       interval: 10s
@@ -75,7 +75,7 @@ services:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
-    container_name: atma-api-gateway
+    container_name: fg-api-gateway
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -101,7 +101,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     volumes:
       - ./api-gateway/logs:/app/logs
@@ -111,7 +111,7 @@ services:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
-    container_name: atma-auth-service
+    container_name: fg-auth-service
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -134,7 +134,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_DB: 0
-      REDIS_KEY_PREFIX: "atma:auth:"
+      REDIS_KEY_PREFIX: "fg:auth:"
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       BCRYPT_ROUNDS: 10
       DEFAULT_TOKEN_BALANCE: 3
@@ -160,7 +160,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     volumes:
       - ./auth-service/logs:/app/logs
@@ -170,7 +170,7 @@ services:
     build:
       context: ./auth-v2-service
       dockerfile: Dockerfile
-    container_name: atma-auth-v2-service
+    container_name: fg-auth-v2-service
     environment:
       NODE_ENV: production
       PORT: 3008
@@ -195,7 +195,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_DB: 1
-      REDIS_KEY_PREFIX: "atma:auth-v2:"
+      REDIS_KEY_PREFIX: "fg:auth-v2:"
       # Token Configuration
       DEFAULT_TOKEN_BALANCE: 3
       # Logging
@@ -208,7 +208,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     volumes:
       - ./auth-v2-service/logs:/app/logs
@@ -218,7 +218,7 @@ services:
     build:
       context: ./assessment-service
       dockerfile: Dockerfile
-    container_name: atma-assessment-service
+    container_name: fg-assessment-service
     environment:
       NODE_ENV: production
       PORT: 3003
@@ -238,7 +238,10 @@ services:
       RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
-      EXCHANGE_NAME: atma_exchange
+      EXCHANGE_NAME: fg_exchange
+      EVENTS_EXCHANGE_NAME: fg_events_exchange
+      EVENTS_QUEUE_NAME_ASSESSMENTS: analysis_events_assessments
+      CONSUMER_PREFETCH: 10
       ROUTING_KEY: analysis.process
       QUEUE_DURABLE: true
       MESSAGE_PERSISTENT: true
@@ -261,7 +264,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     volumes:
       - ./assessment-service/logs:/app/logs
@@ -271,7 +274,7 @@ services:
     build:
       context: ./archive-service
       dockerfile: Dockerfile
-    container_name: atma-archive-service
+    container_name: fg-archive-service
     environment:
       NODE_ENV: production
       PORT: 3002
@@ -313,7 +316,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     volumes:
       - ./archive-service/logs:/app/logs
@@ -323,7 +326,7 @@ services:
     build:
       context: ./notification-service
       dockerfile: Dockerfile
-    container_name: atma-notification-service
+    container_name: fg-notification-service
     environment:
       NODE_ENV: production
       PORT: 3005
@@ -337,7 +340,7 @@ services:
       SOCKET_PING_TIMEOUT: 60000
       SOCKET_PING_INTERVAL: 25000
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
-      EVENTS_EXCHANGE_NAME: atma_events_exchange
+      EVENTS_EXCHANGE_NAME: fg_events_exchange
       EVENTS_QUEUE_NAME_NOTIFICATIONS: analysis_events_notifications
       CONSUMER_PREFETCH: 10
     ports:
@@ -346,7 +349,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     volumes:
       - ./notification-service/logs:/app/logs
@@ -356,7 +359,7 @@ services:
     build:
       context: ./chatbot-service
       dockerfile: Dockerfile
-    container_name: atma-chatbot-service
+    container_name: fg-chatbot-service
     environment:
       NODE_ENV: production
       PORT: 3006
@@ -397,12 +400,12 @@ services:
       FREE_MODEL_RATE_LIMIT_PER_MINUTE: ${FREE_MODEL_RATE_LIMIT_PER_MINUTE}
       MAX_CONVERSATION_HISTORY_TOKENS: ${MAX_CONVERSATION_HISTORY_TOKENS}
       # OpenRouter Headers
-      HTTP_REFERER: ${HTTP_REFERER:-https://atma.chhrone.web.id}
-      X_TITLE: ${X_TITLE:-ATMA - AI Talent Mapping Assessment}
+      HTTP_REFERER: ${HTTP_REFERER:-https://futureguide.chhrone.web.id}
+      X_TITLE: ${X_TITLE:-FutureGuide - AI Talent Mapping Assessment}
       # Phase 3: Assessment Integration
       ARCHIVE_SERVICE_URL: http://archive-service:3002
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
-      RABBITMQ_EXCHANGE: atma_events
+      RABBITMQ_EXCHANGE: fg_events
       RABBITMQ_QUEUE: chatbot_assessment_events
       RABBITMQ_ROUTING_KEY: analysis_complete
       RABBITMQ_CONNECTION_TIMEOUT: 10000
@@ -421,7 +424,7 @@ services:
       auth-service:
         condition: service_started
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     volumes:
       - ./chatbot-service/logs:/app/logs
@@ -445,7 +448,8 @@ services:
       RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       QUEUE_NAME: assessment_analysis
-      EXCHANGE_NAME: atma_exchange
+      EXCHANGE_NAME: fg_exchange
+      EVENTS_EXCHANGE_NAME: fg_events_exchange
       ROUTING_KEY: analysis.process
       DEAD_LETTER_QUEUE: assessment_analysis_dlq
       QUEUE_DURABLE: true
@@ -515,7 +519,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     volumes:
       - ./analysis-worker/logs:/app/logs
@@ -528,7 +532,7 @@ services:
   #   build:
   #     context: ./admin-service
   #     dockerfile: Dockerfile
-  #   container_name: atma-admin-service
+  #   container_name: fg-admin-service
   #   environment:
   #     NODE_ENV: production
   #     PORT: 3007
@@ -543,7 +547,7 @@ services:
   #     archive-service:
   #       condition: service_started
   #   networks:
-  #     - atma-network
+  #     - fg-network
   #   restart: unless-stopped
 
   # Documentation Service
@@ -551,13 +555,13 @@ services:
     build:
       context: ./documentation-service
       dockerfile: Dockerfile
-    container_name: atma-documentation-service
+    container_name: fg-documentation-service
     environment:
       NODE_ENV: production
     ports:
       - "8080:80"
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/health"]
@@ -574,7 +578,7 @@ services:
   # Cloudflare Tunnel
   cloudflared:
     image: cloudflare/cloudflared:latest
-    container_name: atma-cloudflared
+    container_name: fg-cloudflared
     # Force HTTP/2 (TCP 443) to avoid QUIC/UDP issues seen in logs
     command: tunnel --config /etc/cloudflared/config.yml run --protocol http2
     volumes:
@@ -583,7 +587,7 @@ services:
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
-      - atma-network
+      - fg-network
     restart: unless-stopped
     depends_on:
       - api-gateway
@@ -603,9 +607,9 @@ services:
 
 # Networks
 networks:
-  atma-network:
+  fg-network:
     driver: bridge
-    name: atma-network
+    name: fg-network
 
 # Volumes
 volumes:

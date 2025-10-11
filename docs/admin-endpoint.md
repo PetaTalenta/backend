@@ -334,7 +334,7 @@ limit: number (optional, default: 10, min: 1, max: 100)
         "created_at": "2025-10-11T01:07:30.432Z",
         "admin": {
           "id": "uuid",
-          "email": "superadmin@atma.com",
+          "email": "superadmin@futureguide.com",
           "username": null
         }
       }

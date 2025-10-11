@@ -21,9 +21,9 @@ NC='\033[0m' # No Color
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENVIRONMENT=${1:-staging}
-DB_CONTAINER="atma-postgres"
-DB_USER="atma_user"
-DB_NAME="atma_db"
+DB_CONTAINER="fg-postgres"
+DB_USER="fg_user"
+DB_NAME="fg_db"
 BACKUP_DIR="${SCRIPT_DIR}/../../backups"
 
 # ============================================================================

@@ -6,8 +6,8 @@ This directory contains SQL migration scripts for the chatbot service database s
 
 ### Prerequisites
 - PostgreSQL database with `auth` schema already set up
-- Database user `atma_user` with appropriate permissions
-- Connection to the ATMA database
+- Database user `fg_user` with appropriate permissions
+- Connection to the FutureGuide database
 
 ### Manual Migration Execution
 
@@ -15,7 +15,7 @@ To run the chat schema migration manually, execute the following command:
 
 ```bash
 # Connect to PostgreSQL and run the migration
-psql -h localhost -U atma_user -d atma_db -f migrations/001_create_chat_schema.sql
+psql -h localhost -U fg_user -d fg_db -f migrations/001_create_chat_schema.sql
 ```
 
 ### Using Docker
@@ -24,18 +24,18 @@ If running in Docker environment:
 
 ```bash
 # Copy migration file to running postgres container
-docker cp migrations/001_create_chat_schema.sql atma-postgres:/tmp/
+docker cp migrations/001_create_chat_schema.sql fg-postgres:/tmp/
 
 # Execute migration inside container
-docker exec -it atma-postgres psql -U atma_user -d atma_db -f /tmp/001_create_chat_schema.sql
+docker exec -it fg-postgres psql -U fg_user -d fg_db -f /tmp/001_create_chat_schema.sql
 ```
 
 ### Environment Variables
 
 Make sure these environment variables are set:
-- `POSTGRES_DB=atma_db`
-- `POSTGRES_USER=atma_user`
-- `POSTGRES_PASSWORD=atma_password`
+- `POSTGRES_DB=fg_db`
+- `POSTGRES_USER=fg_user`
+- `POSTGRES_PASSWORD=fg_password`
 
 ## Migration Details
 
