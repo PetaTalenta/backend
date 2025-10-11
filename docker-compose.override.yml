@@ -172,12 +172,27 @@ services:
       AUTH_SERVICE_URL: http://auth-service:3001
       ARCHIVE_SERVICE_URL: http://archive-service:3002
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
+      # Direct Database Access Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_DIALECT: postgres
+      DB_POOL_MAX: 20
+      DB_POOL_MIN: 5
+      DB_POOL_ACQUIRE: 30000
+      DB_POOL_IDLE: 10000
+      JWT_SECRET: ${JWT_SECRET}
     container_name: atma-admin-service
     command: npm run dev
     ports:
       - "3007:3007"
     networks:
       - atma-network
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
       - ./admin-service:/app
       - /app/node_modules
